@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Cache;
 use OpenAI;
 use App\Models\Player;
+use Illuminate\Support\Facades\Log;
 
 class AIService
 {
@@ -75,7 +76,7 @@ class AIService
                     $player = Player::where('username', $username)
                         ->where('agent', $agent)
                         ->first();
-
+                    Log::info('Player ' . json_encode($player));
                     if (!$player) {
                         $assistantReply = "Username {$username} tidak ditemukan untuk agent {$agent}.";
                         $this->saveConversationTurn($chatId, $history, $message, $assistantReply);

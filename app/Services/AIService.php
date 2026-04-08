@@ -30,16 +30,19 @@ class AIService
         Only use provided APIs for sensitive actions. Confirm with user before action.";
 
         // Define function/tool
-        $functions = [
+        $tools = [
             [
-                'name' => 'resetPassword',
-                'description' => 'Reset user password',
-                'parameters' => [
-                    'type' => 'object',
-                    'properties' => [
-                        'username' => ['type' => 'string', 'description' => 'Username to reset password']
-                    ],
-                    'required' => ['username']
+                'type' => 'function',
+                'function' => [
+                    'name' => 'resetPassword',
+                    'description' => 'Reset user password',
+                    'parameters' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'username' => ['type' => 'string', 'description' => 'Username to reset password']
+                        ],
+                        'required' => ['username']
+                    ]
                 ]
             ]
         ];
@@ -56,55 +59,31 @@ class AIService
             $response = $client->chat()->create([
                 'model' => 'gpt-4o-mini',
                 'messages' => $messages,
-                'functions' => $functions,
-                'function_call' => 'auto'
+                'tools' => $tools,
+                'tool_choice' => 'auto'
             ]);
 
             $msg = $response->choices[0]->message;
 
-            // The SDK returns objects, not arrays.
-            $functionCall = $msg->functionCall ?? null;
+            // Prefer model tool call, then fallback to local intent parsing.
+            $usernameFromTool = $this->extractUsernameFromToolCall($msg);
 
-            if ($functionCall && ($functionCall->name ?? null) === 'resetPassword') {
-                $argumentsRaw = $functionCall->arguments ?? '{}';
-                $arguments = is_string($argumentsRaw)
-                    ? json_decode($argumentsRaw, true)
-                    : (array) $argumentsRaw;
+            if ($usernameFromTool !== null) {
+                $assistantReply = $this->performPasswordReset($usernameFromTool, $agent);
+                $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
+                return $assistantReply;
+            }
 
-                $username = $arguments['username'] ?? null;
+            if ($this->isResetPasswordIntent($message)) {
+                $usernameFromText = $this->extractUsernameFromText($message);
 
-                if ($username) {
-                    $player = Player::where('username', $username)
-                        ->where('agent', $agent)
-                        ->first();
-                    Log::info('Player ' . json_encode($player));
-                    if (!$player) {
-                        $assistantReply = "Username {$username} tidak ditemukan untuk agent {$agent}.";
-                        $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
-                        return $assistantReply;
-                    }
-
-                    try {
-                        $player->password = Hash::make('1234567');
-                        $player->save();
-                    } catch (\Throwable $e) {
-                        Log::error('Failed to reset player password', [
-                            'username' => $username,
-                            'agent' => $agent,
-                            'error' => $e->getMessage(),
-                        ]);
-
-                        $assistantReply = "Gagal reset password untuk username {$username} (agent {$agent}).";
-                        $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
-                        return $assistantReply;
-                    }
-
-                    $assistantReply = "Password untuk username {$username} (agent {$agent}) berhasil direset ke 1234567.";
+                if ($usernameFromText === null) {
+                    $assistantReply = "Untuk reset password, mohon kirim username dengan format: username: namakamu";
                     $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
                     return $assistantReply;
                 }
 
-                $assistantReply = "Missing username for reset password ⚠️";
+                $assistantReply = $this->performPasswordReset($usernameFromText, $agent);
                 $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
                 return $assistantReply;
             }
@@ -150,5 +129,100 @@ class AIService
     private function historyKey($chatId): string
     {
         return 'chat_context:' . $chatId;
+    }
+
+    private function extractUsernameFromToolCall($msg): ?string
+    {
+        $toolCalls = $msg->toolCalls ?? [];
+
+        if (is_array($toolCalls)) {
+            foreach ($toolCalls as $toolCall) {
+                $function = $toolCall->function ?? null;
+                $name = $function->name ?? null;
+
+                if ($name !== 'resetPassword') {
+                    continue;
+                }
+
+                $argumentsRaw = $function->arguments ?? '{}';
+                $arguments = $this->normalizeArguments($argumentsRaw);
+
+                return $arguments['username'] ?? null;
+            }
+        }
+
+        // Backward compatibility for legacy response field.
+        $legacyCall = $msg->functionCall ?? null;
+
+        if (($legacyCall->name ?? null) === 'resetPassword') {
+            $arguments = $this->normalizeArguments($legacyCall->arguments ?? '{}');
+
+            return $arguments['username'] ?? null;
+        }
+
+        return null;
+    }
+
+    private function normalizeArguments($argumentsRaw): array
+    {
+        if (is_string($argumentsRaw)) {
+            $decoded = json_decode($argumentsRaw, true);
+
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        if (is_array($argumentsRaw)) {
+            return $argumentsRaw;
+        }
+
+        return (array) $argumentsRaw;
+    }
+
+    private function isResetPasswordIntent(string $message): bool
+    {
+        $keywords = ['reset password', 'resetpass', 'kata sandi', 'password'];
+
+        foreach ($keywords as $keyword) {
+            if (stripos($message, $keyword) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function extractUsernameFromText(string $message): ?string
+    {
+        if (preg_match('/username\s*[:=]?\s*([a-zA-Z0-9._-]+)/i', $message, $matches) === 1) {
+            return $matches[1] ?? null;
+        }
+
+        return null;
+    }
+
+    private function performPasswordReset(string $username, string $agent): string
+    {
+        $player = Player::where('username', $username)
+            ->where('agent', $agent)
+            ->first();
+
+        if (!$player) {
+            return "Username {$username} tidak ditemukan untuk agent {$agent}.";
+        }
+
+        try {
+            $player->password = Hash::make('1234567');
+            $player->save();
+        } catch (\Throwable $e) {
+            Log::error('Failed to reset player password', [
+                'username' => $username,
+                'agent' => $agent,
+                'error' => $e->getMessage(),
+            ]);
+
+            return "Gagal reset password untuk username {$username} (agent {$agent}).";
+        }
+
+        return "Password untuk username {$username} (agent {$agent}) berhasil direset ke 1234567.";
     }
 }

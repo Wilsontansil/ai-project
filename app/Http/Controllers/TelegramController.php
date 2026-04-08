@@ -20,6 +20,8 @@ class TelegramController extends Controller
             return response()->json(['status' => 'ignored']);
         }
 
+        $this->sendTyping($chatId);
+
         // Send both message and chatId to keep service signature consistent.
         $reply = app(AIService::class)->reply($text, $chatId);
 
@@ -34,6 +36,15 @@ class TelegramController extends Controller
         Http::post("https://api.telegram.org/bot" . $telegramtoken . "/sendMessage", [
             'chat_id' => $chatId,
             'text' => $text
+        ]);
+    }
+
+    private function sendTyping($chatId)
+    {
+        $telegramtoken = '8460292911:AAEh1dcKps7elxi0ZjuX0z4jj2AOPwZcYgw';
+        Http::post("https://api.telegram.org/bot" . $telegramtoken . "/sendChatAction", [
+            'chat_id' => $chatId,
+            'action' => 'typing'
         ]);
     }
 }

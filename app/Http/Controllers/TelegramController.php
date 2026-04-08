@@ -20,8 +20,8 @@ class TelegramController extends Controller
             return response()->json(['status' => 'ignored']);
         }
 
-        // 👉 TEMP: simple reply first
-        $reply = app(AIService::class)->reply($text);
+        // Send both message and chatId to keep service signature consistent.
+        $reply = app(AIService::class)->reply($text, $chatId);
 
         $this->sendMessage($chatId, $reply);
 

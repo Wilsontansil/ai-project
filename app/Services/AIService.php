@@ -6,7 +6,7 @@ use OpenAI;
 
 class AIService
 {
-    public function reply($message, $chatId)
+    public function reply($message, $chatId = null)
     {
         $client = OpenAI::client(env('OPENAI_API_KEY'));
 

@@ -9,6 +9,13 @@ use App\Services\AIService;
 
 class TelegramController extends Controller
 {
+    private string $telegramToken = '';
+
+    public function __construct()
+    {
+        $this->telegramToken = config('services.telegram.bot_token', '');
+    }
+
     public function handleWebhook(Request $request)
     {
         Log::info('Received Telegram webhook', ['payload' => $request->all()]);
@@ -32,8 +39,12 @@ class TelegramController extends Controller
 
     private function sendMessage($chatId, $text)
     {
-        $telegramtoken = '8460292911:AAEh1dcKps7elxi0ZjuX0z4jj2AOPwZcYgw';
-        Http::post("https://api.telegram.org/bot" . $telegramtoken . "/sendMessage", [
+        if ($this->telegramToken === '') {
+            Log::error('TELEGRAM_BOT_TOKEN is not configured.');
+            return;
+        }
+
+        Http::post("https://api.telegram.org/bot" . $this->telegramToken . "/sendMessage", [
             'chat_id' => $chatId,
             'text' => $text
         ]);
@@ -41,8 +52,11 @@ class TelegramController extends Controller
 
     private function sendTyping($chatId)
     {
-        $telegramtoken = '8460292911:AAEh1dcKps7elxi0ZjuX0z4jj2AOPwZcYgw';
-        Http::post("https://api.telegram.org/bot" . $telegramtoken . "/sendChatAction", [
+        if ($this->telegramToken === '') {
+            return;
+        }
+
+        Http::post("https://api.telegram.org/bot" . $this->telegramToken . "/sendChatAction", [
             'chat_id' => $chatId,
             'action' => 'typing'
         ]);

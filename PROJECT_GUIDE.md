@@ -77,7 +77,9 @@ Recommended cache driver for production conversation memory:
 - Always validate webhook payload before processing.
 - If payload is invalid, return safe response and do not call OpenAI.
 - Keep assistant identity consistent as xoneBot.
+- Default assistant response language is Bahasa Indonesia, unless user asks for another language.
 - Keep conversation context per user/chat id.
+- For password reset flow, identify account by `username` and validate player by `username + agent` before any action.
 
 ### 4. Code Quality Rules
 
@@ -95,6 +97,11 @@ Recommended cache driver for production conversation memory:
 - Deploy with:
     - `composer install --no-dev --optimize-autoloader`
     - `php artisan optimize:clear`
+
+### 6. Documentation Update Rules
+
+- On every code/config update, review `PROJECT_GUIDE.md` and update it if behavior, setup, structure, or rules changed.
+- If no guide update is needed, confirm this in the PR/commit note (example: "PROJECT_GUIDE reviewed, no changes needed").
 
 ## Suggested Next Improvements
 

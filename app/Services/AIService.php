@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
 use OpenAI;
+use App\Models\Player;
 
 class AIService
 {
@@ -11,7 +12,7 @@ class AIService
 
     private int $historyTtlHours = 12;
 
-    public function reply($message, $chatId = null)
+    public function reply($message, $chatId = null, $agent = 'PG')
     {
         $apiKey = (string) config('services.openai.api_key', '');
 
@@ -23,6 +24,7 @@ class AIService
 
         // Define system prompt
         $systemPrompt = "Your name is xoneBot, always introduce yourself as xoneBot on the beginning of the chat or when asked. You are a polite, professional customer service AI for a gaming platform.
+        Answer in Bahasa Indonesia by default, unless the user explicitly asks for another language.
         Only use provided APIs for sensitive actions. Confirm with user before action.";
 
         // Define function/tool
@@ -33,9 +35,9 @@ class AIService
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
-                        'user_id' => ['type' => 'string', 'description' => 'User ID to reset password']
+                        'username' => ['type' => 'string', 'description' => 'Username to reset password']
                     ],
-                    'required' => ['user_id']
+                    'required' => ['username']
                 ]
             ]
         ];
@@ -67,17 +69,27 @@ class AIService
                     ? json_decode($argumentsRaw, true)
                     : (array) $argumentsRaw;
 
-                $userId = $arguments['user_id'] ?? null;
+                $username = $arguments['username'] ?? null;
 
-                if ($userId) {
-                    // Example: call internal API
-                    // $this->resetPassword($userId);
-                    $assistantReply = "Password reset for user ID {$userId} ✅";
+                if ($username) {
+                    $player = Player::where('username', $username)
+                        ->where('agent', $agent)
+                        ->first();
+
+                    if (!$player) {
+                        $assistantReply = "Username {$username} tidak ditemukan untuk agent {$agent}.";
+                        $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
+                        return $assistantReply;
+                    }
+
+                    // Example: call internal API after player validation
+                    // $this->resetPassword($player);
+                    $assistantReply = "Password reset untuk username {$username} (agent {$agent}) ✅";
                     $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
                     return $assistantReply;
                 }
 
-                $assistantReply = "Missing user_id for reset password ⚠️";
+                $assistantReply = "Missing username for reset password ⚠️";
                 $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
                 return $assistantReply;
             }

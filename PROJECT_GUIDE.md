@@ -80,6 +80,7 @@ Recommended cache driver for production conversation memory:
 - Default assistant response language is Bahasa Indonesia, unless user asks for another language.
 - Keep conversation context per user/chat id.
 - For password reset flow, identify account by `username` and validate player by `username + agent` before any action.
+- Current reset flow sets player password to `1234567` after username+agent validation.
 
 ### 4. Code Quality Rules
 

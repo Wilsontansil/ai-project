@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Cache;
 use OpenAI;
 use App\Models\Player;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 
 class AIService
 {
@@ -83,9 +84,22 @@ class AIService
                         return $assistantReply;
                     }
 
-                    // Example: call internal API after player validation
-                    // $this->resetPassword($player);
-                    $assistantReply = "Password reset untuk username {$username} (agent {$agent}) ✅";
+                    try {
+                        $player->password = Hash::make('1234567');
+                        $player->save();
+                    } catch (\Throwable $e) {
+                        Log::error('Failed to reset player password', [
+                            'username' => $username,
+                            'agent' => $agent,
+                            'error' => $e->getMessage(),
+                        ]);
+
+                        $assistantReply = "Gagal reset password untuk username {$username} (agent {$agent}).";
+                        $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
+                        return $assistantReply;
+                    }
+
+                    $assistantReply = "Password untuk username {$username} (agent {$agent}) berhasil direset ke 1234567.";
                     $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
                     return $assistantReply;
                 }

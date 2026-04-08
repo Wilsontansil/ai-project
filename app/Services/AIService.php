@@ -2,10 +2,15 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use OpenAI;
 
 class AIService
 {
+    private int $maxHistoryMessages = 20;
+
+    private int $historyTtlHours = 12;
+
     public function reply($message, $chatId = null)
     {
         $apiKey = (string) config('services.openai.api_key', '');
@@ -35,14 +40,18 @@ class AIService
             ]
         ];
 
+        $history = $this->loadConversationHistory($chatId);
+        $messages = array_merge(
+            [['role' => 'system', 'content' => $systemPrompt]],
+            $history,
+            [['role' => 'user', 'content' => $message]]
+        );
+
         // Send to OpenAI
         try {
             $response = $client->chat()->create([
                 'model' => 'gpt-4o-mini',
-                'messages' => [
-                    ['role' => 'system', 'content' => $systemPrompt],
-                    ['role' => 'user', 'content' => $message]
-                ],
+                'messages' => $messages,
                 'functions' => $functions,
                 'function_call' => 'auto'
             ]);
@@ -63,19 +72,56 @@ class AIService
                 if ($userId) {
                     // Example: call internal API
                     // $this->resetPassword($userId);
-                    return "Password reset for user ID {$userId} ✅";
+                    $assistantReply = "Password reset for user ID {$userId} ✅";
+                    $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
+                    return $assistantReply;
                 }
 
-                return "Missing user_id for reset password ⚠️";
+                $assistantReply = "Missing user_id for reset password ⚠️";
+                $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
+                return $assistantReply;
             }
 
             // Normal AI reply
-            return $msg->content ?? "Sorry, I couldn't understand.";
+            $assistantReply = $msg->content ?? "Sorry, I couldn't understand.";
+            $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
+            return $assistantReply;
 
         } catch (\OpenAI\Exceptions\RateLimitException $e) {
             return "⚠️ System busy, please try again...";
         } catch (\Exception $e) {
             return "⚠️ Error: " . $e->getMessage();
         }
+    }
+
+    private function loadConversationHistory($chatId): array
+    {
+        if (!$chatId) {
+            return [];
+        }
+
+        $history = Cache::get($this->historyKey($chatId), []);
+
+        return is_array($history) ? $history : [];
+    }
+
+    private function saveConversationTurn($chatId, array $history, string $userMessage, string $assistantReply): void
+    {
+        if (!$chatId) {
+            return;
+        }
+
+        $history[] = ['role' => 'user', 'content' => $userMessage];
+        $history[] = ['role' => 'assistant', 'content' => $assistantReply];
+
+        // Keep only recent messages to control token usage.
+        $history = array_slice($history, -$this->maxHistoryMessages);
+
+        Cache::put($this->historyKey($chatId), $history, now()->addHours($this->historyTtlHours));
+    }
+
+    private function historyKey($chatId): string
+    {
+        return 'chat_context:' . $chatId;
     }
 }

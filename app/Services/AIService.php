@@ -43,26 +43,28 @@ class AIService
 
             $msg = $response->choices[0]->message;
 
-            // Check if AI requested a function
-            if (isset($msg['function_call'])) {
-                $func = $msg['function_call'];
-                if ($func['name'] === 'resetPassword') {
-                    // Here you call your backend API to reset the password
-                    $userId = $func['arguments']['user_id'] ?? null;
+            // The SDK returns objects, not arrays.
+            $functionCall = $msg->functionCall ?? null;
 
-                    if ($userId) {
-                        // Example: call internal API
-                        // $this->resetPassword($userId);
+            if ($functionCall && ($functionCall->name ?? null) === 'resetPassword') {
+                $argumentsRaw = $functionCall->arguments ?? '{}';
+                $arguments = is_string($argumentsRaw)
+                    ? json_decode($argumentsRaw, true)
+                    : (array) $argumentsRaw;
 
-                        return "Password reset for user ID {$userId} ✅";
-                    }
+                $userId = $arguments['user_id'] ?? null;
 
-                    return "Missing user_id for reset password ⚠️";
+                if ($userId) {
+                    // Example: call internal API
+                    // $this->resetPassword($userId);
+                    return "Password reset for user ID {$userId} ✅";
                 }
+
+                return "Missing user_id for reset password ⚠️";
             }
 
             // Normal AI reply
-            return $msg['content'] ?? "Sorry, I couldn't understand.";
+            return $msg->content ?? "Sorry, I couldn't understand.";
 
         } catch (\OpenAI\Exceptions\RateLimitException $e) {
             return "⚠️ System busy, please try again...";

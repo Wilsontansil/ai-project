@@ -8,7 +8,13 @@ class AIService
 {
     public function reply($message, $chatId = null)
     {
-        $client = OpenAI::client(env('OPENAI_API_KEY'));
+        $apiKey = (string) config('services.openai.api_key', '');
+
+        if ($apiKey === '') {
+            return 'OpenAI API key is not configured. Please set OPENAI_API_KEY on server .env.';
+        }
+
+        $client = OpenAI::client($apiKey);
 
         // Define system prompt
         $systemPrompt = "You are a polite, professional customer service AI for a gaming platform.

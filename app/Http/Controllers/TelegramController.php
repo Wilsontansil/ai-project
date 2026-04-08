@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Services\AIService;
 
 class TelegramController extends Controller
 {
@@ -20,7 +21,7 @@ class TelegramController extends Controller
         }
 
         // 👉 TEMP: simple reply first
-        $reply = "You said: " . $text;
+        $reply = app(AIService::class)->reply($text);
 
         $this->sendMessage($chatId, $reply);
 

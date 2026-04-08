@@ -1,0 +1,104 @@
+# AI Project Guide
+
+## Project Explanation
+
+This project is a Laravel 13 API that connects Telegram messages to an OpenAI-powered assistant named xoneBot.
+
+Main purpose:
+
+- Receive user messages from Telegram webhook.
+- Send user message and conversation history to OpenAI.
+- Return the AI reply back to Telegram.
+
+Current key endpoints:
+
+- `GET /api/test`: simple API health check.
+- `POST /api/telegram/webhook`: Telegram webhook receiver.
+
+Main components:
+
+- `app/Http/Controllers/TelegramController.php`
+    - Validates incoming Telegram payload.
+    - Extracts `message.text` and `message.chat.id`.
+    - Calls `AIService` and sends the reply to Telegram.
+- `app/Services/AIService.php`
+    - Builds OpenAI chat request.
+    - Adds system prompt and prior conversation context.
+    - Stores per-chat memory using Laravel Cache.
+    - Handles function/tool call flow for password reset intent.
+
+Conversation memory behavior:
+
+- Context is stored per chat id with cache key format: `chat_context:{chatId}`.
+- Maximum stored messages: 20 (rolling window).
+- Cache TTL: 12 hours.
+
+## Message Flow
+
+1. Telegram sends webhook to `/api/telegram/webhook`.
+2. Controller reads user text and chat id.
+3. Controller calls `AIService::reply($text, $chatId)`.
+4. Service loads previous context from cache.
+5. Service sends `system + history + current user message` to OpenAI.
+6. Service saves new user/assistant turn to cache.
+7. Controller sends assistant response back to Telegram.
+
+## Environment Requirements
+
+- PHP 8.3+
+- Composer
+- Laravel dependencies installed
+- OpenAI API key configured in environment:
+    - `OPENAI_API_KEY=...`
+
+Recommended cache driver for production conversation memory:
+
+- Redis (preferred), or database cache.
+
+## Project Rules
+
+### 1. Security Rules
+
+- Never hardcode secrets (OpenAI key, Telegram bot token, database credentials).
+- Keep all secrets in `.env` and access via `config(...)`.
+- Do not commit real tokens, keys, or passwords to git history.
+- If a secret leaks, rotate it immediately.
+
+### 2. Configuration Rules
+
+- Define third-party credentials in `config/services.php`.
+- Read configuration in code via `config(...)`, not direct `env(...)` in business logic.
+- After changing env/config in server, run:
+    - `php artisan config:clear`
+    - `php artisan optimize:clear`
+
+### 3. API and Bot Behavior Rules
+
+- Always validate webhook payload before processing.
+- If payload is invalid, return safe response and do not call OpenAI.
+- Keep assistant identity consistent as xoneBot.
+- Keep conversation context per user/chat id.
+
+### 4. Code Quality Rules
+
+- Use PSR-4 compatible class and file naming (example: `AIService.php`).
+- Keep controllers thin and business logic in services.
+- Add clear logs for webhook receive and invalid payload cases.
+- Handle OpenAI errors gracefully and return user-friendly messages.
+
+### 5. Git and Deployment Rules
+
+- Run syntax checks before pushing:
+    - `php -l app/Services/AIService.php`
+    - `php -l app/Http/Controllers/TelegramController.php`
+- Keep commits focused and descriptive.
+- Deploy with:
+    - `composer install --no-dev --optimize-autoloader`
+    - `php artisan optimize:clear`
+
+## Suggested Next Improvements
+
+- Move Telegram bot token to `.env` and `config/services.php`.
+- Add automated tests for webhook payload and service response handling.
+- Add command/endpoint to reset chat memory for a specific user.
+- Move function-call operations to dedicated action classes.

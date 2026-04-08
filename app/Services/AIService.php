@@ -4,9 +4,8 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
 use OpenAI;
-use App\Models\Player;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Hash;
+use App\Services\Tools\ResetPasswordTool;
 
 class AIService
 {
@@ -23,29 +22,8 @@ class AIService
         }
 
         $client = OpenAI::client($apiKey);
-
-        // Define system prompt
-        $systemPrompt = "Your name is xoneBot, always introduce yourself as xoneBot on the beginning of the chat or when asked. You are a polite, professional customer service AI for a gaming platform.
-        Answer in Bahasa Indonesia by default, unless the user explicitly asks for another language.
-        Only use provided APIs for sensitive actions. Confirm with user before action.";
-
-        // Define function/tool
-        $tools = [
-            [
-                'type' => 'function',
-                'function' => [
-                    'name' => 'resetPassword',
-                    'description' => 'Reset user password',
-                    'parameters' => [
-                        'type' => 'object',
-                        'properties' => [
-                            'username' => ['type' => 'string', 'description' => 'Username to reset password']
-                        ],
-                        'required' => ['username']
-                    ]
-                ]
-            ]
-        ];
+        $systemPrompt = $this->getSystemPrompt();
+        $tools = $this->getTools();
 
         $history = $this->loadConversationHistory($chatId);
         $messages = array_merge(
@@ -65,25 +43,10 @@ class AIService
 
             $msg = $response->choices[0]->message;
 
-            // Prefer model tool call, then fallback to local intent parsing.
-            $usernameFromTool = $this->extractUsernameFromToolCall($msg);
+            // Try to handle tool call or local intent.
+            $assistantReply = $this->handleToolCallOrIntent($msg, $message, $agent);
 
-            if ($usernameFromTool !== null) {
-                $assistantReply = $this->performPasswordReset($usernameFromTool, $agent);
-                $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
-                return $assistantReply;
-            }
-
-            if ($this->isResetPasswordIntent($message)) {
-                $usernameFromText = $this->extractUsernameFromText($message);
-
-                if ($usernameFromText === null) {
-                    $assistantReply = "Untuk reset password, mohon kirim username dengan format: username: namakamu";
-                    $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
-                    return $assistantReply;
-                }
-
-                $assistantReply = $this->performPasswordReset($usernameFromText, $agent);
+            if ($assistantReply !== null) {
                 $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
                 return $assistantReply;
             }
@@ -98,6 +61,71 @@ class AIService
         } catch (\Exception $e) {
             return "⚠️ Error: " . $e->getMessage();
         }
+    }
+
+    /**
+     * Get the system prompt for xoneBot.
+     */
+    private function getSystemPrompt(): string
+    {
+        return "Your name is xoneBot, always introduce yourself as xoneBot on the beginning of the chat or when asked. You are a polite, professional customer service AI for a gaming platform.
+        Answer in Bahasa Indonesia by default, unless the user explicitly asks for another language.
+        Only use provided APIs for sensitive actions. Confirm with user before action.";
+    }
+
+    /**
+     * Get available tools/functions for OpenAI.
+     * Each tool service is registered here.
+     */
+    private function getTools(): array
+    {
+        $tools = [];
+
+        // Register all tool services
+        foreach ($this->getToolServices() as $toolService) {
+            $tools[] = $toolService->definition();
+        }
+
+        return $tools;
+    }
+
+    /**
+     * Get instances of all available tool services.
+     */
+    private function getToolServices(): array
+    {
+        return [
+            new ResetPasswordTool(),
+        ];
+    }
+
+    /**
+     * Handle tool call or fallback to local intent parsing.
+     * Returns null if tool/intent not matched.
+     */
+    private function handleToolCallOrIntent($msg, string $userMessage, string $agent): ?string
+    {
+        // Try to match tool by model call or local intent.
+        foreach ($this->getToolServices() as $tool) {
+            $usernameFromTool = $this->extractUsernameFromToolCall($msg, $tool->name());
+
+            if ($usernameFromTool !== null) {
+                return $tool->execute($usernameFromTool, $agent);
+            }
+
+            // Fallback to intent parsing.
+            if ($tool->matchesIntent($userMessage)) {
+                $usernameFromText = $tool->extractUsernameFromText($userMessage);
+
+                if ($usernameFromText === null) {
+                    return $tool->missingUsernameMessage();
+                }
+
+                return $tool->execute($usernameFromText, $agent);
+            }
+        }
+
+        return null;
     }
 
     private function loadConversationHistory($chatId): array
@@ -131,7 +159,7 @@ class AIService
         return 'chat_context:' . $chatId;
     }
 
-    private function extractUsernameFromToolCall($msg): ?string
+    private function extractUsernameFromToolCall($msg, string $toolName): ?string
     {
         $toolCalls = $msg->toolCalls ?? [];
 
@@ -140,7 +168,7 @@ class AIService
                 $function = $toolCall->function ?? null;
                 $name = $function->name ?? null;
 
-                if ($name !== 'resetPassword') {
+                if ($name !== $toolName) {
                     continue;
                 }
 
@@ -154,7 +182,7 @@ class AIService
         // Backward compatibility for legacy response field.
         $legacyCall = $msg->functionCall ?? null;
 
-        if (($legacyCall->name ?? null) === 'resetPassword') {
+        if (($legacyCall->name ?? null) === $toolName) {
             $arguments = $this->normalizeArguments($legacyCall->arguments ?? '{}');
 
             return $arguments['username'] ?? null;
@@ -176,53 +204,5 @@ class AIService
         }
 
         return (array) $argumentsRaw;
-    }
-
-    private function isResetPasswordIntent(string $message): bool
-    {
-        $keywords = ['reset password', 'resetpass', 'kata sandi', 'password'];
-
-        foreach ($keywords as $keyword) {
-            if (stripos($message, $keyword) !== false) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function extractUsernameFromText(string $message): ?string
-    {
-        if (preg_match('/username\s*[:=]?\s*([a-zA-Z0-9._-]+)/i', $message, $matches) === 1) {
-            return $matches[1] ?? null;
-        }
-
-        return null;
-    }
-
-    private function performPasswordReset(string $username, string $agent): string
-    {
-        $player = Player::where('username', $username)
-            ->where('agent', $agent)
-            ->first();
-
-        if (!$player) {
-            return "Username {$username} tidak ditemukan untuk agent {$agent}.";
-        }
-
-        try {
-            $player->password = Hash::make('1234567');
-            $player->save();
-        } catch (\Throwable $e) {
-            Log::error('Failed to reset player password', [
-                'username' => $username,
-                'agent' => $agent,
-                'error' => $e->getMessage(),
-            ]);
-
-            return "Gagal reset password untuk username {$username} (agent {$agent}).";
-        }
-
-        return "Password untuk username {$username} (agent {$agent}) berhasil direset ke 1234567.";
     }
 }

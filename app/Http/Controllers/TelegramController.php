@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class TelegramController extends Controller
 {
     public function handleWebhook(Request $request)
     {
         // Log the incoming request for debugging
-        \Log::info('Received Telegram webhook:', $request->all());
+        Log::info('Received Telegram webhook:', $request->all());
 
         // Process the incoming message
         $message = $request->input('message');
@@ -40,9 +42,9 @@ class TelegramController extends Controller
 
         // Use Guzzle or any HTTP client to send the POST request to Telegram API
         try {
-            \Http::post($url, $data);
+            Http::post($url, $data);
         } catch (\Exception $e) {
-            \Log::error('Error sending message to Telegram: ' . $e->getMessage());
+            Log::error('Error sending message to Telegram: ' . $e->getMessage());
         }
     }
 }

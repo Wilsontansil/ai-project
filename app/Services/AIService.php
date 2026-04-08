@@ -17,7 +17,7 @@ class AIService
         $client = OpenAI::client($apiKey);
 
         // Define system prompt
-        $systemPrompt = "You are a polite, professional customer service AI for a gaming platform.
+        $systemPrompt = "Your name is xoneBot, always introduce yourself as xoneBot on the beginning of the chat or when asked. You are a polite, professional customer service AI for a gaming platform.
         Only use provided APIs for sensitive actions. Confirm with user before action.";
 
         // Define function/tool

@@ -10,41 +10,28 @@ class TelegramController extends Controller
 {
     public function handleWebhook(Request $request)
     {
-        // Log the incoming request for debugging
-        Log::info('Received Telegram webhook:', $request->all());
+        Log::info('Received Telegram webhook', ['payload' => $request->all()]);
+        $text = $request->input('message.text');
+        $chatId = $request->input('message.chat.id');
 
-        // Process the incoming message
-        $message = $request->input('message');
-        if ($message) {
-            $chatId = $message['chat']['id'];
-            $text = $message['text'] ?? '';
-
-            // Here you can add your logic to handle the message and generate a response
-            $responseText = "You said: " . $text;
-
-            // Send a response back to Telegram
-            $this->sendMessage($chatId, $responseText);
+        if (!$text || !$chatId) {
+            Log::warning('Invalid Telegram webhook payload', ['payload' => $request->all()]);
+            return response()->json(['status' => 'ignored']);
         }
 
-        return response()->json(['status' => 'success']);
+        // 👉 TEMP: simple reply first
+        $reply = "You said: " . $text;
+
+        $this->sendMessage($chatId, $reply);
+
+        return response()->json(['status' => 'ok']);
     }
 
     private function sendMessage($chatId, $text)
     {
-        // $telegramToken = env('TELEGRAM_BOT_TOKEN');
-        $telegramToken = '8460292911:AAEh1dcKps7elxi0ZjuX0z4jj2AOPwZcYgw';
-        $url = "https://api.telegram.org/bot{$telegramToken}/sendMessage";
-
-        $data = [
+        Http::post("https://api.telegram.org/bot" . env('TELEGRAM_BOT_TOKEN') . "/sendMessage", [
             'chat_id' => $chatId,
-            'text' => $text,
-        ];
-
-        // Use Guzzle or any HTTP client to send the POST request to Telegram API
-        try {
-            Http::post($url, $data);
-        } catch (\Exception $e) {
-            Log::error('Error sending message to Telegram: ' . $e->getMessage());
-        }
+            'text' => $text
+        ]);
     }
 }

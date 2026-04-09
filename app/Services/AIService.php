@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Cache;
 use OpenAI;
 use Illuminate\Support\Facades\Log;
 use App\Services\Tools\ResetPasswordTool;
+use App\Services\Tools\CheckSuspendTool;
 
 class AIService
 {
@@ -96,6 +97,7 @@ class AIService
     {
         return [
             new ResetPasswordTool(),
+            new CheckSuspendTool(),
         ];
     }
 

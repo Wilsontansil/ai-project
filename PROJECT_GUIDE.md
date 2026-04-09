@@ -2,18 +2,20 @@
 
 ## Project Explanation
 
-This project is a Laravel 13 API that connects Telegram messages to an OpenAI-powered assistant named xoneBot.
+This project is a Laravel 13 API that connects Telegram and WhatsApp messages to an OpenAI-powered assistant named xoneBot.
 
 Main purpose:
 
 - Receive user messages from Telegram webhook.
+- Receive user messages from WAHA WhatsApp webhook.
 - Send user message and conversation history to OpenAI.
-- Return the AI reply back to Telegram.
+- Return the AI reply back to Telegram or WhatsApp.
 
 Current key endpoints:
 
 - `GET /api/test`: simple API health check.
 - `POST /api/telegram/webhook`: Telegram webhook receiver.
+- `GET|POST /api/whatsapp/webhook`: WAHA WhatsApp webhook receiver.
 
 Main components:
 
@@ -26,6 +28,10 @@ Main components:
     - Adds system prompt and prior conversation context.
     - Stores per-chat memory using Laravel Cache.
     - Handles function/tool call flow for password reset intent.
+- `app/Http/Controllers/WhatsAppController.php`
+    - Accepts WAHA webhook payloads.
+    - Extracts text and chat id from common WAHA message fields.
+    - Calls `AIService` and sends the reply through WAHA `sendText` API.
 
 Conversation memory behavior:
 
@@ -36,7 +42,7 @@ Conversation memory behavior:
 ## Message Flow
 
 1. Telegram sends webhook to `/api/telegram/webhook`.
-2. Controller reads user text and chat id.
+2. Telegram or WAHA controller reads user text and chat id.
 3. Controller calls `AIService::reply($text, $chatId)`.
 4. Service loads previous context from cache.
 5. Service sends `system + history + current user message` to OpenAI.
@@ -50,6 +56,10 @@ Conversation memory behavior:
 - Laravel dependencies installed
 - OpenAI API key configured in environment:
     - `OPENAI_API_KEY=...`
+- WAHA WhatsApp configured in environment when using WhatsApp:
+    - `WAHA_BASE_URL=...`
+    - `WAHA_SESSION=...`
+    - `WAHA_API_KEY=...`
 
 Recommended cache driver for production conversation memory:
 

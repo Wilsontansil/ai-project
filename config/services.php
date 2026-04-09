@@ -43,4 +43,11 @@ return [
         'bot_token' => env('TELEGRAM_BOT_TOKEN'),
     ],
 
+    'whatsapp' => [
+        'base_url' => env('WAHA_BASE_URL'),
+        'session' => env('WAHA_SESSION', 'default'),
+        'api_key' => env('WAHA_API_KEY'),
+        'agent' => env('WHATSAPP_AGENT', 'PG'),
+    ],
+
 ];

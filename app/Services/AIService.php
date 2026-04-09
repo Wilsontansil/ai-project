@@ -16,6 +16,10 @@ class AIService
 
     private int $debounceSeconds = 2;
 
+    /**
+     * Main AI entrypoint.
+     * Builds context, executes model call, runs tool logic, and returns formatted reply.
+     */
     public function reply($message, $chatId = null, $agent = 'PG', string $channel = 'telegram')
     {
         $apiKey = (string) config('services.openai.api_key', '');
@@ -151,12 +155,21 @@ class AIService
     /**
      * Get available tools/functions for OpenAI.
      * Each tool service is registered here.
+     *
+     * Command map (human-readable):
+     * - resetPassword:
+     *   Username(username): <value>
+     *   Nama rekening(namarek): <value>
+     *   Nomor rekening(norek): <value>
+     *   Nama Bank(bank): <value>
+     * - checkSuspend:
+     *   Username: <value>
      */
     private function getTools(): array
     {
         $tools = [];
 
-        // Register all tool services
+        // Register all tool services (tool schema comes from each tool class).
         foreach ($this->getToolServices() as $toolService) {
             $tools[] = $toolService->definition();
         }
@@ -166,6 +179,7 @@ class AIService
 
     /**
      * Get instances of all available tool services.
+        * Add new tool classes here when introducing new commands.
      */
     private function getToolServices(): array
     {
@@ -224,6 +238,9 @@ class AIService
         return null;
     }
 
+    /**
+     * Load cached conversation history for a chat.
+     */
     private function loadConversationHistory($chatId): array
     {
         if (!$chatId) {
@@ -235,6 +252,9 @@ class AIService
         return is_array($history) ? $history : [];
     }
 
+    /**
+     * Save user + assistant turn into cached history.
+     */
     private function saveConversationTurn($chatId, array $history, string $userMessage, string $assistantReply): void
     {
         if (!$chatId) {
@@ -250,11 +270,17 @@ class AIService
         Cache::put($this->historyKey($chatId), $history, now()->addHours($this->historyTtlHours));
     }
 
+    /**
+     * Build cache key for per-chat context storage.
+     */
     private function historyKey($chatId): string
     {
         return 'chat_context:' . $chatId;
     }
 
+    /**
+     * Extract tool call arguments from OpenAI response for a specific tool name.
+     */
     private function extractArgumentsFromToolCall($msg, string $toolName): ?array
     {
         $toolCalls = $msg->toolCalls ?? [];
@@ -283,6 +309,9 @@ class AIService
         return null;
     }
 
+    /**
+     * Normalize tool arguments to associative array.
+     */
     private function normalizeArguments($argumentsRaw): array
     {
         if (is_string($argumentsRaw)) {
@@ -298,6 +327,10 @@ class AIService
         return (array) $argumentsRaw;
     }
 
+    /**
+     * Debounce rapid incoming messages and combine them before AI processing.
+     * Returns null for non-leader requests while waiting for the buffer window.
+     */
     public function collectDebouncedMessage(string $chatId, string $message): ?string
     {
         $chatId = trim($chatId);
@@ -351,6 +384,9 @@ class AIService
         return $parts === [] ? $text : implode("\n", $parts);
     }
 
+    /**
+     * Apply final formatting rules to outgoing assistant text.
+     */
     private function formatReply(string $reply): string
     {
         $normalized = str_replace(["\r\n", "\r"], "\n", $reply);
@@ -401,6 +437,9 @@ class AIService
         return mb_substr($clean, 0, 260);
     }
 
+    /**
+     * Prepare assistant reply with formatting and anti-repeat protection.
+     */
     private function prepareAssistantReply(array $history, string $reply): string
     {
         $formatted = $this->formatReply($reply);
@@ -412,6 +451,9 @@ class AIService
         return $formatted;
     }
 
+    /**
+     * Detect whether the new reply is identical to last assistant message.
+     */
     private function isRepeatedAssistantReply(array $history, string $reply): bool
     {
         for ($i = count($history) - 1; $i >= 0; $i--) {
@@ -433,6 +475,9 @@ class AIService
         return false;
     }
 
+    /**
+     * Convert inline numbered verification list into multiline format.
+     */
     private function formatInlineVerificationList(string $text): string
     {
         // Convert one-line numbered verification fields into multiline list for readability.
@@ -450,6 +495,9 @@ class AIService
         return $text;
     }
 
+    /**
+     * Check whether text is a structured field request that should keep newlines.
+     */
     private function isStructuredDataRequest(string $text): bool
     {
         $markers = [

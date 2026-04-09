@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Log;
 
 class CheckSuspendTool
 {
+    // Command example:
+    // cek suspend
+    // Username: chowyunfat
+
     /**
      * Get tool definition for OpenAI.
      */
@@ -99,6 +103,7 @@ class CheckSuspendTool
 
     /**
      * Get fallback message when username is missing.
+      * Also used as command template shown to user.
      */
     public function missingUsernameMessage(): string
     {

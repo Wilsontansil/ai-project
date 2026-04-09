@@ -8,6 +8,13 @@ use Illuminate\Support\Facades\Log;
 
 class ResetPasswordTool
 {
+    // Command example:
+    // reset password
+    // Username(username): chowyunfat
+    // Nama rekening(namarek): mateoo
+    // Nomor rekening(norek): 198009098
+    // Nama Bank(bank): BCA
+
     /**
      * Get tool definition for OpenAI.
      */
@@ -153,6 +160,7 @@ class ResetPasswordTool
 
     /**
      * Get fallback message when username is missing.
+      * Also used as command template shown to user.
      */
     public function missingUsernameMessage(): string
     {
@@ -163,6 +171,9 @@ class ResetPasswordTool
             . "Nama Bank(bank) :";
     }
 
+    /**
+     * Extract a single field value from free-form message text.
+     */
     private function extractField(string $message, string $field): string
     {
         $pattern = '/(?:' . preg_quote($field, '/') . '(?:\s*\(' . preg_quote($field, '/') . '\))?)\s*:\s*(.+)/i';

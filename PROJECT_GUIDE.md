@@ -89,6 +89,7 @@ Recommended cache driver for production conversation memory:
 - If payload is invalid, return safe response and do not call OpenAI.
 - Keep assistant identity consistent as xoneBot.
 - Default assistant response language is Bahasa Indonesia, unless user asks for another language.
+- Keep default reply short and to the point unless user asks for detailed explanation.
 - Keep conversation context per user/chat id.
 - For password reset flow, identify account by `username` and validate player by `username + agent` before any action.
 - Current reset flow sets player password to `1234567` after username+agent validation.
@@ -97,6 +98,7 @@ Recommended cache driver for production conversation memory:
 - Reset request can be triggered by OpenAI tool call or fallback local intent parsing (`username: ...`) to improve reliability.
 - If bot is stuck or uncertain, it should offer handover to human support using default phone `08120000000`.
 - Handover link can be different per channel using `SUPPORT_TELEGRAM_URL` and `SUPPORT_WHATSAPP_URL`.
+- Incoming rapid messages from same chat are debounced and can be combined before AI processing to reduce duplicate replies.
 
 ### 4. Code Quality Rules
 

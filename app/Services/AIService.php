@@ -14,6 +14,8 @@ class AIService
 
     private int $historyTtlHours = 12;
 
+    private int $debounceSeconds = 2;
+
     public function reply($message, $chatId = null, $agent = 'PG', string $channel = 'telegram')
     {
         $apiKey = (string) config('services.openai.api_key', '');
@@ -39,7 +41,8 @@ class AIService
                 'model' => 'gpt-4o-mini',
                 'messages' => $messages,
                 'tools' => $tools,
-                'tool_choice' => 'auto'
+                'tool_choice' => 'auto',
+                'max_tokens' => 180,
             ]);
 
             $msg = $response->choices[0]->message;
@@ -48,12 +51,14 @@ class AIService
             $assistantReply = $this->handleToolCallOrIntent($msg, $message, $agent);
 
             if ($assistantReply !== null) {
+                $assistantReply = $this->shortenReply($assistantReply);
                 $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
                 return $assistantReply;
             }
 
             // Normal AI reply
             $assistantReply = $msg->content ?? "Sorry, I couldn't understand.";
+            $assistantReply = $this->shortenReply($assistantReply);
             $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
             return $assistantReply;
 
@@ -292,5 +297,79 @@ class AIService
         }
 
         return (array) $argumentsRaw;
+    }
+
+    public function collectDebouncedMessage(string $chatId, string $message): ?string
+    {
+        $chatId = trim($chatId);
+
+        if ($chatId === '') {
+            return trim($message);
+        }
+
+        $text = trim($message);
+        if ($text === '') {
+            return null;
+        }
+
+        $bufferKey = 'chat:debounce:buffer:' . $chatId;
+        $leaderKey = 'chat:debounce:leader:' . $chatId;
+
+        $buffer = Cache::get($bufferKey, []);
+        $buffer[] = [
+            'message' => $text,
+            'at' => now()->timestamp,
+        ];
+
+        Cache::put($bufferKey, $buffer, now()->addMinutes(2));
+
+        $isLeader = Cache::add($leaderKey, 1, now()->addSeconds($this->debounceSeconds + 2));
+
+        if (!$isLeader) {
+            return null;
+        }
+
+        usleep($this->debounceSeconds * 1000000);
+
+        $messages = Cache::get($bufferKey, []);
+        Cache::forget($bufferKey);
+        Cache::forget($leaderKey);
+
+        if (!is_array($messages) || $messages === []) {
+            return $text;
+        }
+
+        $parts = [];
+        foreach ($messages as $item) {
+            $part = trim((string) ($item['message'] ?? ''));
+            if ($part !== '') {
+                $parts[] = $part;
+            }
+        }
+
+        $parts = array_values(array_unique($parts));
+
+        return $parts === [] ? $text : implode("\n", $parts);
+    }
+
+    private function shortenReply(string $reply): string
+    {
+        $clean = trim(preg_replace('/\s+/', ' ', $reply) ?? $reply);
+
+        if (mb_strlen($clean) <= 260) {
+            return $clean;
+        }
+
+        $sentences = preg_split('/(?<=[.!?])\s+/', $clean) ?: [];
+        $sentences = array_values(array_filter(array_map('trim', $sentences), fn ($s) => $s !== ''));
+
+        if ($sentences !== []) {
+            $short = implode(' ', array_slice($sentences, 0, 3));
+            if ($short !== '') {
+                return mb_substr($short, 0, 260);
+            }
+        }
+
+        return mb_substr($clean, 0, 260);
     }
 }

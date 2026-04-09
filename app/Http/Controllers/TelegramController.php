@@ -33,10 +33,17 @@ class TelegramController extends Controller
             return response()->json(['status' => 'ignored']);
         }
 
+        $chatId = (string) $chatId;
+        $combinedText = app(AIService::class)->collectDebouncedMessage($chatId, (string) $text);
+
+        if ($combinedText === null) {
+            return response()->json(['status' => 'queued']);
+        }
+
         $this->sendTyping($chatId);
 
         // Send channel so AI can include platform-specific handover info.
-        $reply = app(AIService::class)->reply($text, (string) $chatId, $this->agent, 'telegram');
+        $reply = app(AIService::class)->reply($combinedText, $chatId, $this->agent, 'telegram');
         $reply = $this->appendHandoverContactIfNeeded($reply);
 
         $this->sendMessage($chatId, $reply);

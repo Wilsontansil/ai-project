@@ -103,6 +103,23 @@ class ResetPasswordTool
             return $this->missingUsernameMessage();
         }
 
+        $playerByUsername = Player::where('username', $username)
+            ->where('agent', $agent)
+            ->first();
+
+        if (!$playerByUsername) {
+            return "Username {$username} tidak ditemukan untuk agent {$agent}.";
+        }
+
+        $hasNullableVerificationData =
+            is_null($playerByUsername->namarek) || trim((string) $playerByUsername->namarek) === '' ||
+            is_null($playerByUsername->norek) || trim((string) $playerByUsername->norek) === '' ||
+            is_null($playerByUsername->bank) || trim((string) $playerByUsername->bank) === '';
+
+        if ($hasNullableVerificationData) {
+            return "Data verifikasi rekening untuk username {$username} belum lengkap (nullable). Silakan transfer ke human support untuk proses reset password.";
+        }
+
         $player = Player::where('username', $username)
             ->where('agent', $agent)
             ->where('namarek', $namarek)

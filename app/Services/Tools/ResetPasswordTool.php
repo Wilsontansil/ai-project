@@ -17,13 +17,16 @@ class ResetPasswordTool
             'type' => 'function',
             'function' => [
                 'name' => 'resetPassword',
-                'description' => 'Reset user password to temporary password and display success message',
+                'description' => 'Reset user password after account data verification',
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
-                        'username' => ['type' => 'string', 'description' => 'Username to reset password for']
+                        'username' => ['type' => 'string', 'description' => 'Username akun'],
+                        'namarek' => ['type' => 'string', 'description' => 'Nama rekening'],
+                        'norek' => ['type' => 'string', 'description' => 'Nomor rekening'],
+                        'bank' => ['type' => 'string', 'description' => 'Nama bank']
                     ],
-                    'required' => ['username']
+                    'required' => ['username', 'namarek', 'norek', 'bank']
                 ]
             ]
         ];
@@ -66,16 +69,49 @@ class ResetPasswordTool
     }
 
     /**
+     * Extract all verification fields from user message.
+     */
+    public function extractArgumentsFromText(string $message): array
+    {
+        return [
+            'username' => $this->extractField($message, 'username'),
+            'namarek' => $this->extractField($message, 'namarek'),
+            'norek' => $this->extractField($message, 'norek'),
+            'bank' => $this->extractField($message, 'bank'),
+        ];
+    }
+
+    /**
      * Execute tool: reset password for player.
      */
     public function execute(string $username, string $agent): string
     {
+        return $this->executeWithArguments(['username' => $username], $agent);
+    }
+
+    /**
+     * Execute tool: reset password with full account verification.
+     */
+    public function executeWithArguments(array $arguments, string $agent): string
+    {
+        $username = trim((string) ($arguments['username'] ?? ''));
+        $namarek = trim((string) ($arguments['namarek'] ?? ''));
+        $norek = trim((string) ($arguments['norek'] ?? ''));
+        $bank = trim((string) ($arguments['bank'] ?? ''));
+
+        if ($username === '' || $namarek === '' || $norek === '' || $bank === '') {
+            return $this->missingUsernameMessage();
+        }
+
         $player = Player::where('username', $username)
             ->where('agent', $agent)
+            ->where('namarek', $namarek)
+            ->where('norek', $norek)
+            ->where('bank', $bank)
             ->first();
 
         if (!$player) {
-            return "Username {$username} tidak ditemukan untuk agent {$agent}.";
+            return "Data verifikasi tidak cocok untuk username {$username} (agent {$agent}).";
         }
 
         try {
@@ -99,6 +135,21 @@ class ResetPasswordTool
      */
     public function missingUsernameMessage(): string
     {
-        return "Untuk reset password, mohon kirim username dengan format: username: namakamu";
+        return "Untuk reset password, mohon kirim data berikut:\n"
+            . "Username(username) :\n"
+            . "Nama rekening(namarek) :\n"
+            . "Nomor rekening(norek) :\n"
+            . "Nama Bank(bank) :";
+    }
+
+    private function extractField(string $message, string $field): string
+    {
+        $pattern = '/(?:' . preg_quote($field, '/') . '(?:\s*\(' . preg_quote($field, '/') . '\))?)\s*:\s*(.+)/i';
+
+        if (preg_match($pattern, $message, $matches) === 1) {
+            return trim((string) ($matches[1] ?? ''));
+        }
+
+        return '';
     }
 }

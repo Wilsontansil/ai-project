@@ -146,18 +146,38 @@ class AIService
     {
         // Try to match tool by model call or local intent.
         foreach ($this->getToolServices() as $tool) {
-            $usernameFromTool = $this->extractUsernameFromToolCall($msg, $tool->name());
+            $argumentsFromTool = $this->extractArgumentsFromToolCall($msg, $tool->name());
 
-            if ($usernameFromTool !== null) {
-                return $tool->execute($usernameFromTool, $agent);
+            if ($argumentsFromTool !== null) {
+                if (method_exists($tool, 'executeWithArguments')) {
+                    return $tool->executeWithArguments($argumentsFromTool, $agent);
+                }
+
+                $username = $argumentsFromTool['username'] ?? null;
+
+                if ($username === null) {
+                    return method_exists($tool, 'missingUsernameMessage')
+                        ? $tool->missingUsernameMessage()
+                        : 'Missing username.';
+                }
+
+                return $tool->execute($username, $agent);
             }
 
             // Fallback to intent parsing.
             if ($tool->matchesIntent($userMessage)) {
+                if (method_exists($tool, 'extractArgumentsFromText')) {
+                    $argumentsFromText = $tool->extractArgumentsFromText($userMessage);
+
+                    return $tool->executeWithArguments($argumentsFromText, $agent);
+                }
+
                 $usernameFromText = $tool->extractUsernameFromText($userMessage);
 
                 if ($usernameFromText === null) {
-                    return $tool->missingUsernameMessage();
+                    return method_exists($tool, 'missingUsernameMessage')
+                        ? $tool->missingUsernameMessage()
+                        : 'Missing username.';
                 }
 
                 return $tool->execute($usernameFromText, $agent);
@@ -198,7 +218,7 @@ class AIService
         return 'chat_context:' . $chatId;
     }
 
-    private function extractUsernameFromToolCall($msg, string $toolName): ?string
+    private function extractArgumentsFromToolCall($msg, string $toolName): ?array
     {
         $toolCalls = $msg->toolCalls ?? [];
 
@@ -212,9 +232,7 @@ class AIService
                 }
 
                 $argumentsRaw = $function->arguments ?? '{}';
-                $arguments = $this->normalizeArguments($argumentsRaw);
-
-                return $arguments['username'] ?? null;
+                return $this->normalizeArguments($argumentsRaw);
             }
         }
 
@@ -222,9 +240,7 @@ class AIService
         $legacyCall = $msg->functionCall ?? null;
 
         if (($legacyCall->name ?? null) === $toolName) {
-            $arguments = $this->normalizeArguments($legacyCall->arguments ?? '{}');
-
-            return $arguments['username'] ?? null;
+            return $this->normalizeArguments($legacyCall->arguments ?? '{}');
         }
 
         return null;

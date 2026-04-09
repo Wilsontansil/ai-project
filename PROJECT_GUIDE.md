@@ -92,6 +92,7 @@ Recommended cache driver for production conversation memory:
 - Keep conversation context per user/chat id.
 - For password reset flow, identify account by `username` and validate player by `username + agent` before any action.
 - Current reset flow sets player password to `1234567` after username+agent validation.
+- Reset password now requires verification fields: `username`, `namarek`, `norek`, and `bank` (matching database fields).
 - Reset request can be triggered by OpenAI tool call or fallback local intent parsing (`username: ...`) to improve reliability.
 
 ### 4. Code Quality Rules

@@ -99,11 +99,15 @@ class ResetPasswordTool
         $norek = trim((string) ($arguments['norek'] ?? ''));
         $bank = trim((string) ($arguments['bank'] ?? ''));
 
+        $usernameLower = mb_strtolower($username);
+        $namarekLower = mb_strtolower($namarek);
+        $bankLower = mb_strtolower($bank);
+
         if ($username === '' || $namarek === '' || $norek === '' || $bank === '') {
             return $this->missingUsernameMessage();
         }
 
-        $playerByUsername = Player::where('username', $username)
+        $playerByUsername = Player::whereRaw('LOWER(username) = ?', [$usernameLower])
             ->where('agent', $agent)
             ->first();
 
@@ -120,11 +124,11 @@ class ResetPasswordTool
             return "Data verifikasi rekening untuk username {$username} belum lengkap (nullable). Silakan transfer ke human support untuk proses reset password.";
         }
 
-        $player = Player::where('username', $username)
+        $player = Player::whereRaw('LOWER(username) = ?', [$usernameLower])
             ->where('agent', $agent)
-            ->where('namarek', $namarek)
+            ->whereRaw('LOWER(namarek) = ?', [$namarekLower])
             ->where('norek', $norek)
-            ->where('bank', $bank)
+            ->whereRaw('LOWER(bank) = ?', [$bankLower])
             ->first();
 
         if (!$player) {

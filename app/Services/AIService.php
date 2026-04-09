@@ -38,7 +38,7 @@ class AIService
         // Send to OpenAI
         try {
             $response = $client->chat()->create([
-                'model' => 'gpt-4.1-mini',
+                'model' => 'gpt-4o-mini',
                 'messages' => $messages,
                 'tools' => $tools,
                 'tool_choice' => 'auto',

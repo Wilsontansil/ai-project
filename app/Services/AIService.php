@@ -51,14 +51,14 @@ class AIService
             $assistantReply = $this->handleToolCallOrIntent($msg, $message, $agent);
 
             if ($assistantReply !== null) {
-                $assistantReply = $this->formatReply($assistantReply);
+                $assistantReply = $this->prepareAssistantReply($history, $assistantReply);
                 $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
                 return $assistantReply;
             }
 
             // Normal AI reply
             $assistantReply = $msg->content ?? "Sorry, I couldn't understand.";
-            $assistantReply = $this->formatReply($assistantReply);
+            $assistantReply = $this->prepareAssistantReply($history, $assistantReply);
             $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
             return $assistantReply;
 
@@ -399,6 +399,38 @@ class AIService
         }
 
         return mb_substr($clean, 0, 260);
+    }
+
+    private function prepareAssistantReply(array $history, string $reply): string
+    {
+        $formatted = $this->formatReply($reply);
+
+        if ($this->isRepeatedAssistantReply($history, $formatted)) {
+            return 'Siap, saya lanjut dari data terbaru kamu ya.';
+        }
+
+        return $formatted;
+    }
+
+    private function isRepeatedAssistantReply(array $history, string $reply): bool
+    {
+        for ($i = count($history) - 1; $i >= 0; $i--) {
+            $item = $history[$i] ?? null;
+
+            if (!is_array($item)) {
+                continue;
+            }
+
+            if (($item['role'] ?? '') !== 'assistant') {
+                continue;
+            }
+
+            $lastAssistant = trim((string) ($item['content'] ?? ''));
+
+            return mb_strtolower($lastAssistant) === mb_strtolower(trim($reply));
+        }
+
+        return false;
     }
 
     private function formatInlineVerificationList(string $text): string

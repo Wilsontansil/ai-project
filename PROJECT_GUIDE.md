@@ -31,6 +31,7 @@ Main components:
 - `app/Http/Controllers/WhatsAppController.php`
     - Accepts WAHA webhook payloads.
     - Extracts text and chat id from common WAHA message fields.
+    - Sends WAHA typing indicator while waiting for AI response.
     - Calls `AIService` and sends the reply through WAHA `sendText` API.
 
 Conversation memory behavior:

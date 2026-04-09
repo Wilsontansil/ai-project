@@ -63,9 +63,16 @@ class WhatsAppController extends Controller
             return response()->json(['status' => 'ignored', 'reason' => 'invalid_payload']);
         }
 
-        $reply = app(AIService::class)->reply((string) $text, (string) $chatId, $this->agent);
+        $chatId = (string) $chatId;
+        $this->sendTyping($chatId);
 
-        $this->sendMessage((string) $chatId, $reply);
+        try {
+            $reply = app(AIService::class)->reply((string) $text, $chatId, $this->agent);
+        } finally {
+            $this->stopTyping($chatId);
+        }
+
+        $this->sendMessage($chatId, $reply);
 
         return response()->json(['status' => 'ok']);
     }
@@ -77,17 +84,15 @@ class WhatsAppController extends Controller
             return;
         }
 
-        $headers = ['Accept' => 'application/json'];
-
-        if ($this->apiKey !== '') {
-            $headers['X-Api-Key'] = $this->apiKey;
-        }
-
-        $response = Http::withHeaders($headers)->post($this->baseUrl . '/api/sendText', [
+        $response = $this->postToWaha('/api/sendText', [
             'session' => $this->session,
             'chatId' => $chatId,
             'text' => $text,
         ]);
+
+        if ($response === null) {
+            return;
+        }
 
         if ($response->failed()) {
             Log::error('Failed to send WAHA message', [
@@ -96,5 +101,53 @@ class WhatsAppController extends Controller
                 'body' => $response->body(),
             ]);
         }
+    }
+
+    private function sendTyping(string $chatId): void
+    {
+        $response = $this->postToWaha('/api/startTyping', [
+            'session' => $this->session,
+            'chatId' => $chatId,
+        ]);
+
+        if ($response !== null && $response->failed()) {
+            Log::warning('Failed to start WAHA typing indicator', [
+                'chat_id' => $chatId,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+        }
+    }
+
+    private function stopTyping(string $chatId): void
+    {
+        $response = $this->postToWaha('/api/stopTyping', [
+            'session' => $this->session,
+            'chatId' => $chatId,
+        ]);
+
+        if ($response !== null && $response->failed()) {
+            Log::warning('Failed to stop WAHA typing indicator', [
+                'chat_id' => $chatId,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+        }
+    }
+
+    private function postToWaha(string $endpoint, array $payload)
+    {
+        if ($this->baseUrl === '') {
+            Log::error('WAHA base URL is not configured.');
+            return null;
+        }
+
+        $headers = ['Accept' => 'application/json'];
+
+        if ($this->apiKey !== '') {
+            $headers['X-Api-Key'] = $this->apiKey;
+        }
+
+        return Http::withHeaders($headers)->post($this->baseUrl . $endpoint, $payload);
     }
 }

@@ -94,6 +94,8 @@ Recommended cache driver for production conversation memory:
 - Current reset flow sets player password to `1234567` after username+agent validation.
 - Reset password now requires verification fields: `username`, `namarek`, `norek`, and `bank` (matching database fields).
 - Reset request can be triggered by OpenAI tool call or fallback local intent parsing (`username: ...`) to improve reliability.
+- If bot is stuck or uncertain, it should offer handover to human support using default phone `08120000000`.
+- Handover link can be different per channel using `SUPPORT_TELEGRAM_URL` and `SUPPORT_WHATSAPP_URL`.
 
 ### 4. Code Quality Rules
 

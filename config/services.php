@@ -50,4 +50,10 @@ return [
         'agent' => env('WHATSAPP_AGENT', 'PG'),
     ],
 
+    'support' => [
+        'phone' => env('SUPPORT_PHONE', '08120000000'),
+        'telegram_url' => env('SUPPORT_TELEGRAM_URL'),
+        'whatsapp_url' => env('SUPPORT_WHATSAPP_URL'),
+    ],
+
 ];

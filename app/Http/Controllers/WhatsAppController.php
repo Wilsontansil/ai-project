@@ -17,6 +17,8 @@ class WhatsAppController extends Controller
     private string $apiKey = '';
 
     private string $agent = 'PG';
+    private string $supportPhone = '';
+    private string $supportUrl = '';
 
     public function __construct()
     {
@@ -24,6 +26,8 @@ class WhatsAppController extends Controller
         $this->session = (string) config('services.whatsapp.session', 'default');
         $this->apiKey = (string) config('services.whatsapp.api_key', '');
         $this->agent = (string) config('services.whatsapp.agent', 'PG');
+        $this->supportPhone = (string) config('services.support.phone', '08120000000');
+        $this->supportUrl = (string) config('services.support.whatsapp_url', '');
     }
 
     public function handleWebhook(Request $request)
@@ -73,10 +77,12 @@ class WhatsAppController extends Controller
         $this->sendTyping($chatId);
 
         try {
-            $reply = app(AIService::class)->reply((string) $text, $chatId, $this->agent);
+            $reply = app(AIService::class)->reply((string) $text, $chatId, $this->agent, 'whatsapp');
         } finally {
             $this->stopTyping($chatId);
         }
+
+        $reply = $this->appendHandoverContactIfNeeded($reply);
 
         $this->sendMessage($chatId, $reply);
 
@@ -182,5 +188,24 @@ class WhatsAppController extends Controller
         }
 
         return !$isNew;
+    }
+
+    private function appendHandoverContactIfNeeded(string $reply): string
+    {
+        $needsHandover = stripos($reply, 'human support') !== false
+            || stripos($reply, 'transfer') !== false
+            || stripos($reply, 'agent manusia') !== false;
+
+        if (!$needsHandover) {
+            return $reply;
+        }
+
+        $lines = ["\nKontak human support: {$this->supportPhone}"];
+
+        if ($this->supportUrl !== '') {
+            $lines[] = "Link WhatsApp support: {$this->supportUrl}";
+        }
+
+        return $reply . "\n" . implode("\n", $lines);
     }
 }

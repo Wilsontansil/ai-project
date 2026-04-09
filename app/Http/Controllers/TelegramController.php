@@ -11,11 +11,15 @@ class TelegramController extends Controller
 {
     private string $telegramToken = '';
     private string $agent = 'PG';
+    private string $supportPhone = '';
+    private string $supportUrl = '';
 
     public function __construct()
     {
         $this->telegramToken = config('services.telegram.bot_token', '');
         $this->agent = 'PG'; // Could be dynamic based on chat or other factors
+        $this->supportPhone = (string) config('services.support.phone', '08120000000');
+        $this->supportUrl = (string) config('services.support.telegram_url', '');
     }
 
     public function handleWebhook(Request $request)
@@ -31,8 +35,9 @@ class TelegramController extends Controller
 
         $this->sendTyping($chatId);
 
-        // Send both message and chatId to keep service signature consistent.
-        $reply = app(AIService::class)->reply($text, $chatId, $this->agent);
+        // Send channel so AI can include platform-specific handover info.
+        $reply = app(AIService::class)->reply($text, (string) $chatId, $this->agent, 'telegram');
+        $reply = $this->appendHandoverContactIfNeeded($reply);
 
         $this->sendMessage($chatId, $reply);
 
@@ -62,5 +67,24 @@ class TelegramController extends Controller
             'chat_id' => $chatId,
             'action' => 'typing'
         ]);
+    }
+
+    private function appendHandoverContactIfNeeded(string $reply): string
+    {
+        $needsHandover = stripos($reply, 'human support') !== false
+            || stripos($reply, 'transfer') !== false
+            || stripos($reply, 'agent manusia') !== false;
+
+        if (!$needsHandover) {
+            return $reply;
+        }
+
+        $lines = ["\nKontak human support: {$this->supportPhone}"];
+
+        if ($this->supportUrl !== '') {
+            $lines[] = "Link Telegram support: {$this->supportUrl}";
+        }
+
+        return $reply . "\n" . implode("\n", $lines);
     }
 }

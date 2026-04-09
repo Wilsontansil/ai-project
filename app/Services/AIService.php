@@ -14,7 +14,7 @@ class AIService
 
     private int $historyTtlHours = 12;
 
-    public function reply($message, $chatId = null, $agent = 'PG')
+    public function reply($message, $chatId = null, $agent = 'PG', string $channel = 'telegram')
     {
         $apiKey = (string) config('services.openai.api_key', '');
 
@@ -69,6 +69,16 @@ class AIService
      */
     private function getSystemPrompt(): string
     {
+        $phone = (string) config('services.support.phone', '08120000000');
+
+        $handoverInstruction = "
+            HUMAN HANDOVER:
+            - If you are stuck, unsure, or cannot solve the issue confidently, offer transfer to human support.
+            - Human support phone: {$phone}
+            - Tell user you can transfer to human support and ask confirmation first.
+            - Explain briefly why handover is needed, then ask user confirmation.
+            ";
+
         return "
             You are xoneBot, a friendly and professional customer support assistant for a gaming platform.
 
@@ -89,6 +99,7 @@ class AIService
             - If the user is confused, guide them step by step
             - If you don’t know something, be honest and offer to help find a solution
             - Do not make up information
+            - Do not reply too long, keep it to the point
 
             STYLE:
             - Use casual-professional tone (like a helpful customer service agent on chat)
@@ -104,6 +115,8 @@ class AIService
             - Never perform sensitive actions without user confirmation
             - Only use provided APIs when required
             - If action is needed, clearly explain and ask for confirmation first
+
+            {$handoverInstruction}
 
             GOAL:
             - Make the user feel helped, understood, and comfortable

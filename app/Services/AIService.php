@@ -354,6 +354,7 @@ class AIService
     private function formatReply(string $reply): string
     {
         $normalized = str_replace(["\r\n", "\r"], "\n", $reply);
+        $normalized = $this->formatInlineVerificationList($normalized);
         $lines = array_map(static fn ($line) => trim((string) $line), explode("\n", $normalized));
 
         $tidyLines = [];
@@ -400,9 +401,35 @@ class AIService
         return mb_substr($clean, 0, 260);
     }
 
+    private function formatInlineVerificationList(string $text): string
+    {
+        // Convert one-line numbered verification fields into multiline list for readability.
+        $patterns = [
+            '/\s+(?=1\.\s*Username\s*:)/i',
+            '/\s+(?=2\.\s*Nomor rekening\s*:)/i',
+            '/\s+(?=3\.\s*Nama rekening\s*:)/i',
+            '/\s+(?=4\.\s*Nama Bank\s*:)/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            $text = preg_replace($pattern, "\n", $text) ?? $text;
+        }
+
+        return $text;
+    }
+
     private function isStructuredDataRequest(string $text): bool
     {
-        $markers = ['Username(username)', 'Nama rekening(namarek)', 'Nomor rekening(norek)', 'Nama Bank(bank)'];
+        $markers = [
+            'Username:',
+            'Nama rekening:',
+            'Nomor rekening:',
+            'Nama Bank:',
+            '1. Username:',
+            '2. Nomor rekening:',
+            '3. Nama rekening:',
+            '4. Nama Bank:',
+        ];
 
         $markerHits = 0;
         foreach ($markers as $marker) {

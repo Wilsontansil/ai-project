@@ -108,6 +108,7 @@ class AIService
             - If you don’t know something, be honest and offer to help find a solution
             - Do not make up information
             - Do not reply too long, keep it to the point
+            - Always check your reply make readable and tidy before sending, avoid messy formatting or long unbroken text blocks.
 
             STYLE:
             - Use casual-professional tone (like a helpful customer service agent on chat)
@@ -134,7 +135,7 @@ class AIService
             - Make the user feel helped, understood, and comfortable
             - Respond like a real human support agent, not a machine
 
-            Additonal:
+            Additonal instructions for tools:
             'bank' => [
                 'BCA', 'Mandiri', 'BRI', 'BNI', 'Danamon', 'CIMB Niaga', 'Permata', 'Maybank', 'Panin', 'Bank Syariah Indonesia (BSI)', 'Bank Jago',
                 'Bank Mega', 'Bank Bukopin', 'Bank OCBC NISP', 'Bank Mayapada', 'Bank Sinarmas', 'Bank Commonwealth', 'Bank UOB Indonesia', 'Bank BTN',
@@ -144,8 +145,6 @@ class AIService
                 'Bank BRI Syariah', 'Bank Danamon Syariah', 'Bank Permata Syariah', 'Bank BNI Syariah', 'Bank Mandiri Syariah', 'Bank Mega Syariah', 'Bank Bukopin Syariah', 'Bank CIMB Niaga Syariah', 'Bank Mayapada Syariah', 'Bank Sinarmas Syariah'
 
             'norek' => 'Numeric'
-            - If sequence of provided verification data is incorrect, help user map each value to the correct field and validate again.
-            
             ";
     }
 

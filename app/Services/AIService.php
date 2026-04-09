@@ -115,12 +115,27 @@ class AIService
             - Never perform sensitive actions without user confirmation
             - Only use provided APIs when required
             - If action is needed, clearly explain and ask for confirmation first
+            - Always ask confirmation every time before updating any player data.
+            - If player input sequence or values are wrong, review the possible valid data values and ask user to re-check before proceeding.
 
             {$handoverInstruction}
 
             GOAL:
             - Make the user feel helped, understood, and comfortable
             - Respond like a real human support agent, not a machine
+
+            Additonal:
+            'bank' => [
+                'BCA', 'Mandiri', 'BRI', 'BNI', 'Danamon', 'CIMB Niaga', 'Permata', 'Maybank', 'Panin', 'Bank Syariah Indonesia (BSI)', 'Bank Jago',
+                'Bank Mega', 'Bank Bukopin', 'Bank OCBC NISP', 'Bank Mayapada', 'Bank Sinarmas', 'Bank Commonwealth', 'Bank UOB Indonesia', 'Bank BTN',
+                'Bank DKI', 'Bank BTPN', 'Bank Artha Graha', 'Bank Mayora', 'Bank JTrust Indonesia', 'Bank Mestika', 'Bank Victoria', 'Bank Ina Perdana',
+                'Bank Maybank Syariah Indonesia', 'Bank Woori Saudara', 'Bank Artos Indonesia', 'Bank Harda Internasional', 'Bank Ganesha', 'Bank Maspion',
+                'Bank QNB Indonesia', 'Bank Royal Indonesia', 'Bank Sinar Mas', 'Bank Victoria International', 'Bank Bumi Arta', 'Bank Maybank Indonesia', 'Bank Nusantara Parahyangan', 'Bank OCBC NISP Syariah', 'Bank Panin Dubai Syariah',
+                'Bank BRI Syariah', 'Bank Danamon Syariah', 'Bank Permata Syariah', 'Bank BNI Syariah', 'Bank Mandiri Syariah', 'Bank Mega Syariah', 'Bank Bukopin Syariah', 'Bank CIMB Niaga Syariah', 'Bank Mayapada Syariah', 'Bank Sinarmas Syariah'
+
+            'norek' => 'Numeric'
+            - If sequence of provided verification data is incorrect, help user map each value to the correct field and validate again.
+            
             ";
     }
 

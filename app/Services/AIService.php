@@ -38,7 +38,6 @@ class AIService
         // Send to OpenAI
         try {
             $response = $client->chat()->create([
-                'model' => 'gpt-4o-mini',
                 'model' => 'gpt-4.1-mini',
                 'messages' => $messages,
                 'tools' => $tools,
@@ -52,14 +51,14 @@ class AIService
             $assistantReply = $this->handleToolCallOrIntent($msg, $message, $agent);
 
             if ($assistantReply !== null) {
-                $assistantReply = $this->shortenReply($assistantReply);
+                $assistantReply = $this->formatReply($assistantReply);
                 $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
                 return $assistantReply;
             }
 
             // Normal AI reply
             $assistantReply = $msg->content ?? "Sorry, I couldn't understand.";
-            $assistantReply = $this->shortenReply($assistantReply);
+            $assistantReply = $this->formatReply($assistantReply);
             $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
             return $assistantReply;
 
@@ -116,6 +115,8 @@ class AIService
             - You may use light friendly expressions when appropriate (e.g. “baik, saya bantu ya 😊”)
             - Do NOT overuse emojis
             - Make every response feel human, warm, and practical.
+            - Keep formatting tidy: proper spacing, no messy line breaks.
+            - When asking for data, format one field per line.
 
             INTRODUCTION:
             - On the first interaction, introduce yourself as “xoneBot”
@@ -353,9 +354,37 @@ class AIService
         return $parts === [] ? $text : implode("\n", $parts);
     }
 
-    private function shortenReply(string $reply): string
+    private function formatReply(string $reply): string
     {
-        $clean = trim(preg_replace('/\s+/', ' ', $reply) ?? $reply);
+        $normalized = str_replace(["\r\n", "\r"], "\n", $reply);
+        $lines = array_map(static fn ($line) => trim((string) $line), explode("\n", $normalized));
+
+        $tidyLines = [];
+        $lastBlank = false;
+
+        foreach ($lines as $line) {
+            $line = preg_replace('/[ \t]+/', ' ', $line) ?? $line;
+            $isBlank = $line === '';
+
+            if ($isBlank) {
+                if (!$lastBlank) {
+                    $tidyLines[] = '';
+                }
+                $lastBlank = true;
+                continue;
+            }
+
+            $tidyLines[] = $line;
+            $lastBlank = false;
+        }
+
+        $tidy = trim(implode("\n", $tidyLines));
+
+        if ($this->isStructuredDataRequest($tidy)) {
+            return $tidy;
+        }
+
+        $clean = trim(preg_replace('/\s+/', ' ', $tidy) ?? $tidy);
 
         if (mb_strlen($clean) <= 260) {
             return $clean;
@@ -372,5 +401,30 @@ class AIService
         }
 
         return mb_substr($clean, 0, 260);
+    }
+
+    private function isStructuredDataRequest(string $text): bool
+    {
+        $markers = ['Username(username)', 'Nama rekening(namarek)', 'Nomor rekening(norek)', 'Nama Bank(bank)'];
+
+        $markerHits = 0;
+        foreach ($markers as $marker) {
+            if (stripos($text, $marker) !== false) {
+                $markerHits++;
+            }
+        }
+
+        if ($markerHits >= 2) {
+            return true;
+        }
+
+        $fieldLineCount = 0;
+        foreach (explode("\n", $text) as $line) {
+            if (preg_match('/^[^:\n]{2,}:\s*$/', trim($line)) === 1) {
+                $fieldLineCount++;
+            }
+        }
+
+        return $fieldLineCount >= 3;
     }
 }

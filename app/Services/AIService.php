@@ -21,7 +21,7 @@ class AIService
         $apiKey = (string) config('services.openai.api_key', '');
 
         if ($apiKey === '') {
-            return 'OpenAI API key is not configured. Please set OPENAI_API_KEY on server .env.';
+            return $this->formatReply('OpenAI API key is not configured. Please set OPENAI_API_KEY on server .env.');
         }
 
         $client = OpenAI::client($apiKey);
@@ -63,9 +63,9 @@ class AIService
             return $assistantReply;
 
         } catch (\OpenAI\Exceptions\RateLimitException $e) {
-            return "⚠️ System busy, please try again...";
+            return $this->formatReply("⚠️ System busy, please try again...");
         } catch (\Exception $e) {
-            return "⚠️ Error: " . $e->getMessage();
+            return $this->formatReply("⚠️ Error: " . $e->getMessage());
         }
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Services\AIService;
@@ -64,6 +65,11 @@ class WhatsAppController extends Controller
         }
 
         $chatId = (string) $chatId;
+
+        if ($this->isDuplicateMessage($request, $payload, $chatId, (string) $text)) {
+            return response()->json(['status' => 'ignored', 'reason' => 'duplicate_message']);
+        }
+
         $this->sendTyping($chatId);
 
         try {
@@ -149,5 +155,32 @@ class WhatsAppController extends Controller
         }
 
         return Http::withHeaders($headers)->post($this->baseUrl . $endpoint, $payload);
+    }
+
+    private function isDuplicateMessage(Request $request, array $payload, string $chatId, string $text): bool
+    {
+        $messageId = (string) (
+            $payload['id']
+            ?? ($payload['message']['id'] ?? null)
+            ?? $request->input('id')
+            ?? ''
+        );
+
+        // Fallback hash if provider does not send message id.
+        if ($messageId === '') {
+            $messageId = sha1($chatId . '|' . trim($text));
+        }
+
+        $cacheKey = 'waha:processed:' . $messageId;
+        $isNew = Cache::add($cacheKey, 1, now()->addMinutes(5));
+
+        if (!$isNew) {
+            Log::info('Duplicate WAHA message ignored', [
+                'chat_id' => $chatId,
+                'message_id' => $messageId,
+            ]);
+        }
+
+        return !$isNew;
     }
 }

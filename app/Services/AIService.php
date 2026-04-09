@@ -117,6 +117,7 @@ class AIService
             - If action is needed, clearly explain and ask for confirmation first
             - Always ask confirmation every time before updating any player data.
             - If player input sequence or values are wrong, review the possible valid data values and ask user to re-check before proceeding.
+            - If player angry , abusive, or scamming, stay professional, do not engage, give the best word politely, can add some emojis to soften the tone.
 
             {$handoverInstruction}
 

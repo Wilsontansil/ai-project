@@ -21,7 +21,7 @@ class AIAgentController extends Controller
         $botName = 'xoneBot';
         if (Schema::hasTable('tool_settings')) {
             $config = ToolSetting::query()->where('tool_name', '_bot_config')->first();
-            $botName = $config->meta['bot_name'] ?? $botName;
+            $botName = $config?->meta['bot_name'] ?? $botName;
         }
 
         return view('backoffice.ai-agent', [

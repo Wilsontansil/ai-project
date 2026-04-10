@@ -88,7 +88,7 @@ class WhatsAppController extends Controller
         $agentContext = [];
 
         try {
-            $customer = app(CustomerIdentityService::class)->resolve('whatsapp', $requestPayload);
+            $customer = app(CustomerIdentityService::class)->resolve('whatsapp', $requestPayload, $combinedText);
             $agentContext = app(AgentContextService::class)->buildContext($customer, $combinedText);
 
             app(ConversationMemoryService::class)->addMessage(

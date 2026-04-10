@@ -30,6 +30,7 @@ Main components:
     - Handles function/tool call flow for password reset intent.
 - `app/Services/Agent/CustomerIdentityService.php`
     - Resolves unique customer identity from each platform payload.
+    - Learns/updates customer name from message patterns (example: "nama saya ...", "my name is ...") when value is more reliable.
 - `app/Services/Agent/ConversationMemoryService.php`
     - Stores and fetches short-term conversation memory.
 - `app/Services/Agent/KnowledgeBaseService.php`

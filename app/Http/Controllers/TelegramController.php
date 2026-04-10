@@ -49,7 +49,7 @@ class TelegramController extends Controller
         $agentContext = [];
 
         try {
-            $customer = app(CustomerIdentityService::class)->resolve('telegram', $payload);
+            $customer = app(CustomerIdentityService::class)->resolve('telegram', $payload, $combinedText);
             $agentContext = app(AgentContextService::class)->buildContext($customer, $combinedText);
 
             app(ConversationMemoryService::class)->addMessage(

@@ -2,14 +2,20 @@
     #bo-sidebar {
         width: 260px;
         min-width: 260px;
-        min-height: calc(100vh - 3rem);
-        transition: width 0.25s ease, min-width 0.25s ease;
+        max-width: 260px;
+        height: calc(100vh - 3rem);
+        position: sticky;
+        top: 1.5rem;
+        transition: width 0.25s ease, min-width 0.25s ease, max-width 0.25s ease;
         background: #3bb5a5;
+        flex-shrink: 0;
+        flex-grow: 0;
     }
 
     #bo-shell.bo-collapsed #bo-sidebar {
         width: 72px;
         min-width: 72px;
+        max-width: 72px;
     }
 
     #bo-shell.bo-collapsed .bo-label,

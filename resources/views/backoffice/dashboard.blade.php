@@ -47,6 +47,10 @@
                         WhatsApp.</p>
                 </div>
                 <div class="flex items-center gap-3">
+                    <a href="{{ route('backoffice.ai-agent') }}"
+                        class="rounded-2xl border border-cyan-300/30 bg-cyan-500/10 px-4 py-3 text-sm font-medium text-cyan-100 transition hover:bg-cyan-500/20">
+                        AI Agent Settings
+                    </a>
                     <div class="rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-300">
                         Login as {{ auth()->user()->email }}
                     </div>

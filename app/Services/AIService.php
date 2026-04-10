@@ -2,11 +2,12 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Cache;
-use OpenAI;
-use Illuminate\Support\Facades\Log;
-use App\Services\Tools\ResetPasswordTool;
+use App\Models\ToolSetting;
 use App\Services\Tools\CheckSuspendTool;
+use App\Services\Tools\ResetPasswordTool;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
+use OpenAI;
 
 class AIService
 {
@@ -44,14 +45,19 @@ class AIService
 
         // Send to OpenAI
         try {
-            $response = $client->chat()->create([
+            $payload = [
                 'model' => 'gpt-4o-mini',
                 'messages' => $messages,
-                'tools' => $tools,
-                'tool_choice' => 'auto',
                 // Allow fuller answers to avoid confusing, cut-off responses.
                 'max_tokens' => 420,
-            ]);
+            ];
+
+            if ($tools !== []) {
+                $payload['tools'] = $tools;
+                $payload['tool_choice'] = 'auto';
+            }
+
+            $response = $client->chat()->create($payload);
 
             $msg = $response->choices[0]->message;
             $finishReason = (string) ($response->choices[0]->finishReason ?? '');
@@ -241,10 +247,34 @@ class AIService
      */
     private function getToolServices(): array
     {
-        return [
+        $catalog = [
             new ResetPasswordTool(),
             new CheckSuspendTool(),
         ];
+
+        if (!Schema::hasTable('tool_settings')) {
+            return $catalog;
+        }
+
+        $enabledMap = ToolSetting::query()->pluck('is_enabled', 'tool_name')->toArray();
+
+        if ($enabledMap === []) {
+            return $catalog;
+        }
+
+        $filtered = [];
+        foreach ($catalog as $tool) {
+            $name = $tool->name();
+            $isEnabled = array_key_exists($name, $enabledMap)
+                ? (bool) $enabledMap[$name]
+                : true;
+
+            if ($isEnabled) {
+                $filtered[] = $tool;
+            }
+        }
+
+        return $filtered;
     }
 
     /**

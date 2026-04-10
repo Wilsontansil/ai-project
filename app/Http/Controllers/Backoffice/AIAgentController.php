@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Models\AgentCase;
 use App\Models\ToolSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,10 +34,22 @@ class AIAgentController extends Controller
             ];
         }
 
+        $activeCases = Schema::hasTable('agent_cases')
+            ? AgentCase::query()->where('is_active', true)->count()
+            : 0;
+
         return view('backoffice.ai-agent', [
             'tools' => $tools,
             'hasToolSettingsTable' => Schema::hasTable('tool_settings'),
             'currentTool' => $currentTool,
+            'aiInfo' => [
+                'model' => 'gpt-4o-mini',
+                'bot_name' => 'xoneBot',
+                'agent_kode' => config('services.agent.kode', 'PG'),
+                'agent_id' => config('services.agent.id', 1),
+                'max_tokens' => 420,
+                'active_cases' => $activeCases,
+            ],
         ]);
     }
 

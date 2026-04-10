@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Backoffice\AIAgentController;
 use App\Http\Controllers\Backoffice\AuthController;
+use App\Http\Controllers\Backoffice\CaseController;
 use App\Http\Controllers\Backoffice\DashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +41,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/backoffice/tools/register', [AIAgentController::class, 'updateTool'])
         ->defaults('toolSlug', 'register')
         ->name('backoffice.tools.register.update');
+
+    Route::get('/backoffice/cases', [CaseController::class, 'index'])->name('backoffice.cases.index');
+    Route::get('/backoffice/cases/create', [CaseController::class, 'create'])->name('backoffice.cases.create');
+    Route::post('/backoffice/cases', [CaseController::class, 'store'])->name('backoffice.cases.store');
+    Route::get('/backoffice/cases/{case}/edit', [CaseController::class, 'edit'])->name('backoffice.cases.edit');
+    Route::put('/backoffice/cases/{case}', [CaseController::class, 'update'])->name('backoffice.cases.update');
+    Route::delete('/backoffice/cases/{case}', [CaseController::class, 'destroy'])->name('backoffice.cases.destroy');
 
     Route::post('/backoffice/logout', [AuthController::class, 'logout'])->name('logout');
 });

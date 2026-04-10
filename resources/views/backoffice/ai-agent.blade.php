@@ -29,8 +29,53 @@
 
             <main class="min-w-0 flex-1 space-y-6">
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                    <h1 class="text-3xl font-semibold">AI Agent Tools Setting</h1>
-                    <p class="mt-2 text-sm text-slate-300">Atur tool mana yang aktif untuk AI agent saat melayani
+                    <h1 class="text-3xl font-semibold">AI Agent Settings</h1>
+                    <p class="mt-2 text-sm text-slate-300">Informasi dan konfigurasi AI agent.</p>
+                </div>
+
+                {{-- AI Info Panel --}}
+                <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                    <h2 class="text-xl font-semibold text-white">AI Agent Info</h2>
+                    <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/50 px-4 py-3">
+                            <p class="text-xs text-slate-400">Bot Name</p>
+                            <p class="mt-1 text-sm font-semibold text-white">{{ $aiInfo['bot_name'] }}</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/50 px-4 py-3">
+                            <p class="text-xs text-slate-400">Model</p>
+                            <p class="mt-1 text-sm font-semibold text-white">{{ $aiInfo['model'] }}</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/50 px-4 py-3">
+                            <p class="text-xs text-slate-400">Max Tokens</p>
+                            <p class="mt-1 text-sm font-semibold text-white">{{ $aiInfo['max_tokens'] }}</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/50 px-4 py-3">
+                            <p class="text-xs text-slate-400">Agent</p>
+                            <p class="mt-1 text-sm font-semibold text-white">{{ $aiInfo['agent_kode'] }} <span
+                                    class="text-xs font-normal text-slate-400">(ID: {{ $aiInfo['agent_id'] }})</span>
+                            </p>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/50 px-4 py-3">
+                            <p class="text-xs text-slate-400">Active Cases</p>
+                            <p class="mt-1 text-sm font-semibold text-white">
+                                {{ $aiInfo['active_cases'] }}
+                                @if ($aiInfo['active_cases'] > 0)
+                                    <a href="{{ route('backoffice.cases.index') }}"
+                                        class="ml-1 text-xs font-normal text-cyan-400 hover:underline">View</a>
+                                @endif
+                            </p>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/50 px-4 py-3">
+                            <p class="text-xs text-slate-400">Language</p>
+                            <p class="mt-1 text-sm font-semibold text-white">Bahasa Indonesia</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Tools Section Header --}}
+                <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                    <h2 class="text-xl font-semibold text-white">Tools Configuration</h2>
+                    <p class="mt-1 text-sm text-slate-300">Atur tool mana yang aktif untuk AI agent saat melayani
                         customer.</p>
                 </div>
 

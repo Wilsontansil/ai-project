@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Agent;
+use App\Models\AgentCase;
 use App\Models\ToolSetting;
 use App\Services\Tools\CheckSuspendTool;
 use App\Services\Tools\RegisterTool;
@@ -154,7 +155,7 @@ class AIService
             - Explain briefly why handover is needed, then ask user confirmation.
             ";
 
-        return "
+        $basePrompt = "
             You are xoneBot, a friendly and professional customer support assistant for a gaming platform.
 
             PERSONALITY:
@@ -216,6 +217,42 @@ class AIService
 
             'norek' => 'Numeric'
             ";
+
+        // Append active case instructions from database
+        $caseInstructions = $this->getCaseInstructions();
+        if ($caseInstructions !== '') {
+            return $basePrompt . "\n\n" . $caseInstructions;
+        }
+
+        return $basePrompt;
+    }
+
+    /**
+     * Build additional instructions from active agent cases.
+     */
+    private function getCaseInstructions(): string
+    {
+        if (!Schema::hasTable('agent_cases')) {
+            return '';
+        }
+
+        $cases = AgentCase::query()
+            ->where('is_active', true)
+            ->orderByRaw("FIELD(level, 'danger', 'warning', 'info')")
+            ->get();
+
+        if ($cases->isEmpty()) {
+            return '';
+        }
+
+        $lines = ["IMPORTANT BEHAVIORAL RULES (from reported cases — follow strictly):"];
+
+        foreach ($cases as $case) {
+            $levelTag = strtoupper($case->level);
+            $lines[] = "- [{$levelTag}] {$case->instruction}";
+        }
+
+        return implode("\n", $lines);
     }
 
     /**

@@ -157,7 +157,7 @@ class ResetPasswordTool
             return "Gagal reset password untuk username {$username} (agent {$agentKode}).";
         }
 
-        return "Password untuk username {$username} (agent {$agentKode}) berhasil direset ke 1234567.";
+        return "Password untuk username {$username} (agent {$agentKode}) berhasil direset.\nPassword baru: 1234567\nSilakan login dan segera ganti password.";
     }
 
     /**

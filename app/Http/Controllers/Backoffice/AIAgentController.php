@@ -11,10 +11,11 @@ use Illuminate\View\View;
 
 class AIAgentController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $catalog = $this->toolCatalog();
         $settings = collect();
+        $currentTool = trim((string) $request->query('tool', ''));
 
         if (Schema::hasTable('tool_settings')) {
             $settings = ToolSetting::query()->get()->keyBy('tool_name');
@@ -35,6 +36,7 @@ class AIAgentController extends Controller
         return view('backoffice.ai-agent', [
             'tools' => $tools,
             'hasToolSettingsTable' => Schema::hasTable('tool_settings'),
+            'currentTool' => $currentTool,
         ]);
     }
 

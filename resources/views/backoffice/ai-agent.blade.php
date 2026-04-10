@@ -22,7 +22,10 @@
 <body class="min-h-screen bg-slate-950 text-slate-100">
     <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] p-4 md:p-6">
         <div id="bo-shell" class="mx-auto flex max-w-7xl gap-6">
-            @include('backoffice.partials.sidebar', ['active' => 'ai-agent'])
+            @include('backoffice.partials.sidebar', [
+                'active' => 'ai-agent',
+                'currentTool' => $currentTool ?? null,
+            ])
 
             <main class="min-w-0 flex-1 space-y-6">
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
@@ -57,7 +60,8 @@
                     @csrf
 
                     @foreach ($tools as $index => $tool)
-                        <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                        <div id="tool-{{ $tool['tool_name'] }}"
+                            class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
                             <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                                 <div>
                                     <h2 class="text-xl font-semibold text-white">{{ $tool['display_name'] }}</h2>
@@ -107,6 +111,22 @@
             </main>
         </div>
     </div>
+
+    @if (!empty($currentTool))
+        <script>
+            (() => {
+                const id = 'tool-{{ $currentTool }}';
+                const section = document.getElementById(id);
+
+                if (section) {
+                    section.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            })();
+        </script>
+    @endif
 </body>
 
 </html>

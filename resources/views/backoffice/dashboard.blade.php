@@ -38,7 +38,7 @@
     @endif
     <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] p-4 md:p-6">
         <div id="bo-shell" class="mx-auto flex max-w-7xl gap-6">
-            @include('backoffice.partials.sidebar', ['active' => 'customer'])
+            @include('backoffice.partials.sidebar', ['active' => 'customer', 'currentTool' => null])
 
             <main class="min-w-0 flex-1 space-y-6">
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">

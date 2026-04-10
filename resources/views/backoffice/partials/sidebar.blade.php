@@ -20,6 +20,18 @@
         padding-right: 0.75rem;
     }
 
+    #bo-shell.bo-collapsed .bo-subnav {
+        display: none;
+    }
+
+    .bo-nav-link {
+        min-height: 48px;
+    }
+
+    .bo-subnav-link {
+        min-height: 40px;
+    }
+
     #bo-shell.bo-collapsed #bo-sidebar-toggle {
         transform: rotate(180deg);
     }
@@ -43,11 +55,25 @@
             <span class="text-base">👥</span>
             <span class="bo-label">Customer</span>
         </a>
+
         <a href="{{ route('backoffice.ai-agent') }}"
             class="bo-nav-link flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition {{ $active === 'ai-agent' ? 'bg-cyan-400 text-slate-950' : 'bg-slate-900/50 text-slate-200 hover:bg-slate-800/70' }}">
             <span class="text-base">⚙️</span>
             <span class="bo-label">AI Agent</span>
         </a>
+
+        <div class="bo-subnav ml-4 space-y-2">
+            <a href="{{ route('backoffice.ai-agent', ['tool' => 'resetPassword']) }}#tool-resetPassword"
+                class="bo-subnav-link flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition {{ $active === 'ai-agent' && ($currentTool ?? '') === 'resetPassword' ? 'bg-cyan-400/20 text-cyan-100' : 'bg-slate-900/40 text-slate-300 hover:bg-slate-800/70' }}">
+                <span class="text-[10px]">•</span>
+                <span class="bo-label">Reset Password</span>
+            </a>
+            <a href="{{ route('backoffice.ai-agent', ['tool' => 'checkSuspend']) }}#tool-checkSuspend"
+                class="bo-subnav-link flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition {{ $active === 'ai-agent' && ($currentTool ?? '') === 'checkSuspend' ? 'bg-cyan-400/20 text-cyan-100' : 'bg-slate-900/40 text-slate-300 hover:bg-slate-800/70' }}">
+                <span class="text-[10px]">•</span>
+                <span class="bo-label">CheckSuspend</span>
+            </a>
+        </div>
     </nav>
 
     <form method="POST" action="{{ route('logout') }}" class="mt-8">

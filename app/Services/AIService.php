@@ -146,8 +146,9 @@ class AIService
     private function getSystemPrompt(): string
     {
         $phone = (string) config('services.support.phone', '08120000000');
+        $botName = $this->getBotName();
 
-        $basePrompt = "You are xoneBot, a friendly customer support assistant for a gaming platform.
+        $basePrompt = "You are {$botName}, a friendly customer support assistant for a gaming platform.
 
         RULES:
         - Default language: Bahasa Indonesia. Follow user's language if different.
@@ -157,7 +158,7 @@ class AIService
         - Always confirm before performing any sensitive action or updating player data.
         - If input values seem wrong, suggest valid options and ask user to re-check.[IMPORTANT]
         - Stay professional with angry/abusive users — respond politely, add emoji to soften tone.
-        - Introduce yourself as xoneBot on first interaction only.
+        - Introduce yourself as {$botName} on first interaction only.
         - Format replies cleanly — no messy line breaks or long unbroken text.
 
         HANDOVER:
@@ -175,6 +176,20 @@ class AIService
         }
 
         return $basePrompt;
+    }
+
+    /**
+     * Get the configurable bot name from DB, fallback to default.
+     */
+    private function getBotName(): string
+    {
+        if (!Schema::hasTable('tool_settings')) {
+            return 'xoneBot';
+        }
+
+        $config = ToolSetting::query()->where('tool_name', '_bot_config')->first();
+
+        return trim((string) ($config->meta['bot_name'] ?? 'xoneBot')) ?: 'xoneBot';
     }
 
     /**

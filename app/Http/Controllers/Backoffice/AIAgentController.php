@@ -18,16 +18,40 @@ class AIAgentController extends Controller
             ? AgentCase::query()->where('is_active', true)->count()
             : 0;
 
+        $botName = 'xoneBot';
+        if (Schema::hasTable('tool_settings')) {
+            $config = ToolSetting::query()->where('tool_name', '_bot_config')->first();
+            $botName = $config->meta['bot_name'] ?? $botName;
+        }
+
         return view('backoffice.ai-agent', [
             'aiInfo' => [
                 'model' => 'gpt-4o-mini',
-                'bot_name' => 'xoneBot',
+                'bot_name' => $botName,
                 'agent_kode' => config('services.agent.kode', 'PG'),
                 'agent_id' => config('services.agent.id', 1),
                 'max_tokens' => 420,
                 'active_cases' => $activeCases,
             ],
         ]);
+    }
+
+    public function update(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'bot_name' => ['required', 'string', 'max:60'],
+        ]);
+
+        ToolSetting::query()->updateOrCreate(
+            ['tool_name' => '_bot_config'],
+            [
+                'display_name' => 'Bot Config',
+                'description' => 'General bot configuration',
+                'meta' => ['bot_name' => trim($data['bot_name'])],
+            ]
+        );
+
+        return back()->with('success', 'Bot name berhasil diperbarui.');
     }
 
     public function showTool(string $toolSlug): View

@@ -89,9 +89,10 @@
                                 @if (($msg['role'] ?? '') === 'user')
                                     <div class="flex justify-start">
                                         <div
-                                            class="max-w-[75%] rounded-2xl rounded-bl-sm border border-white/10 bg-slate-800 px-4 py-3 shadow-lg shadow-black/20">
+                                            class="max-w-[50%] rounded-2xl rounded-bl-sm border border-white/10 bg-slate-800 px-4 py-3 shadow-lg shadow-black/20">
                                             <p class="mb-1 text-[10px] font-semibold text-amber-400">customer</p>
-                                            <p class="text-sm text-slate-100">{{ $msg['message'] }}</p>
+                                            <p class="whitespace-pre-wrap text-sm text-slate-100">{{ $msg['message'] }}
+                                            </p>
                                             <p class="mt-1.5 text-[10px] text-slate-500">
                                                 {{ $msg['time'] ?? '' }}</p>
                                         </div>
@@ -99,10 +100,10 @@
                                 @else
                                     <div class="flex justify-end">
                                         <div
-                                            class="max-w-[75%] rounded-2xl rounded-br-sm border border-cyan-500/20 bg-cyan-600/25 px-4 py-3 shadow-lg shadow-cyan-900/20">
+                                            class="max-w-[50%] rounded-2xl rounded-br-sm border border-cyan-500/20 bg-cyan-600/25 px-4 py-3 shadow-lg shadow-cyan-900/20">
                                             <p class="mb-1 text-[10px] font-semibold text-cyan-400">
                                                 {{ $msg['role'] ?? 'assistant' }}</p>
-                                            <p class="text-sm text-white">{{ $msg['message'] }}</p>
+                                            <p class="whitespace-pre-wrap text-sm text-white">{{ $msg['message'] }}</p>
                                             <p class="mt-1.5 text-right text-[10px] text-cyan-300/60">
                                                 {{ $msg['time'] ?? '' }}
                                             </p>

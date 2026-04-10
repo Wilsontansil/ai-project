@@ -7,7 +7,6 @@ use App\Models\Player;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use App\Utils;
 
 class RegisterTool
 {
@@ -160,7 +159,7 @@ class RegisterTool
                 'namarek' => $namarek,
                 'norek' => $norek,
                 'password' => Hash::make('1234567'),
-                'playercode' => utils::generateUniqueCode($agent->prefix),
+                'playercode' => self::generateUniqueCode($agent->prefix),
                 'agents_id' => $agent->id,
                 'agent' => $agent->kode,
                 'browser' => 'AI-Bot',
@@ -217,5 +216,17 @@ class RegisterTool
         }
 
         return '';
+    }
+
+    private static function generateUniqueCode($agent)
+    {
+        $code = Str::upper($agent . Str::random(9));
+
+        if (Player::where('playercode', $code)->exists()) {
+            return self::generateUniqueCode($agent);
+        }
+
+        return $code;
+
     }
 }

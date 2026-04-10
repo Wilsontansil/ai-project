@@ -93,6 +93,7 @@
                                         <th class="px-4 py-3 font-medium">Phone</th>
                                         <th class="px-4 py-3 font-medium">Messages</th>
                                         <th class="px-4 py-3 font-medium">Last Seen</th>
+                                        <th class="px-4 py-3 font-medium">Chat</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-white/5 bg-slate-950/40">
@@ -108,10 +109,15 @@
                                                 {{ number_format($customer->total_messages) }}</td>
                                             <td class="px-4 py-3 text-slate-300">
                                                 {{ $customer->last_seen_at?->diffForHumans() ?: '-' }}</td>
+                                            <td class="px-4 py-3">
+                                                <a href="{{ route('backoffice.customer.chat', $customer->id) }}"
+                                                    class="rounded-xl bg-cyan-400/20 px-3 py-1.5 text-xs font-semibold text-cyan-300 transition hover:bg-cyan-400/30">Open
+                                                    Chat</a>
+                                            </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="px-4 py-8 text-center text-slate-400">Belum ada
+                                            <td colspan="7" class="px-4 py-8 text-center text-slate-400">Belum ada
                                                 data customer.</td>
                                         </tr>
                                     @endforelse

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Models\Conversation;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -34,6 +35,35 @@ class DashboardController extends Controller
                 'telegram_customers' => Customer::query()->where('platform', 'telegram')->count(),
                 'whatsapp_customers' => Customer::query()->where('platform', 'whatsapp')->count(),
             ],
+        ]);
+    }
+
+    public function chat(Request $request, Customer $customer): View
+    {
+        $startDate = $request->query('start_date', now()->toDateString());
+        $endDate = $request->query('end_date', now()->toDateString());
+
+        $conversations = Conversation::query()
+            ->where('customer_id', $customer->id)
+            ->whereBetween('conversation_date', [$startDate, $endDate])
+            ->orderBy('conversation_date')
+            ->get();
+
+        // Combine messages from all dates into a single flat array
+        $messages = [];
+        foreach ($conversations as $convo) {
+            $date = $convo->conversation_date->toDateString();
+            foreach ($convo->messages ?? [] as $msg) {
+                $msg['date'] = $date;
+                $messages[] = $msg;
+            }
+        }
+
+        return view('backoffice.customer-chat', [
+            'customer' => $customer,
+            'messages' => $messages,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
         ]);
     }
 }

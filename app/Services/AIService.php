@@ -20,6 +20,9 @@ class AIService
 
     private int $debounceSeconds = 2;
 
+    // private string $model = 'gpt-4o-mini';
+    private string $model = 'gpt-4.1-mini';
+
     /**
      * Main AI entrypoint.
      * Builds context, executes model call, runs tool logic, and returns formatted reply.
@@ -49,7 +52,7 @@ class AIService
         // Send to OpenAI
         try {
             $payload = [
-                'model' => 'gpt-4o-mini',
+                'model' => $this->model,
                 'messages' => $messages,
                 // Allow fuller answers to avoid confusing, cut-off responses.
                 'max_tokens' => 420,

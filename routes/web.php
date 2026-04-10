@@ -2,14 +2,9 @@
 
 use App\Http\Controllers\Backoffice\AuthController;
 use App\Http\Controllers\Backoffice\DashboardController;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-$entryRedirect = function () {
-    return Auth::check()
-        ? redirect()->route('backoffice.dashboard')
-        : redirect()->route('login');
-};
+$entryRedirect = fn () => redirect()->route('login');
 
 Route::get('/', $entryRedirect);
 Route::get('/aiproject', $entryRedirect);

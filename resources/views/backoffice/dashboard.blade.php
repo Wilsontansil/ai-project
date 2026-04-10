@@ -36,107 +36,117 @@
             Frontend assets belum di-build. Jalankan <strong>npm run build</strong> di server untuk tampilan penuh.
         </div>
     @endif
-    <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] px-6 py-8">
-        <div class="mx-auto max-w-7xl">
-            <div
-                class="mb-8 flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur md:flex-row md:items-center md:justify-between">
-                <div>
-                    <p class="text-sm uppercase tracking-[0.3em] text-cyan-300/80">Backoffice</p>
-                    <h1 class="mt-2 text-3xl font-semibold">Customer Dashboard</h1>
+    <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] p-4 md:p-6">
+        <div class="mx-auto flex max-w-7xl gap-6">
+            <aside class="w-64 shrink-0 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+                <p class="text-xs uppercase tracking-[0.3em] text-cyan-300/80">Backoffice</p>
+                <p class="mt-2 text-sm text-slate-300">{{ auth()->user()->email }}</p>
+
+                <nav class="mt-6 space-y-2">
+                    <a href="{{ route('backoffice.dashboard') }}"
+                        class="block rounded-xl px-4 py-3 text-sm font-medium transition {{ request()->routeIs('backoffice.dashboard') ? 'bg-cyan-400 text-slate-950' : 'bg-slate-900/50 text-slate-200 hover:bg-slate-800/70' }}">
+                        Customer
+                    </a>
+                    <a href="{{ route('backoffice.ai-agent') }}"
+                        class="block rounded-xl px-4 py-3 text-sm font-medium transition {{ request()->routeIs('backoffice.ai-agent') ? 'bg-cyan-400 text-slate-950' : 'bg-slate-900/50 text-slate-200 hover:bg-slate-800/70' }}">
+                        AI Agent
+                    </a>
+                </nav>
+
+                <form method="POST" action="{{ route('logout') }}" class="mt-8">
+                    @csrf
+                    <button type="submit"
+                        class="w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15">
+                        Logout
+                    </button>
+                </form>
+            </aside>
+
+            <main class="min-w-0 flex-1 space-y-6">
+                <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                    <h1 class="text-3xl font-semibold">Customer Dashboard</h1>
                     <p class="mt-2 text-sm text-slate-300">Monitoring data customer yang masuk dari Telegram dan
                         WhatsApp.</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <a href="{{ route('backoffice.ai-agent') }}"
-                        class="rounded-2xl border border-cyan-300/30 bg-cyan-500/10 px-4 py-3 text-sm font-medium text-cyan-100 transition hover:bg-cyan-500/20">
-                        AI Agent Settings
-                    </a>
-                    <div class="rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-300">
-                        Login as {{ auth()->user()->email }}
+
+                <div class="grid gap-4 md:grid-cols-3">
+                    <div class="rounded-3xl border border-cyan-400/20 bg-cyan-400/10 p-5">
+                        <p class="text-sm text-cyan-100/80">Total Customer</p>
+                        <p class="mt-2 text-3xl font-semibold text-white">{{ number_format($stats['total_customers']) }}
+                        </p>
                     </div>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit"
-                            class="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15">
-                            Logout
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="mb-6 grid gap-4 md:grid-cols-3">
-                <div class="rounded-3xl border border-cyan-400/20 bg-cyan-400/10 p-5">
-                    <p class="text-sm text-cyan-100/80">Total Customer</p>
-                    <p class="mt-2 text-3xl font-semibold text-white">{{ number_format($stats['total_customers']) }}</p>
-                </div>
-                <div class="rounded-3xl border border-emerald-400/20 bg-emerald-400/10 p-5">
-                    <p class="text-sm text-emerald-100/80">Telegram</p>
-                    <p class="mt-2 text-3xl font-semibold text-white">{{ number_format($stats['telegram_customers']) }}
-                    </p>
-                </div>
-                <div class="rounded-3xl border border-amber-400/20 bg-amber-400/10 p-5">
-                    <p class="text-sm text-amber-100/80">WhatsApp</p>
-                    <p class="mt-2 text-3xl font-semibold text-white">{{ number_format($stats['whatsapp_customers']) }}
-                    </p>
-                </div>
-            </div>
-
-            <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <h2 class="text-xl font-semibold">Customer Table</h2>
-                        <p class="mt-1 text-sm text-slate-300">List customer terbaru dan status aktivitas terakhir.</p>
+                    <div class="rounded-3xl border border-emerald-400/20 bg-emerald-400/10 p-5">
+                        <p class="text-sm text-emerald-100/80">Telegram</p>
+                        <p class="mt-2 text-3xl font-semibold text-white">
+                            {{ number_format($stats['telegram_customers']) }}</p>
                     </div>
-                    <form method="GET" action="{{ route('backoffice.dashboard') }}"
-                        class="flex w-full max-w-md gap-3">
-                        <input type="text" name="search" value="{{ $search }}"
-                            placeholder="Cari nama, phone, platform, user id"
-                            class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
-                        <button type="submit"
-                            class="rounded-2xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">Cari</button>
-                    </form>
+                    <div class="rounded-3xl border border-amber-400/20 bg-amber-400/10 p-5">
+                        <p class="text-sm text-amber-100/80">WhatsApp</p>
+                        <p class="mt-2 text-3xl font-semibold text-white">
+                            {{ number_format($stats['whatsapp_customers']) }}</p>
+                    </div>
                 </div>
 
-                <div class="overflow-hidden rounded-3xl border border-white/10">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-white/10 text-sm">
-                            <thead class="bg-white/5 text-left text-slate-300">
-                                <tr>
-                                    <th class="px-4 py-3 font-medium">Name</th>
-                                    <th class="px-4 py-3 font-medium">Platform</th>
-                                    <th class="px-4 py-3 font-medium">Platform User ID</th>
-                                    <th class="px-4 py-3 font-medium">Phone</th>
-                                    <th class="px-4 py-3 font-medium">Messages</th>
-                                    <th class="px-4 py-3 font-medium">Last Seen</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-white/5 bg-slate-950/40">
-                                @forelse ($customers as $customer)
-                                    <tr class="hover:bg-white/5">
-                                        <td class="px-4 py-3 text-white">{{ $customer->name ?: '-' }}</td>
-                                        <td class="px-4 py-3 text-slate-200">{{ ucfirst($customer->platform) }}</td>
-                                        <td class="px-4 py-3 text-slate-300">{{ $customer->platform_user_id }}</td>
-                                        <td class="px-4 py-3 text-slate-300">{{ $customer->phone_number ?: '-' }}</td>
-                                        <td class="px-4 py-3 text-slate-300">
-                                            {{ number_format($customer->total_messages) }}</td>
-                                        <td class="px-4 py-3 text-slate-300">
-                                            {{ $customer->last_seen_at?->diffForHumans() ?: '-' }}</td>
-                                    </tr>
-                                @empty
+                <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                    <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <h2 class="text-xl font-semibold">Customer Table</h2>
+                            <p class="mt-1 text-sm text-slate-300">List customer terbaru dan status aktivitas terakhir.
+                            </p>
+                        </div>
+                        <form method="GET" action="{{ route('backoffice.dashboard') }}"
+                            class="flex w-full max-w-md gap-3">
+                            <input type="text" name="search" value="{{ $search }}"
+                                placeholder="Cari nama, phone, platform, user id"
+                                class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                            <button type="submit"
+                                class="rounded-2xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">Cari</button>
+                        </form>
+                    </div>
+
+                    <div class="overflow-hidden rounded-3xl border border-white/10">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-white/10 text-sm">
+                                <thead class="bg-white/5 text-left text-slate-300">
                                     <tr>
-                                        <td colspan="6" class="px-4 py-8 text-center text-slate-400">Belum ada data
-                                            customer.</td>
+                                        <th class="px-4 py-3 font-medium">Name</th>
+                                        <th class="px-4 py-3 font-medium">Platform</th>
+                                        <th class="px-4 py-3 font-medium">Platform User ID</th>
+                                        <th class="px-4 py-3 font-medium">Phone</th>
+                                        <th class="px-4 py-3 font-medium">Messages</th>
+                                        <th class="px-4 py-3 font-medium">Last Seen</th>
                                     </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody class="divide-y divide-white/5 bg-slate-950/40">
+                                    @forelse ($customers as $customer)
+                                        <tr class="hover:bg-white/5">
+                                            <td class="px-4 py-3 text-white">{{ $customer->name ?: '-' }}</td>
+                                            <td class="px-4 py-3 text-slate-200">{{ ucfirst($customer->platform) }}
+                                            </td>
+                                            <td class="px-4 py-3 text-slate-300">{{ $customer->platform_user_id }}</td>
+                                            <td class="px-4 py-3 text-slate-300">{{ $customer->phone_number ?: '-' }}
+                                            </td>
+                                            <td class="px-4 py-3 text-slate-300">
+                                                {{ number_format($customer->total_messages) }}</td>
+                                            <td class="px-4 py-3 text-slate-300">
+                                                {{ $customer->last_seen_at?->diffForHumans() ?: '-' }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="6" class="px-4 py-8 text-center text-slate-400">Belum ada
+                                                data customer.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mt-5">
+                        {{ $customers->links() }}
                     </div>
                 </div>
-
-                <div class="mt-5">
-                    {{ $customers->links() }}
-                </div>
-            </div>
+            </main>
         </div>
     </div>
 </body>

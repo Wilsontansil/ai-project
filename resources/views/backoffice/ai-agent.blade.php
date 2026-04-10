@@ -20,102 +20,113 @@
 </head>
 
 <body class="min-h-screen bg-slate-950 text-slate-100">
-    <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] px-6 py-8">
-        <div class="mx-auto max-w-6xl">
-            <div class="mb-8 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <p class="text-sm uppercase tracking-[0.3em] text-cyan-300/80">Backoffice</p>
-                        <h1 class="mt-2 text-3xl font-semibold">AI Agent Tools Setting</h1>
-                        <p class="mt-2 text-sm text-slate-300">Atur tool mana yang aktif untuk AI agent saat melayani
-                            customer.</p>
-                    </div>
-                    <div class="flex gap-3">
-                        <a href="{{ route('backoffice.dashboard') }}"
-                            class="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15">
-                            Customer Dashboard
-                        </a>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit"
-                                class="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15">
-                                Logout
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
+    <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] p-4 md:p-6">
+        <div class="mx-auto flex max-w-7xl gap-6">
+            <aside class="w-64 shrink-0 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+                <p class="text-xs uppercase tracking-[0.3em] text-cyan-300/80">Backoffice</p>
+                <p class="mt-2 text-sm text-slate-300">{{ auth()->user()->email }}</p>
 
-            @if (session('success'))
-                <div
-                    class="mb-4 rounded-2xl border border-emerald-300/30 bg-emerald-500/15 px-4 py-3 text-sm text-emerald-100">
-                    {{ session('success') }}
-                </div>
-            @endif
+                <nav class="mt-6 space-y-2">
+                    <a href="{{ route('backoffice.dashboard') }}"
+                        class="block rounded-xl px-4 py-3 text-sm font-medium transition {{ request()->routeIs('backoffice.dashboard') ? 'bg-cyan-400 text-slate-950' : 'bg-slate-900/50 text-slate-200 hover:bg-slate-800/70' }}">
+                        Customer
+                    </a>
+                    <a href="{{ route('backoffice.ai-agent') }}"
+                        class="block rounded-xl px-4 py-3 text-sm font-medium transition {{ request()->routeIs('backoffice.ai-agent') ? 'bg-cyan-400 text-slate-950' : 'bg-slate-900/50 text-slate-200 hover:bg-slate-800/70' }}">
+                        AI Agent
+                    </a>
+                </nav>
 
-            @if (session('error'))
-                <div class="mb-4 rounded-2xl border border-rose-300/30 bg-rose-500/15 px-4 py-3 text-sm text-rose-100">
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            @if (!$hasToolSettingsTable)
-                <div
-                    class="mb-4 rounded-2xl border border-amber-300/30 bg-amber-500/15 px-4 py-3 text-sm text-amber-100">
-                    Table <strong>tool_settings</strong> belum tersedia. Jalankan migration agar setting bisa disimpan.
-                </div>
-            @endif
-
-            <form method="POST" action="{{ route('backoffice.ai-agent.update') }}" class="space-y-4">
-                @csrf
-
-                @foreach ($tools as $index => $tool)
-                    <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                        <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                            <div>
-                                <h2 class="text-xl font-semibold text-white">{{ $tool['display_name'] }}</h2>
-                                <p class="mt-1 text-sm text-slate-300">{{ $tool['description'] }}</p>
-                                <p class="mt-1 text-xs text-slate-400">Tool key: {{ $tool['tool_name'] }}</p>
-                            </div>
-                            <label
-                                class="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-slate-900/50 px-4 py-2 text-sm text-slate-200">
-                                <input type="checkbox" name="enabled[{{ $tool['tool_name'] }}]" value="1"
-                                    {{ $tool['is_enabled'] ? 'checked' : '' }}
-                                    class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
-                                Enable tool
-                            </label>
-                        </div>
-
-                        <input type="hidden" name="tools[{{ $index }}][tool_name]"
-                            value="{{ $tool['tool_name'] }}">
-
-                        <div class="grid gap-4 md:grid-cols-2">
-                            <div>
-                                <label for="display_name_{{ $index }}"
-                                    class="mb-2 block text-sm text-slate-200">Display Name</label>
-                                <input id="display_name_{{ $index }}" type="text"
-                                    name="tools[{{ $index }}][display_name]"
-                                    value="{{ $tool['display_name'] }}"
-                                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
-                            </div>
-                            <div>
-                                <label for="description_{{ $index }}"
-                                    class="mb-2 block text-sm text-slate-200">Description</label>
-                                <input id="description_{{ $index }}" type="text"
-                                    name="tools[{{ $index }}][description]" value="{{ $tool['description'] }}"
-                                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-
-                <div class="pt-2">
+                <form method="POST" action="{{ route('logout') }}" class="mt-8">
+                    @csrf
                     <button type="submit"
-                        class="rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
-                        Save AI Tool Settings
+                        class="w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15">
+                        Logout
                     </button>
+                </form>
+            </aside>
+
+            <main class="min-w-0 flex-1 space-y-6">
+                <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                    <h1 class="text-3xl font-semibold">AI Agent Tools Setting</h1>
+                    <p class="mt-2 text-sm text-slate-300">Atur tool mana yang aktif untuk AI agent saat melayani
+                        customer.</p>
                 </div>
-            </form>
+
+                @if (session('success'))
+                    <div
+                        class="mb-4 rounded-2xl border border-emerald-300/30 bg-emerald-500/15 px-4 py-3 text-sm text-emerald-100">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div
+                        class="mb-4 rounded-2xl border border-rose-300/30 bg-rose-500/15 px-4 py-3 text-sm text-rose-100">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+                @if (!$hasToolSettingsTable)
+                    <div
+                        class="mb-4 rounded-2xl border border-amber-300/30 bg-amber-500/15 px-4 py-3 text-sm text-amber-100">
+                        Table <strong>tool_settings</strong> belum tersedia. Jalankan migration agar setting bisa
+                        disimpan.
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('backoffice.ai-agent.update') }}" class="space-y-4">
+                    @csrf
+
+                    @foreach ($tools as $index => $tool)
+                        <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                            <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-white">{{ $tool['display_name'] }}</h2>
+                                    <p class="mt-1 text-sm text-slate-300">{{ $tool['description'] }}</p>
+                                    <p class="mt-1 text-xs text-slate-400">Tool key: {{ $tool['tool_name'] }}</p>
+                                </div>
+                                <label
+                                    class="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-slate-900/50 px-4 py-2 text-sm text-slate-200">
+                                    <input type="checkbox" name="enabled[{{ $tool['tool_name'] }}]" value="1"
+                                        {{ $tool['is_enabled'] ? 'checked' : '' }}
+                                        class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
+                                    Enable tool
+                                </label>
+                            </div>
+
+                            <input type="hidden" name="tools[{{ $index }}][tool_name]"
+                                value="{{ $tool['tool_name'] }}">
+
+                            <div class="grid gap-4 md:grid-cols-2">
+                                <div>
+                                    <label for="display_name_{{ $index }}"
+                                        class="mb-2 block text-sm text-slate-200">Display Name</label>
+                                    <input id="display_name_{{ $index }}" type="text"
+                                        name="tools[{{ $index }}][display_name]"
+                                        value="{{ $tool['display_name'] }}"
+                                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                                </div>
+                                <div>
+                                    <label for="description_{{ $index }}"
+                                        class="mb-2 block text-sm text-slate-200">Description</label>
+                                    <input id="description_{{ $index }}" type="text"
+                                        name="tools[{{ $index }}][description]"
+                                        value="{{ $tool['description'] }}"
+                                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+
+                    <div class="pt-2">
+                        <button type="submit"
+                            class="rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
+                            Save AI Tool Settings
+                        </button>
+                    </div>
+                </form>
+            </main>
         </div>
     </div>
 </body>

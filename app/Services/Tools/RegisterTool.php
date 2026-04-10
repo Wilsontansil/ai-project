@@ -6,6 +6,8 @@ use App\Models\Agent;
 use App\Models\Player;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use App\Utils;
 
 class RegisterTool
 {
@@ -158,6 +160,7 @@ class RegisterTool
                 'namarek' => $namarek,
                 'norek' => $norek,
                 'password' => Hash::make('1234567'),
+                'playercode' => utils::generateUniqueCode($agent->prefix),
                 'agents_id' => $agent->id,
                 'agent' => $agent->kode,
                 'browser' => 'AI-Bot',

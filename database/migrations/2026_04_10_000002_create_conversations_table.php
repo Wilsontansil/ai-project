@@ -15,13 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->string('channel', 30);
-            $table->string('role', 20);
-            $table->text('message');
-            $table->json('meta')->nullable();
+            $table->date('conversation_date');
+            $table->json('messages');
             $table->timestamps();
 
-            $table->index(['customer_id', 'created_at']);
-            $table->index(['channel', 'role']);
+            $table->unique(['customer_id', 'conversation_date']);
+            $table->index('channel');
         });
     }
 

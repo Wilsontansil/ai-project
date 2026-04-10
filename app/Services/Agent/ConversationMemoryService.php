@@ -10,32 +10,54 @@ class ConversationMemoryService
 {
     public function addMessage(Customer $customer, string $channel, string $role, string $message, array $meta = []): Conversation
     {
-        return Conversation::query()->create([
-            'customer_id' => $customer->id,
-            'channel' => $channel,
+        $today = now()->toDateString();
+
+        $conversation = Conversation::query()->firstOrCreate(
+            [
+                'customer_id' => $customer->id,
+                'conversation_date' => $today,
+            ],
+            [
+                'channel' => $channel,
+                'messages' => [],
+            ]
+        );
+
+        $messages = $conversation->messages ?? [];
+        $messages[] = [
             'role' => $role,
             'message' => $message,
-            'meta' => $meta,
-        ]);
+            'meta' => $meta ?: null,
+            'time' => now()->toTimeString(),
+        ];
+
+        $conversation->update(['messages' => $messages, 'channel' => $channel]);
+
+        return $conversation;
     }
 
     public function getRecent(Customer $customer, int $limit = 10): Collection
     {
-        return Conversation::query()
+        $conversation = Conversation::query()
             ->where('customer_id', $customer->id)
-            ->latest('id')
-            ->limit($limit)
-            ->get()
-            ->reverse()
-            ->values();
+            ->latest('conversation_date')
+            ->first();
+
+        if (!$conversation) {
+            return collect();
+        }
+
+        $messages = collect($conversation->messages ?? []);
+
+        return $messages->slice(-$limit)->values();
     }
 
     public function toPromptSnippet(Customer $customer, int $limit = 10): string
     {
         $lines = [];
 
-        foreach ($this->getRecent($customer, $limit) as $row) {
-            $lines[] = sprintf('%s: %s', $row->role, $row->message);
+        foreach ($this->getRecent($customer, $limit) as $entry) {
+            $lines[] = sprintf('%s: %s', $entry['role'], $entry['message']);
         }
 
         return implode("\n", $lines);

@@ -13,13 +13,13 @@ class Conversation extends Model
     protected $fillable = [
         'customer_id',
         'channel',
-        'role',
-        'message',
-        'meta',
+        'conversation_date',
+        'messages',
     ];
 
     protected $casts = [
-        'meta' => 'array',
+        'conversation_date' => 'date',
+        'messages' => 'array',
     ];
 
     public function customer(): BelongsTo

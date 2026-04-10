@@ -2,9 +2,14 @@
 
 use App\Http\Controllers\Backoffice\AuthController;
 use App\Http\Controllers\Backoffice\DashboardController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/backoffice');
+Route::get('/', function () {
+    return Auth::check()
+        ? redirect()->route('backoffice.dashboard')
+        : redirect()->route('login');
+});
 
 Route::middleware('guest')->group(function () {
     Route::get('/backoffice/login', [AuthController::class, 'showLoginForm'])->name('login');

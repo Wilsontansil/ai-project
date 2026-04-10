@@ -28,6 +28,16 @@ Main components:
     - Adds system prompt and prior conversation context.
     - Stores per-chat memory using Laravel Cache.
     - Handles function/tool call flow for password reset intent.
+- `app/Services/Agent/CustomerIdentityService.php`
+    - Resolves unique customer identity from each platform payload.
+- `app/Services/Agent/ConversationMemoryService.php`
+    - Stores and fetches short-term conversation memory.
+- `app/Services/Agent/KnowledgeBaseService.php`
+    - Stores and retrieves reusable long-term knowledge entries.
+- `app/Services/Agent/BehaviorProfilerService.php`
+    - Updates intent/sentiment/frequency behavior profile per customer.
+- `app/Services/Agent/AgentContextService.php`
+    - Builds unified AI context: profile + behavior + memory + knowledge.
 - `app/Http/Controllers/WhatsAppController.php`
     - Accepts WAHA webhook payloads.
     - Extracts text and chat id from common WAHA message fields.
@@ -39,6 +49,13 @@ Conversation memory behavior:
 - Context is stored per chat id with cache key format: `chat_context:{chatId}`.
 - Maximum stored messages: 20 (rolling window).
 - Cache TTL: 12 hours.
+
+Learning persistence tables:
+
+- `customers`
+- `conversations`
+- `knowledge_base`
+- `customer_behaviors`
 
 ## Message Flow
 

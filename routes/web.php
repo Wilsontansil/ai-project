@@ -4,6 +4,7 @@ use App\Http\Controllers\Backoffice\AIAgentController;
 use App\Http\Controllers\Backoffice\AuthController;
 use App\Http\Controllers\Backoffice\CaseController;
 use App\Http\Controllers\Backoffice\DashboardController;
+use App\Http\Controllers\Backoffice\ToolController;
 use Illuminate\Support\Facades\Route;
 
 $entryRedirect = fn () => redirect()->route('login');
@@ -22,8 +23,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/backoffice/ai-agent', [AIAgentController::class, 'index'])->name('backoffice.ai-agent');
     Route::post('/backoffice/ai-agent', [AIAgentController::class, 'update'])->name('backoffice.ai-agent.update');
 
-    Route::get('/backoffice/tools/{tool:slug}', [AIAgentController::class, 'showTool'])->name('backoffice.tools.show');
-    Route::post('/backoffice/tools/{tool:slug}', [AIAgentController::class, 'updateTool'])->name('backoffice.tools.update');
+    Route::get('/backoffice/tools', [ToolController::class, 'index'])->name('backoffice.tools.index');
+    Route::get('/backoffice/tools/create', [ToolController::class, 'create'])->name('backoffice.tools.create');
+    Route::post('/backoffice/tools', [ToolController::class, 'store'])->name('backoffice.tools.store');
+    Route::get('/backoffice/tools/{tool}/edit', [ToolController::class, 'edit'])->name('backoffice.tools.edit');
+    Route::put('/backoffice/tools/{tool}', [ToolController::class, 'update'])->name('backoffice.tools.update');
+    Route::delete('/backoffice/tools/{tool}', [ToolController::class, 'destroy'])->name('backoffice.tools.destroy');
 
     Route::get('/backoffice/cases', [CaseController::class, 'index'])->name('backoffice.cases.index');
     Route::get('/backoffice/cases/create', [CaseController::class, 'create'])->name('backoffice.cases.create');

@@ -56,30 +56,5 @@ class AIAgentController extends Controller
 
         return back()->with('success', 'Bot name berhasil diperbarui.');
     }
-
-    public function showTool(Tool $tool): View
-    {
-        return view('backoffice.tools.tool-detail', [
-            'tool' => $tool,
-            'boActive' => 'ai-agent',
-            'currentTool' => $tool->tool_name,
-        ]);
-    }
-
-    public function updateTool(Request $request, Tool $tool): RedirectResponse
-    {
-        $data = $request->validate([
-            'display_name' => ['required', 'string', 'max:120'],
-            'description' => ['nullable', 'string', 'max:500'],
-        ]);
-
-        $tool->update([
-            'display_name' => trim((string) $data['display_name']),
-            'description' => trim((string) ($data['description'] ?? '')),
-            'is_enabled' => $request->boolean('is_enabled'),
-        ]);
-
-        return back()->with('success', $tool->display_name . ' setting berhasil disimpan.');
-    }
 }
 

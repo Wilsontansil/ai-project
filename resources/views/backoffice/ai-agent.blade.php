@@ -24,7 +24,6 @@
         <div id="bo-shell" class="mx-auto flex max-w-7xl gap-6">
             @include('backoffice.partials.sidebar', [
                 'active' => 'ai-agent',
-                'currentTool' => $currentTool ?? null,
             ])
 
             <main class="min-w-0 flex-1 space-y-6">

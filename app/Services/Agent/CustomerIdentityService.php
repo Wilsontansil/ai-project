@@ -77,7 +77,9 @@ class CustomerIdentityService
     {
         if ($platform === 'whatsapp') {
             $raw = (string) (
-                data_get($payload, 'payload.from')
+                data_get($payload, 'payload.SenderAlt')
+                ?? data_get($payload, 'SenderAlt')
+                ?? data_get($payload, 'payload.from')
                 ?? data_get($payload, 'from')
                 ?? ''
             );
@@ -86,9 +88,11 @@ class CustomerIdentityService
                 return null;
             }
 
-            $clean = preg_replace('/[^0-9+]/', '', $raw);
+            // Strip @s.whatsapp.net / @c.us suffixes, keep only digits
+            $clean = preg_replace('/@.*$/', '', $raw);
+            $clean = preg_replace('/[^0-9]/', '', $clean);
 
-            return $clean !== '' ? $clean : null;
+            return $clean !== '' ? ('+' . $clean) : null;
         }
 
         return null;

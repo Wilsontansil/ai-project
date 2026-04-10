@@ -38,6 +38,10 @@ Main components:
     - Updates intent/sentiment/frequency behavior profile per customer.
 - `app/Services/Agent/AgentContextService.php`
     - Builds unified AI context: profile + behavior + memory + knowledge.
+- `app/Http/Controllers/Backoffice/AuthController.php`
+    - Handles admin login and logout for backoffice.
+- `app/Http/Controllers/Backoffice/DashboardController.php`
+    - Displays customer dashboard table and summary stats.
 - `app/Http/Controllers/WhatsAppController.php`
     - Accepts WAHA webhook payloads.
     - Extracts text and chat id from common WAHA message fields.
@@ -56,6 +60,16 @@ Learning persistence tables:
 - `conversations`
 - `knowledge_base`
 - `customer_behaviors`
+- `users`
+
+Backoffice:
+
+- Login page: `/backoffice/login`
+- Dashboard page: `/backoffice`
+- Dashboard currently shows customer table with basic search and summary stats.
+- Default seeded admin user:
+    - Email: `admin@xonebot.local`
+    - Password: `admin12345`
 
 ## Message Flow
 

@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Services\Agent\AgentContextService;
+use App\Services\Agent\ConversationMemoryService;
+use App\Services\Agent\CustomerIdentityService;
 use App\Services\AIService;
 
 class WhatsAppController extends Controller
@@ -32,7 +35,8 @@ class WhatsAppController extends Controller
 
     public function handleWebhook(Request $request)
     {
-        Log::info('Received WhatsApp webhook', ['payload' => $request->all()]);
+        $requestPayload = $request->all();
+        Log::info('Received WhatsApp webhook', ['payload' => $requestPayload]);
 
         if ($request->isMethod('get')) {
             return response()->json(['status' => 'ok']);
@@ -64,7 +68,7 @@ class WhatsAppController extends Controller
             ?? $request->input('chatId');
 
         if (!$text || !$chatId) {
-            Log::warning('Invalid WAHA webhook payload', ['payload' => $request->all()]);
+            Log::warning('Invalid WAHA webhook payload', ['payload' => $requestPayload]);
             return response()->json(['status' => 'ignored', 'reason' => 'invalid_payload']);
         }
 
@@ -80,15 +84,54 @@ class WhatsAppController extends Controller
             return response()->json(['status' => 'queued']);
         }
 
+        $customer = null;
+        $agentContext = [];
+
+        try {
+            $customer = app(CustomerIdentityService::class)->resolve('whatsapp', $requestPayload);
+            $agentContext = app(AgentContextService::class)->buildContext($customer, $combinedText);
+
+            app(ConversationMemoryService::class)->addMessage(
+                $customer,
+                'whatsapp',
+                'user',
+                $combinedText,
+                ['chat_id' => $chatId]
+            );
+        } catch (\Throwable $e) {
+            // Keep chat flow alive if DB/migration is temporarily unavailable.
+            Log::warning('WhatsApp customer context persistence failed', [
+                'chat_id' => $chatId,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         $this->sendTyping($chatId);
 
         try {
-            $reply = app(AIService::class)->reply($combinedText, $chatId, $this->agent, 'whatsapp');
+            $reply = app(AIService::class)->reply($combinedText, $chatId, $this->agent, 'whatsapp', $agentContext);
         } finally {
             $this->stopTyping($chatId);
         }
 
         $reply = $this->appendHandoverContactIfNeeded($reply);
+
+        if ($customer !== null) {
+            try {
+                app(ConversationMemoryService::class)->addMessage(
+                    $customer,
+                    'whatsapp',
+                    'assistant',
+                    $reply,
+                    ['chat_id' => $chatId]
+                );
+            } catch (\Throwable $e) {
+                Log::warning('WhatsApp assistant message persistence failed', [
+                    'chat_id' => $chatId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
         $this->sendMessage($chatId, $reply);
 

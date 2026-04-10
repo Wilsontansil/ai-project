@@ -20,7 +20,7 @@ class AIService
      * Main AI entrypoint.
      * Builds context, executes model call, runs tool logic, and returns formatted reply.
      */
-    public function reply($message, $chatId = null, $agent = 'PG', string $channel = 'telegram')
+    public function reply($message, $chatId = null, $agent = 'PG', string $channel = 'telegram', array $agentContext = [])
     {
         $apiKey = (string) config('services.openai.api_key', '');
 
@@ -33,11 +33,14 @@ class AIService
         $tools = $this->getTools();
 
         $history = $this->loadConversationHistory($chatId);
-        $messages = array_merge(
-            [['role' => 'system', 'content' => $systemPrompt]],
-            $history,
-            [['role' => 'user', 'content' => $message]]
-        );
+        $messages = [['role' => 'system', 'content' => $systemPrompt]];
+
+        $contextPrompt = $this->buildAgentContextPrompt($agentContext);
+        if ($contextPrompt !== null) {
+            $messages[] = ['role' => 'system', 'content' => $contextPrompt];
+        }
+
+        $messages = array_merge($messages, $history, [['role' => 'user', 'content' => $message]]);
 
         // Send to OpenAI
         try {
@@ -46,10 +49,12 @@ class AIService
                 'messages' => $messages,
                 'tools' => $tools,
                 'tool_choice' => 'auto',
-                'max_tokens' => 180,
+                // Allow fuller answers to avoid confusing, cut-off responses.
+                'max_tokens' => 420,
             ]);
 
             $msg = $response->choices[0]->message;
+            $finishReason = (string) ($response->choices[0]->finishReason ?? '');
 
             // Try to handle tool call or local intent.
             $assistantReply = $this->handleToolCallOrIntent($msg, $message, $agent);
@@ -62,6 +67,11 @@ class AIService
 
             // Normal AI reply
             $assistantReply = $msg->content ?? "Sorry, I couldn't understand.";
+
+            if ($finishReason === 'length') {
+                $assistantReply .= "\n\nJika jawaban ini masih terpotong, balas: lanjut.";
+            }
+
             $assistantReply = $this->prepareAssistantReply($history, $assistantReply);
             $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
             return $assistantReply;
@@ -71,6 +81,54 @@ class AIService
         } catch (\Exception $e) {
             return $this->formatReply("⚠️ Error: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Build compact system context for personalization from DB-backed profile/memory.
+     */
+    private function buildAgentContextPrompt(array $context): ?string
+    {
+        if ($context === []) {
+            return null;
+        }
+
+        $profile = (array) ($context['customer_profile'] ?? []);
+        $behavior = (array) ($context['behavior'] ?? []);
+        $recentConversation = trim((string) ($context['recent_conversation'] ?? ''));
+        $relevantKnowledge = trim((string) ($context['relevant_knowledge'] ?? ''));
+
+        $parts = [
+            'Customer context from internal CRM memory (do not expose raw internals to user):',
+        ];
+
+        if ($profile !== []) {
+            $parts[] = 'Profile: ' . json_encode([
+                'platform' => $profile['platform'] ?? null,
+                'name' => $profile['name'] ?? null,
+                'total_messages' => $profile['total_messages'] ?? null,
+                'tags' => $profile['tags'] ?? [],
+            ], JSON_UNESCAPED_UNICODE);
+        }
+
+        if ($behavior !== []) {
+            $parts[] = 'Behavior: ' . json_encode([
+                'intent' => $behavior['intent'] ?? null,
+                'sentiment' => $behavior['sentiment'] ?? null,
+                'frequency_score' => $behavior['frequency_score'] ?? null,
+            ], JSON_UNESCAPED_UNICODE);
+        }
+
+        if ($recentConversation !== '') {
+            $parts[] = "Recent conversation:\n" . mb_substr($recentConversation, 0, 1200);
+        }
+
+        if ($relevantKnowledge !== '') {
+            $parts[] = "Relevant knowledge:\n" . mb_substr($relevantKnowledge, 0, 1000);
+        }
+
+        $parts[] = 'Use this only to personalize response, keep answer concise and natural.';
+
+        return implode("\n\n", $parts);
     }
 
     /**
@@ -418,23 +476,33 @@ class AIService
             return $tidy;
         }
 
-        $clean = trim(preg_replace('/\s+/', ' ', $tidy) ?? $tidy);
-
-        if (mb_strlen($clean) <= 260) {
-            return $clean;
+        // Keep reply complete; only hard-limit extremely long output.
+        if (mb_strlen($tidy) <= 1400) {
+            return $tidy;
         }
 
-        $sentences = preg_split('/(?<=[.!?])\s+/', $clean) ?: [];
+        $sentences = preg_split('/(?<=[.!?])\s+/', trim(preg_replace('/\s+/', ' ', $tidy) ?? $tidy)) ?: [];
         $sentences = array_values(array_filter(array_map('trim', $sentences), fn ($s) => $s !== ''));
 
-        if ($sentences !== []) {
-            $short = implode(' ', array_slice($sentences, 0, 3));
-            if ($short !== '') {
-                return mb_substr($short, 0, 260);
+        $chunks = [];
+        $length = 0;
+
+        foreach ($sentences as $sentence) {
+            $segmentLength = mb_strlen($sentence) + ($length > 0 ? 1 : 0);
+
+            if ($length + $segmentLength > 1400) {
+                break;
             }
+
+            $chunks[] = $sentence;
+            $length += $segmentLength;
         }
 
-        return mb_substr($clean, 0, 260);
+        if ($chunks !== []) {
+            return implode(' ', $chunks) . "\n\n(Pesan dipersingkat karena terlalu panjang.)";
+        }
+
+        return mb_substr($tidy, 0, 1400) . "\n\n(Pesan dipersingkat karena terlalu panjang.)";
     }
 
     /**

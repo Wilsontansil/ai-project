@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Services\Agent\AgentContextService;
+use App\Services\Agent\ConversationMemoryService;
+use App\Services\Agent\CustomerIdentityService;
 use App\Services\AIService;
 
 class TelegramController extends Controller
@@ -24,7 +27,9 @@ class TelegramController extends Controller
 
     public function handleWebhook(Request $request)
     {
-        Log::info('Received Telegram webhook', ['payload' => $request->all()]);
+        $payload = $request->all();
+        Log::info('Received Telegram webhook', ['payload' => $payload]);
+
         $text = $request->input('message.text');
         $chatId = $request->input('message.chat.id');
 
@@ -40,11 +45,50 @@ class TelegramController extends Controller
             return response()->json(['status' => 'queued']);
         }
 
+        $customer = null;
+        $agentContext = [];
+
+        try {
+            $customer = app(CustomerIdentityService::class)->resolve('telegram', $payload);
+            $agentContext = app(AgentContextService::class)->buildContext($customer, $combinedText);
+
+            app(ConversationMemoryService::class)->addMessage(
+                $customer,
+                'telegram',
+                'user',
+                $combinedText,
+                ['chat_id' => $chatId]
+            );
+        } catch (\Throwable $e) {
+            // Keep chat flow alive if DB/migration is temporarily unavailable.
+            Log::warning('Telegram customer context persistence failed', [
+                'chat_id' => $chatId,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         $this->sendTyping($chatId);
 
         // Send channel so AI can include platform-specific handover info.
-        $reply = app(AIService::class)->reply($combinedText, $chatId, $this->agent, 'telegram');
+        $reply = app(AIService::class)->reply($combinedText, $chatId, $this->agent, 'telegram', $agentContext);
         $reply = $this->appendHandoverContactIfNeeded($reply);
+
+        if ($customer !== null) {
+            try {
+                app(ConversationMemoryService::class)->addMessage(
+                    $customer,
+                    'telegram',
+                    'assistant',
+                    $reply,
+                    ['chat_id' => $chatId]
+                );
+            } catch (\Throwable $e) {
+                Log::warning('Telegram assistant message persistence failed', [
+                    'chat_id' => $chatId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
         $this->sendMessage($chatId, $reply);
 

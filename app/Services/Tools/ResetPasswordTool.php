@@ -2,6 +2,7 @@
 
 namespace App\Services\Tools;
 
+use App\Models\Agent;
 use App\Models\Player;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -91,7 +92,7 @@ class ResetPasswordTool
     /**
      * Execute tool: reset password for player.
      */
-    public function execute(string $username, string $agent): string
+    public function execute(string $username, ?Agent $agent): string
     {
         return $this->executeWithArguments(['username' => $username], $agent);
     }
@@ -99,8 +100,9 @@ class ResetPasswordTool
     /**
      * Execute tool: reset password with full account verification.
      */
-    public function executeWithArguments(array $arguments, string $agent): string
+    public function executeWithArguments(array $arguments, ?Agent $agent): string
     {
+        $agentKode = $agent ? $agent->kode : 'PG';
         $username = trim((string) ($arguments['username'] ?? ''));
         $namarek = trim((string) ($arguments['namarek'] ?? ''));
         $norek = trim((string) ($arguments['norek'] ?? ''));
@@ -115,11 +117,11 @@ class ResetPasswordTool
         }
 
         $playerByUsername = Player::whereRaw('LOWER(username) = ?', [$usernameLower])
-            ->where('agent', $agent)
+            ->where('agent', $agentKode)
             ->first();
 
         if (!$playerByUsername) {
-            return "Username {$username} tidak ditemukan untuk agent {$agent}.";
+            return "Username {$username} tidak ditemukan untuk agent {$agentKode}.";
         }
 
         $hasNullableVerificationData =
@@ -132,14 +134,14 @@ class ResetPasswordTool
         }
 
         $player = Player::whereRaw('LOWER(username) = ?', [$usernameLower])
-            ->where('agent', $agent)
+            ->where('agent', $agentKode)
             ->whereRaw('LOWER(namarek) = ?', [$namarekLower])
             ->where('norek', $norek)
             ->whereRaw('LOWER(bank) = ?', [$bankLower])
             ->first();
 
         if (!$player) {
-            return "Data verifikasi tidak cocok untuk username {$username} (agent {$agent}).";
+            return "Data verifikasi tidak cocok untuk username {$username} (agent {$agentKode}).";
         }
 
         try {
@@ -148,14 +150,14 @@ class ResetPasswordTool
         } catch (\Throwable $e) {
             Log::error('Failed to reset player password', [
                 'username' => $username,
-                'agent' => $agent,
+                'agent' => $agentKode,
                 'error' => $e->getMessage(),
             ]);
 
-            return "Gagal reset password untuk username {$username} (agent {$agent}).";
+            return "Gagal reset password untuk username {$username} (agent {$agentKode}).";
         }
 
-        return "Password untuk username {$username} (agent {$agent}) berhasil direset ke 1234567.";
+        return "Password untuk username {$username} (agent {$agentKode}) berhasil direset ke 1234567.";
     }
 
     /**

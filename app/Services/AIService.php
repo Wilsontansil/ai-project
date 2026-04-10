@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Agent;
 use App\Models\ToolSetting;
 use App\Services\Tools\CheckSuspendTool;
 use App\Services\Tools\RegisterTool;
@@ -22,7 +23,7 @@ class AIService
      * Main AI entrypoint.
      * Builds context, executes model call, runs tool logic, and returns formatted reply.
      */
-    public function reply($message, $chatId = null, $agent = 'PG', string $channel = 'telegram', array $agentContext = [])
+    public function reply($message, $chatId = null, ?Agent $agent = null, string $channel = 'telegram', array $agentContext = [])
     {
         $apiKey = (string) config('services.openai.api_key', '');
 
@@ -283,7 +284,7 @@ class AIService
      * Handle tool call or fallback to local intent parsing.
      * Returns null if tool/intent not matched.
      */
-    private function handleToolCallOrIntent($msg, string $userMessage, string $agent): ?string
+    private function handleToolCallOrIntent($msg, string $userMessage, ?Agent $agent): ?string
     {
         // Try to match tool by model call or local intent.
         foreach ($this->getToolServices() as $tool) {

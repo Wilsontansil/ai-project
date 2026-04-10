@@ -10,6 +10,7 @@ use App\Services\Agent\AgentContextService;
 use App\Services\Agent\ConversationMemoryService;
 use App\Services\Agent\CustomerIdentityService;
 use App\Services\AIService;
+use App\Models\Agent;
 
 class WhatsAppController extends Controller
 {
@@ -19,7 +20,7 @@ class WhatsAppController extends Controller
 
     private string $apiKey = '';
 
-    private string $agent = 'PG';
+    private ?Agent $agent = null;
     private string $supportPhone = '';
     private string $supportUrl = '';
 
@@ -28,7 +29,7 @@ class WhatsAppController extends Controller
         $this->baseUrl = rtrim((string) config('services.whatsapp.base_url', ''), '/');
         $this->session = (string) config('services.whatsapp.session', 'default');
         $this->apiKey = (string) config('services.whatsapp.api_key', '');
-        $this->agent = (string) config('services.whatsapp.agent', 'PG');
+        $this->agent = Agent::first();
         $this->supportPhone = (string) config('services.support.phone', '08120000000');
         $this->supportUrl = (string) config('services.support.whatsapp_url', '');
     }

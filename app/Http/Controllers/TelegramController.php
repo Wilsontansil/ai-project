@@ -9,18 +9,19 @@ use App\Services\Agent\AgentContextService;
 use App\Services\Agent\ConversationMemoryService;
 use App\Services\Agent\CustomerIdentityService;
 use App\Services\AIService;
+use App\Models\Agent;
 
 class TelegramController extends Controller
 {
     private string $telegramToken = '';
-    private string $agent = 'PG';
+    private ?Agent $agent = null;
     private string $supportPhone = '';
     private string $supportUrl = '';
 
     public function __construct()
     {
         $this->telegramToken = config('services.telegram.bot_token', '');
-        $this->agent = 'PG'; // Could be dynamic based on chat or other factors
+        $this->agent = Agent::first();
         $this->supportPhone = (string) config('services.support.phone', '08120000000');
         $this->supportUrl = (string) config('services.support.telegram_url', '');
     }

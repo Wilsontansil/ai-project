@@ -2,6 +2,7 @@
 
 namespace App\Services\Tools;
 
+use App\Models\Agent;
 use App\Models\Player;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -97,7 +98,7 @@ class RegisterTool
     /**
      * Execute tool: register player (simple entry point).
      */
-    public function execute(string $username, string $agent): string
+    public function execute(string $username, ?Agent $agent): string
     {
         return $this->executeWithArguments(['username' => $username], $agent);
     }
@@ -105,8 +106,9 @@ class RegisterTool
     /**
      * Execute tool: register new player with full data and duplicate checks.
      */
-    public function executeWithArguments(array $arguments, string $agent): string
+    public function executeWithArguments(array $arguments, ?Agent $agent): string
     {
+        $agentKode = $agent ? $agent->kode : 'PG';
         $username = mb_strtolower(trim((string) ($arguments['username'] ?? '')));
         $email = mb_strtolower(trim((string) ($arguments['email'] ?? '')));
         $hp = trim((string) ($arguments['hp'] ?? ''));
@@ -121,19 +123,19 @@ class RegisterTool
         // Duplicate checks
         $duplicates = [];
 
-        if (Player::whereRaw('LOWER(username) = ?', [$username])->where('agent', $agent)->exists()) {
+        if (Player::whereRaw('LOWER(username) = ?', [$username])->where('agent', $agentKode)->exists()) {
             $duplicates[] = "Username \"{$username}\" sudah terdaftar";
         }
 
-        if (Player::whereRaw('LOWER(email) = ?', [$email])->where('agent', $agent)->exists()) {
+        if (Player::whereRaw('LOWER(email) = ?', [$email])->where('agent', $agentKode)->exists()) {
             $duplicates[] = "Email \"{$email}\" sudah terdaftar";
         }
 
-        if (Player::where('hp', $hp)->where('agent', $agent)->exists()) {
+        if (Player::where('hp', $hp)->where('agent', $agentKode)->exists()) {
             $duplicates[] = "Nomor telepon \"{$hp}\" sudah terdaftar";
         }
 
-        if (Player::where('norek', $norek)->where('agent', $agent)->exists()) {
+        if (Player::where('norek', $norek)->where('agent', $agentKode)->exists()) {
             $duplicates[] = "Nomor rekening \"{$norek}\" sudah terdaftar";
         }
 
@@ -143,6 +145,10 @@ class RegisterTool
         }
 
         try {
+            if (!$agent) {
+                return "Agent tidak ditemukan di sistem.";
+            }
+
             Player::create([
                 'name' => $username,
                 'username' => $username,
@@ -152,8 +158,8 @@ class RegisterTool
                 'namarek' => $namarek,
                 'norek' => $norek,
                 'password' => Hash::make('1234567'),
-                'agents_id' => 1,
-                'agent' => $agent,
+                'agents_id' => $agent->id,
+                'agent' => $agent->kode,
                 'browser' => 'AI-Bot',
                 'os' => 'Server',
                 'device' => 'Other',
@@ -164,11 +170,11 @@ class RegisterTool
         } catch (\Throwable $e) {
             Log::error('Failed to register new player', [
                 'username' => $username,
-                'agent' => $agent,
+                'agent' => $agentKode,
                 'error' => $e->getMessage(),
             ]);
 
-            return "Gagal mendaftarkan akun untuk username {$username} (agent {$agent}). Silakan coba lagi.";
+            return "Gagal mendaftarkan akun untuk username {$username} (agent {$agentKode}). Silakan coba lagi.";
         }
 
         return "Registrasi berhasil! Akun baru telah dibuat:\n"

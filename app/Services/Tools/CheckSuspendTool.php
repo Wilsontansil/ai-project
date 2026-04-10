@@ -2,6 +2,7 @@
 
 namespace App\Services\Tools;
 
+use App\Models\Agent;
 use App\Models\Player;
 use Illuminate\Support\Facades\Log;
 
@@ -71,14 +72,16 @@ class CheckSuspendTool
     /**
      * Execute tool: check suspend status for player.
      */
-    public function execute(string $username, string $agent): string
+    public function execute(string $username, ?Agent $agent): string
     {
+        $agentKode = $agent ? $agent->kode : 'PG';
+
         $player = Player::where('username', $username)
-            ->where('agent', $agent)
+            ->where('agent', $agentKode)
             ->first();
 
         if (!$player) {
-            return "Username {$username} tidak ditemukan untuk agent {$agent}.";
+            return "Username {$username} tidak ditemukan untuk agent {$agentKode}.";
         }
 
         try {
@@ -86,18 +89,18 @@ class CheckSuspendTool
 
             if ($isSuspended) {
                 $suspendReason = $player->suspend_reason ?? 'Tidak ada alasan yang diberikan';
-                return "Akun {$username} (agent {$agent}) sedang di-suspend. Alasan: {$suspendReason}";
+                return "Akun {$username} (agent {$agentKode}) sedang di-suspend. Alasan: {$suspendReason}";
             }
 
-            return "Akun {$username} (agent {$agent}) aktif dan tidak di-suspend.";
+            return "Akun {$username} (agent {$agentKode}) aktif dan tidak di-suspend.";
         } catch (\Throwable $e) {
             Log::error('Failed to check player suspend status', [
                 'username' => $username,
-                'agent' => $agent,
+                'agent' => $agentKode,
                 'error' => $e->getMessage(),
             ]);
 
-            return "Gagal memeriksa status suspend untuk username {$username} (agent {$agent}).";
+            return "Gagal memeriksa status suspend untuk username {$username} (agent {$agentKode}).";
         }
     }
 

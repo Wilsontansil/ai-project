@@ -63,7 +63,11 @@
             <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20">
                 <span class="text-sm font-bold text-white">AI</span>
             </div>
-            <span class="bo-label text-sm font-bold tracking-wide text-white">AI Backoffice</span>
+            <div class="bo-label flex flex-col">
+                <span class="text-sm font-bold tracking-wide text-white">AI Backoffice</span>
+                <span class="text-[10px] font-medium text-white/60">Agent:
+                    {{ config('services.agent.kode', 'PG') }}</span>
+            </div>
         </div>
         <button id="bo-sidebar-toggle" type="button"
             class="flex h-7 w-7 items-center justify-center rounded-md bg-white/10 text-white/80 transition hover:bg-white/20 hover:text-white"

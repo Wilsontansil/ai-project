@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@yield('title', 'Backoffice')</title>
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <style>
+            body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+                background: #0f172a;
+                color: #f8fafc;
+            }
+        </style>
+    @endif
+</head>
+
+<body class="min-h-screen bg-slate-950 text-slate-100">
+    <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] p-4 md:p-6">
+        <div id="bo-shell" class="mx-auto flex max-w-7xl gap-6">
+            @include('backoffice.partials.sidebar', [
+                'active' => $boActive ?? '',
+                'currentTool' => $currentTool ?? null,
+            ])
+
+            <main class="min-w-0 flex-1 space-y-6">
+                @yield('content')
+            </main>
+        </div>
+    </div>
+
+    @yield('scripts')
+</body>
+
+</html>

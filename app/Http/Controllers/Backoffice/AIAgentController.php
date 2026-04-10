@@ -76,6 +76,75 @@ class AIAgentController extends Controller
         return back()->with('success', 'AI Agent tools setting berhasil disimpan.');
     }
 
+    public function showTool(string $toolSlug): View
+    {
+        $slugMap = [
+            'reset-password' => 'resetPassword',
+            'check-suspend' => 'checkSuspend',
+        ];
+
+        $viewMap = [
+            'reset-password' => 'backoffice.tools.reset-password',
+            'check-suspend' => 'backoffice.tools.check-suspend',
+        ];
+
+        $toolName = $slugMap[$toolSlug] ?? null;
+
+        abort_unless($toolName && isset($viewMap[$toolSlug]), 404);
+
+        $catalog = $this->toolCatalog();
+        $meta = $catalog[$toolName];
+        $setting = Schema::hasTable('tool_settings')
+            ? ToolSetting::query()->where('tool_name', $toolName)->first()
+            : null;
+
+        $tool = [
+            'tool_name' => $toolName,
+            'display_name' => (string) ($setting->display_name ?? $meta['display_name']),
+            'description' => (string) ($setting->description ?? $meta['description']),
+            'is_enabled' => (bool) ($setting->is_enabled ?? true),
+        ];
+
+        return view($viewMap[$toolSlug], [
+            'tool' => $tool,
+            'boActive' => 'ai-agent',
+            'currentTool' => $toolName,
+        ]);
+    }
+
+    public function updateTool(Request $request, string $toolSlug): RedirectResponse
+    {
+        $slugMap = [
+            'reset-password' => 'resetPassword',
+            'check-suspend' => 'checkSuspend',
+        ];
+
+        $toolName = $slugMap[$toolSlug] ?? null;
+        $catalog = $this->toolCatalog();
+
+        abort_unless($toolName && array_key_exists($toolName, $catalog), 404);
+
+        if (!Schema::hasTable('tool_settings')) {
+            return back()->with('error', 'Table tool_settings belum ada. Jalankan migration terlebih dahulu.');
+        }
+
+        $data = $request->validate([
+            'display_name' => ['required', 'string', 'max:120'],
+            'description' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        ToolSetting::query()->updateOrCreate(
+            ['tool_name' => $toolName],
+            [
+                'display_name' => trim((string) $data['display_name']),
+                'description' => trim((string) ($data['description'] ?? '')),
+                'is_enabled' => $request->boolean('is_enabled'),
+            ]
+        );
+
+        return back()->with('success', ucfirst($toolName) . ' setting berhasil disimpan.');
+    }
+
     private function toolCatalog(): array
     {
         return [

@@ -126,8 +126,8 @@
                     </span>
                     <span class="bo-label">Settings</span>
                 </a>
-                <a href="{{ route('backoffice.ai-agent', ['tool' => 'resetPassword']) }}#tool-resetPassword"
-                    class="bo-nav-item group flex items-center gap-3 rounded-lg py-2 pl-6 pr-3 text-sm transition {{ $active === 'ai-agent' && ($currentTool ?? '') === 'resetPassword' ? 'bg-white/20 font-semibold text-white' : 'text-white/80 hover:bg-white/10' }}">
+                <a href="{{ route('backoffice.tools.reset-password') }}"
+                    class="bo-nav-item group flex items-center gap-3 rounded-lg py-2 pl-6 pr-3 text-sm transition {{ ($currentTool ?? '') === 'resetPassword' ? 'bg-white/20 font-semibold text-white' : 'text-white/80 hover:bg-white/10' }}">
                     <span
                         class="flex h-5 w-5 items-center justify-center rounded {{ ($currentTool ?? '') === 'resetPassword' ? 'bg-white/20' : 'bg-white/10' }}">
                         <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,8 +137,8 @@
                     </span>
                     <span class="bo-label text-xs">Reset Password</span>
                 </a>
-                <a href="{{ route('backoffice.ai-agent', ['tool' => 'checkSuspend']) }}#tool-checkSuspend"
-                    class="bo-nav-item group flex items-center gap-3 rounded-lg py-2 pl-6 pr-3 text-sm transition {{ $active === 'ai-agent' && ($currentTool ?? '') === 'checkSuspend' ? 'bg-white/20 font-semibold text-white' : 'text-white/80 hover:bg-white/10' }}">
+                <a href="{{ route('backoffice.tools.check-suspend') }}"
+                    class="bo-nav-item group flex items-center gap-3 rounded-lg py-2 pl-6 pr-3 text-sm transition {{ ($currentTool ?? '') === 'checkSuspend' ? 'bg-white/20 font-semibold text-white' : 'text-white/80 hover:bg-white/10' }}">
                     <span
                         class="flex h-5 w-5 items-center justify-center rounded {{ ($currentTool ?? '') === 'checkSuspend' ? 'bg-white/20' : 'bg-white/10' }}">
                         <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

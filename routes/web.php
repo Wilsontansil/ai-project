@@ -19,5 +19,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/backoffice', [DashboardController::class, 'index'])->name('backoffice.dashboard');
     Route::get('/backoffice/ai-agent', [AIAgentController::class, 'index'])->name('backoffice.ai-agent');
     Route::post('/backoffice/ai-agent', [AIAgentController::class, 'update'])->name('backoffice.ai-agent.update');
+
+    Route::get('/backoffice/tools/reset-password', [AIAgentController::class, 'showTool'])
+        ->defaults('toolSlug', 'reset-password')
+        ->name('backoffice.tools.reset-password');
+    Route::post('/backoffice/tools/reset-password', [AIAgentController::class, 'updateTool'])
+        ->defaults('toolSlug', 'reset-password')
+        ->name('backoffice.tools.reset-password.update');
+
+    Route::get('/backoffice/tools/check-suspend', [AIAgentController::class, 'showTool'])
+        ->defaults('toolSlug', 'check-suspend')
+        ->name('backoffice.tools.check-suspend');
+    Route::post('/backoffice/tools/check-suspend', [AIAgentController::class, 'updateTool'])
+        ->defaults('toolSlug', 'check-suspend')
+        ->name('backoffice.tools.check-suspend.update');
+
     Route::post('/backoffice/logout', [AuthController::class, 'logout'])->name('logout');
 });

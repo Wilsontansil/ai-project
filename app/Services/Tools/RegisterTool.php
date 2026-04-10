@@ -151,7 +151,13 @@ class RegisterTool
                 'namarek' => $namarek,
                 'norek' => $norek,
                 'password' => Hash::make('1234567'),
+                'agents_id' => 1,
                 'agent' => $agent,
+                'browser' => 'AI-Bot',
+                'os' => 'Server',
+                'device' => 'Other',
+                'devicefamily' => 'Other',
+                'referer' => 'ai-agent',
                 'status' => 1,
             ]);
         } catch (\Throwable $e) {

@@ -81,11 +81,13 @@ class AIAgentController extends Controller
         $slugMap = [
             'reset-password' => 'resetPassword',
             'check-suspend' => 'checkSuspend',
+            'register' => 'register',
         ];
 
         $viewMap = [
             'reset-password' => 'backoffice.tools.reset-password',
             'check-suspend' => 'backoffice.tools.check-suspend',
+            'register' => 'backoffice.tools.register',
         ];
 
         $toolName = $slugMap[$toolSlug] ?? null;
@@ -117,6 +119,7 @@ class AIAgentController extends Controller
         $slugMap = [
             'reset-password' => 'resetPassword',
             'check-suspend' => 'checkSuspend',
+            'register' => 'register',
         ];
 
         $toolName = $slugMap[$toolSlug] ?? null;
@@ -155,6 +158,10 @@ class AIAgentController extends Controller
             'checkSuspend' => [
                 'display_name' => 'Check Suspend Tool',
                 'description' => 'Tool untuk cek status suspend akun player.',
+            ],
+            'register' => [
+                'display_name' => 'Register Tool',
+                'description' => 'Tool untuk registrasi akun player baru.',
             ],
         ];
     }

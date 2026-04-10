@@ -34,5 +34,12 @@ Route::middleware('auth')->group(function () {
         ->defaults('toolSlug', 'check-suspend')
         ->name('backoffice.tools.check-suspend.update');
 
+    Route::get('/backoffice/tools/register', [AIAgentController::class, 'showTool'])
+        ->defaults('toolSlug', 'register')
+        ->name('backoffice.tools.register');
+    Route::post('/backoffice/tools/register', [AIAgentController::class, 'updateTool'])
+        ->defaults('toolSlug', 'register')
+        ->name('backoffice.tools.register.update');
+
     Route::post('/backoffice/logout', [AuthController::class, 'logout'])->name('logout');
 });

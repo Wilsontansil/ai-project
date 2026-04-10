@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ToolSetting;
 use App\Services\Tools\CheckSuspendTool;
+use App\Services\Tools\RegisterTool;
 use App\Services\Tools\ResetPasswordTool;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -250,6 +251,7 @@ class AIService
         $catalog = [
             new ResetPasswordTool(),
             new CheckSuspendTool(),
+            new RegisterTool(),
         ];
 
         if (!Schema::hasTable('tool_settings')) {

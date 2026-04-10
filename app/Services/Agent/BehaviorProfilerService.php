@@ -47,6 +47,9 @@ class BehaviorProfilerService
         if (str_contains($text, 'reset') && str_contains($text, 'password')) {
             return 'reset_password';
         }
+        if (str_contains($text, 'register') || str_contains($text, 'daftar') || str_contains($text, 'registrasi')) {
+            return 'register';
+        }
 
         return 'general_question';
     }

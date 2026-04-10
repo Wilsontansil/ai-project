@@ -40,16 +40,40 @@
             </div>
 
             <div>
-                <label for="class_name" class="mb-2 block text-sm text-slate-200">Class Name (full namespace)</label>
-                <input id="class_name" type="text" name="class_name" value="{{ old('class_name', $tool->class_name) }}"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm font-mono text-white outline-none transition focus:border-cyan-400" />
-            </div>
-
-            <div>
                 <label for="description" class="mb-2 block text-sm text-slate-200">Description</label>
+                <p class="mb-2 text-xs text-slate-400">Deskripsi fungsi tool ini — dikirim ke OpenAI.</p>
                 <input id="description" type="text" name="description"
                     value="{{ old('description', $tool->description) }}"
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+            </div>
+
+            <div>
+                <label for="parameters" class="mb-2 block text-sm text-slate-200">Parameters (JSON)</label>
+                <p class="mb-2 text-xs text-slate-400">Schema parameter untuk OpenAI function calling.</p>
+                <textarea id="parameters" name="parameters" rows="6"
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm font-mono text-white outline-none transition focus:border-cyan-400">{{ old('parameters', $tool->parameters ? json_encode($tool->parameters, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : '') }}</textarea>
+            </div>
+
+            <div>
+                <label for="keywords" class="mb-2 block text-sm text-slate-200">Keywords (comma-separated)</label>
+                <p class="mb-2 text-xs text-slate-400">Kata kunci untuk intent matching fallback.</p>
+                <input id="keywords" type="text" name="keywords"
+                    value="{{ old('keywords', $tool->keywords ? implode(', ', $tool->keywords) : '') }}"
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+            </div>
+
+            <div>
+                <label for="missing_message" class="mb-2 block text-sm text-slate-200">Missing Data Message</label>
+                <p class="mb-2 text-xs text-slate-400">Pesan yang ditampilkan jika data belum lengkap.</p>
+                <textarea id="missing_message" name="missing_message" rows="3"
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('missing_message', $tool->missing_message) }}</textarea>
+            </div>
+
+            <div>
+                <label for="class_name" class="mb-2 block text-sm text-slate-200">Class Name (optional)</label>
+                <p class="mb-2 text-xs text-slate-400">PHP class untuk execution logic. Kosongkan jika tidak ada.</p>
+                <input id="class_name" type="text" name="class_name" value="{{ old('class_name', $tool->class_name) }}"
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm font-mono text-white outline-none transition focus:border-cyan-400" />
             </div>
 
             <div>

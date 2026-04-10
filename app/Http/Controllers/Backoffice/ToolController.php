@@ -14,7 +14,7 @@ class ToolController extends Controller
     public function index(): View
     {
         $tools = Tool::query()
-            ->where('class_name', '!=', '')
+            ->where('tool_name', '!=', '_bot_config')
             ->orderBy('id')
             ->get();
 
@@ -37,16 +37,36 @@ class ToolController extends Controller
             'tool_name' => ['required', 'string', 'max:80', 'unique:tools,tool_name'],
             'display_name' => ['required', 'string', 'max:120'],
             'description' => ['nullable', 'string', 'max:500'],
-            'class_name' => ['required', 'string', 'max:255'],
+            'class_name' => ['nullable', 'string', 'max:255'],
+            'parameters' => ['nullable', 'string'],
+            'keywords' => ['nullable', 'string'],
+            'missing_message' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $parameters = null;
+        if (!empty($data['parameters'])) {
+            $parameters = json_decode($data['parameters'], true);
+            if (!is_array($parameters)) {
+                return back()->withErrors(['parameters' => 'Parameters harus berupa JSON yang valid.'])->withInput();
+            }
+        }
+
+        $keywords = null;
+        if (!empty($data['keywords'])) {
+            $keywords = array_map('trim', explode(',', $data['keywords']));
+            $keywords = array_values(array_filter($keywords, fn ($k) => $k !== ''));
+        }
 
         Tool::create([
             'tool_name' => trim($data['tool_name']),
             'display_name' => trim($data['display_name']),
             'description' => trim($data['description'] ?? ''),
-            'class_name' => trim($data['class_name']),
+            'class_name' => trim($data['class_name'] ?? '') ?: null,
             'slug' => Str::slug($data['tool_name']),
             'is_enabled' => $request->boolean('is_enabled'),
+            'parameters' => $parameters,
+            'keywords' => $keywords,
+            'missing_message' => trim($data['missing_message'] ?? '') ?: null,
             'meta' => [
                 'icon' => trim($request->input('icon', 'M13 10V3L4 14h7v7l9-11h-7z')),
             ],
@@ -68,14 +88,45 @@ class ToolController extends Controller
         $data = $request->validate([
             'display_name' => ['required', 'string', 'max:120'],
             'description' => ['nullable', 'string', 'max:500'],
-            'class_name' => ['required', 'string', 'max:255'],
+            'class_name' => ['nullable', 'string', 'max:255'],
+            'parameters' => ['nullable', 'string'],
+            'keywords' => ['nullable', 'string'],
+            'missing_message' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $parameters = $tool->parameters;
+        if ($request->has('parameters')) {
+            $raw = $data['parameters'] ?? '';
+            if ($raw !== '') {
+                $decoded = json_decode($raw, true);
+                if (!is_array($decoded)) {
+                    return back()->withErrors(['parameters' => 'Parameters harus berupa JSON yang valid.'])->withInput();
+                }
+                $parameters = $decoded;
+            } else {
+                $parameters = null;
+            }
+        }
+
+        $keywords = $tool->keywords;
+        if ($request->has('keywords')) {
+            $raw = trim($data['keywords'] ?? '');
+            if ($raw !== '') {
+                $keywords = array_map('trim', explode(',', $raw));
+                $keywords = array_values(array_filter($keywords, fn ($k) => $k !== ''));
+            } else {
+                $keywords = null;
+            }
+        }
 
         $tool->update([
             'display_name' => trim($data['display_name']),
             'description' => trim($data['description'] ?? ''),
-            'class_name' => trim($data['class_name']),
+            'class_name' => trim($data['class_name'] ?? '') ?: null,
             'is_enabled' => $request->boolean('is_enabled'),
+            'parameters' => $parameters,
+            'keywords' => $keywords,
+            'missing_message' => trim($data['missing_message'] ?? '') ?: null,
             'meta' => array_merge($tool->meta ?? [], [
                 'icon' => trim($request->input('icon', $tool->meta['icon'] ?? 'M13 10V3L4 14h7v7l9-11h-7z')),
             ]),

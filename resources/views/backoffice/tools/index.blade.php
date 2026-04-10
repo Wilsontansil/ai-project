@@ -34,7 +34,7 @@
                         <tr>
                             <th class="px-5 py-3.5 font-medium">Tool Name</th>
                             <th class="px-5 py-3.5 font-medium">Display Name</th>
-                            <th class="px-5 py-3.5 font-medium">Class</th>
+                            <th class="px-5 py-3.5 font-medium">Parameters</th>
                             <th class="px-5 py-3.5 font-medium text-center">Status</th>
                             <th class="px-5 py-3.5 font-medium text-right">Actions</th>
                         </tr>
@@ -64,8 +64,16 @@
                                     </div>
                                 </td>
                                 <td class="px-5 py-3.5">
-                                    <span
-                                        class="font-mono text-xs text-slate-400">{{ class_basename($tool->class_name) }}</span>
+                                    @php
+                                        $params = $tool->parameters['properties'] ?? [];
+                                        $paramCount = count($params);
+                                    @endphp
+                                    @if ($paramCount > 0)
+                                        <span class="font-mono text-xs text-slate-400">{{ $paramCount }}
+                                            param{{ $paramCount > 1 ? 's' : '' }}</span>
+                                    @else
+                                        <span class="text-xs text-slate-500">–</span>
+                                    @endif
                                 </td>
                                 <td class="px-5 py-3.5 text-center">
                                     @if ($tool->is_enabled)

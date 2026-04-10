@@ -40,18 +40,52 @@
             </div>
 
             <div>
-                <label for="class_name" class="mb-2 block text-sm text-slate-200">Class Name (full namespace)</label>
-                <p class="mb-2 text-xs text-slate-400">Contoh: App\Services\Tools\ResetPasswordTool</p>
-                <input id="class_name" type="text" name="class_name" value="{{ old('class_name') }}"
-                    placeholder="App\Services\Tools\YourTool"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm font-mono text-white outline-none transition focus:border-cyan-400" />
+                <label for="description" class="mb-2 block text-sm text-slate-200">Description</label>
+                <p class="mb-2 text-xs text-slate-400">Deskripsi fungsi tool ini — dikirim ke OpenAI.</p>
+                <input id="description" type="text" name="description" value="{{ old('description') }}"
+                    placeholder="e.g. Reset user password after account data verification"
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
             </div>
 
             <div>
-                <label for="description" class="mb-2 block text-sm text-slate-200">Description</label>
-                <input id="description" type="text" name="description" value="{{ old('description') }}"
-                    placeholder="Deskripsi singkat fungsi tool ini"
+                <label for="parameters" class="mb-2 block text-sm text-slate-200">Parameters (JSON)</label>
+                <p class="mb-2 text-xs text-slate-400">Schema parameter untuk OpenAI function calling. Format JSON
+                    object.</p>
+                <textarea id="parameters" name="parameters" rows="6"
+                    placeholder='{
+  "type": "object",
+  "properties": {
+    "username": { "type": "string", "description": "Username akun" }
+  },
+  "required": ["username"]
+}'
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm font-mono text-white outline-none transition focus:border-cyan-400">{{ old('parameters') }}</textarea>
+            </div>
+
+            <div>
+                <label for="keywords" class="mb-2 block text-sm text-slate-200">Keywords (comma-separated)</label>
+                <p class="mb-2 text-xs text-slate-400">Kata kunci untuk intent matching fallback, pisahkan dengan koma.
+                </p>
+                <input id="keywords" type="text" name="keywords" value="{{ old('keywords') }}"
+                    placeholder="e.g. reset password, resetpass, kata sandi"
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+            </div>
+
+            <div>
+                <label for="missing_message" class="mb-2 block text-sm text-slate-200">Missing Data Message</label>
+                <p class="mb-2 text-xs text-slate-400">Pesan yang ditampilkan jika data yang diperlukan belum lengkap.
+                </p>
+                <textarea id="missing_message" name="missing_message" rows="3"
+                    placeholder="Untuk reset password, mohon kirim data berikut:&#10;Username(username) :&#10;Nama rekening(namarek) :"
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('missing_message') }}</textarea>
+            </div>
+
+            <div>
+                <label for="class_name" class="mb-2 block text-sm text-slate-200">Class Name (optional)</label>
+                <p class="mb-2 text-xs text-slate-400">PHP class untuk execution logic. Kosongkan jika tidak ada.</p>
+                <input id="class_name" type="text" name="class_name" value="{{ old('class_name') }}"
+                    placeholder="App\Services\Tools\YourTool"
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm font-mono text-white outline-none transition focus:border-cyan-400" />
             </div>
 
             <div>

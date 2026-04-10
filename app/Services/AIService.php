@@ -222,50 +222,29 @@ class AIService
 
     /**
      * Get available tools/functions for OpenAI.
-     * Each tool service is registered here.
-     *
-     * Command map (human-readable):
-     * - resetPassword:
-     *   Username(username): <value>
-     *   Nama rekening(namarek): <value>
-     *   Nomor rekening(norek): <value>
-     *   Nama Bank(bank): <value>
-     * - checkSuspend:
-     *   Username: <value>
+     * Definitions are built from DB columns — no PHP class needed.
      */
     private function getTools(): array
     {
-        $tools = [];
-
-        // Register all tool services (tool schema comes from each tool class).
-        foreach ($this->getToolServices() as $toolService) {
-            $tools[] = $toolService->definition();
-        }
-
-        return $tools;
+        return $this->getEnabledTools()
+            ->map(fn (Tool $tool) => $tool->getDefinition())
+            ->values()
+            ->all();
     }
 
     /**
-     * Get instances of all available tool services.
-     * Loaded dynamically from the tools table.
+     * Get enabled tools from the database (excludes config rows).
      */
-    private function getToolServices(): array
+    private function getEnabledTools(): \Illuminate\Support\Collection
     {
         if (!Schema::hasTable('tools')) {
-            return [];
+            return collect();
         }
 
-        $enabledTools = Tool::query()->where('is_enabled', true)->where('class_name', '!=', '')->get();
-
-        $services = [];
-        foreach ($enabledTools as $tool) {
-            $instance = $tool->newServiceInstance();
-            if ($instance !== null) {
-                $services[] = $instance;
-            }
-        }
-
-        return $services;
+        return Tool::query()
+            ->where('is_enabled', true)
+            ->where('tool_name', '!=', '_bot_config')
+            ->get();
     }
 
     /**
@@ -274,47 +253,69 @@ class AIService
      */
     private function handleToolCallOrIntent($msg, string $userMessage, ?Agent $agent): ?string
     {
-        // Try to match tool by model call or local intent.
-        foreach ($this->getToolServices() as $tool) {
-            $argumentsFromTool = $this->extractArgumentsFromToolCall($msg, $tool->name());
+        $tools = $this->getEnabledTools();
 
-            if ($argumentsFromTool !== null) {
-                if (method_exists($tool, 'executeWithArguments')) {
-                    return $tool->executeWithArguments($argumentsFromTool, $agent);
-                }
+        foreach ($tools as $tool) {
+            // Check if OpenAI returned a tool call for this tool.
+            $arguments = $this->extractArgumentsFromToolCall($msg, $tool->tool_name);
 
-                $username = $argumentsFromTool['username'] ?? null;
-
-                if ($username === null) {
-                    return method_exists($tool, 'missingUsernameMessage')
-                        ? $tool->missingUsernameMessage()
-                        : 'Missing username.';
-                }
-
-                return $tool->execute($username, $agent);
+            if ($arguments !== null) {
+                return $this->executeTool($tool, $arguments, $agent);
             }
 
-            // Fallback to intent parsing.
+            // Fallback: match intent using DB keywords.
             if ($tool->matchesIntent($userMessage)) {
-                if (method_exists($tool, 'extractArgumentsFromText')) {
-                    $argumentsFromText = $tool->extractArgumentsFromText($userMessage);
+                $instance = $tool->newServiceInstance();
 
-                    return $tool->executeWithArguments($argumentsFromText, $agent);
+                if ($instance !== null && method_exists($instance, 'extractArgumentsFromText')) {
+                    $args = $instance->extractArgumentsFromText($userMessage);
+                    return $this->executeTool($tool, $args, $agent);
                 }
 
-                $usernameFromText = $tool->extractUsernameFromText($userMessage);
-
-                if ($usernameFromText === null) {
-                    return method_exists($tool, 'missingUsernameMessage')
-                        ? $tool->missingUsernameMessage()
-                        : 'Missing username.';
-                }
-
-                return $tool->execute($usernameFromText, $agent);
+                return $tool->getMissingMessage();
             }
         }
 
         return null;
+    }
+
+    /**
+     * Execute a tool with extracted arguments.
+     * Uses PHP class if available, otherwise returns formatted collected data.
+     */
+    private function executeTool(Tool $tool, array $arguments, ?Agent $agent): string
+    {
+        $instance = $tool->newServiceInstance();
+
+        if ($instance !== null) {
+            if (method_exists($instance, 'executeWithArguments')) {
+                return $instance->executeWithArguments($arguments, $agent);
+            }
+
+            $username = $arguments['username'] ?? null;
+
+            if ($username === null) {
+                return method_exists($instance, 'missingUsernameMessage')
+                    ? $instance->missingUsernameMessage()
+                    : $tool->getMissingMessage();
+            }
+
+            return $instance->execute($username, $agent);
+        }
+
+        // No PHP class — return collected arguments summary.
+        $filled = array_filter($arguments, fn ($v) => $v !== null && $v !== '');
+
+        if ($filled === []) {
+            return $tool->getMissingMessage();
+        }
+
+        $lines = ["Data diterima untuk {$tool->display_name}:"];
+        foreach ($filled as $key => $value) {
+            $lines[] = "- {$key}: {$value}";
+        }
+
+        return implode("\n", $lines);
     }
 
     /**

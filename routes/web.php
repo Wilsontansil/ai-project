@@ -19,7 +19,6 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/backoffice', [DashboardController::class, 'index'])->name('backoffice.dashboard');
     Route::get('/backoffice/ai-agent', [AIAgentController::class, 'index'])->name('backoffice.ai-agent');
-    Route::post('/backoffice/ai-agent', [AIAgentController::class, 'update'])->name('backoffice.ai-agent.update');
 
     Route::get('/backoffice/tools/reset-password', [AIAgentController::class, 'showTool'])
         ->defaults('toolSlug', 'reset-password')

@@ -14,34 +14,11 @@ class AIAgentController extends Controller
 {
     public function index(Request $request): View
     {
-        $catalog = $this->toolCatalog();
-        $settings = collect();
-        $currentTool = trim((string) $request->query('tool', ''));
-
-        if (Schema::hasTable('tool_settings')) {
-            $settings = ToolSetting::query()->get()->keyBy('tool_name');
-        }
-
-        $tools = [];
-        foreach ($catalog as $toolName => $meta) {
-            $current = $settings->get($toolName);
-
-            $tools[] = [
-                'tool_name' => $toolName,
-                'display_name' => (string) ($current->display_name ?? $meta['display_name']),
-                'description' => (string) ($current->description ?? $meta['description']),
-                'is_enabled' => (bool) ($current->is_enabled ?? true),
-            ];
-        }
-
         $activeCases = Schema::hasTable('agent_cases')
             ? AgentCase::query()->where('is_active', true)->count()
             : 0;
 
         return view('backoffice.ai-agent', [
-            'tools' => $tools,
-            'hasToolSettingsTable' => Schema::hasTable('tool_settings'),
-            'currentTool' => $currentTool,
             'aiInfo' => [
                 'model' => 'gpt-4o-mini',
                 'bot_name' => 'xoneBot',
@@ -51,42 +28,6 @@ class AIAgentController extends Controller
                 'active_cases' => $activeCases,
             ],
         ]);
-    }
-
-    public function update(Request $request): RedirectResponse
-    {
-        if (!Schema::hasTable('tool_settings')) {
-            return back()->with('error', 'Table tool_settings belum ada. Jalankan migration terlebih dahulu.');
-        }
-
-        $payload = $request->validate([
-            'tools' => ['required', 'array'],
-            'tools.*.tool_name' => ['required', 'string'],
-            'tools.*.display_name' => ['required', 'string', 'max:120'],
-            'tools.*.description' => ['nullable', 'string', 'max:500'],
-        ]);
-
-        $enabledMap = (array) $request->input('enabled', []);
-        $catalog = $this->toolCatalog();
-
-        foreach ($payload['tools'] as $item) {
-            $toolName = (string) $item['tool_name'];
-
-            if (!array_key_exists($toolName, $catalog)) {
-                continue;
-            }
-
-            ToolSetting::query()->updateOrCreate(
-                ['tool_name' => $toolName],
-                [
-                    'display_name' => trim((string) $item['display_name']),
-                    'description' => trim((string) ($item['description'] ?? '')),
-                    'is_enabled' => isset($enabledMap[$toolName]) && $enabledMap[$toolName] === '1',
-                ]
-            );
-        }
-
-        return back()->with('success', 'AI Agent tools setting berhasil disimpan.');
     }
 
     public function showTool(string $toolSlug): View

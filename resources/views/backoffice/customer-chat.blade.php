@@ -52,12 +52,12 @@
                         <div>
                             <label class="mb-1 block text-xs text-slate-400">Start Date</label>
                             <input type="date" name="start_date" value="{{ $startDate }}"
-                                class="rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                                class="rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-200 outline-none [color-scheme:dark] focus:border-cyan-400" />
                         </div>
                         <div>
                             <label class="mb-1 block text-xs text-slate-400">End Date</label>
                             <input type="date" name="end_date" value="{{ $endDate }}"
-                                class="rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                                class="rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-200 outline-none [color-scheme:dark] focus:border-cyan-400" />
                         </div>
                         <button type="submit"
                             class="rounded-xl bg-cyan-400 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
@@ -67,12 +67,12 @@
                 </div>
 
                 {{-- Chat Messages --}}
-                <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                <div class="rounded-3xl border border-white/10 bg-slate-900/60 p-6 backdrop-blur">
                     @if (empty($messages))
                         <p class="py-8 text-center text-sm text-slate-400">Belum ada percakapan pada rentang tanggal
                             ini.</p>
                     @else
-                        <div class="space-y-3">
+                        <div class="space-y-4">
                             @php $lastDate = null; @endphp
                             @foreach ($messages as $msg)
                                 @php $msgDate = $msg['date'] ?? null; @endphp
@@ -87,22 +87,25 @@
                                 @endif
 
                                 @if (($msg['role'] ?? '') === 'user')
-                                    <div class="flex justify-end">
+                                    <div class="flex justify-start">
                                         <div
-                                            class="max-w-[75%] rounded-2xl rounded-tr-sm bg-cyan-600/30 px-4 py-2.5 text-sm text-white">
-                                            <p>{{ $msg['message'] }}</p>
-                                            <p class="mt-1 text-right text-[10px] text-slate-400">
+                                            class="max-w-[75%] rounded-2xl rounded-bl-sm border border-white/10 bg-slate-800 px-4 py-3 shadow-lg shadow-black/20">
+                                            <p class="mb-1 text-[10px] font-semibold text-amber-400">customer</p>
+                                            <p class="text-sm text-slate-100">{{ $msg['message'] }}</p>
+                                            <p class="mt-1.5 text-[10px] text-slate-500">
                                                 {{ $msg['time'] ?? '' }}</p>
                                         </div>
                                     </div>
                                 @else
-                                    <div class="flex justify-start">
+                                    <div class="flex justify-end">
                                         <div
-                                            class="max-w-[75%] rounded-2xl rounded-tl-sm bg-slate-800/80 px-4 py-2.5 text-sm text-slate-100">
+                                            class="max-w-[75%] rounded-2xl rounded-br-sm border border-cyan-500/20 bg-cyan-600/25 px-4 py-3 shadow-lg shadow-cyan-900/20">
                                             <p class="mb-1 text-[10px] font-semibold text-cyan-400">
                                                 {{ $msg['role'] ?? 'assistant' }}</p>
-                                            <p>{{ $msg['message'] }}</p>
-                                            <p class="mt-1 text-[10px] text-slate-500">{{ $msg['time'] ?? '' }}</p>
+                                            <p class="text-sm text-white">{{ $msg['message'] }}</p>
+                                            <p class="mt-1.5 text-right text-[10px] text-cyan-300/60">
+                                                {{ $msg['time'] ?? '' }}
+                                            </p>
                                         </div>
                                     </div>
                                 @endif

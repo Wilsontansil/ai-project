@@ -5,7 +5,7 @@ use App\Http\Controllers\Backoffice\DashboardController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/backoffice', function () {
+Route::get('/', function () {
     return Auth::check()
         ? redirect()->route('backoffice.dashboard')
         : redirect()->route('login');

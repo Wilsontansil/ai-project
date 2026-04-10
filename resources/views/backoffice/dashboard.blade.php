@@ -5,10 +5,37 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Backoffice Dashboard</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <style>
+            body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+                background: #0f172a;
+                color: #f8fafc;
+            }
+
+            .fallback-note {
+                max-width: 1100px;
+                margin: 16px auto 0;
+                padding: 12px 16px;
+                border: 1px solid #334155;
+                background: #111827;
+                border-radius: 10px;
+                color: #cbd5e1;
+                font-size: 13px;
+            }
+        </style>
+    @endif
 </head>
 
 <body class="min-h-screen bg-slate-950 text-slate-100">
+    @if (!file_exists(public_path('build/manifest.json')) && !file_exists(public_path('hot')))
+        <div class="fallback-note">
+            Frontend assets belum di-build. Jalankan <strong>npm run build</strong> di server untuk tampilan penuh.
+        </div>
+    @endif
     <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] px-6 py-8">
         <div class="mx-auto max-w-7xl">
             <div

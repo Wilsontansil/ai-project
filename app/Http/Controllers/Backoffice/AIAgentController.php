@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
-use App\Models\Agent;
 use App\Models\ToolSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,27 +33,10 @@ class AIAgentController extends Controller
             ];
         }
 
-        $agents = [];
-        $activeAgentId = null;
-
-        try {
-            $agents = Agent::all();
-        } catch (\Throwable $e) {
-            // mysqlgame connection may not be available
-        }
-
-        if (Schema::hasTable('tool_settings')) {
-            $agentConfig = ToolSetting::query()->where('tool_name', '_active_agent')->first();
-            $meta = is_array($agentConfig->meta ?? null) ? $agentConfig->meta : [];
-            $activeAgentId = $meta['agent_id'] ?? null;
-        }
-
         return view('backoffice.ai-agent', [
             'tools' => $tools,
             'hasToolSettingsTable' => Schema::hasTable('tool_settings'),
             'currentTool' => $currentTool,
-            'agents' => $agents,
-            'activeAgentId' => $activeAgentId,
         ]);
     }
 
@@ -62,24 +44,6 @@ class AIAgentController extends Controller
     {
         if (!Schema::hasTable('tool_settings')) {
             return back()->with('error', 'Table tool_settings belum ada. Jalankan migration terlebih dahulu.');
-        }
-
-        // Agent-only save (separate form)
-        if ($request->boolean('_agent_only')) {
-            $agentId = $request->input('active_agent_id');
-            if ($agentId !== null && $agentId !== '') {
-                ToolSetting::query()->updateOrCreate(
-                    ['tool_name' => '_active_agent'],
-                    [
-                        'display_name' => 'Active Agent',
-                        'description' => 'Currently active agent for AI tools.',
-                        'is_enabled' => true,
-                        'meta' => ['agent_id' => (int) $agentId],
-                    ]
-                );
-            }
-
-            return back()->with('success', 'Active agent berhasil disimpan.');
         }
 
         $payload = $request->validate([

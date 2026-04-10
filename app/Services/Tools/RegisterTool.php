@@ -109,7 +109,7 @@ class RegisterTool
      */
     public function executeWithArguments(array $arguments, ?Agent $agent): string
     {
-        $agentKode = $agent ? $agent->kode : 'PG';
+        $agentKode = $agent ? $agent->kode : (string) config('services.agent.kode', 'PG');
         $username = mb_strtolower(trim((string) ($arguments['username'] ?? '')));
         $email = mb_strtolower(trim((string) ($arguments['email'] ?? '')));
         $hp = trim((string) ($arguments['hp'] ?? ''));

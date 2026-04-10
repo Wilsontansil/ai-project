@@ -102,7 +102,7 @@ class ResetPasswordTool
      */
     public function executeWithArguments(array $arguments, ?Agent $agent): string
     {
-        $agentKode = $agent ? $agent->kode : 'PG';
+        $agentKode = $agent ? $agent->kode : (string) config('services.agent.kode', 'PG');
         $username = trim((string) ($arguments['username'] ?? ''));
         $namarek = trim((string) ($arguments['namarek'] ?? ''));
         $norek = trim((string) ($arguments['norek'] ?? ''));

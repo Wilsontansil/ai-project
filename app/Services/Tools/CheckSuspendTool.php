@@ -74,7 +74,7 @@ class CheckSuspendTool
      */
     public function execute(string $username, ?Agent $agent): string
     {
-        $agentKode = $agent ? $agent->kode : 'PG';
+        $agentKode = $agent ? $agent->kode : (string) config('services.agent.kode', 'PG');
 
         $player = Player::where('username', $username)
             ->where('agent', $agentKode)

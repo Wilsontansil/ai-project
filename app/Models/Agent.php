@@ -13,26 +13,12 @@ class Agent extends Model
     ];
 
     /**
-     * Get the active agent configured in backoffice, or fall back to first agent.
+     * Get the active agent from env configuration (AGENT_ID).
      */
     public static function getActive(): ?self
     {
-        $setting = \App\Models\ToolSetting::query()
-            ->where('tool_name', '_active_agent')
-            ->first();
+        $agentId = (int) config('services.agent.id', 1);
 
-        if ($setting) {
-            $meta = is_array($setting->meta) ? $setting->meta : [];
-            $agentId = $meta['agent_id'] ?? null;
-
-            if ($agentId !== null) {
-                $agent = static::find($agentId);
-                if ($agent) {
-                    return $agent;
-                }
-            }
-        }
-
-        return static::first();
+        return static::find($agentId);
     }
 }

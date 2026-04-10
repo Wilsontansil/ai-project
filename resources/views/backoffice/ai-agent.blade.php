@@ -56,44 +56,6 @@
                     </div>
                 @endif
 
-                {{-- Agent Selection --}}
-                <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                    <h2 class="text-xl font-semibold text-white">Active Agent</h2>
-                    <p class="mt-1 text-sm text-slate-300">Pilih agent yang digunakan AI bot untuk melayani customer.
-                    </p>
-
-                    @if (count($agents) === 0)
-                        <div
-                            class="mt-4 rounded-2xl border border-amber-300/30 bg-amber-500/15 px-4 py-3 text-sm text-amber-100">
-                            Tidak ada agent ditemukan di database game. Pastikan koneksi <strong>mysqlgame</strong>
-                            aktif.
-                        </div>
-                    @else
-                        <form method="POST" action="{{ route('backoffice.ai-agent.update') }}" class="mt-4">
-                            @csrf
-                            <input type="hidden" name="_agent_only" value="1">
-                            <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-                                <div class="flex-1">
-                                    <label for="active_agent_id" class="mb-2 block text-sm text-slate-200">Agent</label>
-                                    <select id="active_agent_id" name="active_agent_id"
-                                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
-                                        @foreach ($agents as $ag)
-                                            <option value="{{ $ag->id }}"
-                                                {{ (int) $activeAgentId === (int) $ag->id ? 'selected' : '' }}>
-                                                {{ $ag->kode }} (ID: {{ $ag->id }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <button type="submit"
-                                    class="rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
-                                    Save Agent
-                                </button>
-                            </div>
-                        </form>
-                    @endif
-                </div>
-
                 <form method="POST" action="{{ route('backoffice.ai-agent.update') }}" class="space-y-4">
                     @csrf
 

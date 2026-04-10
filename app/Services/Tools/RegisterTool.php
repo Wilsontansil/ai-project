@@ -162,6 +162,7 @@ class RegisterTool
                 'playercode' => self::generateUniqueCode($agent->prefix),
                 'agents_id' => $agent->id,
                 'agent' => $agent->kode,
+                'useragent' => 'AI-Bot',
                 'browser' => 'AI-Bot',
                 'os' => 'Server',
                 'device' => 'Other',

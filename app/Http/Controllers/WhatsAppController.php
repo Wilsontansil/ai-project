@@ -29,7 +29,7 @@ class WhatsAppController extends Controller
         $this->baseUrl = rtrim((string) config('services.whatsapp.base_url', ''), '/');
         $this->session = (string) config('services.whatsapp.session', 'default');
         $this->apiKey = (string) config('services.whatsapp.api_key', '');
-        $this->agent = Agent::first();
+        $this->agent = Agent::getActive();
         $this->supportPhone = (string) config('services.support.phone', '08120000000');
         $this->supportUrl = (string) config('services.support.whatsapp_url', '');
     }

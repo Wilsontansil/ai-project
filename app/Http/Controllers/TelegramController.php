@@ -21,7 +21,7 @@ class TelegramController extends Controller
     public function __construct()
     {
         $this->telegramToken = config('services.telegram.bot_token', '');
-        $this->agent = Agent::first();
+        $this->agent = Agent::getActive();
         $this->supportPhone = (string) config('services.support.phone', '08120000000');
         $this->supportUrl = (string) config('services.support.telegram_url', '');
     }

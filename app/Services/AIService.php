@@ -4,10 +4,7 @@ namespace App\Services;
 
 use App\Models\Agent;
 use App\Models\AgentCase;
-use App\Models\ToolSetting;
-use App\Services\Tools\CheckSuspendTool;
-use App\Services\Tools\RegisterTool;
-use App\Services\Tools\ResetPasswordTool;
+use App\Models\Tool;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use OpenAI;
@@ -186,13 +183,13 @@ class AIService
      */
     private function getBotName(): string
     {
-        if (!Schema::hasTable('tool_settings')) {
+        if (!Schema::hasTable('tools')) {
             return 'xoneBot';
         }
 
-        $config = ToolSetting::query()->where('tool_name', '_bot_config')->first();
+        $config = Tool::query()->where('tool_name', '_bot_config')->first();
 
-        return trim((string) ($config->meta['bot_name'] ?? 'xoneBot')) ?: 'xoneBot';
+        return trim((string) ($config?->meta['bot_name'] ?? 'xoneBot')) ?: 'xoneBot';
     }
 
     /**
@@ -250,39 +247,25 @@ class AIService
 
     /**
      * Get instances of all available tool services.
-        * Add new tool classes here when introducing new commands.
+     * Loaded dynamically from the tools table.
      */
     private function getToolServices(): array
     {
-        $catalog = [
-            new ResetPasswordTool(),
-            new CheckSuspendTool(),
-            new RegisterTool(),
-        ];
-
-        if (!Schema::hasTable('tool_settings')) {
-            return $catalog;
+        if (!Schema::hasTable('tools')) {
+            return [];
         }
 
-        $enabledMap = ToolSetting::query()->pluck('is_enabled', 'tool_name')->toArray();
+        $enabledTools = Tool::query()->where('is_enabled', true)->where('class_name', '!=', '')->get();
 
-        if ($enabledMap === []) {
-            return $catalog;
-        }
-
-        $filtered = [];
-        foreach ($catalog as $tool) {
-            $name = $tool->name();
-            $isEnabled = array_key_exists($name, $enabledMap)
-                ? (bool) $enabledMap[$name]
-                : true;
-
-            if ($isEnabled) {
-                $filtered[] = $tool;
+        $services = [];
+        foreach ($enabledTools as $tool) {
+            $instance = $tool->newServiceInstance();
+            if ($instance !== null) {
+                $services[] = $instance;
             }
         }
 
-        return $filtered;
+        return $services;
     }
 
     /**

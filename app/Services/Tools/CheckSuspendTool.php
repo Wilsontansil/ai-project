@@ -6,6 +6,9 @@ use App\Models\Agent;
 use App\Models\Player;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @deprecated Managed dynamically via App\Models\Tool. Do not delete — kept for reference.
+ */
 class CheckSuspendTool
 {
     // Command example:

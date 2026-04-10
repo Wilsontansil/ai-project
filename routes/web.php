@@ -22,26 +22,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/backoffice/ai-agent', [AIAgentController::class, 'index'])->name('backoffice.ai-agent');
     Route::post('/backoffice/ai-agent', [AIAgentController::class, 'update'])->name('backoffice.ai-agent.update');
 
-    Route::get('/backoffice/tools/reset-password', [AIAgentController::class, 'showTool'])
-        ->defaults('toolSlug', 'reset-password')
-        ->name('backoffice.tools.reset-password');
-    Route::post('/backoffice/tools/reset-password', [AIAgentController::class, 'updateTool'])
-        ->defaults('toolSlug', 'reset-password')
-        ->name('backoffice.tools.reset-password.update');
-
-    Route::get('/backoffice/tools/check-suspend', [AIAgentController::class, 'showTool'])
-        ->defaults('toolSlug', 'check-suspend')
-        ->name('backoffice.tools.check-suspend');
-    Route::post('/backoffice/tools/check-suspend', [AIAgentController::class, 'updateTool'])
-        ->defaults('toolSlug', 'check-suspend')
-        ->name('backoffice.tools.check-suspend.update');
-
-    Route::get('/backoffice/tools/register', [AIAgentController::class, 'showTool'])
-        ->defaults('toolSlug', 'register')
-        ->name('backoffice.tools.register');
-    Route::post('/backoffice/tools/register', [AIAgentController::class, 'updateTool'])
-        ->defaults('toolSlug', 'register')
-        ->name('backoffice.tools.register.update');
+    Route::get('/backoffice/tools/{tool:slug}', [AIAgentController::class, 'showTool'])->name('backoffice.tools.show');
+    Route::post('/backoffice/tools/{tool:slug}', [AIAgentController::class, 'updateTool'])->name('backoffice.tools.update');
 
     Route::get('/backoffice/cases', [CaseController::class, 'index'])->name('backoffice.cases.index');
     Route::get('/backoffice/cases/create', [CaseController::class, 'create'])->name('backoffice.cases.create');

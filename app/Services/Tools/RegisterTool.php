@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/**
+ * @deprecated Managed dynamically via App\Models\Tool. Do not delete — kept for reference.
+ */
 class RegisterTool
 {
     // Command example:

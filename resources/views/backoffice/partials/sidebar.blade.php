@@ -117,39 +117,25 @@
                 </svg>
             </button>
             <div class="bo-section-items mt-1 space-y-0.5">
-                <a href="{{ route('backoffice.tools.reset-password') }}"
-                    class="bo-nav-item group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition {{ ($currentTool ?? '') === 'resetPassword' ? 'bg-white/20 font-semibold text-white' : 'text-white/90 hover:bg-white/10' }}">
-                    <span
-                        class="flex h-7 w-7 items-center justify-center rounded-md {{ ($currentTool ?? '') === 'resetPassword' ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/15' }}">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                        </svg>
-                    </span>
-                    <span class="bo-label">Reset Password</span>
-                </a>
-                <a href="{{ route('backoffice.tools.check-suspend') }}"
-                    class="bo-nav-item group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition {{ ($currentTool ?? '') === 'checkSuspend' ? 'bg-white/20 font-semibold text-white' : 'text-white/90 hover:bg-white/10' }}">
-                    <span
-                        class="flex h-7 w-7 items-center justify-center rounded-md {{ ($currentTool ?? '') === 'checkSuspend' ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/15' }}">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                    </span>
-                    <span class="bo-label">Check Suspend</span>
-                </a>
-                <a href="{{ route('backoffice.tools.register') }}"
-                    class="bo-nav-item group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition {{ ($currentTool ?? '') === 'register' ? 'bg-white/20 font-semibold text-white' : 'text-white/90 hover:bg-white/10' }}">
-                    <span
-                        class="flex h-7 w-7 items-center justify-center rounded-md {{ ($currentTool ?? '') === 'register' ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/15' }}">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                        </svg>
-                    </span>
-                    <span class="bo-label">Register</span>
-                </a>
+                @php
+                    $sidebarTools = \App\Models\Tool::query()->where('class_name', '!=', '')->orderBy('id')->get();
+                @endphp
+                @foreach ($sidebarTools as $sidebarTool)
+                    <a href="{{ route('backoffice.tools.show', $sidebarTool->slug) }}"
+                        class="bo-nav-item group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition {{ ($currentTool ?? '') === $sidebarTool->tool_name ? 'bg-white/20 font-semibold text-white' : 'text-white/90 hover:bg-white/10' }}">
+                        <span
+                            class="flex h-7 w-7 items-center justify-center rounded-md {{ ($currentTool ?? '') === $sidebarTool->tool_name ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/15' }}">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="{{ $sidebarTool->meta['icon'] ?? 'M13 10V3L4 14h7v7l9-11h-7z' }}" />
+                            </svg>
+                        </span>
+                        <span class="bo-label">{{ $sidebarTool->display_name }}</span>
+                        @unless ($sidebarTool->is_enabled)
+                            <span class="bo-label ml-auto text-[10px] text-rose-400">OFF</span>
+                        @endunless
+                    </a>
+                @endforeach
                 <a href="{{ route('backoffice.ai-agent') }}"
                     class="bo-nav-item group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition {{ $active === 'ai-agent' && empty($currentTool) ? 'bg-white/20 font-semibold text-white' : 'text-white/90 hover:bg-white/10' }}">
                     <span

@@ -2,88 +2,167 @@
     #bo-sidebar {
         width: 260px;
         min-width: 260px;
-        transition: width 0.2s ease, min-width 0.2s ease;
+        min-height: calc(100vh - 3rem);
+        transition: width 0.25s ease, min-width 0.25s ease;
+        background: #3bb5a5;
     }
 
     #bo-shell.bo-collapsed #bo-sidebar {
-        width: 84px;
-        min-width: 84px;
+        width: 72px;
+        min-width: 72px;
     }
 
-    #bo-shell.bo-collapsed .bo-label {
+    #bo-shell.bo-collapsed .bo-label,
+    #bo-shell.bo-collapsed .bo-section-label,
+    #bo-shell.bo-collapsed .bo-section-chevron,
+    #bo-shell.bo-collapsed .bo-section-items {
         display: none;
     }
 
-    #bo-shell.bo-collapsed .bo-nav-link {
+    #bo-shell.bo-collapsed .bo-nav-item {
         justify-content: center;
-        padding-left: 0.75rem;
-        padding-right: 0.75rem;
+        padding-left: 0;
+        padding-right: 0;
     }
 
-    #bo-shell.bo-collapsed .bo-subnav {
-        display: none;
+    #bo-shell.bo-collapsed .bo-section-header {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
     }
 
-    .bo-nav-link {
-        min-height: 48px;
+    .bo-section-items {
+        overflow: hidden;
+        max-height: 500px;
+        transition: max-height 0.3s ease;
     }
 
-    .bo-subnav-link {
-        min-height: 40px;
+    .bo-section-items.collapsed {
+        max-height: 0;
     }
 
-    #bo-shell.bo-collapsed #bo-sidebar-toggle {
-        transform: rotate(180deg);
+    .bo-section-chevron {
+        transition: transform 0.2s ease;
+    }
+
+    .bo-section-chevron.rotated {
+        transform: rotate(90deg);
     }
 </style>
 
-<aside id="bo-sidebar" class="shrink-0 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur">
-    <div class="flex items-center justify-between">
-        <p class="bo-label text-xs uppercase tracking-[0.3em] text-cyan-300/80">Backoffice</p>
+<aside id="bo-sidebar" class="shrink-0 flex flex-col rounded-2xl overflow-hidden">
+    {{-- Brand area --}}
+    <div class="flex items-center justify-between px-5 py-4" style="background: rgba(0,0,0,0.15);">
+        <div class="flex items-center gap-3">
+            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20">
+                <span class="text-sm font-bold text-white">AI</span>
+            </div>
+            <span class="bo-label text-sm font-bold tracking-wide text-white">AI Backoffice</span>
+        </div>
         <button id="bo-sidebar-toggle" type="button"
-            class="rounded-lg border border-white/15 bg-white/10 px-2 py-1 text-xs text-white transition hover:bg-white/15"
+            class="flex h-7 w-7 items-center justify-center rounded-md bg-white/10 text-white/80 transition hover:bg-white/20 hover:text-white"
             title="Minimize navigation" aria-label="Toggle sidebar">
-            <span>◀</span>
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
         </button>
     </div>
 
-    <p class="bo-label mt-2 text-sm text-slate-300">{{ auth()->user()->email }}</p>
+    {{-- Navigation sections --}}
+    <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
 
-    <nav class="mt-6 space-y-2">
-        <a href="{{ route('backoffice.dashboard') }}"
-            class="bo-nav-link flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition {{ $active === 'customer' ? 'bg-cyan-400 text-slate-950' : 'bg-slate-900/50 text-slate-200 hover:bg-slate-800/70' }}">
-            <span class="text-base">👥</span>
-            <span class="bo-label">Customer</span>
-        </a>
-
-        <a href="{{ route('backoffice.ai-agent') }}"
-            class="bo-nav-link flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition {{ $active === 'ai-agent' ? 'bg-cyan-400 text-slate-950' : 'bg-slate-900/50 text-slate-200 hover:bg-slate-800/70' }}">
-            <span class="text-base">⚙️</span>
-            <span class="bo-label">AI Agent</span>
-        </a>
-
-        <div class="bo-subnav ml-4 space-y-2">
-            <a href="{{ route('backoffice.ai-agent', ['tool' => 'resetPassword']) }}#tool-resetPassword"
-                class="bo-subnav-link flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition {{ $active === 'ai-agent' && ($currentTool ?? '') === 'resetPassword' ? 'bg-cyan-400/20 text-cyan-100' : 'bg-slate-900/40 text-slate-300 hover:bg-slate-800/70' }}">
-                <span class="text-[10px]">•</span>
-                <span class="bo-label">Reset Password</span>
-            </a>
-            <a href="{{ route('backoffice.ai-agent', ['tool' => 'checkSuspend']) }}#tool-checkSuspend"
-                class="bo-subnav-link flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition {{ $active === 'ai-agent' && ($currentTool ?? '') === 'checkSuspend' ? 'bg-cyan-400/20 text-cyan-100' : 'bg-slate-900/40 text-slate-300 hover:bg-slate-800/70' }}">
-                <span class="text-[10px]">•</span>
-                <span class="bo-label">CheckSuspend</span>
-            </a>
+        {{-- Section: CUSTOMER DATA --}}
+        <div class="bo-section" data-section="customer-data">
+            <button type="button"
+                class="bo-section-header flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-white/80 transition hover:bg-white/10">
+                <span class="bo-section-label text-[11px] font-bold uppercase tracking-widest">Customer Data</span>
+                <svg class="bo-section-chevron h-3.5 w-3.5 rotated" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+            <div class="bo-section-items mt-1 space-y-0.5">
+                <a href="{{ route('backoffice.dashboard') }}"
+                    class="bo-nav-item group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition {{ $active === 'customer' ? 'bg-white/20 font-semibold text-white' : 'text-white/90 hover:bg-white/10' }}">
+                    <span
+                        class="flex h-7 w-7 items-center justify-center rounded-md {{ $active === 'customer' ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/15' }}">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </span>
+                    <span class="bo-label">Customer</span>
+                </a>
+            </div>
         </div>
+
+        {{-- Section: AI AGENT --}}
+        <div class="bo-section" data-section="ai-agent">
+            <button type="button"
+                class="bo-section-header flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-white/80 transition hover:bg-white/10">
+                <span class="bo-section-label text-[11px] font-bold uppercase tracking-widest">AI Agent</span>
+                <svg class="bo-section-chevron h-3.5 w-3.5 rotated" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+            <div class="bo-section-items mt-1 space-y-0.5">
+                <a href="{{ route('backoffice.ai-agent') }}"
+                    class="bo-nav-item group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition {{ $active === 'ai-agent' && empty($currentTool) ? 'bg-white/20 font-semibold text-white' : 'text-white/90 hover:bg-white/10' }}">
+                    <span
+                        class="flex h-7 w-7 items-center justify-center rounded-md {{ $active === 'ai-agent' && empty($currentTool) ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/15' }}">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </span>
+                    <span class="bo-label">Settings</span>
+                </a>
+                <a href="{{ route('backoffice.ai-agent', ['tool' => 'resetPassword']) }}#tool-resetPassword"
+                    class="bo-nav-item group flex items-center gap-3 rounded-lg py-2 pl-6 pr-3 text-sm transition {{ $active === 'ai-agent' && ($currentTool ?? '') === 'resetPassword' ? 'bg-white/20 font-semibold text-white' : 'text-white/80 hover:bg-white/10' }}">
+                    <span
+                        class="flex h-5 w-5 items-center justify-center rounded {{ ($currentTool ?? '') === 'resetPassword' ? 'bg-white/20' : 'bg-white/10' }}">
+                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                    </span>
+                    <span class="bo-label text-xs">Reset Password</span>
+                </a>
+                <a href="{{ route('backoffice.ai-agent', ['tool' => 'checkSuspend']) }}#tool-checkSuspend"
+                    class="bo-nav-item group flex items-center gap-3 rounded-lg py-2 pl-6 pr-3 text-sm transition {{ $active === 'ai-agent' && ($currentTool ?? '') === 'checkSuspend' ? 'bg-white/20 font-semibold text-white' : 'text-white/80 hover:bg-white/10' }}">
+                    <span
+                        class="flex h-5 w-5 items-center justify-center rounded {{ ($currentTool ?? '') === 'checkSuspend' ? 'bg-white/20' : 'bg-white/10' }}">
+                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </span>
+                    <span class="bo-label text-xs">CheckSuspend</span>
+                </a>
+            </div>
+        </div>
+
     </nav>
 
-    <form method="POST" action="{{ route('logout') }}" class="mt-8">
-        @csrf
-        <button type="submit"
-            class="bo-nav-link flex w-full items-center gap-3 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15">
-            <span class="text-base">↩</span>
-            <span class="bo-label">Logout</span>
-        </button>
-    </form>
+    {{-- Footer / Logout --}}
+    <div class="border-t border-white/15 px-3 py-4">
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit"
+                class="bo-nav-item group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/80 transition hover:bg-white/10">
+                <span class="flex h-7 w-7 items-center justify-center rounded-md bg-white/10 group-hover:bg-white/15">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </span>
+                <span class="bo-label">Logout</span>
+            </button>
+        </form>
+    </div>
 </aside>
 
 <script>
@@ -91,27 +170,53 @@
         const shell = document.getElementById('bo-shell');
         const toggleButton = document.getElementById('bo-sidebar-toggle');
 
-        if (!shell || !toggleButton || shell.dataset.sidebarReady === '1') {
-            return;
-        }
-
+        if (!shell || !toggleButton || shell.dataset.sidebarReady === '1') return;
         shell.dataset.sidebarReady = '1';
 
         const storageKey = 'backoffice_sidebar_collapsed';
+        const sectionKey = 'backoffice_sections';
 
-        const applyState = (collapsed) => {
+        // Sidebar collapse / expand
+        const applyCollapsed = (collapsed) => {
             shell.classList.toggle('bo-collapsed', collapsed);
             toggleButton.title = collapsed ? 'Expand navigation' : 'Minimize navigation';
             toggleButton.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Minimize sidebar');
         };
 
-        const collapsed = localStorage.getItem(storageKey) === '1';
-        applyState(collapsed);
+        applyCollapsed(localStorage.getItem(storageKey) === '1');
 
         toggleButton.addEventListener('click', () => {
             const next = !shell.classList.contains('bo-collapsed');
-            applyState(next);
+            applyCollapsed(next);
             localStorage.setItem(storageKey, next ? '1' : '0');
+        });
+
+        // Section collapse / expand (like reference panel)
+        const savedSections = JSON.parse(localStorage.getItem(sectionKey) || '{}');
+
+        document.querySelectorAll('.bo-section').forEach(section => {
+            const name = section.dataset.section;
+            const header = section.querySelector('.bo-section-header');
+            const items = section.querySelector('.bo-section-items');
+            const chevron = section.querySelector('.bo-section-chevron');
+
+            if (!header || !items || !chevron) return;
+
+            const applySection = (expanded) => {
+                items.classList.toggle('collapsed', !expanded);
+                chevron.classList.toggle('rotated', expanded);
+            };
+
+            // Default open unless explicitly saved as closed
+            const isExpanded = savedSections[name] !== false;
+            applySection(isExpanded);
+
+            header.addEventListener('click', () => {
+                const expanded = items.classList.contains('collapsed');
+                applySection(expanded);
+                savedSections[name] = expanded;
+                localStorage.setItem(sectionKey, JSON.stringify(savedSections));
+            });
         });
     })();
 </script>

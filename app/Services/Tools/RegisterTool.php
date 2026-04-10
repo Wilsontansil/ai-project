@@ -144,6 +144,7 @@ class RegisterTool
 
         try {
             Player::create([
+                'name' => $username,
                 'username' => $username,
                 'email' => $email,
                 'hp' => $hp,

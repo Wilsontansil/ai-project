@@ -21,30 +21,8 @@
 
 <body class="min-h-screen bg-slate-950 text-slate-100">
     <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] p-4 md:p-6">
-        <div class="mx-auto flex max-w-7xl gap-6">
-            <aside class="w-64 shrink-0 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur">
-                <p class="text-xs uppercase tracking-[0.3em] text-cyan-300/80">Backoffice</p>
-                <p class="mt-2 text-sm text-slate-300">{{ auth()->user()->email }}</p>
-
-                <nav class="mt-6 space-y-2">
-                    <a href="{{ route('backoffice.dashboard') }}"
-                        class="block rounded-xl px-4 py-3 text-sm font-medium transition {{ request()->routeIs('backoffice.dashboard') ? 'bg-cyan-400 text-slate-950' : 'bg-slate-900/50 text-slate-200 hover:bg-slate-800/70' }}">
-                        Customer
-                    </a>
-                    <a href="{{ route('backoffice.ai-agent') }}"
-                        class="block rounded-xl px-4 py-3 text-sm font-medium transition {{ request()->routeIs('backoffice.ai-agent') ? 'bg-cyan-400 text-slate-950' : 'bg-slate-900/50 text-slate-200 hover:bg-slate-800/70' }}">
-                        AI Agent
-                    </a>
-                </nav>
-
-                <form method="POST" action="{{ route('logout') }}" class="mt-8">
-                    @csrf
-                    <button type="submit"
-                        class="w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15">
-                        Logout
-                    </button>
-                </form>
-            </aside>
+        <div id="bo-shell" class="mx-auto flex max-w-7xl gap-6">
+            @include('backoffice.partials.sidebar', ['active' => 'ai-agent'])
 
             <main class="min-w-0 flex-1 space-y-6">
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">

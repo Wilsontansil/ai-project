@@ -318,11 +318,16 @@ class AIService
             }
         }
 
-        // 2. Fallback: score all tools by keyword match, pick the best.
+        // 2. Fallback: keyword match only for info-only tools (no OpenAI definition).
+        //    Tools with parameters were already offered to OpenAI — trust its decision.
         $bestTool = null;
         $bestScore = 0;
 
         foreach ($tools as $tool) {
+            if ($tool->getDefinition() !== null) {
+                continue; // OpenAI already had a chance to call this tool.
+            }
+
             $score = $tool->matchScore($userMessage);
             if ($score > $bestScore) {
                 $bestScore = $score;
@@ -330,19 +335,8 @@ class AIService
             }
         }
 
-        if ($bestTool !== null) {
-            if (!empty($bestTool->information_text)) {
-                return $bestTool->information_text;
-            }
-
-            $instance = $bestTool->newServiceInstance();
-
-            if ($instance !== null && method_exists($instance, 'extractArgumentsFromText')) {
-                $args = $instance->extractArgumentsFromText($userMessage);
-                return $this->executeTool($bestTool, $args, $agent);
-            }
-
-            return $bestTool->getMissingMessage();
+        if ($bestTool !== null && !empty($bestTool->information_text)) {
+            return $bestTool->information_text;
         }
 
         return null;

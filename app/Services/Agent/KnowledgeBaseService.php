@@ -93,33 +93,35 @@ class KnowledgeBaseService
     }
 
     /**
-     * Build prompt snippet from relevant knowledge + learned memories.
-     * Only injects matching content — not the entire knowledge base.
+     * Build compact JSON snippet grouped by category.
+     * Keeps it short — only matching content, sorted by category.
      */
     public function toPromptSnippet(string $message, int $limit = 5): string
     {
         $rows = $this->searchRelevant($message, $limit);
         $memories = $this->searchLearnedMemories($message, 3);
 
-        $lines = [];
-
-        if ($rows->isNotEmpty()) {
-            foreach ($rows as $row) {
-                $label = $row->title ?: ($row->category ?: 'Info');
-                $lines[] = "[{$label}]";
-                $lines[] = $row->content;
-                $lines[] = '';
-            }
+        if ($rows->isEmpty() && $memories->isEmpty()) {
+            return '';
         }
 
-        if ($memories->isNotEmpty()) {
-            $lines[] = 'Learned patterns:';
-            foreach ($memories as $mem) {
-                $lines[] = '- ' . $mem->pattern . ': ' . $mem->learned_response;
-            }
+        $grouped = [];
+
+        foreach ($rows as $row) {
+            $cat = $row->category ?: 'general';
+            $grouped[$cat][] = $row->title
+                ? "{$row->title}: {$row->content}"
+                : $row->content;
         }
 
-        return implode("\n", $lines);
+        foreach ($memories as $mem) {
+            $cat = $mem->category ?: 'learned';
+            $grouped[$cat][] = "{$mem->pattern}: {$mem->learned_response}";
+        }
+
+        ksort($grouped);
+
+        return json_encode($grouped, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
     /**

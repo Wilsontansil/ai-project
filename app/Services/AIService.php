@@ -309,30 +309,40 @@ class AIService
     {
         $tools = $this->getEnabledTools();
 
+        // 1. Check if OpenAI explicitly called a tool (highest priority).
         foreach ($tools as $tool) {
-            // Check if OpenAI returned a tool call for this tool.
             $arguments = $this->extractArgumentsFromToolCall($msg, $tool->tool_name);
 
             if ($arguments !== null) {
                 return $this->executeTool($tool, $arguments, $agent);
             }
+        }
 
-            // Fallback: match intent using DB keywords.
-            if ($tool->matchesIntent($userMessage)) {
-                // Info-only tool — return information text directly.
-                if (!empty($tool->information_text)) {
-                    return $tool->information_text;
-                }
+        // 2. Fallback: score all tools by keyword match, pick the best.
+        $bestTool = null;
+        $bestScore = 0;
 
-                $instance = $tool->newServiceInstance();
-
-                if ($instance !== null && method_exists($instance, 'extractArgumentsFromText')) {
-                    $args = $instance->extractArgumentsFromText($userMessage);
-                    return $this->executeTool($tool, $args, $agent);
-                }
-
-                return $tool->getMissingMessage();
+        foreach ($tools as $tool) {
+            $score = $tool->matchScore($userMessage);
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $bestTool = $tool;
             }
+        }
+
+        if ($bestTool !== null) {
+            if (!empty($bestTool->information_text)) {
+                return $bestTool->information_text;
+            }
+
+            $instance = $bestTool->newServiceInstance();
+
+            if ($instance !== null && method_exists($instance, 'extractArgumentsFromText')) {
+                $args = $instance->extractArgumentsFromText($userMessage);
+                return $this->executeTool($bestTool, $args, $agent);
+            }
+
+            return $bestTool->getMissingMessage();
         }
 
         return null;

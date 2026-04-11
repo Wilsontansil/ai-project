@@ -54,19 +54,22 @@ class Tool extends Model
     }
 
     /**
-     * Check if a user message matches this tool's intent keywords (from DB).
+     * Return the best keyword match score for a user message.
+     * Score = length of longest matched keyword. 0 = no match.
      */
-    public function matchesIntent(string $message): bool
+    public function matchScore(string $message): int
     {
         $keywords = $this->keywords ?? [];
+        $best = 0;
 
         foreach ($keywords as $keyword) {
-            if (stripos($message, (string) $keyword) !== false) {
-                return true;
+            $kw = (string) $keyword;
+            if ($kw !== '' && stripos($message, $kw) !== false) {
+                $best = max($best, mb_strlen($kw));
             }
         }
 
-        return false;
+        return $best;
     }
 
     /**

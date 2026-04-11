@@ -228,6 +228,7 @@ class AIService
     {
         return $this->getEnabledTools()
             ->map(fn (Tool $tool) => $tool->getDefinition())
+            ->filter()
             ->values()
             ->all();
     }
@@ -265,6 +266,11 @@ class AIService
 
             // Fallback: match intent using DB keywords.
             if ($tool->matchesIntent($userMessage)) {
+                // Info-only tool — return information text directly.
+                if (!empty($tool->information_text)) {
+                    return $tool->information_text;
+                }
+
                 $instance = $tool->newServiceInstance();
 
                 if ($instance !== null && method_exists($instance, 'extractArgumentsFromText')) {

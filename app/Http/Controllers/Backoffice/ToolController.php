@@ -34,22 +34,18 @@ class ToolController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'tool_name' => ['required', 'string', 'max:80', 'unique:tools,tool_name'],
+            'tool_name' => ['required', 'string', 'max:80', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:tools,tool_name'],
             'display_name' => ['required', 'string', 'max:120'],
             'description' => ['nullable', 'string', 'max:500'],
-            'parameters' => ['nullable', 'string'],
+            'params' => ['nullable', 'array'],
+            'params.*.name' => ['required_with:params', 'string', 'max:80'],
+            'params.*.description' => ['nullable', 'string', 'max:255'],
             'keywords' => ['nullable', 'string'],
             'missing_message' => ['nullable', 'string', 'max:1000'],
             'information_text' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        $parameters = null;
-        if (!empty($data['parameters'])) {
-            $parameters = json_decode($data['parameters'], true);
-            if (!is_array($parameters)) {
-                return back()->withErrors(['parameters' => 'Parameters harus berupa JSON yang valid.'])->withInput();
-            }
-        }
+        $parameters = $this->buildParametersFromInput($request->input('params', []));
 
         $keywords = null;
         if (!empty($data['keywords'])) {
@@ -88,25 +84,15 @@ class ToolController extends Controller
         $data = $request->validate([
             'display_name' => ['required', 'string', 'max:120'],
             'description' => ['nullable', 'string', 'max:500'],
-            'parameters' => ['nullable', 'string'],
+            'params' => ['nullable', 'array'],
+            'params.*.name' => ['required_with:params', 'string', 'max:80'],
+            'params.*.description' => ['nullable', 'string', 'max:255'],
             'keywords' => ['nullable', 'string'],
             'missing_message' => ['nullable', 'string', 'max:1000'],
             'information_text' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        $parameters = $tool->parameters;
-        if ($request->has('parameters')) {
-            $raw = $data['parameters'] ?? '';
-            if ($raw !== '') {
-                $decoded = json_decode($raw, true);
-                if (!is_array($decoded)) {
-                    return back()->withErrors(['parameters' => 'Parameters harus berupa JSON yang valid.'])->withInput();
-                }
-                $parameters = $decoded;
-            } else {
-                $parameters = null;
-            }
-        }
+        $parameters = $this->buildParametersFromInput($request->input('params', []));
 
         $keywords = $tool->keywords;
         if ($request->has('keywords')) {
@@ -141,5 +127,44 @@ class ToolController extends Controller
         $tool->delete();
 
         return redirect()->route('backoffice.tools.index')->with('success', $name . ' berhasil dihapus.');
+    }
+
+    /**
+     * Build OpenAI-compatible parameters JSON from simple form input.
+     */
+    private function buildParametersFromInput(?array $params): ?array
+    {
+        if (empty($params)) {
+            return null;
+        }
+
+        $properties = [];
+        $required = [];
+
+        foreach ($params as $param) {
+            $name = trim((string) ($param['name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+
+            $properties[$name] = [
+                'type' => 'string',
+                'description' => trim((string) ($param['description'] ?? '')),
+            ];
+
+            if (!empty($param['required'])) {
+                $required[] = $name;
+            }
+        }
+
+        if ($properties === []) {
+            return null;
+        }
+
+        return [
+            'type' => 'object',
+            'properties' => $properties,
+            'required' => $required,
+        ];
     }
 }

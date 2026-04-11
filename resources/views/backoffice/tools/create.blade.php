@@ -48,18 +48,18 @@
             </div>
 
             <div>
-                <label for="parameters" class="mb-2 block text-sm text-slate-200">Parameters (JSON)</label>
-                <p class="mb-2 text-xs text-slate-400">Schema parameter untuk OpenAI function calling. Format JSON
-                    object.</p>
-                <textarea id="parameters" name="parameters" rows="6"
-                    placeholder='{
-  "type": "object",
-  "properties": {
-    "username": { "type": "string", "description": "Username akun" }
-  },
-  "required": ["username"]
-}'
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm font-mono text-white outline-none transition focus:border-cyan-400">{{ old('parameters') }}</textarea>
+                <label class="mb-2 block text-sm text-slate-200">Parameters</label>
+                <p class="mb-2 text-xs text-slate-400">Data yang perlu dikumpulkan dari user. Kosongkan jika tool hanya
+                    memberikan informasi.</p>
+
+                <div id="param-list" class="space-y-3">
+                    {{-- Rows added by JS --}}
+                </div>
+
+                <button type="button" onclick="addParamRow()"
+                    class="mt-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300 transition hover:bg-white/10">
+                    + Tambah Parameter
+                </button>
             </div>
 
             <div>
@@ -119,4 +119,31 @@
             </div>
         </form>
     </div>
+
+@section('scripts')
+    <script>
+        let paramIndex = 0;
+
+        function addParamRow(name = '', desc = '', required = false) {
+            const list = document.getElementById('param-list');
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
+            row.innerHTML = `
+                    <input type="text" name="params[${paramIndex}][name]" value="${name}" placeholder="Nama field (e.g. username)"
+                        class="w-1/3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    <input type="text" name="params[${paramIndex}][description]" value="${desc}" placeholder="Deskripsi (e.g. Username akun)"
+                        class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    <label class="flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap">
+                        <input type="checkbox" name="params[${paramIndex}][required]" value="1" ${required ? 'checked' : ''}
+                            class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
+                        Wajib
+                    </label>
+                    <button type="button" onclick="this.parentElement.remove()"
+                        class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                `;
+            list.appendChild(row);
+            paramIndex++;
+        }
+    </script>
+@endsection
 @endsection

@@ -11,4 +11,5 @@ Route::get('/test', function () {
 });
 Route::post('/telegram/webhook', [TelegramController::class, 'handleWebhook']);
 Route::match(['get', 'post'], '/whatsapp/webhook', [WhatsAppController::class, 'handleWebhook']);
-Route::post('/livechat/webhook', [LiveChatController::class, 'handleWebhook']);
+// Route::post('/livechat/webhook', [LiveChatController::class, 'handleWebhook']);
+Route::match(['get', 'post'], '/livechat/webhook', [LiveChatController::class, 'handleWebhook']);

@@ -33,12 +33,10 @@ Main components:
     - Learns/updates customer name from message patterns (example: "nama saya ...", "my name is ...") when value is more reliable.
 - `app/Services/Agent/ConversationMemoryService.php`
     - Stores and fetches short-term conversation memory.
-- `app/Services/Agent/KnowledgeBaseService.php`
-    - Stores and retrieves reusable long-term knowledge entries.
 - `app/Services/Agent/BehaviorProfilerService.php`
     - Updates intent/sentiment/frequency behavior profile per customer.
 - `app/Services/Agent/AgentContextService.php`
-    - Builds unified AI context: profile + behavior + memory + knowledge.
+    - Builds unified AI context: profile + behavior + memory.
 - `app/Http/Controllers/Backoffice/AuthController.php`
     - Handles admin login and logout for backoffice.
 - `app/Http/Controllers/Backoffice/DashboardController.php`
@@ -61,7 +59,6 @@ Learning persistence tables:
 
 - `customers`
 - `conversations`
-- `knowledge_base`
 - `customer_behaviors`
 - `tool_settings`
 - `users`

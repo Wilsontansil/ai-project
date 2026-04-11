@@ -8,7 +8,6 @@ class AgentContextService
 {
     public function __construct(
         private readonly ConversationMemoryService $memoryService,
-        private readonly KnowledgeBaseService $knowledgeService,
         private readonly BehaviorProfilerService $behaviorService,
     ) {
     }
@@ -32,7 +31,6 @@ class AgentContextService
                 'last_intent_at' => optional($behavior->last_intent_at)?->toDateTimeString(),
             ],
             'recent_conversation' => $this->memoryService->toPromptSnippet($customer, 10),
-            'relevant_knowledge' => $this->knowledgeService->toPromptSnippet($message, 5),
         ];
     }
 }

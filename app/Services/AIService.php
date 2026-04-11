@@ -263,7 +263,7 @@ class AIService
             return '';
         }
 
-        $lines = ["FORBIDDEN BEHAVIOURS (strictly prohibited � never violate):"];
+        $lines = ["FORBIDDEN BEHAVIOURS (strictly prohibited — never violate):"];
 
         foreach ($rules as $rule) {
             $levelTag = strtoupper($rule->level);

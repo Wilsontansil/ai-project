@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Backoffice\AIAgentController;
 use App\Http\Controllers\Backoffice\AuthController;
-use App\Http\Controllers\Backoffice\CaseController;
+use App\Http\Controllers\Backoffice\ForbiddenBehaviourController;
 use App\Http\Controllers\Backoffice\DashboardController;
 use App\Http\Controllers\Backoffice\EscalationController;
 use App\Http\Controllers\Backoffice\ToolController;
@@ -31,12 +31,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/backoffice/tools/{tool}', [ToolController::class, 'update'])->name('backoffice.tools.update');
     Route::delete('/backoffice/tools/{tool}', [ToolController::class, 'destroy'])->name('backoffice.tools.destroy');
 
-    Route::get('/backoffice/cases', [CaseController::class, 'index'])->name('backoffice.cases.index');
-    Route::get('/backoffice/cases/create', [CaseController::class, 'create'])->name('backoffice.cases.create');
-    Route::post('/backoffice/cases', [CaseController::class, 'store'])->name('backoffice.cases.store');
-    Route::get('/backoffice/cases/{case}/edit', [CaseController::class, 'edit'])->name('backoffice.cases.edit');
-    Route::put('/backoffice/cases/{case}', [CaseController::class, 'update'])->name('backoffice.cases.update');
-    Route::delete('/backoffice/cases/{case}', [CaseController::class, 'destroy'])->name('backoffice.cases.destroy');
+    Route::get('/backoffice/forbidden-behaviours', [ForbiddenBehaviourController::class, 'index'])->name('backoffice.forbidden.index');
+    Route::get('/backoffice/forbidden-behaviours/create', [ForbiddenBehaviourController::class, 'create'])->name('backoffice.forbidden.create');
+    Route::post('/backoffice/forbidden-behaviours', [ForbiddenBehaviourController::class, 'store'])->name('backoffice.forbidden.store');
+    Route::get('/backoffice/forbidden-behaviours/{forbidden_behaviour}/edit', [ForbiddenBehaviourController::class, 'edit'])->name('backoffice.forbidden.edit');
+    Route::put('/backoffice/forbidden-behaviours/{forbidden_behaviour}', [ForbiddenBehaviourController::class, 'update'])->name('backoffice.forbidden.update');
+    Route::delete('/backoffice/forbidden-behaviours/{forbidden_behaviour}', [ForbiddenBehaviourController::class, 'destroy'])->name('backoffice.forbidden.destroy');
 
     Route::get('/backoffice/escalations', [EscalationController::class, 'index'])->name('backoffice.escalations.index');
     Route::post('/backoffice/escalations/{escalation}/read', [EscalationController::class, 'markRead'])->name('backoffice.escalations.markRead');

@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\Agent;
-use App\Models\AgentCase;
+use App\Models\ForbiddenBehaviour;
 use App\Models\Customer;
 use App\Models\EscalationNotification;
 use App\Models\Tool;
@@ -246,28 +246,28 @@ class AIService
     }
 
     /**
-     * Build additional instructions from active agent cases.
+     * Build additional instructions from active forbidden behaviour rules.
      */
     private function getCaseInstructions(): string
     {
-        if (!Schema::hasTable('agent_cases')) {
+        if (!Schema::hasTable('forbidden_behaviours')) {
             return '';
         }
 
-        $cases = AgentCase::query()
+        $rules = ForbiddenBehaviour::query()
             ->where('is_active', true)
             ->orderByRaw("FIELD(level, 'danger', 'warning', 'info')")
             ->get();
 
-        if ($cases->isEmpty()) {
+        if ($rules->isEmpty()) {
             return '';
         }
 
-        $lines = ["IMPORTANT BEHAVIORAL RULES (from reported cases â€” follow strictly):"];
+        $lines = ["FORBIDDEN BEHAVIOURS (strictly prohibited � never violate):"];
 
-        foreach ($cases as $case) {
-            $levelTag = strtoupper($case->level);
-            $lines[] = "- [{$levelTag}] {$case->instruction}";
+        foreach ($rules as $rule) {
+            $levelTag = strtoupper($rule->level);
+            $lines[] = "- [{$levelTag}] {$rule->instruction}";
         }
 
         return implode("\n", $lines);

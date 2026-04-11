@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('agent_cases', function (Blueprint $table) {
+        Schema::create('forbidden_behaviours', function (Blueprint $table) {
             $table->id();
             $table->string('title');
             $table->text('instruction');
@@ -20,6 +20,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('agent_cases');
+        Schema::dropIfExists('forbidden_behaviours');
     }
 };

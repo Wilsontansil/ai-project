@@ -1,17 +1,17 @@
 @extends('backoffice.partials.layout')
 
-@section('title', 'Agent Cases')
+@section('title', 'Forbidden Behaviours')
 
 @section('content')
     <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-3xl font-semibold">Agent Cases</h1>
-                <p class="mt-2 text-sm text-slate-300">Report dan kelola case untuk memperbaiki behaviour AI agent.</p>
+                <h1 class="text-3xl font-semibold">Forbidden Behaviours</h1>
+                <p class="mt-2 text-sm text-slate-300">Kelola aturan perilaku yang dilarang untuk AI agent.</p>
             </div>
-            <a href="{{ route('backoffice.cases.create') }}"
+            <a href="{{ route('backoffice.forbidden.create') }}"
                 class="rounded-2xl bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
-                + New Case
+                + New Rule
             </a>
         </div>
     </div>
@@ -22,23 +22,23 @@
         </div>
     @endif
 
-    @if ($cases->isEmpty())
+    @if ($rules->isEmpty())
         <div class="rounded-3xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur">
-            <p class="text-slate-400">Belum ada case. Tambahkan case pertama untuk melatih AI agent.</p>
+            <p class="text-slate-400">Belum ada rule. Tambahkan rule pertama untuk membatasi perilaku AI agent.</p>
         </div>
     @else
         <div class="space-y-3">
-            @foreach ($cases as $case)
+            @foreach ($rules as $rule)
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur">
                     <div class="flex items-start justify-between gap-4">
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-3">
-                                @if ($case->level === 'danger')
+                                @if ($rule->level === 'danger')
                                     <span
                                         class="inline-flex items-center rounded-full bg-red-500/20 px-2.5 py-0.5 text-xs font-semibold text-red-300 ring-1 ring-red-400/30">
                                         DANGER
                                     </span>
-                                @elseif ($case->level === 'warning')
+                                @elseif ($rule->level === 'warning')
                                     <span
                                         class="inline-flex items-center rounded-full bg-amber-500/20 px-2.5 py-0.5 text-xs font-semibold text-amber-300 ring-1 ring-amber-400/30">
                                         WARNING
@@ -50,23 +50,23 @@
                                     </span>
                                 @endif
 
-                                <h3 class="text-base font-semibold text-white">{{ $case->title }}</h3>
+                                <h3 class="text-base font-semibold text-white">{{ $rule->title }}</h3>
 
-                                @if (!$case->is_active)
+                                @if (!$rule->is_active)
                                     <span class="text-xs text-slate-500">(inactive)</span>
                                 @endif
                             </div>
-                            <p class="mt-2 text-sm text-slate-300">{{ $case->instruction }}</p>
-                            <p class="mt-1 text-xs text-slate-500">{{ $case->created_at->format('d M Y H:i') }}</p>
+                            <p class="mt-2 text-sm text-slate-300">{{ $rule->instruction }}</p>
+                            <p class="mt-1 text-xs text-slate-500">{{ $rule->created_at->format('d M Y H:i') }}</p>
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <a href="{{ route('backoffice.cases.edit', $case) }}"
+                            <a href="{{ route('backoffice.forbidden.edit', $rule) }}"
                                 class="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
                                 Edit
                             </a>
-                            <form method="POST" action="{{ route('backoffice.cases.destroy', $case) }}"
-                                onsubmit="return confirm('Hapus case ini?')">
+                            <form method="POST" action="{{ route('backoffice.forbidden.destroy', $rule) }}"
+                                onsubmit="return confirm('Hapus rule ini?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"

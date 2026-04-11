@@ -1,11 +1,11 @@
 @extends('backoffice.partials.layout')
 
-@section('title', 'New Case')
+@section('title', 'New Forbidden Rule')
 
 @section('content')
     <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-        <h1 class="text-3xl font-semibold">Report New Case</h1>
-        <p class="mt-2 text-sm text-slate-300">Tambahkan case baru untuk memperbaiki perilaku AI agent.</p>
+        <h1 class="text-3xl font-semibold">New Forbidden Rule</h1>
+        <p class="mt-2 text-sm text-slate-300">Tambahkan aturan baru yang AI agent dilarang lakukan.</p>
     </div>
 
     @if ($errors->any())
@@ -19,22 +19,22 @@
     @endif
 
     <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-        <form method="POST" action="{{ route('backoffice.cases.store') }}" class="space-y-5">
+        <form method="POST" action="{{ route('backoffice.forbidden.store') }}" class="space-y-5">
             @csrf
 
             <div>
-                <label for="title" class="mb-2 block text-sm text-slate-200">Case Title</label>
+                <label for="title" class="mb-2 block text-sm text-slate-200">Rule Title</label>
                 <input id="title" type="text" name="title" value="{{ old('title') }}"
-                    placeholder="e.g. Agent asking customer for password"
+                    placeholder="e.g. Forbidden to create player without confirmation"
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
             </div>
 
             <div>
                 <label for="instruction" class="mb-2 block text-sm text-slate-200">Instruction for AI</label>
-                <p class="mb-2 text-xs text-slate-400">Tulis instruksi yang jelas agar AI agent tidak mengulangi kesalahan
-                    ini.</p>
+                <p class="mb-2 text-xs text-slate-400">Tulis instruksi yang jelas tentang apa yang AI agent dilarang
+                    lakukan.</p>
                 <textarea id="instruction" name="instruction" rows="4"
-                    placeholder="e.g. Dont ask customer for password when reset password, just always give 1234567 as default"
+                    placeholder="e.g. AI dilarang membuat data player tanpa konfirmasi dari player"
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('instruction') }}</textarea>
             </div>
 
@@ -51,9 +51,9 @@
             <div class="flex items-center gap-4 pt-2">
                 <button type="submit"
                     class="rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
-                    Submit Case
+                    Submit Rule
                 </button>
-                <a href="{{ route('backoffice.cases.index') }}"
+                <a href="{{ route('backoffice.forbidden.index') }}"
                     class="rounded-2xl border border-white/10 px-6 py-3 text-sm text-slate-300 transition hover:bg-white/5">
                     Cancel
                 </a>

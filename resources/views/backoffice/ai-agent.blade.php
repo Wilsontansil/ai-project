@@ -67,11 +67,11 @@
                                 </p>
                             </div>
                             <div class="rounded-2xl border border-white/10 bg-slate-900/50 px-4 py-3">
-                                <p class="text-xs text-slate-400">Active Cases</p>
+                                <p class="text-xs text-slate-400">Forbidden Rules</p>
                                 <p class="mt-1 text-sm font-semibold text-white">
-                                    {{ $aiInfo['active_cases'] }}
-                                    @if ($aiInfo['active_cases'] > 0)
-                                        <a href="{{ route('backoffice.cases.index') }}"
+                                    {{ $aiInfo['active_forbidden'] }}
+                                    @if ($aiInfo['active_forbidden'] > 0)
+                                        <a href="{{ route('backoffice.forbidden.index') }}"
                                             class="ml-1 text-xs font-normal text-cyan-400 hover:underline">View</a>
                                     @endif
                                 </p>

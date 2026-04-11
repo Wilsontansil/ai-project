@@ -162,30 +162,16 @@
                     </span>
                     <span class="bo-label">Settings</span>
                 </a>
-            </div>
-        </div>
-
-        {{-- Section: CASE REPORT --}}
-        <div class="bo-section" data-section="case-report">
-            <button type="button"
-                class="bo-section-header flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-white/80 transition hover:bg-white/10">
-                <span class="bo-section-label text-[11px] font-bold uppercase tracking-widest">Case Report</span>
-                <svg class="bo-section-chevron h-3.5 w-3.5 rotated" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-            </button>
-            <div class="bo-section-items mt-1 space-y-0.5">
-                <a href="{{ route('backoffice.cases.index') }}"
-                    class="bo-nav-item group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition {{ ($boActive ?? ($active ?? '')) === 'cases' ? 'bg-white/20 font-semibold text-white' : 'text-white/90 hover:bg-white/10' }}">
+                <a href="{{ route('backoffice.forbidden.index') }}"
+                    class="bo-nav-item group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition {{ ($boActive ?? ($active ?? '')) === 'forbidden' ? 'bg-white/20 font-semibold text-white' : 'text-white/90 hover:bg-white/10' }}">
                     <span
-                        class="flex h-7 w-7 items-center justify-center rounded-md {{ ($boActive ?? ($active ?? '')) === 'cases' ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/15' }}">
+                        class="flex h-7 w-7 items-center justify-center rounded-md {{ ($boActive ?? ($active ?? '')) === 'forbidden' ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/15' }}">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                         </svg>
                     </span>
-                    <span class="bo-label">Cases</span>
+                    <span class="bo-label">Forbidden</span>
                 </a>
             </div>
         </div>

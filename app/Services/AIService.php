@@ -303,7 +303,11 @@ class AIService
             return $instance->execute($username, $agent);
         }
 
-        // No PHP class — return collected arguments summary.
+        // No PHP class — return information text or collected arguments summary.
+        if (!empty($tool->information_text)) {
+            return $tool->information_text;
+        }
+
         $filled = array_filter($arguments, fn ($v) => $v !== null && $v !== '');
 
         if ($filled === []) {

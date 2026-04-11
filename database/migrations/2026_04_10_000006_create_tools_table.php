@@ -19,6 +19,7 @@ return new class extends Migration
             $table->json('parameters')->nullable();
             $table->json('keywords')->nullable();
             $table->text('missing_message')->nullable();
+            $table->text('information_text')->nullable();
             $table->json('meta')->nullable();
             $table->timestamps();
         });

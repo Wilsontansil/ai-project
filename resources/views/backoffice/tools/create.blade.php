@@ -81,11 +81,12 @@
             </div>
 
             <div>
-                <label for="class_name" class="mb-2 block text-sm text-slate-200">Class Name (optional)</label>
-                <p class="mb-2 text-xs text-slate-400">PHP class untuk execution logic. Kosongkan jika tidak ada.</p>
-                <input id="class_name" type="text" name="class_name" value="{{ old('class_name') }}"
-                    placeholder="App\Services\Tools\YourTool"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm font-mono text-white outline-none transition focus:border-cyan-400" />
+                <label for="information_text" class="mb-2 block text-sm text-slate-200">Information Text</label>
+                <p class="mb-2 text-xs text-slate-400">Teks informasi yang langsung dikirim sebagai jawaban. Cocok untuk
+                    tool yang hanya memberikan info tanpa perlu eksekusi.</p>
+                <textarea id="information_text" name="information_text" rows="4"
+                    placeholder="e.g. Untuk deposit, silakan transfer ke rekening BCA 1234567890 a/n PT XYZ."
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('information_text') }}</textarea>
             </div>
 
             <div>

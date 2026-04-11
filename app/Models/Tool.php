@@ -19,6 +19,7 @@ class Tool extends Model
         'parameters',
         'keywords',
         'missing_message',
+        'information_text',
         'meta',
     ];
 

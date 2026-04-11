@@ -4,6 +4,7 @@ use App\Http\Controllers\Backoffice\AIAgentController;
 use App\Http\Controllers\Backoffice\AuthController;
 use App\Http\Controllers\Backoffice\CaseController;
 use App\Http\Controllers\Backoffice\DashboardController;
+use App\Http\Controllers\Backoffice\EscalationController;
 use App\Http\Controllers\Backoffice\ToolController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +37,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/backoffice/cases/{case}/edit', [CaseController::class, 'edit'])->name('backoffice.cases.edit');
     Route::put('/backoffice/cases/{case}', [CaseController::class, 'update'])->name('backoffice.cases.update');
     Route::delete('/backoffice/cases/{case}', [CaseController::class, 'destroy'])->name('backoffice.cases.destroy');
+
+    Route::get('/backoffice/escalations', [EscalationController::class, 'index'])->name('backoffice.escalations.index');
+    Route::post('/backoffice/escalations/{escalation}/read', [EscalationController::class, 'markRead'])->name('backoffice.escalations.markRead');
+    Route::post('/backoffice/escalations/{escalation}/resolve', [EscalationController::class, 'resolve'])->name('backoffice.escalations.resolve');
+    Route::post('/backoffice/escalations/mark-all-read', [EscalationController::class, 'markAllRead'])->name('backoffice.escalations.markAllRead');
+    Route::get('/backoffice/escalations/unread-count', [EscalationController::class, 'unreadCount'])->name('backoffice.escalations.unreadCount');
 
     Route::post('/backoffice/logout', [AuthController::class, 'logout'])->name('logout');
 });

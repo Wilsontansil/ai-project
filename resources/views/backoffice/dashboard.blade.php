@@ -47,7 +47,7 @@
                         WhatsApp.</p>
                 </div>
 
-                <div class="grid gap-4 md:grid-cols-3">
+                <div class="grid gap-4 md:grid-cols-4">
                     <div class="rounded-3xl border border-cyan-400/20 bg-cyan-400/10 p-5">
                         <p class="text-sm text-cyan-100/80">Total Customer</p>
                         <p class="mt-2 text-3xl font-semibold text-white">{{ number_format($stats['total_customers']) }}
@@ -63,6 +63,12 @@
                         <p class="mt-2 text-3xl font-semibold text-white">
                             {{ number_format($stats['whatsapp_customers']) }}</p>
                     </div>
+                    <a href="{{ route('backoffice.escalations.index') }}"
+                        class="rounded-3xl border border-red-400/20 bg-red-400/10 p-5 transition hover:bg-red-400/15">
+                        <p class="text-sm text-red-100/80">Need Human</p>
+                        <p class="mt-2 text-3xl font-semibold text-white">
+                            {{ number_format($stats['needs_human']) }}</p>
+                    </a>
                 </div>
 
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
@@ -99,7 +105,14 @@
                                 <tbody class="divide-y divide-white/5 bg-slate-950/40">
                                     @forelse ($customers as $customer)
                                         <tr class="hover:bg-white/5">
-                                            <td class="px-4 py-3 text-white">{{ $customer->name ?: '-' }}</td>
+                                            <td class="px-4 py-3 text-white">
+                                                {{ $customer->name ?: '-' }}
+                                                @if ($customer->needs_human)
+                                                    <span
+                                                        class="ml-1.5 inline-flex items-center rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-bold text-red-300">NEED
+                                                        HUMAN</span>
+                                                @endif
+                                            </td>
                                             <td class="px-4 py-3 text-slate-200">{{ ucfirst($customer->platform) }}
                                             </td>
                                             <td class="px-4 py-3 text-slate-300">{{ $customer->platform_user_id }}</td>

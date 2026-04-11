@@ -110,12 +110,18 @@ class WhatsAppController extends Controller
         $this->sendTyping($chatId);
 
         try {
-            $reply = app(AIService::class)->reply($combinedText, $chatId, $this->agent, 'whatsapp', $agentContext);
+            $aiService = app(AIService::class);
+            $rawReply = $aiService->reply($combinedText, $chatId, $this->agent, 'whatsapp', $agentContext);
         } finally {
             $this->stopTyping($chatId);
         }
 
-        $reply = $this->appendHandoverContactIfNeeded($reply);
+        // Check if AI flagged this conversation for human escalation.
+        if ($aiService->needsEscalation($rawReply)) {
+            $aiService->createEscalation($customer, 'whatsapp', $chatId, $combinedText, $rawReply);
+        }
+
+        $reply = $this->appendHandoverContactIfNeeded($rawReply);
 
         if ($customer !== null) {
             try {

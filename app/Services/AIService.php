@@ -4,8 +4,11 @@ namespace App\Services;
 
 use App\Models\Agent;
 use App\Models\AgentCase;
+use App\Models\Customer;
+use App\Models\EscalationNotification;
 use App\Models\Tool;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use OpenAI;
 
@@ -71,7 +74,7 @@ class AIService
             if ($assistantReply !== null) {
                 $assistantReply = $this->prepareAssistantReply($history, $assistantReply);
                 $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
-                return $assistantReply;
+                return $this->stripEscalationMarker($assistantReply);
             }
 
             // Normal AI reply
@@ -83,12 +86,61 @@ class AIService
 
             $assistantReply = $this->prepareAssistantReply($history, $assistantReply);
             $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
-            return $assistantReply;
+            return $this->stripEscalationMarker($assistantReply);
 
         } catch (\OpenAI\Exceptions\RateLimitException $e) {
             return $this->formatReply("âš ï¸ System busy, please try again...");
         } catch (\Exception $e) {
             return $this->formatReply("âš ï¸ Error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Check if the AI reply contains an escalation marker [ESCALATE].
+     */
+    public function needsEscalation(string $reply): bool
+    {
+        return stripos($reply, '[ESCALATE]') !== false;
+    }
+
+    /**
+     * Strip the [ESCALATE] marker from the reply before sending to user.
+     */
+    private function stripEscalationMarker(string $reply): string
+    {
+        return trim(preg_replace('/\s*\[ESCALATE\]\s*/i', '', $reply));
+    }
+
+    /**
+     * Create an escalation notification for backoffice when AI cannot resolve.
+     */
+    public function createEscalation(?Customer $customer, string $channel, ?string $chatId, string $userMessage, string $aiReply): void
+    {
+        if ($customer === null) {
+            return;
+        }
+
+        try {
+            $customer->update([
+                'needs_human' => true,
+                'escalation_reason' => mb_substr($aiReply, 0, 500),
+                'escalated_at' => now(),
+                'resolved_at' => null,
+            ]);
+
+            EscalationNotification::create([
+                'customer_id' => $customer->id,
+                'channel' => $channel,
+                'chat_id' => $chatId,
+                'reason' => mb_substr($aiReply, 0, 500),
+                'last_message' => mb_substr($userMessage, 0, 1000),
+                'is_read' => false,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Failed to create escalation notification', [
+                'customer_id' => $customer->id,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -160,6 +212,14 @@ class AIService
         - Stay professional with angry/abusive users — respond politely, add emoji to soften tone.
         - Introduce yourself as {$botName} on first interaction only.
         - Format replies cleanly — no messy line breaks or long unbroken text.
+
+        ESCALATION TO HUMAN SUPPORT:
+        - If you cannot resolve the user's problem after 2-3 attempts, or the issue is outside your capabilities, you MUST escalate to human support.
+        - Situations that REQUIRE escalation: payment/billing disputes, account security issues, technical bugs you cannot fix, repeated failed tool calls, user explicitly asks for a human agent, complaints about the bot itself, legal/refund matters.
+        - When escalating, include the EXACT phrase '[ESCALATE]' (with brackets) at the END of your reply. This is a system marker — it will not be shown to the user.
+        - Before escalating, apologize briefly and inform the user that you are connecting them to a human agent.
+        - Example escalation reply: 'Mohon maaf, saya belum bisa membantu masalah ini. Saya akan sambungkan kamu ke tim support kami ya 🙏 [ESCALATE]'
+        - Do NOT escalate for simple questions or issues you can handle with available tools.
 
         HANDOVER:
         - If stuck or unable to resolve, offer transfer to human support at {$phone}. Ask confirmation first.

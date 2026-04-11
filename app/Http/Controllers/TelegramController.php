@@ -71,8 +71,15 @@ class TelegramController extends Controller
         $this->sendTyping($chatId);
 
         // Send channel so AI can include platform-specific handover info.
-        $reply = app(AIService::class)->reply($combinedText, $chatId, $this->agent, 'telegram', $agentContext);
-        $reply = $this->appendHandoverContactIfNeeded($reply);
+        $aiService = app(AIService::class);
+        $rawReply = $aiService->reply($combinedText, $chatId, $this->agent, 'telegram', $agentContext);
+
+        // Check if AI flagged this conversation for human escalation.
+        if ($aiService->needsEscalation($rawReply)) {
+            $aiService->createEscalation($customer, 'telegram', $chatId, $combinedText, $rawReply);
+        }
+
+        $reply = $this->appendHandoverContactIfNeeded($rawReply);
 
         if ($customer !== null) {
             try {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backoffice;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\Customer;
+use App\Models\EscalationNotification;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -34,6 +35,7 @@ class DashboardController extends Controller
                 'total_customers' => Customer::query()->count(),
                 'telegram_customers' => Customer::query()->where('platform', 'telegram')->count(),
                 'whatsapp_customers' => Customer::query()->where('platform', 'whatsapp')->count(),
+                'needs_human' => Customer::query()->where('needs_human', true)->count(),
             ],
         ]);
     }

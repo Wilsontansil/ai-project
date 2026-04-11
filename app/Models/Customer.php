@@ -20,12 +20,19 @@ class Customer extends Model
         'last_seen_at',
         'total_messages',
         'tags',
+        'needs_human',
+        'escalation_reason',
+        'escalated_at',
+        'resolved_at',
     ];
 
     protected $casts = [
         'first_seen_at' => 'datetime',
         'last_seen_at' => 'datetime',
+        'escalated_at' => 'datetime',
+        'resolved_at' => 'datetime',
         'tags' => 'array',
+        'needs_human' => 'boolean',
     ];
 
     public function conversations(): HasMany
@@ -36,5 +43,10 @@ class Customer extends Model
     public function behavior(): HasOne
     {
         return $this->hasOne(CustomerBehavior::class);
+    }
+
+    public function escalationNotifications(): HasMany
+    {
+        return $this->hasMany(EscalationNotification::class);
     }
 }

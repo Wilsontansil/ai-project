@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Log;
 class FileParserService
 {
     /**
-     * Parse uploaded file into knowledge base entries.
-     * Returns array of ['question' => ..., 'answer' => ...] pairs.
+     * Parse uploaded file into knowledge documents.
+     * Returns array of ['title' => ..., 'content' => ..., 'category' => ...] entries.
      */
     public function parse(UploadedFile $file): array
     {
@@ -24,9 +24,6 @@ class FileParserService
         };
     }
 
-    /**
-     * Supported file extensions.
-     */
     public static function supportedExtensions(): array
     {
         return ['txt', 'csv', 'xlsx', 'xls', 'docx'];
@@ -34,8 +31,7 @@ class FileParserService
 
     /**
      * Parse TXT file.
-     * Format: each paragraph as one knowledge entry.
-     * Or Q: / A: pairs separated by blank lines.
+     * Supports section-based format (## Title / content blocks separated by blank lines).
      */
     private function parseTxt(UploadedFile $file): array
     {
@@ -44,19 +40,19 @@ class FileParserService
             return [];
         }
 
-        // Try Q:/A: format first
-        $qaEntries = $this->parseQAFormat($content);
-        if ($qaEntries !== []) {
-            return $qaEntries;
+        // Try section-based format: ## Title\nContent...
+        $sections = $this->parseSections($content);
+        if ($sections !== []) {
+            return $sections;
         }
 
-        // Fallback: split by double newline into paragraphs
-        return $this->parseParagraphs($content);
+        // Fallback: split by double newline into separate documents
+        return $this->splitIntoParagraphs($content);
     }
 
     /**
      * Parse CSV file.
-     * Expected columns: question, answer (or first 2 columns).
+     * Expected columns: category, title, content (or content-only).
      */
     private function parseCsv(UploadedFile $file): array
     {
@@ -68,28 +64,41 @@ class FileParserService
         $entries = [];
         $header = fgetcsv($handle);
 
-        // Detect column indices
-        $qIdx = 0;
-        $aIdx = 1;
+        $catIdx = null;
+        $titleIdx = null;
+        $contentIdx = null;
+
         if (is_array($header)) {
             $headerLower = array_map(fn ($h) => strtolower(trim($h ?? '')), $header);
             foreach ($headerLower as $i => $col) {
-                if (in_array($col, ['question', 'pertanyaan', 'q', 'topic', 'topik'])) {
-                    $qIdx = $i;
+                if (in_array($col, ['category', 'kategori', 'cat'])) {
+                    $catIdx = $i;
                 }
-                if (in_array($col, ['answer', 'jawaban', 'a', 'response', 'content'])) {
-                    $aIdx = $i;
+                if (in_array($col, ['title', 'judul', 'topic', 'topik', 'nama'])) {
+                    $titleIdx = $i;
                 }
+                if (in_array($col, ['content', 'konten', 'isi', 'text', 'jawaban', 'answer', 'description'])) {
+                    $contentIdx = $i;
+                }
+            }
+
+            // If no content column found, use second column
+            if ($contentIdx === null) {
+                $contentIdx = min(1, count($header) - 1);
             }
         }
 
         while (($row = fgetcsv($handle)) !== false) {
-            $question = trim((string) ($row[$qIdx] ?? ''));
-            $answer = trim((string) ($row[$aIdx] ?? ''));
-
-            if ($question !== '' && $answer !== '') {
-                $entries[] = ['question' => $question, 'answer' => $answer];
+            $content = trim((string) ($row[$contentIdx] ?? ''));
+            if ($content === '') {
+                continue;
             }
+
+            $entries[] = [
+                'category' => $catIdx !== null ? trim((string) ($row[$catIdx] ?? '')) : null,
+                'title' => $titleIdx !== null ? trim((string) ($row[$titleIdx] ?? '')) : null,
+                'content' => $content,
+            ];
         }
 
         fclose($handle);
@@ -97,17 +106,14 @@ class FileParserService
     }
 
     /**
-     * Parse Excel file (xlsx/xls) using simple XML parsing for xlsx.
-     * Falls back to CSV-style if PhpSpreadsheet is not available.
+     * Parse Excel file (xlsx/xls).
      */
     private function parseExcel(UploadedFile $file): array
     {
-        // Use PhpSpreadsheet if available
         if (class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
             return $this->parseExcelWithSpreadsheet($file);
         }
 
-        // Fallback: try to parse xlsx as XML
         return $this->parseXlsxAsXml($file);
     }
 
@@ -118,8 +124,9 @@ class FileParserService
             $sheet = $spreadsheet->getActiveSheet();
             $entries = [];
             $firstRow = true;
-            $qIdx = 0;
-            $aIdx = 1;
+            $catIdx = null;
+            $titleIdx = null;
+            $contentIdx = null;
 
             foreach ($sheet->getRowIterator() as $row) {
                 $cells = [];
@@ -131,22 +138,22 @@ class FileParserService
                     $firstRow = false;
                     $headerLower = array_map('strtolower', $cells);
                     foreach ($headerLower as $i => $col) {
-                        if (in_array($col, ['question', 'pertanyaan', 'q', 'topic', 'topik'])) {
-                            $qIdx = $i;
-                        }
-                        if (in_array($col, ['answer', 'jawaban', 'a', 'response', 'content'])) {
-                            $aIdx = $i;
-                        }
+                        if (in_array($col, ['category', 'kategori', 'cat'])) $catIdx = $i;
+                        if (in_array($col, ['title', 'judul', 'topic', 'topik', 'nama'])) $titleIdx = $i;
+                        if (in_array($col, ['content', 'konten', 'isi', 'text', 'jawaban', 'answer', 'description'])) $contentIdx = $i;
                     }
+                    if ($contentIdx === null) $contentIdx = min(1, count($cells) - 1);
                     continue;
                 }
 
-                $question = $cells[$qIdx] ?? '';
-                $answer = $cells[$aIdx] ?? '';
+                $content = $cells[$contentIdx] ?? '';
+                if ($content === '') continue;
 
-                if ($question !== '' && $answer !== '') {
-                    $entries[] = ['question' => $question, 'answer' => $answer];
-                }
+                $entries[] = [
+                    'category' => $catIdx !== null ? ($cells[$catIdx] ?? '') : null,
+                    'title' => $titleIdx !== null ? ($cells[$titleIdx] ?? '') : null,
+                    'content' => $content,
+                ];
             }
 
             return $entries;
@@ -156,9 +163,6 @@ class FileParserService
         }
     }
 
-    /**
-     * Basic xlsx parser using ZipArchive + XML (no extra packages needed).
-     */
     private function parseXlsxAsXml(UploadedFile $file): array
     {
         $path = $file->getRealPath();
@@ -168,7 +172,6 @@ class FileParserService
             return [];
         }
 
-        // Read shared strings
         $strings = [];
         $sharedStringsXml = $zip->getFromName('xl/sharedStrings.xml');
         if ($sharedStringsXml !== false) {
@@ -180,7 +183,6 @@ class FileParserService
             }
         }
 
-        // Read first sheet
         $sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml');
         $zip->close();
 
@@ -213,27 +215,28 @@ class FileParserService
             return [];
         }
 
-        // First row = header
         $header = array_map(fn ($h) => strtolower(trim($h)), $rows[0]);
-        $qIdx = 0;
-        $aIdx = 1;
+        $catIdx = null;
+        $titleIdx = null;
+        $contentIdx = null;
+
         foreach ($header as $i => $col) {
-            if (in_array($col, ['question', 'pertanyaan', 'q', 'topic', 'topik'])) {
-                $qIdx = $i;
-            }
-            if (in_array($col, ['answer', 'jawaban', 'a', 'response', 'content'])) {
-                $aIdx = $i;
-            }
+            if (in_array($col, ['category', 'kategori', 'cat'])) $catIdx = $i;
+            if (in_array($col, ['title', 'judul', 'topic', 'topik', 'nama'])) $titleIdx = $i;
+            if (in_array($col, ['content', 'konten', 'isi', 'text', 'jawaban', 'answer', 'description'])) $contentIdx = $i;
         }
+        if ($contentIdx === null) $contentIdx = min(1, count($header) - 1);
 
         $entries = [];
         for ($i = 1; $i < count($rows); $i++) {
-            $question = trim((string) ($rows[$i][$qIdx] ?? ''));
-            $answer = trim((string) ($rows[$i][$aIdx] ?? ''));
+            $content = trim((string) ($rows[$i][$contentIdx] ?? ''));
+            if ($content === '') continue;
 
-            if ($question !== '' && $answer !== '') {
-                $entries[] = ['question' => $question, 'answer' => $answer];
-            }
+            $entries[] = [
+                'category' => $catIdx !== null ? trim((string) ($rows[$i][$catIdx] ?? '')) : null,
+                'title' => $titleIdx !== null ? trim((string) ($rows[$i][$titleIdx] ?? '')) : null,
+                'content' => $content,
+            ];
         }
 
         return $entries;
@@ -258,7 +261,6 @@ class FileParserService
             return [];
         }
 
-        // Strip XML tags to get plain text, preserve paragraph breaks
         $content = str_replace('</w:p>', "\n", $xml);
         $content = strip_tags($content);
         $content = html_entity_decode($content, ENT_QUOTES, 'UTF-8');
@@ -267,32 +269,34 @@ class FileParserService
             return [];
         }
 
-        // Try Q:/A: format
-        $qaEntries = $this->parseQAFormat($content);
-        if ($qaEntries !== []) {
-            return $qaEntries;
+        $sections = $this->parseSections($content);
+        if ($sections !== []) {
+            return $sections;
         }
 
-        // Fallback: paragraphs
-        return $this->parseParagraphs($content);
+        return $this->splitIntoParagraphs($content);
     }
 
     /**
-     * Parse text in Q:/A: format.
-     * Supports: Q: ... A: ... separated by blank lines.
+     * Parse text with section headers (## Title or [Title] or Title:).
+     * Each section becomes a knowledge document.
      */
-    private function parseQAFormat(string $content): array
+    private function parseSections(string $content): array
     {
         $entries = [];
 
-        // Match Q: ... A: ... blocks
-        if (preg_match_all('/(?:Q|Question|Pertanyaan)\s*:\s*(.+?)(?:\n|\r\n?)(?:A|Answer|Jawaban)\s*:\s*(.+?)(?=\n\s*\n|\n(?:Q|Question|Pertanyaan)\s*:|$)/si', $content, $matches, PREG_SET_ORDER)) {
+        // Match: ## Title or [Title] headers followed by content
+        if (preg_match_all('/(?:^|\n)(?:##\s*(.+)|(?:\[(.+?)\]))\s*\n([\s\S]*?)(?=\n(?:##\s|\[)|\z)/m', $content, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
-                $question = trim($match[1]);
-                $answer = trim($match[2]);
+                $title = trim($match[1] ?: $match[2]);
+                $body = trim($match[3]);
 
-                if ($question !== '' && $answer !== '') {
-                    $entries[] = ['question' => $question, 'answer' => $answer];
+                if ($title !== '' && $body !== '') {
+                    $entries[] = [
+                        'title' => $title,
+                        'content' => $body,
+                        'category' => null,
+                    ];
                 }
             }
         }
@@ -301,30 +305,24 @@ class FileParserService
     }
 
     /**
-     * Split content into paragraphs as knowledge entries.
-     * Each non-empty paragraph becomes a Q&A pair where question = first line, answer = rest.
+     * Split plain text by double-newline into separate knowledge documents.
      */
-    private function parseParagraphs(string $content): array
+    private function splitIntoParagraphs(string $content): array
     {
-        $blocks = preg_split('/\n\s*\n/', $content);
+        $blocks = preg_split('/\n\s*\n/', $content, -1, PREG_SPLIT_NO_EMPTY) ?: [];
         $entries = [];
 
         foreach ($blocks as $block) {
-            $block = trim($block);
-            if ($block === '' || mb_strlen($block) < 10) {
+            $text = trim($block);
+            if (mb_strlen($text) < 10) {
                 continue;
             }
 
-            $lines = preg_split('/\n/', $block, 2);
-            $question = trim($lines[0]);
-            $answer = trim($lines[1] ?? $lines[0]);
-
-            if ($question !== '') {
-                $entries[] = [
-                    'question' => mb_substr($question, 0, 500),
-                    'answer' => mb_substr($answer, 0, 5000),
-                ];
-            }
+            $entries[] = [
+                'title' => null,
+                'content' => $text,
+                'category' => null,
+            ];
         }
 
         return $entries;

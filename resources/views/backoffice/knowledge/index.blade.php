@@ -90,8 +90,8 @@
                     <table class="min-w-full divide-y divide-white/10 text-sm">
                         <thead class="bg-white/5 text-left text-slate-300">
                             <tr>
-                                <th class="px-5 py-3.5 font-medium">Question</th>
-                                <th class="px-5 py-3.5 font-medium">Answer</th>
+                                <th class="px-5 py-3.5 font-medium">Title</th>
+                                <th class="px-5 py-3.5 font-medium">Content</th>
                                 <th class="px-5 py-3.5 font-medium">Category</th>
                                 <th class="px-5 py-3.5 font-medium">Source</th>
                                 <th class="px-5 py-3.5 font-medium text-center">Status</th>
@@ -102,12 +102,12 @@
                             @foreach ($entries as $entry)
                                 <tr class="transition hover:bg-white/[0.03]">
                                     <td class="px-5 py-3.5 max-w-[200px]">
-                                        <p class="truncate text-white" title="{{ $entry->question }}">
-                                            {{ Str::limit($entry->question, 60) }}</p>
+                                        <p class="truncate text-white" title="{{ $entry->title }}">
+                                            {{ $entry->title ? Str::limit($entry->title, 60) : '—' }}</p>
                                     </td>
                                     <td class="px-5 py-3.5 max-w-[250px]">
-                                        <p class="truncate text-slate-300" title="{{ $entry->answer }}">
-                                            {{ Str::limit($entry->answer, 80) }}</p>
+                                        <p class="truncate text-slate-300" title="{{ $entry->content }}">
+                                            {{ Str::limit($entry->content, 80) }}</p>
                                     </td>
                                     <td class="px-5 py-3.5">
                                         @if ($entry->category)

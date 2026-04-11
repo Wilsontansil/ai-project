@@ -21,8 +21,8 @@ class KnowledgeBaseController extends Controller
 
         $knowledgeQuery = KnowledgeBase::query()
             ->when($search !== '', function ($q) use ($search) {
-                $q->where('question', 'like', '%' . $search . '%')
-                    ->orWhere('answer', 'like', '%' . $search . '%')
+                $q->where('title', 'like', '%' . $search . '%')
+                    ->orWhere('content', 'like', '%' . $search . '%')
                     ->orWhere('category', 'like', '%' . $search . '%');
             })
             ->latest()
@@ -64,16 +64,16 @@ class KnowledgeBaseController extends Controller
     {
         $request->validate([
             'category' => ['nullable', 'string', 'max:100'],
-            'question' => ['required', 'string', 'max:1000'],
-            'answer' => ['required', 'string', 'max:10000'],
+            'title' => ['nullable', 'string', 'max:255'],
+            'content' => ['required', 'string', 'max:10000'],
             'tags' => ['nullable', 'string'],
             'confidence_score' => ['nullable', 'numeric', 'min:0', 'max:1'],
         ]);
 
         KnowledgeBase::create([
             'category' => $request->input('category'),
-            'question' => $request->input('question'),
-            'answer' => $request->input('answer'),
+            'title' => $request->input('title'),
+            'content' => $request->input('content'),
             'tags' => $request->input('tags') ? array_map('trim', explode(',', $request->input('tags'))) : null,
             'confidence_score' => $request->input('confidence_score', 0.7),
             'source' => 'manual',
@@ -96,8 +96,8 @@ class KnowledgeBaseController extends Controller
     {
         $request->validate([
             'category' => ['nullable', 'string', 'max:100'],
-            'question' => ['required', 'string', 'max:1000'],
-            'answer' => ['required', 'string', 'max:10000'],
+            'title' => ['nullable', 'string', 'max:255'],
+            'content' => ['required', 'string', 'max:10000'],
             'tags' => ['nullable', 'string'],
             'confidence_score' => ['nullable', 'numeric', 'min:0', 'max:1'],
             'is_active' => ['nullable'],
@@ -105,8 +105,8 @@ class KnowledgeBaseController extends Controller
 
         $knowledge->update([
             'category' => $request->input('category'),
-            'question' => $request->input('question'),
-            'answer' => $request->input('answer'),
+            'title' => $request->input('title'),
+            'content' => $request->input('content'),
             'tags' => $request->input('tags') ? array_map('trim', explode(',', $request->input('tags'))) : null,
             'confidence_score' => $request->input('confidence_score', 0.7),
             'is_active' => $request->boolean('is_active'),
@@ -118,7 +118,7 @@ class KnowledgeBaseController extends Controller
 
     public function destroy(KnowledgeBase $knowledge): RedirectResponse
     {
-        $name = $knowledge->question;
+        $name = $knowledge->title ?: $knowledge->category ?: 'Untitled';
         $knowledge->delete();
 
         return redirect()->route('backoffice.knowledge.index')
@@ -157,7 +157,7 @@ class KnowledgeBaseController extends Controller
 
         if ($entries === []) {
             return redirect()->back()
-                ->withErrors(['file' => 'Tidak ada data yang bisa diparse dari file ini. Pastikan format sesuai (Q:/A: atau kolom question/answer).'])
+                ->withErrors(['file' => 'Tidak ada data yang bisa diparse dari file ini.'])
                 ->withInput();
         }
 
@@ -168,9 +168,9 @@ class KnowledgeBaseController extends Controller
 
         foreach ($entries as $entry) {
             KnowledgeBase::create([
-                'category' => $category,
-                'question' => $entry['question'],
-                'answer' => $entry['answer'],
+                'category' => $category ?: ($entry['category'] ?? null),
+                'title' => $entry['title'] ?? null,
+                'content' => $entry['content'],
                 'tags' => null,
                 'confidence_score' => $confidence,
                 'source' => 'file',

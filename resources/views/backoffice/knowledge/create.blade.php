@@ -38,15 +38,17 @@
             </div>
 
             <div>
-                <label for="question" class="mb-2 block text-sm text-slate-200">Question / Pertanyaan</label>
-                <textarea id="question" name="question" rows="3" placeholder="Tulis pertanyaan atau topik..."
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('question') }}</textarea>
+                <label for="title" class="mb-2 block text-sm text-slate-200">Title <span
+                        class="text-slate-500">(opsional)</span></label>
+                <input id="title" type="text" name="title" value="{{ old('title') }}"
+                    placeholder="e.g. Cara Deposit, Minimum Withdraw"
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
             </div>
 
             <div>
-                <label for="answer" class="mb-2 block text-sm text-slate-200">Answer / Jawaban</label>
-                <textarea id="answer" name="answer" rows="5" placeholder="Tulis jawaban yang diharapkan..."
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('answer') }}</textarea>
+                <label for="content" class="mb-2 block text-sm text-slate-200">Content</label>
+                <textarea id="content" name="content" rows="5" placeholder="Tulis konten knowledge..."
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('content') }}</textarea>
             </div>
 
             <div>

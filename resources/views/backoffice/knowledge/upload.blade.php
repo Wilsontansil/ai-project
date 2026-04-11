@@ -63,23 +63,22 @@
                 <div class="space-y-3 text-xs text-slate-400">
                     <div>
                         <p class="font-medium text-slate-300">TXT File:</p>
-                        <pre class="mt-1 rounded-xl bg-slate-900/70 p-3 text-slate-400">Q: Bagaimana cara deposit?
-A: Untuk deposit, silahkan transfer ke rekening yang tertera di menu deposit.
+                        <pre class="mt-1 rounded-xl bg-slate-900/70 p-3 text-slate-400">## Cara Deposit
+Deposit dapat dilakukan melalui menu deposit. Transfer ke rekening yang tertera.
 
-Q: Berapa minimum withdraw?
-A: Minimum withdraw adalah Rp 50.000.</pre>
+## Minimum Withdraw
+Minimum withdraw adalah Rp 50.000 untuk semua metode pembayaran.</pre>
                     </div>
                     <div>
                         <p class="font-medium text-slate-300">CSV / Excel File:</p>
                         <p class="mt-1">Gunakan kolom header: <code
-                                class="rounded bg-slate-800 px-1.5 py-0.5">question</code> dan <code
-                                class="rounded bg-slate-800 px-1.5 py-0.5">answer</code> (atau <code
-                                class="rounded bg-slate-800 px-1.5 py-0.5">pertanyaan</code> / <code
-                                class="rounded bg-slate-800 px-1.5 py-0.5">jawaban</code>)</p>
+                                class="rounded bg-slate-800 px-1.5 py-0.5">content</code> (wajib), <code
+                                class="rounded bg-slate-800 px-1.5 py-0.5">title</code> dan <code
+                                class="rounded bg-slate-800 px-1.5 py-0.5">category</code> (opsional)</p>
                     </div>
                     <div>
                         <p class="font-medium text-slate-300">DOCX File:</p>
-                        <p class="mt-1">Gunakan format Q:/A: di setiap paragraf, atau teks biasa yang akan dipecah per
+                        <p class="mt-1">Gunakan heading ## untuk judul section, atau teks biasa yang akan dipecah per
                             paragraf.</p>
                     </div>
                 </div>

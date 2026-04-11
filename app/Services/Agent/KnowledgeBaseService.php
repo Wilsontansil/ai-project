@@ -8,19 +8,26 @@ use Illuminate\Support\Collection;
 
 class KnowledgeBaseService
 {
+    /**
+     * Search relevant knowledge documents by extracting keywords from user message.
+     * Only returns matching documents — not all data.
+     */
     public function searchRelevant(string $message, int $limit = 5): Collection
     {
-        $query = trim($message);
+        $keywords = $this->extractKeywords($message);
 
-        if ($query === '') {
+        if ($keywords === []) {
             return collect();
         }
 
         return KnowledgeBase::query()
             ->where('is_active', true)
-            ->where(function ($q) use ($query) {
-                $q->where('question', 'like', '%' . $query . '%')
-                    ->orWhere('answer', 'like', '%' . $query . '%');
+            ->where(function ($q) use ($keywords) {
+                foreach ($keywords as $keyword) {
+                    $q->orWhere('content', 'like', '%' . $keyword . '%')
+                      ->orWhere('title', 'like', '%' . $keyword . '%')
+                      ->orWhere('category', 'like', '%' . $keyword . '%');
+                }
             })
             ->orderByDesc('confidence_score')
             ->limit($limit)
@@ -29,27 +36,31 @@ class KnowledgeBaseService
 
     public function searchLearnedMemories(string $message, int $limit = 3): Collection
     {
-        $query = trim($message);
+        $keywords = $this->extractKeywords($message);
 
-        if ($query === '') {
+        if ($keywords === []) {
             return collect();
         }
 
         return AILearnedMemory::query()
             ->where('is_active', true)
             ->where('is_approved', true)
-            ->where('pattern', 'like', '%' . $query . '%')
+            ->where(function ($q) use ($keywords) {
+                foreach ($keywords as $keyword) {
+                    $q->orWhere('pattern', 'like', '%' . $keyword . '%');
+                }
+            })
             ->orderByDesc('confidence')
             ->limit($limit)
             ->get();
     }
 
-    public function storeIfUseful(string $question, string $answer, array $tags = [], float $confidence = 0.5): KnowledgeBase
+    public function storeIfUseful(string $title, string $content, string $category = 'general', float $confidence = 0.5): KnowledgeBase
     {
         return KnowledgeBase::query()->create([
-            'question' => $question,
-            'answer' => $answer,
-            'tags' => $tags,
+            'title' => $title,
+            'content' => $content,
+            'category' => $category,
             'confidence_score' => $confidence,
             'source' => 'auto',
             'is_active' => true,
@@ -61,7 +72,6 @@ class KnowledgeBaseService
      */
     public function storeLearnedMemory(string $pattern, string $response, string $category = 'general'): AILearnedMemory
     {
-        // Check for existing similar pattern to increment hit_count
         $existing = AILearnedMemory::query()
             ->where('pattern', $pattern)
             ->first();
@@ -82,6 +92,10 @@ class KnowledgeBaseService
         ]);
     }
 
+    /**
+     * Build prompt snippet from relevant knowledge + learned memories.
+     * Only injects matching content — not the entire knowledge base.
+     */
     public function toPromptSnippet(string $message, int $limit = 5): string
     {
         $rows = $this->searchRelevant($message, $limit);
@@ -91,20 +105,54 @@ class KnowledgeBaseService
 
         if ($rows->isNotEmpty()) {
             foreach ($rows as $row) {
-                $lines[] = '- Q: ' . $row->question;
-                $lines[] = '  A: ' . $row->answer;
+                $label = $row->title ?: ($row->category ?: 'Info');
+                $lines[] = "[{$label}]";
+                $lines[] = $row->content;
+                $lines[] = '';
             }
         }
 
         if ($memories->isNotEmpty()) {
-            $lines[] = '';
             $lines[] = 'Learned patterns:';
             foreach ($memories as $mem) {
-                $lines[] = '- Pattern: ' . $mem->pattern;
-                $lines[] = '  Response: ' . $mem->learned_response;
+                $lines[] = '- ' . $mem->pattern . ': ' . $mem->learned_response;
             }
         }
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * Extract meaningful keywords from user message for search.
+     * Strips common Indonesian/English stop words.
+     */
+    private function extractKeywords(string $message): array
+    {
+        $message = mb_strtolower(trim($message));
+        if ($message === '') {
+            return [];
+        }
+
+        $stopWords = [
+            'saya', 'aku', 'kamu', 'dia', 'apa', 'ini', 'itu', 'yang', 'di', 'ke', 'dari',
+            'dan', 'atau', 'tapi', 'juga', 'sudah', 'belum', 'bisa', 'tidak', 'mau', 'ada',
+            'dengan', 'untuk', 'akan', 'pada', 'dalam', 'lagi', 'dong', 'ya', 'nih', 'gak',
+            'ga', 'gimana', 'bagaimana', 'tolong', 'mohon', 'bro', 'bang', 'min', 'kak',
+            'the', 'is', 'at', 'in', 'on', 'a', 'an', 'to', 'for', 'of', 'and', 'or',
+            'how', 'what', 'why', 'can', 'do', 'my', 'i', 'me', 'it', 'this', 'that',
+        ];
+
+        // Split into words, filter stop words and short words
+        $words = preg_split('/[\s\?\!\.\,\:\;]+/', $message, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $keywords = [];
+
+        foreach ($words as $word) {
+            $word = trim($word);
+            if (mb_strlen($word) >= 3 && !in_array($word, $stopWords, true)) {
+                $keywords[] = $word;
+            }
+        }
+
+        return array_values(array_unique($keywords));
     }
 }

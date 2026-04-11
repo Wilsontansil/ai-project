@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('knowledge_base', function (Blueprint $table) {
             $table->id();
             $table->string('category', 100)->nullable();
-            $table->text('question');
-            $table->longText('answer');
+            $table->string('title')->nullable();
+            $table->longText('content');
             $table->json('tags')->nullable();
             $table->decimal('confidence_score', 5, 2)->default(0);
             $table->string('source', 50)->default('manual');
@@ -23,6 +23,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
+            $table->index('category');
             $table->index('confidence_score');
             $table->index('created_at');
         });

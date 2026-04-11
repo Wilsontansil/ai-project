@@ -226,10 +226,10 @@ class AIService
         }
 
         if ($relevantKnowledge !== '') {
-            $parts[] = "Relevant knowledge:\n" . mb_substr($relevantKnowledge, 0, 1000);
+            $parts[] = "Knowledge base (USE this as primary source to answer user questions):\n" . mb_substr($relevantKnowledge, 0, 1000);
         }
 
-        $parts[] = 'Use this only to personalize response, keep answer concise and natural.';
+        $parts[] = 'IMPORTANT: If relevant knowledge is provided above, use it as your primary source to answer. Keep answer concise and natural.';
 
         return implode("\n\n", $parts);
     }

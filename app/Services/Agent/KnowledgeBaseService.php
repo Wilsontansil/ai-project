@@ -16,19 +16,29 @@ class KnowledgeBaseService
     {
         $keywords = $this->extractKeywords($message);
 
-        if ($keywords === []) {
-            return collect();
+        // If keywords found, search by keyword match
+        if ($keywords !== []) {
+            $results = KnowledgeBase::query()
+                ->where('is_active', true)
+                ->where(function ($q) use ($keywords) {
+                    foreach ($keywords as $keyword) {
+                        $q->orWhere('content', 'like', '%' . $keyword . '%')
+                          ->orWhere('title', 'like', '%' . $keyword . '%')
+                          ->orWhere('category', 'like', '%' . $keyword . '%');
+                    }
+                })
+                ->orderByDesc('confidence_score')
+                ->limit($limit)
+                ->get();
+
+            if ($results->isNotEmpty()) {
+                return $results;
+            }
         }
 
+        // Fallback: return top knowledge by confidence so AI always has context
         return KnowledgeBase::query()
             ->where('is_active', true)
-            ->where(function ($q) use ($keywords) {
-                foreach ($keywords as $keyword) {
-                    $q->orWhere('content', 'like', '%' . $keyword . '%')
-                      ->orWhere('title', 'like', '%' . $keyword . '%')
-                      ->orWhere('category', 'like', '%' . $keyword . '%');
-                }
-            })
             ->orderByDesc('confidence_score')
             ->limit($limit)
             ->get();

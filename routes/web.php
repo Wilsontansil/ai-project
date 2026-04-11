@@ -5,6 +5,7 @@ use App\Http\Controllers\Backoffice\AuthController;
 use App\Http\Controllers\Backoffice\CaseController;
 use App\Http\Controllers\Backoffice\DashboardController;
 use App\Http\Controllers\Backoffice\EscalationController;
+use App\Http\Controllers\Backoffice\KnowledgeBaseController;
 use App\Http\Controllers\Backoffice\ToolController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,4 +46,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/backoffice/escalations/unread-count', [EscalationController::class, 'unreadCount'])->name('backoffice.escalations.unreadCount');
 
     Route::post('/backoffice/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Knowledge Base
+    Route::get('/backoffice/knowledge', [KnowledgeBaseController::class, 'index'])->name('backoffice.knowledge.index');
+    Route::get('/backoffice/knowledge/create', [KnowledgeBaseController::class, 'create'])->name('backoffice.knowledge.create');
+    Route::post('/backoffice/knowledge', [KnowledgeBaseController::class, 'store'])->name('backoffice.knowledge.store');
+    Route::get('/backoffice/knowledge/upload', [KnowledgeBaseController::class, 'uploadForm'])->name('backoffice.knowledge.upload');
+    Route::post('/backoffice/knowledge/upload', [KnowledgeBaseController::class, 'upload'])->name('backoffice.knowledge.upload.submit');
+    Route::get('/backoffice/knowledge/{knowledge}/edit', [KnowledgeBaseController::class, 'edit'])->name('backoffice.knowledge.edit');
+    Route::put('/backoffice/knowledge/{knowledge}', [KnowledgeBaseController::class, 'update'])->name('backoffice.knowledge.update');
+    Route::delete('/backoffice/knowledge/{knowledge}', [KnowledgeBaseController::class, 'destroy'])->name('backoffice.knowledge.destroy');
+
+    // AI Learned Memories
+    Route::post('/backoffice/knowledge/memory/{memory}/approve', [KnowledgeBaseController::class, 'approveMemory'])->name('backoffice.knowledge.memory.approve');
+    Route::post('/backoffice/knowledge/memory/{memory}/reject', [KnowledgeBaseController::class, 'rejectMemory'])->name('backoffice.knowledge.memory.reject');
+    Route::delete('/backoffice/knowledge/memory/{memory}', [KnowledgeBaseController::class, 'destroyMemory'])->name('backoffice.knowledge.memory.destroy');
 });

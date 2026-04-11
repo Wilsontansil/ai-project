@@ -165,6 +165,31 @@
             </div>
         </div>
 
+        {{-- Section: KNOWLEDGE BASE --}}
+        <div class="bo-section" data-section="knowledge-base">
+            <button type="button"
+                class="bo-section-header flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-white/80 transition hover:bg-white/10">
+                <span class="bo-section-label text-[11px] font-bold uppercase tracking-widest">Knowledge Base</span>
+                <svg class="bo-section-chevron h-3.5 w-3.5 rotated" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+            <div class="bo-section-items mt-1 space-y-0.5">
+                <a href="{{ route('backoffice.knowledge.index') }}"
+                    class="bo-nav-item group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition {{ ($boActive ?? ($active ?? '')) === 'knowledge' ? 'bg-white/20 font-semibold text-white' : 'text-white/90 hover:bg-white/10' }}">
+                    <span
+                        class="flex h-7 w-7 items-center justify-center rounded-md {{ ($boActive ?? ($active ?? '')) === 'knowledge' ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/15' }}">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                    </span>
+                    <span class="bo-label">Training Data</span>
+                </a>
+            </div>
+        </div>
+
         {{-- Section: CASE REPORT --}}
         <div class="bo-section" data-section="case-report">
             <button type="button"

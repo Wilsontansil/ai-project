@@ -7,6 +7,7 @@ use App\Models\AgentCase;
 use App\Models\Customer;
 use App\Models\EscalationNotification;
 use App\Models\Tool;
+use App\Services\Agent\KnowledgeBaseService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -74,6 +75,7 @@ class AIService
             if ($assistantReply !== null) {
                 $assistantReply = $this->prepareAssistantReply($history, $assistantReply);
                 $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
+                $this->learnFromConversation($message, $assistantReply);
                 return $this->stripEscalationMarker($assistantReply);
             }
 
@@ -86,6 +88,7 @@ class AIService
 
             $assistantReply = $this->prepareAssistantReply($history, $assistantReply);
             $this->saveConversationTurn($chatId, $history, $message, $assistantReply);
+            $this->learnFromConversation($message, $assistantReply);
             return $this->stripEscalationMarker($assistantReply);
 
         } catch (\OpenAI\Exceptions\RateLimitException $e) {
@@ -141,6 +144,45 @@ class AIService
                 'customer_id' => $customer->id,
                 'error' => $e->getMessage(),
             ]);
+        }
+    }
+
+    /**
+     * Attempt to learn from a successful conversation exchange.
+     * Stores as pending (unapproved) memory for backoffice review.
+     */
+    public function learnFromConversation(string $userMessage, string $assistantReply): void
+    {
+        $userMessage = trim($userMessage);
+        $assistantReply = trim($assistantReply);
+
+        // Skip very short or system messages
+        if (mb_strlen($userMessage) < 10 || mb_strlen($assistantReply) < 20) {
+            return;
+        }
+
+        // Skip escalated replies
+        if (stripos($assistantReply, '[ESCALATE]') !== false) {
+            return;
+        }
+
+        // Skip error/fallback replies
+        $skipPhrases = ['error', "couldn't understand", 'tidak bisa', 'maaf saya', 'coba lagi'];
+        foreach ($skipPhrases as $phrase) {
+            if (stripos($assistantReply, $phrase) !== false) {
+                return;
+            }
+        }
+
+        try {
+            $kbService = new KnowledgeBaseService();
+            $kbService->storeLearnedMemory(
+                mb_substr($userMessage, 0, 500),
+                mb_substr($assistantReply, 0, 1000),
+                'conversation'
+            );
+        } catch (\Throwable $e) {
+            Log::debug('Auto-learn failed', ['error' => $e->getMessage()]);
         }
     }
 

@@ -94,6 +94,36 @@ class ToolSeeder extends Seeder
                     'icon' => 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z',
                 ],
             ],
+            [
+                'tool_name' => 'game_gacor',
+                'display_name' => 'Game Gacor',
+                'description' => 'Bocoran slot gacor hari ini',
+                'class_name' => null,
+                'slug' => 'game-gacor',
+                'is_enabled' => true,
+                'parameters' => null,
+                'keywords' => ['game gacor', 'slot gacor', 'bocoran slot'],
+                'missing_message' => null,
+                'information_text' => "🔥🔥bocoran slot hari ini🔥🔥\n#pastiamanpastihoki\n#semogaberuntung\n\n fastspin\n- royal house \n- roma\n- poker ways\n- fruits mania\n- neko riches\n\npragmatic play \n- mahjong ways 3 black scatter\n- starlight princes 1000\n- gates of Olympus 1000\n- gates of gatotkaca 1000\n- sweet bonanza 1000\n\npgsoft\n- mahjong ways\n- treasures of aztec\n- Jurassic kingdom\n- wild bandito\n- wild ape",
+                'meta' => [
+                    'icon' => 'M13 10V3L4 14h7v7l9-11h-7z',
+                ],
+            ],
+            [
+                'tool_name' => 'pola_gacor',
+                'display_name' => 'Pola Gacor',
+                'description' => 'Pola VIP terupdate hari ini',
+                'class_name' => null,
+                'slug' => 'pola-gacor',
+                'is_enabled' => true,
+                'parameters' => null,
+                'keywords' => ['pola gacor', 'pola vip', 'pola vvip', 'pola mantap', 'pola terbaik'],
+                'missing_message' => null,
+                'information_text' => "𝐏𝐎𝐋𝐀 𝐕𝐈𝐏  𝐓𝐄𝐑𝐔𝐏𝐃𝐀𝐓𝐄 𝐇𝐀𝐑𝐈 𝐈𝐍𝐈!\nPOLA MAHJONG WAYS 1\nTurbo ✅– MANUAL Spin 10x\nTurbo ✅- AUTO Spin 10x\nTurbo ❌– MANUAL Spin 15x\n📌𝐑𝐄𝐊𝐎𝐌𝐄𝐍𝐃𝐀𝐒𝐈 𝐁𝐄𝐓: 400 - 8.000\n\nPOLA WILD BANDITO\nTurbo ✅ – Auto 30\nTurbo ✅ – Manual 18\nTurbo ❌ – Auto 30\nTurbo ✅ – Manual 12\n📌𝐑𝐄𝐊𝐎𝐌𝐄𝐍𝐃𝐀𝐒𝐈 𝐁𝐄𝐓: 400\n\nPOLA Mahjong Ways 2\nTurbo ✅– MANUAL Spin 14x\nTurbo ✅- AUTO Spin 30x\nTurbo ❌– MANUAL Spin 10x\n📌𝐑𝐄𝐊𝐎𝐌𝐄𝐍𝐃𝐀𝐒𝐈 𝐁𝐄𝐓: 400 - 8.000\n\n📌𝐏𝐎𝐋𝐀 𝐓𝐄𝐑𝐁𝐀𝐈𝐊 \n📈 𝐆𝐚𝐭𝐞 𝐎𝐟 𝐎𝐥𝐲𝐦𝐩𝐮𝐬 𝟏.𝟎𝟎𝟎⚡️\n-----------------------\n✅❌✅ - 20 AUTO DC ON\n❌✅✅ - 10 MANUAL DC OFF\n❌✅✅ - 30 AUTO DC OFF\n❌❌✅ - 50 MANUAL DC ON\n🔔𝐁𝐔𝐘 𝐒𝐏𝐈𝐍 𝐘𝐀𝐍𝐆 𝐃𝐈𝐒𝐀𝐑𝐀𝐍𝐊𝐀𝐍 𝟐𝟎 𝐑𝐈𝐁𝐔 𝐗5\n🔔𝐁𝐔𝐘 𝐒𝐏𝐈𝐍 𝐘𝐀𝐍𝐆 𝐃𝐈𝐒𝐀𝐑𝐀𝐍𝐊𝐀𝐍 6𝟎 𝐑𝐈𝐁𝐔 𝐗3",
+                'meta' => [
+                    'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+                ],
+            ],
         ];
 
         foreach ($tools as $tool) {

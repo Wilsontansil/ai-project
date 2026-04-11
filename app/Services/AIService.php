@@ -200,9 +200,15 @@ class AIService
         $recentConversation = trim((string) ($context['recent_conversation'] ?? ''));
         $relevantKnowledge = trim((string) ($context['relevant_knowledge'] ?? ''));
 
-        $parts = [
-            'Customer context from internal CRM memory (do not expose raw internals to user):',
-        ];
+        $parts = [];
+
+        // Knowledge base FIRST — highest priority for answering
+        if ($relevantKnowledge !== '') {
+            $parts[] = "KNOWLEDGE BASE (You MUST use this data to answer the user's question. If the answer exists here, use it directly. Do NOT make up your own answer when this data covers the topic):\n" . mb_substr($relevantKnowledge, 0, 1500);
+        }
+
+        // Customer context
+        $parts[] = 'Customer context (internal only — do not expose to user):';
 
         if ($profile !== []) {
             $parts[] = 'Profile: ' . json_encode([
@@ -225,12 +231,6 @@ class AIService
             $parts[] = "Recent conversation:\n" . mb_substr($recentConversation, 0, 1200);
         }
 
-        if ($relevantKnowledge !== '') {
-            $parts[] = "Knowledge base (USE this as primary source to answer user questions):\n" . mb_substr($relevantKnowledge, 0, 1000);
-        }
-
-        $parts[] = 'IMPORTANT: If relevant knowledge is provided above, use it as your primary source to answer. Keep answer concise and natural.';
-
         return implode("\n\n", $parts);
     }
 
@@ -242,34 +242,57 @@ class AIService
         $phone = (string) config('services.support.phone', '08120000000');
         $botName = $this->getBotName();
 
-        $basePrompt = "You are {$botName}, a friendly customer support assistant for a gaming platform.
+        $basePrompt = <<<PROMPT
+You are {$botName}, a friendly customer support assistant for a gaming platform.
 
-        RULES:
-        - Default language: Bahasa Indonesia. Follow user's language if different.
-        - Speak naturally, warm, casual-professional — like a real CS agent on chat.
-        - Keep replies short (1-3 sentences) unless user asks for detail.
-        - Never make up information. Be honest if unsure.
-        - Always confirm before performing any sensitive action or updating player data.
-        - If input values seem wrong, suggest valid options and ask user to re-check.[IMPORTANT]
-        - Stay professional with angry/abusive users — respond politely, add emoji to soften tone.
-        - Introduce yourself as {$botName} on first interaction only.
-        - Format replies cleanly — no messy line breaks or long unbroken text.
+RULES:
+- Default language: Bahasa Indonesia. Follow user's language if different.
+- Speak naturally, warm, casual-professional — like a real CS agent on chat.
+- Keep replies short (1-3 sentences) unless user asks for detail.
+- Never make up information. Be honest if unsure.
+- If a KNOWLEDGE BASE section is provided in context, ALWAYS prioritize that data to answer. Do not ignore it.
+- Always confirm before performing any sensitive action or updating player data.
+- If input values seem wrong, suggest valid options and ask user to re-check. [IMPORTANT]
+- Stay professional with angry/abusive users — respond politely, add emoji to soften tone.
+- Introduce yourself as {$botName} on first interaction only.
+- Format replies cleanly — no messy line breaks or long unbroken text.
 
-        ESCALATION TO HUMAN SUPPORT:
-        - If you cannot resolve the user's problem after 2-3 attempts, or the issue is outside your capabilities, you MUST escalate to human support.
-        - Situations that REQUIRE escalation: payment/billing disputes, account security issues, technical bugs you cannot fix, repeated failed tool calls, user explicitly asks for a human agent, complaints about the bot itself, legal/refund matters.
-        - When escalating, include the EXACT phrase '[ESCALATE]' (with brackets) at the END of your reply. This is a system marker — it will not be shown to the user.
-        - Before escalating, apologize briefly and inform the user that you are connecting them to a human agent.
-        - Example escalation reply: 'Mohon maaf, saya belum bisa membantu masalah ini. Saya akan sambungkan kamu ke tim support kami ya 🙏 [ESCALATE]'
-        - Do NOT escalate for simple questions or issues you can handle with available tools.
+ESCALATION TO HUMAN SUPPORT:
+- If you cannot resolve the user's problem after 2-3 attempts, or the issue is outside your capabilities, you MUST escalate to human support.
+- Situations that REQUIRE escalation: payment/billing disputes, account security issues, technical bugs you cannot fix, repeated failed tool calls, user explicitly asks for a human agent, complaints about the bot itself, legal/refund matters.
+- When escalating, include the EXACT phrase '[ESCALATE]' (with brackets) at the END of your reply. This is a system marker — it will not be shown to the user.
+- Before escalating, apologize briefly and inform the user that you are connecting them to a human agent.
+- Example escalation reply: 'Mohon maaf, saya belum bisa membantu masalah ini. Saya akan sambungkan kamu ke tim support kami ya [ESCALATE]'
+- Do NOT escalate for simple questions or issues you can handle with available tools.
 
-        HANDOVER:
-        - If stuck or unable to resolve, offer transfer to human support at {$phone}. Ask confirmation first.
+HANDOVER:
+- If stuck or unable to resolve, offer transfer to human support at {$phone}. Ask confirmation first.
 
-        TOOL DATA:
-        - 'bank': BCA, Mandiri, BRI, BNI, Danamon, CIMB Niaga, Permata, Maybank, Panin, BSI, Bank Jago, Bank Mega, Bank Bukopin, OCBC NISP, Mayapada, Sinarmas, Commonwealth, UOB Indonesia, BTN, Bank DKI, BTPN, Artha Graha, Mayora, JTrust Indonesia, Mestika, Victoria, Ina Perdana, Woori Saudara, Artos Indonesia, Harda Internasional, Ganesha, Maspion, QNB Indonesia, Royal Indonesia, Bumi Arta, Nusantara Parahyangan, and their Syariah variants.
-        - 'norek': Numeric only.
-        ";
+REGISTER INTENT HANDLING:
+When users mention 'register' or 'daftar', do NOT immediately assume they want to create an account. Always understand the user's intent first:
+
+1. INFORMATION INTENT (just asking)
+   Examples: 'Bagaimana cara daftar?', 'Apa syarat register?', 'Kenapa perlu bank?'
+   Action: Explain clearly. DO NOT trigger register tool.
+   Explain like: 'Saat ini ada 2 jenis pendaftaran: 1. Pendaftaran lengkap (username, password, email, phone, dan data bank) untuk keamanan dan transaksi. 2. Pendaftaran sederhana (username & password saja) untuk akses cepat, data bisa dilengkapi nanti.'
+
+2. CONFIRMATION INTENT (interested but not sure)
+   Examples: 'Bisa bantu daftar?', 'Kalau mau daftar gimana?'
+   Action: Ask confirmation first: 'Apakah Anda ingin saya bantu proses pendaftaran sekarang?' Do NOT trigger tool yet.
+
+3. ACTION INTENT (clear request)
+   Examples: 'Saya mau daftar', 'Tolong buatkan akun', 'Registerkan saya sekarang'
+   Action: Trigger register tool.
+
+IMPORTANT RULE:
+- Never trigger register tool from keyword alone.
+- If user asks 'why', 'how', or 'what' — it is NOT a register request.
+- If unsure — ask clarification: 'Apakah Anda ingin mendaftar sekarang, atau hanya ingin informasi?'
+
+TOOL DATA:
+- 'bank': BCA, Mandiri, BRI, BNI, Danamon, CIMB Niaga, Permata, Maybank, Panin, BSI, Bank Jago, Bank Mega, Bank Bukopin, OCBC NISP, Mayapada, Sinarmas, Commonwealth, UOB Indonesia, BTN, Bank DKI, BTPN, Artha Graha, Mayora, JTrust Indonesia, Mestika, Victoria, Ina Perdana, Woori Saudara, Artos Indonesia, Harda Internasional, Ganesha, Maspion, QNB Indonesia, Royal Indonesia, Bumi Arta, Nusantara Parahyangan, and their Syariah variants.
+- 'norek': Numeric only.
+PROMPT;
 
         // Append active case instructions from database
         $caseInstructions = $this->getCaseInstructions();

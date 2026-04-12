@@ -138,26 +138,27 @@
                     {{-- Expected Response --}}
                     <div>
                         <p class="mb-2 text-xs text-slate-300">Expected Response</p>
-                        <div class="rounded-lg border border-white/10 bg-slate-950/60 p-3">
+                        <div class="rounded-lg border border-white/10 bg-slate-950/60 p-3 mb-3">
                             <pre id="expected-response-preview"
                                 class="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-auto max-h-64">{
   "status": 200,
   "message": "Success",
-  "data": {
-    "field1": "value1",
-    "field2": "value2"
-  }
+  "data": {}
 }</pre>
                         </div>
-                        <p class="mt-2 text-xs text-slate-400">Expected response format dalam JSON. Gunakan format di atas
-                            sebagai referensi.</p>
+
+                        <p class="mb-2 text-xs text-slate-400">Add expected data fields (key → value):</p>
+                        <div id="expected-data-list" class="space-y-2 mb-2"></div>
+                        <button type="button" onclick="addExpectedDataField()"
+                            class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
+                            + Tambah Expected Data
+                        </button>
 
                         <div class="hidden">
                             <input type="hidden" name="endpoint_expected_status"
                                 value="{{ old('endpoint_expected_status', 200) }}" />
                             <input type="hidden" name="endpoint_expected_message"
                                 value="{{ old('endpoint_expected_message', 'Success') }}" />
-                            <div id="expected-data-list"></div>
                         </div>
                     </div>
                 </div>
@@ -330,20 +331,56 @@
 
         let expectedDataIdx = 0;
 
+        function updateExpectedResponsePreview() {
+            const list = document.getElementById('expected-data-list');
+            const rows = list.querySelectorAll(':scope > div');
+            const data = {};
+
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input[type=text]');
+                const key = inputs[0]?.value.trim();
+                const value = inputs[1]?.value.trim();
+                if (key && value) {
+                    data[key] = value;
+                }
+            });
+
+            const preview = {
+                status: 200,
+                message: "Success",
+                data: data
+            };
+
+            document.getElementById('expected-response-preview').textContent = JSON.stringify(preview, null, 2);
+        }
+
         function addExpectedDataField(key = '', val = '') {
             const list = document.getElementById('expected-data-list');
             const row = document.createElement('div');
             row.className = 'flex items-center gap-2';
             row.innerHTML = `
                 <input type="text" name="endpoint_expected_data[${expectedDataIdx}][key]" value="${key}" placeholder="Key (e.g. username)"
-                    class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400 expected-data-input" />
                 <input type="text" name="endpoint_expected_data[${expectedDataIdx}][value]" value="${val}" placeholder="Value (e.g. john_doe)"
-                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <button type="button" onclick="this.parentElement.remove()"
-                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400 expected-data-input" />
+                <button type="button" class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20 remove-expected">&times;</button>
             `;
+
+            // Add event listeners for dynamic preview update
+            const inputs = row.querySelectorAll('.expected-data-input');
+            inputs.forEach(input => {
+                input.addEventListener('input', updateExpectedResponsePreview);
+            });
+
+            // Add event listener for remove button
+            row.querySelector('.remove-expected').addEventListener('click', function() {
+                row.remove();
+                updateExpectedResponsePreview();
+            });
+
             list.appendChild(row);
             expectedDataIdx++;
+            updateExpectedResponsePreview();
         }
 
         async function testEndpoint() {

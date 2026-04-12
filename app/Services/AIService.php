@@ -205,6 +205,8 @@ class AIService
         - Speak naturally, warm, casual-professional — like a real CS agent on chat.
         - Keep replies short (1-3 sentences) unless user asks for detail.
         - Never make up information. Be honest if unsure.
+        - If a user asks about account status, suspend status, verification, or any action covered by a configured tool, you MUST use the relevant tool and never guess the answer.
+        - For tools with endpoint data, treat webhook results as the only source of truth.
         - Always confirm before performing any sensitive action or updating player data.
         - If input values seem wrong, suggest valid options and ask user to re-check.[IMPORTANT]
         - Stay professional with angry/abusive users — respond politely, add emoji to soften tone.
@@ -336,16 +338,10 @@ class AIService
             }
         }
 
-        // 2. Fallback: keyword match only for info-only tools (no OpenAI definition).
-        //    Tools with parameters were already offered to OpenAI — trust its decision.
         $bestTool = null;
         $bestScore = 0;
 
         foreach ($tools as $tool) {
-            if ($tool->getDefinition() !== null) {
-                continue; // OpenAI already had a chance to call this tool.
-            }
-
             $score = $tool->matchScore($userMessage);
             if ($score > $bestScore) {
                 $bestScore = $score;
@@ -353,8 +349,31 @@ class AIService
             }
         }
 
-        if ($bestTool !== null && !empty($bestTool->information_text)) {
-            return $bestTool->information_text;
+        if ($bestTool !== null && $bestScore > 0) {
+            $arguments = $bestTool->getDefinition() !== null
+                ? $this->forceToolArgumentsFromMessage($client, $bestTool, $systemPrompt, $contextPrompt, $history, $userMessage)
+                : [];
+
+            if ($bestTool->getDefinition() !== null && $arguments === null) {
+                return $bestTool->getMissingMessage();
+            }
+
+            $execution = $this->executeTool($bestTool, $arguments ?? []);
+
+            if (($execution['mode'] ?? 'direct') === 'model') {
+                return $this->generateAssistantReplyFromToolResult(
+                    $client,
+                    $systemPrompt,
+                    $contextPrompt,
+                    $history,
+                    $userMessage,
+                    $execution['tool_context'] ?? []
+                );
+            }
+
+            if (!empty($execution['reply'])) {
+                return $execution['reply'];
+            }
         }
 
         return null;
@@ -451,6 +470,7 @@ class AIService
 
             $responseData = $payload['data'] ?? [];
             $responseData = is_array($responseData) ? $responseData : ['value' => $responseData];
+            $responseData = $this->normalizeToolData($responseData);
 
             $expectedDataShape = (array) ($expectedResponse['data'] ?? []);
             $resolvedData = $expectedDataShape === []
@@ -520,6 +540,100 @@ class AIService
         }
 
         return [$body, $missingFields];
+    }
+
+    private function forceToolArgumentsFromMessage($client, Tool $tool, string $systemPrompt, ?string $contextPrompt, array $history, string $userMessage): ?array
+    {
+        $definition = $tool->getDefinition();
+
+        if ($definition === null) {
+            return [];
+        }
+
+        $messages = [
+            ['role' => 'system', 'content' => $systemPrompt],
+        ];
+
+        if ($contextPrompt !== null) {
+            $messages[] = ['role' => 'system', 'content' => $contextPrompt];
+        }
+
+        $messages[] = [
+            'role' => 'system',
+            'content' => "Choose the matched tool and extract arguments from the user's latest message. If the message does not contain enough data for a required field, still call the tool with whatever arguments are available so the application can return the configured missing-data message.",
+        ];
+
+        foreach (array_slice($history, -6) as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $role = $item['role'] ?? null;
+            $content = $item['content'] ?? null;
+
+            if (!in_array($role, ['user', 'assistant'], true) || !is_string($content) || trim($content) === '') {
+                continue;
+            }
+
+            $messages[] = [
+                'role' => $role,
+                'content' => $content,
+            ];
+        }
+
+        $messages[] = ['role' => 'user', 'content' => $userMessage];
+
+        try {
+            $response = $client->chat()->create([
+                'model' => $this->model,
+                'messages' => $messages,
+                'tools' => [$definition],
+                'tool_choice' => [
+                    'type' => 'function',
+                    'function' => ['name' => $tool->tool_name],
+                ],
+                'max_tokens' => 120,
+            ]);
+
+            $message = $response->choices[0]->message ?? null;
+
+            return $message !== null
+                ? $this->extractArgumentsFromToolCall($message, $tool->tool_name)
+                : null;
+        } catch (\Throwable $e) {
+            Log::warning('AI forced tool argument extraction failed', [
+                'tool_name' => $tool->tool_name,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return null;
+    }
+
+    private function normalizeToolData($value)
+    {
+        if (is_array($value)) {
+            $normalized = [];
+
+            foreach ($value as $key => $item) {
+                $normalized[$key] = $this->normalizeToolData($item);
+            }
+
+            return $normalized;
+        }
+
+        if (!is_string($value)) {
+            return $value;
+        }
+
+        $normalized = trim($value);
+        $lower = mb_strtolower($normalized);
+
+        return match ($lower) {
+            'true', 'yes', 'y', '1' => true,
+            'false', 'no', 'n', '0' => false,
+            default => $value,
+        };
     }
 
     private function generateAssistantReplyFromToolResult($client, string $systemPrompt, ?string $contextPrompt, array $history, string $userMessage, array $toolContext): string

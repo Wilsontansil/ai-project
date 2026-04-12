@@ -254,6 +254,7 @@ class ToolController extends Controller
         $route = '/' . ltrim($data['route'], '/');
         $url = $baseUrl . $route;
         Log::info('Testing tool endpoint', ['url' => $url, 'body' => $data['body'] ?? []]);
+        
         $body = $data['body'] ?? [];
 
         try {

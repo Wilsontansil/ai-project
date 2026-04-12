@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\DataModel;
 use App\Models\Tool;
 use Illuminate\Database\Seeder;
 
@@ -9,6 +10,9 @@ class ToolSeeder extends Seeder
 {
     public function run(): void
     {
+        $playersModel = DataModel::query()->where('slug', 'players')->first();
+        $playersDataModelId = $playersModel?->id;
+
         $tools = [
             [
                 'tool_name' => '_bot_config',
@@ -16,6 +20,7 @@ class ToolSeeder extends Seeder
                 'description' => 'General bot configuration',
                 'slug' => '_bot-config',
                 'is_enabled' => false,
+                'data_model_id' => null,
                 'parameters' => null,
                 'keywords' => null,
                 'missing_message' => null,
@@ -28,6 +33,7 @@ class ToolSeeder extends Seeder
                 'description' => 'Reset user password after account data verification',
                 'slug' => 'reset-password',
                 'is_enabled' => true,
+                'data_model_id' => $playersDataModelId,
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
@@ -51,6 +57,7 @@ class ToolSeeder extends Seeder
                 'description' => 'Check if a player account is suspended',
                 'slug' => 'check-suspend',
                 'is_enabled' => true,
+                'data_model_id' => $playersDataModelId,
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
@@ -71,6 +78,7 @@ class ToolSeeder extends Seeder
                 'description' => 'Register a new player account. Requires username, email, phone number (telepon/hp), bank name, account holder name (nama rekening), and account number (nomor rekening).',
                 'slug' => 'register',
                 'is_enabled' => true,
+                'data_model_id' => $playersDataModelId,
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
@@ -96,6 +104,7 @@ class ToolSeeder extends Seeder
                 'description' => 'Bocoran slot gacor hari ini',
                 'slug' => 'game-gacor',
                 'is_enabled' => true,
+                'data_model_id' => null,
                 'parameters' => null,
                 'keywords' => ['game gacor', 'slot gacor', 'bocoran slot'],
                 'missing_message' => null,
@@ -110,6 +119,7 @@ class ToolSeeder extends Seeder
                 'description' => 'Pola VIP terupdate hari ini',
                 'slug' => 'pola-gacor',
                 'is_enabled' => true,
+                'data_model_id' => null,
                 'parameters' => null,
                 'keywords' => ['pola gacor', 'pola vip', 'pola vvip', 'pola mantap', 'pola terbaik'],
                 'missing_message' => null,

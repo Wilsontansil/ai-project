@@ -19,10 +19,10 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminUserSeeder::class,
+            DataModelSeeder::class,
             ToolSeeder::class,
             ForbiddenBehaviourSeeder::class,
             ProjectSettingSeeder::class,
-            DataModelSeeder::class,
         ]);
     }
 }

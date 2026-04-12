@@ -89,6 +89,12 @@
                         placeholder="e.g. /getplayer"
                         class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400" />
                     <div>
+                        <label for="endpoint_get_expected_response" class="mb-2 block text-xs text-slate-300">Expected
+                            Response</label>
+                        <textarea id="endpoint_get_expected_response" name="endpoint_get_expected_response" rows="3"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-white outline-none transition focus:border-cyan-400">{{ old('endpoint_get_expected_response', $tool->endpoints['get']['expected_response'] ?? '') }}</textarea>
+                    </div>
+                    <div>
                         <p class="mb-2 text-xs text-slate-400">Body fields (key → value). Kosongkan value jika diisi dari
                             parameter customer.</p>
                         <div id="get-body-list" class="space-y-2"></div>
@@ -124,6 +130,12 @@
                         value="{{ old('endpoint_update_route', $tool->endpoints['update']['route'] ?? '') }}"
                         placeholder="e.g. /updateplayer"
                         class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400" />
+                    <div>
+                        <label for="endpoint_update_expected_response" class="mb-2 block text-xs text-slate-300">Expected
+                            Response</label>
+                        <textarea id="endpoint_update_expected_response" name="endpoint_update_expected_response" rows="3"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-white outline-none transition focus:border-cyan-400">{{ old('endpoint_update_expected_response', $tool->endpoints['update']['expected_response'] ?? '') }}</textarea>
+                    </div>
                     <div>
                         <p class="mb-2 text-xs text-slate-400">Body fields (key → value). Kosongkan value jika diisi dari
                             parameter customer.</p>
@@ -165,14 +177,6 @@
                     tool yang hanya memberikan info.</p>
                 <textarea id="information_text" name="information_text" rows="4"
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('information_text', $tool->information_text) }}</textarea>
-            </div>
-
-            <div>
-                <label for="expected_response" class="mb-2 block text-sm text-slate-200">Expected Response</label>
-                <p class="mb-2 text-xs text-slate-400">Format respons yang diharapkan dari webhook (contoh field JSON yang
-                    harus ada).</p>
-                <textarea id="expected_response" name="expected_response" rows="4"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('expected_response', $tool->expected_response) }}</textarea>
             </div>
 
             <div>

@@ -47,12 +47,13 @@ class ToolController extends Controller
             'keywords' => ['nullable', 'string'],
             'missing_message' => ['nullable', 'string', 'max:1000'],
             'information_text' => ['nullable', 'string', 'max:2000'],
-            'expected_response' => ['nullable', 'string', 'max:4000'],
             'endpoint_get_route' => ['nullable', 'string', 'max:255'],
+            'endpoint_get_expected_response' => ['nullable', 'string', 'max:4000'],
             'endpoint_get_body' => ['nullable', 'array'],
             'endpoint_get_body.*.key' => ['required_with:endpoint_get_body', 'string', 'max:80'],
             'endpoint_get_body.*.value' => ['nullable', 'string', 'max:255'],
             'endpoint_update_route' => ['nullable', 'string', 'max:255'],
+            'endpoint_update_expected_response' => ['nullable', 'string', 'max:4000'],
             'endpoint_update_body' => ['nullable', 'array'],
             'endpoint_update_body.*.key' => ['required_with:endpoint_update_body', 'string', 'max:80'],
             'endpoint_update_body.*.value' => ['nullable', 'string', 'max:255'],
@@ -78,7 +79,6 @@ class ToolController extends Controller
             'keywords' => $keywords,
             'missing_message' => trim($data['missing_message'] ?? '') ?: null,
             'information_text' => trim($data['information_text'] ?? '') ?: null,
-            'expected_response' => trim($data['expected_response'] ?? '') ?: null,
             'meta' => [
                 'icon' => trim($request->input('icon', 'M13 10V3L4 14h7v7l9-11h-7z')),
             ],
@@ -106,12 +106,13 @@ class ToolController extends Controller
             'keywords' => ['nullable', 'string'],
             'missing_message' => ['nullable', 'string', 'max:1000'],
             'information_text' => ['nullable', 'string', 'max:2000'],
-            'expected_response' => ['nullable', 'string', 'max:4000'],
             'endpoint_get_route' => ['nullable', 'string', 'max:255'],
+            'endpoint_get_expected_response' => ['nullable', 'string', 'max:4000'],
             'endpoint_get_body' => ['nullable', 'array'],
             'endpoint_get_body.*.key' => ['required_with:endpoint_get_body', 'string', 'max:80'],
             'endpoint_get_body.*.value' => ['nullable', 'string', 'max:255'],
             'endpoint_update_route' => ['nullable', 'string', 'max:255'],
+            'endpoint_update_expected_response' => ['nullable', 'string', 'max:4000'],
             'endpoint_update_body' => ['nullable', 'array'],
             'endpoint_update_body.*.key' => ['required_with:endpoint_update_body', 'string', 'max:80'],
             'endpoint_update_body.*.value' => ['nullable', 'string', 'max:255'],
@@ -139,7 +140,6 @@ class ToolController extends Controller
             'keywords' => $keywords,
             'missing_message' => trim($data['missing_message'] ?? '') ?: null,
             'information_text' => trim($data['information_text'] ?? '') ?: null,
-            'expected_response' => trim($data['expected_response'] ?? '') ?: null,
             'meta' => array_merge($tool->meta ?? [], [
                 'icon' => trim($request->input('icon', $tool->meta['icon'] ?? 'M13 10V3L4 14h7v7l9-11h-7z')),
             ]),
@@ -205,18 +205,22 @@ class ToolController extends Controller
         $getRoute = trim((string) $request->input('endpoint_get_route', ''));
         if ($getRoute !== '') {
             $getBody = $this->buildBodyKeyValue((array) $request->input('endpoint_get_body', []));
+            $getExpectedResponse = trim((string) $request->input('endpoint_get_expected_response', ''));
             $endpoints['get'] = [
                 'route' => $getRoute,
                 'body' => $getBody,
+                'expected_response' => $getExpectedResponse,
             ];
         }
 
         $updateRoute = trim((string) $request->input('endpoint_update_route', ''));
         if ($updateRoute !== '') {
             $updateBody = $this->buildBodyKeyValue((array) $request->input('endpoint_update_body', []));
+            $updateExpectedResponse = trim((string) $request->input('endpoint_update_expected_response', ''));
             $endpoints['update'] = [
                 'route' => $updateRoute,
                 'body' => $updateBody,
+                'expected_response' => $updateExpectedResponse,
             ];
         }
 

@@ -9,9 +9,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Log;
 
 class ToolController extends Controller
 {
@@ -253,18 +253,11 @@ class ToolController extends Controller
 
         $route = '/' . ltrim($data['route'], '/');
         $url = $baseUrl . $route;
+        Log::info('Testing tool endpoint', ['url' => $url, 'body' => $data['body'] ?? []]);
         $body = $data['body'] ?? [];
 
         try {
-            Log::info('Tool test request', ['url' => $url, 'body' => $body]);
-
             $response = Http::timeout(15)->post($url, $body);
-
-            Log::info('Tool test response', [
-                'url' => $url,
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
 
             return response()->json([
                 'success' => $response->successful(),
@@ -274,12 +267,6 @@ class ToolController extends Controller
                 'response' => $response->json() ?? $response->body(),
             ]);
         } catch (\Throwable $e) {
-            Log::error('Tool test exception', [
-                'url' => $url,
-                'body' => $body,
-                'error' => $e->getMessage(),
-            ]);
-
             return response()->json([
                 'success' => false,
                 'url' => $url,

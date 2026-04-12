@@ -196,7 +196,7 @@
             </div>
 
             <div class="flex items-center gap-4 pt-2">
-                <button type="submit"
+                <button type="submit" onclick="return validateForm()"
                     class="rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
                     Save Changes
                 </button>
@@ -383,6 +383,24 @@
             list.appendChild(row);
             expectedDataIdx++;
             updateExpectedResponsePreview();
+        }
+
+        function validateForm() {
+            const expectedDataList = document.getElementById('expected-data-list');
+            const rows = expectedDataList.querySelectorAll(':scope > div');
+
+            for (let row of rows) {
+                const inputs = row.querySelectorAll('input[type=text]');
+                const key = inputs[0]?.value.trim();
+                const value = inputs[1]?.value.trim();
+
+                if ((key && !value) || (!key && value)) {
+                    alert(
+                        'Expected data fields must have both KEY and VALUE filled. Please complete all fields or remove empty rows.');
+                    return false;
+                }
+            }
+            return true;
         }
 
         async function testEndpoint() {

@@ -13,10 +13,10 @@ class Tool extends Model
         'tool_name',
         'display_name',
         'description',
-        'class_name',
         'slug',
         'is_enabled',
         'parameters',
+        'endpoints',
         'keywords',
         'missing_message',
         'information_text',
@@ -26,6 +26,7 @@ class Tool extends Model
     protected $casts = [
         'is_enabled' => 'boolean',
         'parameters' => 'array',
+        'endpoints' => 'array',
         'keywords' => 'array',
         'meta' => 'array',
     ];
@@ -78,18 +79,5 @@ class Tool extends Model
     public function getMissingMessage(): string
     {
         return $this->missing_message ?? 'Mohon lengkapi data yang diperlukan.';
-    }
-
-    /**
-     * Create a new instance of the tool's service class (for execution only).
-     * Returns null if no class_name is set or class does not exist.
-     */
-    public function newServiceInstance(): ?object
-    {
-        if (empty($this->class_name) || !class_exists($this->class_name)) {
-            return null;
-        }
-
-        return new ($this->class_name)();
     }
 }

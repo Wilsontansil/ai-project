@@ -48,7 +48,6 @@ class AIAgentController extends Controller
             [
                 'display_name' => 'Bot Config',
                 'description' => 'General bot configuration',
-                'class_name' => '',
                 'slug' => '_bot-config',
                 'is_enabled' => false,
                 'meta' => ['bot_name' => trim($data['bot_name'])],

@@ -71,6 +71,53 @@
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
             </div>
 
+            {{-- API Endpoints --}}
+            <div class="rounded-2xl border border-white/10 bg-slate-900/30 p-4 space-y-4">
+                <div>
+                    <h3 class="text-sm font-semibold text-white">API Endpoints</h3>
+                    <p class="text-xs text-slate-400">Route yang dipanggil ke webhook base URL saat tool dieksekusi.</p>
+                </div>
+
+                {{-- GET Endpoint --}}
+                <div class="rounded-xl border border-white/10 bg-slate-900/40 p-3 space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span
+                            class="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300">GET</span>
+                        <label for="endpoint_get_route" class="text-sm text-slate-200">Route</label>
+                    </div>
+                    <input id="endpoint_get_route" type="text" name="endpoint_get_route"
+                        value="{{ old('endpoint_get_route') }}" placeholder="e.g. /getplayer"
+                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400" />
+                    <div>
+                        <p class="mb-2 text-xs text-slate-400">Body fields yang dikirim untuk GET request.</p>
+                        <div id="get-body-list" class="space-y-2"></div>
+                        <button type="button" onclick="addGetBodyField()"
+                            class="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
+                            + Tambah Field
+                        </button>
+                    </div>
+                </div>
+
+                {{-- UPDATE Endpoint --}}
+                <div class="rounded-xl border border-white/10 bg-slate-900/40 p-3 space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span class="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">UPDATE</span>
+                        <label for="endpoint_update_route" class="text-sm text-slate-200">Route</label>
+                    </div>
+                    <input id="endpoint_update_route" type="text" name="endpoint_update_route"
+                        value="{{ old('endpoint_update_route') }}" placeholder="e.g. /updateplayer"
+                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400" />
+                    <div>
+                        <p class="mb-2 text-xs text-slate-400">Body fields yang dikirim untuk UPDATE request.</p>
+                        <div id="update-body-list" class="space-y-2"></div>
+                        <button type="button" onclick="addUpdateBodyField()"
+                            class="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
+                            + Tambah Field
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div>
                 <label for="missing_message" class="mb-2 block text-sm text-slate-200">Missing Data Message</label>
                 <p class="mb-2 text-xs text-slate-400">Pesan yang ditampilkan jika data yang diperlukan belum lengkap.
@@ -101,7 +148,8 @@
             <div>
                 <label
                     class="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-slate-900/50 px-4 py-2 text-sm text-slate-200">
-                    <input type="checkbox" name="is_enabled" value="1" {{ old('is_enabled', true) ? 'checked' : '' }}
+                    <input type="checkbox" name="is_enabled" value="1"
+                        {{ old('is_enabled', true) ? 'checked' : '' }}
                         class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
                     Enable tool
                 </label>
@@ -143,6 +191,32 @@
                 `;
             list.appendChild(row);
             paramIndex++;
+        }
+
+        function addGetBodyField(value = '') {
+            const list = document.getElementById('get-body-list');
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2';
+            row.innerHTML = `
+                <input type="text" name="endpoint_get_body[]" value="${value}" placeholder="e.g. username"
+                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <button type="button" onclick="this.parentElement.remove()"
+                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+            `;
+            list.appendChild(row);
+        }
+
+        function addUpdateBodyField(value = '') {
+            const list = document.getElementById('update-body-list');
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2';
+            row.innerHTML = `
+                <input type="text" name="endpoint_update_body[]" value="${value}" placeholder="e.g. username"
+                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <button type="button" onclick="this.parentElement.remove()"
+                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+            `;
+            list.appendChild(row);
         }
     </script>
 @endsection

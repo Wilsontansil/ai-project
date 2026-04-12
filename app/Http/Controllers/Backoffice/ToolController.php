@@ -43,9 +43,16 @@ class ToolController extends Controller
             'keywords' => ['nullable', 'string'],
             'missing_message' => ['nullable', 'string', 'max:1000'],
             'information_text' => ['nullable', 'string', 'max:2000'],
+            'endpoint_get_route' => ['nullable', 'string', 'max:255'],
+            'endpoint_get_body' => ['nullable', 'array'],
+            'endpoint_get_body.*' => ['string', 'max:80'],
+            'endpoint_update_route' => ['nullable', 'string', 'max:255'],
+            'endpoint_update_body' => ['nullable', 'array'],
+            'endpoint_update_body.*' => ['string', 'max:80'],
         ]);
 
         $parameters = $this->buildParametersFromInput($request->input('params', []));
+        $endpoints = $this->buildEndpointsFromInput($request);
 
         $keywords = null;
         if (!empty($data['keywords'])) {
@@ -60,6 +67,7 @@ class ToolController extends Controller
             'slug' => Str::slug($data['tool_name']),
             'is_enabled' => $request->boolean('is_enabled'),
             'parameters' => $parameters,
+            'endpoints' => $endpoints,
             'keywords' => $keywords,
             'missing_message' => trim($data['missing_message'] ?? '') ?: null,
             'information_text' => trim($data['information_text'] ?? '') ?: null,
@@ -90,6 +98,12 @@ class ToolController extends Controller
             'keywords' => ['nullable', 'string'],
             'missing_message' => ['nullable', 'string', 'max:1000'],
             'information_text' => ['nullable', 'string', 'max:2000'],
+            'endpoint_get_route' => ['nullable', 'string', 'max:255'],
+            'endpoint_get_body' => ['nullable', 'array'],
+            'endpoint_get_body.*' => ['string', 'max:80'],
+            'endpoint_update_route' => ['nullable', 'string', 'max:255'],
+            'endpoint_update_body' => ['nullable', 'array'],
+            'endpoint_update_body.*' => ['string', 'max:80'],
         ]);
 
         $parameters = $this->buildParametersFromInput($request->input('params', []));
@@ -110,6 +124,7 @@ class ToolController extends Controller
             'description' => trim($data['description'] ?? ''),
             'is_enabled' => $request->boolean('is_enabled'),
             'parameters' => $parameters,
+            'endpoints' => $this->buildEndpointsFromInput($request),
             'keywords' => $keywords,
             'missing_message' => trim($data['missing_message'] ?? '') ?: null,
             'information_text' => trim($data['information_text'] ?? '') ?: null,
@@ -166,5 +181,39 @@ class ToolController extends Controller
             'properties' => $properties,
             'required' => $required,
         ];
+    }
+
+    /**
+     * Build endpoints config from form input.
+     */
+    private function buildEndpointsFromInput(Request $request): ?array
+    {
+        $endpoints = [];
+
+        $getRoute = trim((string) $request->input('endpoint_get_route', ''));
+        if ($getRoute !== '') {
+            $getBody = array_values(array_filter(
+                array_map('trim', (array) $request->input('endpoint_get_body', [])),
+                fn ($v) => $v !== ''
+            ));
+            $endpoints['get'] = [
+                'route' => $getRoute,
+                'body' => $getBody,
+            ];
+        }
+
+        $updateRoute = trim((string) $request->input('endpoint_update_route', ''));
+        if ($updateRoute !== '') {
+            $updateBody = array_values(array_filter(
+                array_map('trim', (array) $request->input('endpoint_update_body', [])),
+                fn ($v) => $v !== ''
+            ));
+            $endpoints['update'] = [
+                'route' => $updateRoute,
+                'body' => $updateBody,
+            ];
+        }
+
+        return $endpoints !== [] ? $endpoints : null;
     }
 }

@@ -13,10 +13,10 @@ return new class extends Migration
             $table->string('tool_name')->unique();
             $table->string('display_name');
             $table->text('description')->nullable();
-            $table->string('class_name')->nullable();
             $table->string('slug')->unique();
             $table->boolean('is_enabled')->default(true);
             $table->json('parameters')->nullable();
+            $table->json('endpoints')->nullable();
             $table->json('keywords')->nullable();
             $table->text('missing_message')->nullable();
             $table->text('information_text')->nullable();

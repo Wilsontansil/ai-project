@@ -14,7 +14,6 @@ class ToolSeeder extends Seeder
                 'tool_name' => '_bot_config',
                 'display_name' => 'Bot Config',
                 'description' => 'General bot configuration',
-                'class_name' => null,
                 'slug' => '_bot-config',
                 'is_enabled' => false,
                 'parameters' => null,
@@ -27,7 +26,6 @@ class ToolSeeder extends Seeder
                 'tool_name' => 'resetPassword',
                 'display_name' => 'Reset Password',
                 'description' => 'Reset user password after account data verification',
-                'class_name' => 'App\\Services\\Tools\\ResetPasswordTool',
                 'slug' => 'reset-password',
                 'is_enabled' => true,
                 'parameters' => [
@@ -51,7 +49,6 @@ class ToolSeeder extends Seeder
                 'tool_name' => 'checkSuspend',
                 'display_name' => 'Check Suspend',
                 'description' => 'Check if a player account is suspended',
-                'class_name' => 'App\\Services\\Tools\\CheckSuspendTool',
                 'slug' => 'check-suspend',
                 'is_enabled' => true,
                 'parameters' => [
@@ -72,7 +69,6 @@ class ToolSeeder extends Seeder
                 'tool_name' => 'register',
                 'display_name' => 'Register',
                 'description' => 'Register a new player account. Requires username, email, phone number (telepon/hp), bank name, account holder name (nama rekening), and account number (nomor rekening).',
-                'class_name' => 'App\\Services\\Tools\\RegisterTool',
                 'slug' => 'register',
                 'is_enabled' => true,
                 'parameters' => [
@@ -98,7 +94,6 @@ class ToolSeeder extends Seeder
                 'tool_name' => 'game_gacor',
                 'display_name' => 'Game Gacor',
                 'description' => 'Bocoran slot gacor hari ini',
-                'class_name' => null,
                 'slug' => 'game-gacor',
                 'is_enabled' => true,
                 'parameters' => null,
@@ -113,7 +108,6 @@ class ToolSeeder extends Seeder
                 'tool_name' => 'pola_gacor',
                 'display_name' => 'Pola Gacor',
                 'description' => 'Pola VIP terupdate hari ini',
-                'class_name' => null,
                 'slug' => 'pola-gacor',
                 'is_enabled' => true,
                 'parameters' => null,

@@ -9,6 +9,7 @@ use App\Models\EscalationNotification;
 use App\Models\ProjectSetting;
 use App\Models\Tool;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use OpenAI;
@@ -345,29 +346,17 @@ class AIService
 
     /**
      * Execute a tool with extracted arguments.
-     * Uses PHP class if available, otherwise returns formatted collected data.
+     * Calls webhook endpoint if configured, otherwise returns information text or collected data.
      */
     private function executeTool(Tool $tool, array $arguments, ?Agent $agent): string
     {
-        $instance = $tool->newServiceInstance();
+        $endpoints = $tool->endpoints;
 
-        if ($instance !== null) {
-            if (method_exists($instance, 'executeWithArguments')) {
-                return $instance->executeWithArguments($arguments, $agent);
-            }
-
-            $username = $arguments['username'] ?? null;
-
-            if ($username === null) {
-                return method_exists($instance, 'missingUsernameMessage')
-                    ? $instance->missingUsernameMessage()
-                    : $tool->getMissingMessage();
-            }
-
-            return $instance->execute($username, $agent);
+        if (!empty($endpoints)) {
+            return $this->callWebhookEndpoint($tool, $endpoints, $arguments);
         }
 
-        // No PHP class — return information text or collected arguments summary.
+        // No endpoints — return information text or collected arguments summary.
         if (!empty($tool->information_text)) {
             return $tool->information_text;
         }
@@ -384,6 +373,63 @@ class AIService
         }
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * Call the webhook base URL + tool endpoint route.
+     * Tries 'get' first; falls back to 'update' if 'get' is not configured.
+     */
+    private function callWebhookEndpoint(Tool $tool, array $endpoints, array $arguments): string
+    {
+        $baseUrl = rtrim(ProjectSetting::getValue('webhook_base_url', ''), '/');
+
+        if (empty($baseUrl)) {
+            Log::warning("Webhook base URL not configured for tool [{$tool->tool_name}]");
+            return 'Webhook base URL belum dikonfigurasi.';
+        }
+
+        // Determine which endpoint to use (prefer 'get', fallback 'update')
+        $endpoint = $endpoints['get'] ?? $endpoints['update'] ?? null;
+
+        if ($endpoint === null || empty($endpoint['route'])) {
+            return !empty($tool->information_text) ? $tool->information_text : $tool->getMissingMessage();
+        }
+
+        $route = '/' . ltrim($endpoint['route'], '/');
+        $url = $baseUrl . $route;
+
+        // Build body from configured fields, mapping values from AI arguments
+        $bodyFields = $endpoint['body'] ?? [];
+        $body = [];
+        foreach ($bodyFields as $field) {
+            if (isset($arguments[$field])) {
+                $body[$field] = $arguments[$field];
+            }
+        }
+
+        try {
+            $response = Http::timeout(15)->post($url, $body);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                return is_array($data) ? json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : (string) $response->body();
+            }
+
+            Log::error("Webhook error [{$tool->tool_name}]: HTTP {$response->status()}", [
+                'url' => $url,
+                'body' => $body,
+                'response' => $response->body(),
+            ]);
+
+            return "Gagal menghubungi server (HTTP {$response->status()}).";
+        } catch (\Throwable $e) {
+            Log::error("Webhook exception [{$tool->tool_name}]: {$e->getMessage()}", [
+                'url' => $url,
+                'body' => $body,
+            ]);
+
+            return 'Terjadi kesalahan saat menghubungi server.';
+        }
     }
 
     /**

@@ -229,7 +229,7 @@ class AIService
         - 'norek': Numeric only.
 
 
-        Must Dos:
+        Must Dos (highest priority):
         - For check Tool after confirmation from user, always use the webhook endpoint to get the latest data, do not rely on user input or previous conversation for tool-related questions. This is to avoid mistakes from users and ensure you have the most accurate information.
         ";
 

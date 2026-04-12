@@ -42,7 +42,8 @@
 
             <main class="min-w-0 flex-1 space-y-4">
                 {{-- Header --}}
-                <div class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-5 py-3 backdrop-blur">
+                <div
+                    class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-5 py-3 backdrop-blur">
                     <div>
                         <h1 class="text-lg font-semibold">Customer Dashboard</h1>
                         <p class="text-xs text-slate-400">Monitoring customer dari Telegram & WhatsApp.</p>
@@ -104,13 +105,17 @@
                                             <td class="px-3 py-2 text-white">
                                                 {{ $customer->name ?: '-' }}
                                                 @if ($customer->needs_human)
-                                                    <span class="ml-1 rounded bg-red-500/20 px-1 py-0.5 text-[9px] font-bold text-red-300">ESCALATED</span>
+                                                    <span
+                                                        class="ml-1 rounded bg-red-500/20 px-1 py-0.5 text-[9px] font-bold text-red-300">ESCALATED</span>
                                                 @endif
                                             </td>
                                             <td class="px-3 py-2 text-slate-300">{{ ucfirst($customer->platform) }}</td>
-                                            <td class="px-3 py-2 text-slate-400">{{ $customer->phone_number ?: '-' }}</td>
-                                            <td class="px-3 py-2 text-center text-slate-400">{{ $customer->total_messages }}</td>
-                                            <td class="px-3 py-2 text-slate-400">{{ $customer->last_seen_at?->diffForHumans() ?: '-' }}</td>
+                                            <td class="px-3 py-2 text-slate-400">{{ $customer->phone_number ?: '-' }}
+                                            </td>
+                                            <td class="px-3 py-2 text-center text-slate-400">
+                                                {{ $customer->total_messages }}</td>
+                                            <td class="px-3 py-2 text-slate-400">
+                                                {{ $customer->last_seen_at?->diffForHumans() ?: '-' }}</td>
                                             <td class="px-3 py-2">
                                                 <a href="{{ route('backoffice.customer.chat', $customer->id) }}"
                                                     class="rounded bg-cyan-400/20 px-2 py-1 text-[10px] font-semibold text-cyan-300 transition hover:bg-cyan-400/30">Chat</a>
@@ -118,7 +123,8 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="px-3 py-6 text-center text-slate-500">Belum ada data customer.</td>
+                                            <td colspan="6" class="px-3 py-6 text-center text-slate-500">Belum ada
+                                                data customer.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

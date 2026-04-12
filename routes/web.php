@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Backoffice\AIAgentController;
 use App\Http\Controllers\Backoffice\AuthController;
+use App\Http\Controllers\Backoffice\DataModelController;
 use App\Http\Controllers\Backoffice\ForbiddenBehaviourController;
 use App\Http\Controllers\Backoffice\DashboardController;
 use App\Http\Controllers\Backoffice\EscalationController;
@@ -32,6 +33,13 @@ Route::middleware('auth')->group(function () {
     Route::put('/backoffice/tools/{tool}', [ToolController::class, 'update'])->name('backoffice.tools.update');
     Route::delete('/backoffice/tools/{tool}', [ToolController::class, 'destroy'])->name('backoffice.tools.destroy');
     Route::post('/backoffice/tools/test-endpoint', [ToolController::class, 'testEndpoint'])->name('backoffice.tools.testEndpoint');
+
+    Route::get('/backoffice/data-models', [DataModelController::class, 'index'])->name('backoffice.data-models.index');
+    Route::get('/backoffice/data-models/create', [DataModelController::class, 'create'])->name('backoffice.data-models.create');
+    Route::post('/backoffice/data-models', [DataModelController::class, 'store'])->name('backoffice.data-models.store');
+    Route::get('/backoffice/data-models/{dataModel}/edit', [DataModelController::class, 'edit'])->name('backoffice.data-models.edit');
+    Route::put('/backoffice/data-models/{dataModel}', [DataModelController::class, 'update'])->name('backoffice.data-models.update');
+    Route::delete('/backoffice/data-models/{dataModel}', [DataModelController::class, 'destroy'])->name('backoffice.data-models.destroy');
 
     Route::get('/backoffice/forbidden-behaviours', [ForbiddenBehaviourController::class, 'index'])->name('backoffice.forbidden.index');
     Route::get('/backoffice/forbidden-behaviours/create', [ForbiddenBehaviourController::class, 'create'])->name('backoffice.forbidden.create');

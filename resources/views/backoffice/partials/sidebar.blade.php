@@ -149,6 +149,17 @@
                     </span>
                     <span class="bo-label">Tools</span>
                 </a>
+                <a href="{{ route('backoffice.data-models.index') }}"
+                    class="bo-nav-item group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition {{ ($boActive ?? ($active ?? '')) === 'data-models' ? 'bg-white/20 font-semibold text-white' : 'text-white/90 hover:bg-white/10' }}">
+                    <span
+                        class="flex h-7 w-7 items-center justify-center rounded-md {{ ($boActive ?? ($active ?? '')) === 'data-models' ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/15' }}">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 7a2 2 0 012-2h12a2 2 0 012 2v2H4V7zM4 11h16v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6zm4 2h2m0 0v2m0-2H8m2 0h2" />
+                        </svg>
+                    </span>
+                    <span class="bo-label">Data Models</span>
+                </a>
                 <a href="{{ route('backoffice.ai-agent') }}"
                     class="bo-nav-item group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition {{ $active === 'ai-agent' ? 'bg-white/20 font-semibold text-white' : 'text-white/90 hover:bg-white/10' }}">
                     <span

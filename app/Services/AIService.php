@@ -71,7 +71,14 @@ class AIService
             $finishReason = (string) ($response->choices[0]->finishReason ?? '');
 
             // Try to handle tool call or local intent.
-            $assistantReply = $this->handleToolCallOrIntent($msg, $message, $agent);
+            $assistantReply = $this->handleToolCallOrIntent(
+                $client,
+                $msg,
+                $message,
+                $systemPrompt,
+                $contextPrompt,
+                $history
+            );
 
             if ($assistantReply !== null) {
                 $assistantReply = $this->prepareAssistantReply($history, $assistantReply);
@@ -303,7 +310,7 @@ class AIService
      * Handle tool call or fallback to local intent parsing.
      * Returns null if tool/intent not matched.
      */
-    private function handleToolCallOrIntent($msg, string $userMessage, ?Agent $agent): ?string
+    private function handleToolCallOrIntent($client, $msg, string $userMessage, string $systemPrompt, ?string $contextPrompt, array $history): ?string
     {
         $tools = $this->getEnabledTools();
 
@@ -312,7 +319,20 @@ class AIService
             $arguments = $this->extractArgumentsFromToolCall($msg, $tool->tool_name);
 
             if ($arguments !== null) {
-                return $this->executeTool($tool, $arguments, $agent);
+                $execution = $this->executeTool($tool, $arguments);
+
+                if (($execution['mode'] ?? 'direct') === 'model') {
+                    return $this->generateAssistantReplyFromToolResult(
+                        $client,
+                        $systemPrompt,
+                        $contextPrompt,
+                        $history,
+                        $userMessage,
+                        $execution['tool_context'] ?? []
+                    );
+                }
+
+                return $execution['reply'] ?? null;
             }
         }
 
@@ -344,48 +364,61 @@ class AIService
      * Execute a tool with extracted arguments.
      * Always uses webhook endpoint for tool information requests.
      */
-    private function executeTool(Tool $tool, array $arguments, ?Agent $agent): string
+    private function executeTool(Tool $tool, array $arguments): array
     {
-        $endpoints = $tool->endpoints;
+        $endpoints = (array) ($tool->endpoints ?? []);
 
-        if (empty($endpoints)) {
-            return "Endpoint webhook untuk tool {$tool->display_name} belum dikonfigurasi.";
+        if ($endpoints !== []) {
+            return $this->callWebhookEndpoint($tool, $endpoints, $arguments);
         }
 
-        return $this->callWebhookEndpoint($tool, $endpoints, $arguments);
+        if (!empty($tool->information_text)) {
+            return [
+                'mode' => 'direct',
+                'reply' => $tool->information_text,
+            ];
+        }
+
+        return [
+            'mode' => 'direct',
+            'reply' => "Tool {$tool->display_name} belum dikonfigurasi.",
+        ];
     }
 
     /**
     * Call webhook_base_url + tool endpoint route.
-    * For information requests, endpoint priority: 'get', then 'update'.
+    * Uses current endpoint schema first, with legacy compatibility fallback.
      */
-    private function callWebhookEndpoint(Tool $tool, array $endpoints, array $arguments): string
+    private function callWebhookEndpoint(Tool $tool, array $endpoints, array $arguments): array
     {
         $baseUrl = rtrim(ProjectSetting::getValue('webhook_base_url', ''), '/');
 
         if (empty($baseUrl)) {
-            return 'Webhook base URL belum dikonfigurasi.';
+            return [
+                'mode' => 'direct',
+                'reply' => 'Webhook base URL belum dikonfigurasi.',
+            ];
         }
 
-        // Determine which endpoint to use (prefer 'get', fallback 'update')
-        $endpoint = $endpoints['get'] ?? $endpoints['update'] ?? null;
+        $endpoint = $this->resolveEndpointConfig($endpoints);
 
         if ($endpoint === null || empty($endpoint['route'])) {
-            return !empty($tool->information_text) ? $tool->information_text : $tool->getMissingMessage();
+            return [
+                'mode' => 'direct',
+                'reply' => !empty($tool->information_text) ? $tool->information_text : $tool->getMissingMessage(),
+            ];
         }
 
         $route = '/' . ltrim($endpoint['route'], '/');
         $url = $baseUrl . $route;
 
-        // Build body: use fixed value if set, otherwise map from AI arguments
-        $bodyFields = $endpoint['body'] ?? [];
-        $body = [];
-        foreach ($bodyFields as $key => $value) {
-            if ($value !== '') {
-                $body[$key] = $value; // fixed/default value
-            } elseif (isset($arguments[$key])) {
-                $body[$key] = $arguments[$key]; // from AI parameter
-            }
+        [$body, $missingFields] = $this->buildEndpointRequestBody($endpoint, $arguments);
+
+        if ($missingFields !== []) {
+            return [
+                'mode' => 'direct',
+                'reply' => $tool->getMissingMessage(),
+            ];
         }
 
         try {
@@ -402,20 +435,150 @@ class AIService
                 'response_preview' => mb_substr($response->body(), 0, 1000),
             ]);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                return is_array($data) ? json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : (string) $response->body();
+            $payload = $response->json();
+            $payload = is_array($payload) ? $payload : [];
+
+            $expectedResponse = (array) ($endpoint['expected_response'] ?? []);
+            $expectedStatus = (int) ($expectedResponse['status'] ?? 200);
+            $actualBusinessStatus = (int) ($payload['status'] ?? $response->status());
+
+            if (!$response->successful() || $actualBusinessStatus !== $expectedStatus) {
+                return [
+                    'mode' => 'direct',
+                    'reply' => 'Data tidak ditemukan.',
+                ];
             }
 
-            return "Gagal menghubungi server (HTTP {$response->status()}).";
+            $responseData = $payload['data'] ?? [];
+            $responseData = is_array($responseData) ? $responseData : ['value' => $responseData];
+
+            $expectedDataShape = (array) ($expectedResponse['data'] ?? []);
+            $resolvedData = $expectedDataShape === []
+                ? $responseData
+                : array_intersect_key($responseData, $expectedDataShape);
+
+            if ($resolvedData === []) {
+                $resolvedData = $responseData;
+            }
+
+            return [
+                'mode' => 'model',
+                'tool_context' => [
+                    'tool_name' => $tool->tool_name,
+                    'tool_display_name' => $tool->display_name,
+                    'tool_description' => $tool->description,
+                    'request_route' => $route,
+                    'request_body' => $body,
+                    'expected_response' => $expectedResponse,
+                    'actual_response' => $payload === [] ? ['raw_body' => $response->body()] : $payload,
+                    'resolved_data' => $resolvedData,
+                ],
+            ];
         } catch (\Throwable $e) {
             $this->logAiHttpException('tool.webhook', 'POST', $url, $e->getMessage(), [
                 'tool_name' => $tool->tool_name,
                 'body' => $body,
             ]);
 
-            return 'Terjadi kesalahan saat menghubungi server.';
+            return [
+                'mode' => 'direct',
+                'reply' => 'Terjadi kesalahan saat menghubungi server.',
+            ];
         }
+    }
+
+    private function resolveEndpointConfig(array $endpoints): ?array
+    {
+        $endpoint = $endpoints['endpoint'] ?? $endpoints['get'] ?? $endpoints['update'] ?? null;
+
+        return is_array($endpoint) ? $endpoint : null;
+    }
+
+    private function buildEndpointRequestBody(array $endpoint, array $arguments): array
+    {
+        $bodyFields = (array) ($endpoint['body'] ?? []);
+        $body = [];
+        $missingFields = [];
+
+        foreach ($bodyFields as $key => $value) {
+            $fixedValue = is_string($value) ? trim($value) : $value;
+
+            if ($fixedValue !== '') {
+                $body[$key] = $value;
+                continue;
+            }
+
+            $argumentValue = $arguments[$key] ?? null;
+            $argumentValue = is_string($argumentValue) ? trim($argumentValue) : $argumentValue;
+
+            if ($argumentValue === null || $argumentValue === '') {
+                $missingFields[] = $key;
+                continue;
+            }
+
+            $body[$key] = $argumentValue;
+        }
+
+        return [$body, $missingFields];
+    }
+
+    private function generateAssistantReplyFromToolResult($client, string $systemPrompt, ?string $contextPrompt, array $history, string $userMessage, array $toolContext): string
+    {
+        $messages = [
+            ['role' => 'system', 'content' => $systemPrompt],
+        ];
+
+        if ($contextPrompt !== null) {
+            $messages[] = ['role' => 'system', 'content' => $contextPrompt];
+        }
+
+        $messages[] = [
+            'role' => 'system',
+            'content' => "Internal tool result already fetched. Use it to answer naturally like a human customer service agent. Do not mention webhook, endpoint, JSON, internal tools, or raw response structure. Do not copy the response literally. Use the resolved_data and tool_description as the source of truth. If resolved_data is empty, say the data was not found and ask the user to re-check their input.
+
+Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+        ];
+
+        foreach (array_slice($history, -6) as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $role = $item['role'] ?? null;
+            $content = $item['content'] ?? null;
+
+            if (!in_array($role, ['user', 'assistant'], true) || !is_string($content) || trim($content) === '') {
+                continue;
+            }
+
+            $messages[] = [
+                'role' => $role,
+                'content' => $content,
+            ];
+        }
+
+        $messages[] = ['role' => 'user', 'content' => $userMessage];
+
+        try {
+            $response = $client->chat()->create([
+                'model' => $this->model,
+                'messages' => $messages,
+                'max_tokens' => 220,
+            ]);
+
+            $reply = trim((string) ($response->choices[0]->message->content ?? ''));
+
+            if ($reply !== '') {
+                return $reply;
+            }
+        } catch (\Throwable $e) {
+            Log::warning('AI tool reply generation failed', [
+                'tool_name' => $toolContext['tool_name'] ?? null,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return 'Data berhasil dicek. Saya bantu jelaskan hasilnya ya.';
     }
 
     /**

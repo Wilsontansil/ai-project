@@ -47,6 +47,7 @@ class ToolController extends Controller
             'keywords' => ['nullable', 'string'],
             'missing_message' => ['nullable', 'string', 'max:1000'],
             'information_text' => ['nullable', 'string', 'max:2000'],
+            'expected_response' => ['nullable', 'string', 'max:4000'],
             'endpoint_get_route' => ['nullable', 'string', 'max:255'],
             'endpoint_get_body' => ['nullable', 'array'],
             'endpoint_get_body.*.key' => ['required_with:endpoint_get_body', 'string', 'max:80'],
@@ -77,6 +78,7 @@ class ToolController extends Controller
             'keywords' => $keywords,
             'missing_message' => trim($data['missing_message'] ?? '') ?: null,
             'information_text' => trim($data['information_text'] ?? '') ?: null,
+            'expected_response' => trim($data['expected_response'] ?? '') ?: null,
             'meta' => [
                 'icon' => trim($request->input('icon', 'M13 10V3L4 14h7v7l9-11h-7z')),
             ],
@@ -104,6 +106,7 @@ class ToolController extends Controller
             'keywords' => ['nullable', 'string'],
             'missing_message' => ['nullable', 'string', 'max:1000'],
             'information_text' => ['nullable', 'string', 'max:2000'],
+            'expected_response' => ['nullable', 'string', 'max:4000'],
             'endpoint_get_route' => ['nullable', 'string', 'max:255'],
             'endpoint_get_body' => ['nullable', 'array'],
             'endpoint_get_body.*.key' => ['required_with:endpoint_get_body', 'string', 'max:80'],
@@ -136,6 +139,7 @@ class ToolController extends Controller
             'keywords' => $keywords,
             'missing_message' => trim($data['missing_message'] ?? '') ?: null,
             'information_text' => trim($data['information_text'] ?? '') ?: null,
+            'expected_response' => trim($data['expected_response'] ?? '') ?: null,
             'meta' => array_merge($tool->meta ?? [], [
                 'icon' => trim($request->input('icon', $tool->meta['icon'] ?? 'M13 10V3L4 14h7v7l9-11h-7z')),
             ]),

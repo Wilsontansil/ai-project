@@ -168,6 +168,14 @@
             </div>
 
             <div>
+                <label for="expected_response" class="mb-2 block text-sm text-slate-200">Expected Response</label>
+                <p class="mb-2 text-xs text-slate-400">Format respons yang diharapkan dari webhook (contoh field JSON yang
+                    harus ada).</p>
+                <textarea id="expected_response" name="expected_response" rows="4"
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('expected_response', $tool->expected_response) }}</textarea>
+            </div>
+
+            <div>
                 <label for="icon" class="mb-2 block text-sm text-slate-200">SVG Icon Path</label>
                 <input id="icon" type="text" name="icon"
                     value="{{ old('icon', $tool->meta['icon'] ?? '') }}"

@@ -20,6 +20,7 @@ class Tool extends Model
         'keywords',
         'missing_message',
         'information_text',
+        'expected_response',
         'meta',
     ];
 

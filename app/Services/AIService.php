@@ -312,7 +312,7 @@ class AIService
             $arguments = $this->extractArgumentsFromToolCall($msg, $tool->tool_name);
 
             if ($arguments !== null) {
-                return $this->executeTool($tool, $arguments, $agent, $userMessage);
+                return $this->executeTool($tool, $arguments, $agent);
             }
         }
 
@@ -344,7 +344,7 @@ class AIService
      * Execute a tool with extracted arguments.
      * Always uses webhook endpoint for tool information requests.
      */
-    private function executeTool(Tool $tool, array $arguments, ?Agent $agent, string $userMessage): string
+    private function executeTool(Tool $tool, array $arguments, ?Agent $agent): string
     {
         $endpoints = $tool->endpoints;
 
@@ -352,14 +352,14 @@ class AIService
             return "Endpoint webhook untuk tool {$tool->display_name} belum dikonfigurasi.";
         }
 
-        return $this->callWebhookEndpoint($tool, $endpoints, $arguments, $userMessage);
+        return $this->callWebhookEndpoint($tool, $endpoints, $arguments);
     }
 
     /**
     * Call webhook_base_url + tool endpoint route.
     * For information requests, endpoint priority: 'get', then 'update'.
      */
-    private function callWebhookEndpoint(Tool $tool, array $endpoints, array $arguments, string $userMessage): string
+    private function callWebhookEndpoint(Tool $tool, array $endpoints, array $arguments): string
     {
         $baseUrl = rtrim(ProjectSetting::getValue('webhook_base_url', ''), '/');
 
@@ -371,7 +371,7 @@ class AIService
         $endpoint = $endpoints['get'] ?? $endpoints['update'] ?? null;
 
         if ($endpoint === null || empty($endpoint['route'])) {
-            return "Route endpoint webhook untuk tool {$tool->display_name} belum dikonfigurasi.";
+            return !empty($tool->information_text) ? $tool->information_text : $tool->getMissingMessage();
         }
 
         $route = '/' . ltrim($endpoint['route'], '/');
@@ -404,18 +404,7 @@ class AIService
 
             if ($response->successful()) {
                 $data = $response->json();
-
-                if (is_array($data)) {
-                    return $this->buildUserFocusedWebhookReply($userMessage, $tool, $data);
-                }
-
-                $rawBody = trim((string) $response->body());
-
-                if ($rawBody === '') {
-                    return 'Permintaan berhasil diproses.';
-                }
-
-                return mb_substr($rawBody, 0, 500);
+                return is_array($data) ? json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : (string) $response->body();
             }
 
             return "Gagal menghubungi server (HTTP {$response->status()}).";
@@ -426,132 +415,6 @@ class AIService
             ]);
 
             return 'Terjadi kesalahan saat menghubungi server.';
-        }
-    }
-
-    private function buildUserFocusedWebhookReply(string $userMessage, Tool $tool, array $data): string
-    {
-        $looksLikeStatusRequest = preg_match('/suspend|suspended|ban|blocked|status|aktif|active/i', $userMessage) === 1
-            || preg_match('/suspend|status|ban|blocked/i', $tool->tool_name . ' ' . $tool->display_name) === 1;
-
-        if ($looksLikeStatusRequest) {
-            $status = $this->findFirstScalarByKeys($data, [
-                'is_suspend', 'is_suspended', 'suspend', 'suspended',
-                'status', 'account_status', 'state',
-                'is_active', 'active', 'is_blocked', 'blocked',
-            ]);
-
-            if ($status !== null) {
-                $statusText = $this->normalizeStatusValue($status);
-                $reason = $this->findFirstScalarByKeys($data, ['reason', 'message', 'note', 'description']);
-
-                if ($reason !== null && trim((string) $reason) !== '') {
-                    return "Status akun: {$statusText}. Keterangan: " . mb_substr(trim((string) $reason), 0, 160);
-                }
-
-                return "Status akun: {$statusText}.";
-            }
-        }
-
-        $summary = $this->buildCompactResponseSummary($data, 6);
-
-        if ($summary !== '') {
-            return $summary;
-        }
-
-        return 'Data berhasil diterima dari server, namun tidak ada informasi utama yang bisa ditampilkan.';
-    }
-
-    private function normalizeStatusValue(mixed $status): string
-    {
-        if (is_bool($status)) {
-            return $status ? 'SUSPEND' : 'AKTIF';
-        }
-
-        $value = trim((string) $status);
-        if ($value === '') {
-            return '-';
-        }
-
-        $lower = mb_strtolower($value);
-
-        if (in_array($lower, ['1', 'true', 'yes', 'y', 'suspend', 'suspended', 'blocked', 'banned'], true)) {
-            return 'SUSPEND';
-        }
-
-        if (in_array($lower, ['0', 'false', 'no', 'n', 'active', 'aktif', 'normal'], true)) {
-            return 'AKTIF';
-        }
-
-        return mb_strtoupper($value);
-    }
-
-    private function findFirstScalarByKeys(array $data, array $keys, int $depth = 0): mixed
-    {
-        if ($depth > 4) {
-            return null;
-        }
-
-        $normalizedKeys = array_map(static fn ($k) => mb_strtolower((string) $k), $keys);
-
-        foreach ($data as $key => $value) {
-            $keyName = mb_strtolower((string) $key);
-            if (in_array($keyName, $normalizedKeys, true) && (is_scalar($value) || $value === null)) {
-                return $value;
-            }
-        }
-
-        foreach ($data as $value) {
-            if (is_array($value)) {
-                $found = $this->findFirstScalarByKeys($value, $keys, $depth + 1);
-                if ($found !== null) {
-                    return $found;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private function buildCompactResponseSummary(array $data, int $maxPairs = 6): string
-    {
-        $pairs = [];
-        $this->collectScalarPairs($data, '', 0, $pairs, $maxPairs);
-
-        if ($pairs === []) {
-            return '';
-        }
-
-        $lines = ['Hasil pengecekan:'];
-        foreach ($pairs as [$key, $value]) {
-            $lines[] = "- {$key}: {$value}";
-        }
-
-        return implode("\n", $lines);
-    }
-
-    private function collectScalarPairs(array $data, string $prefix, int $depth, array &$pairs, int $maxPairs): void
-    {
-        if ($depth > 2 || count($pairs) >= $maxPairs) {
-            return;
-        }
-
-        foreach ($data as $key => $value) {
-            if (count($pairs) >= $maxPairs) {
-                return;
-            }
-
-            $label = $prefix === '' ? (string) $key : $prefix . '.' . (string) $key;
-
-            if (is_scalar($value) || $value === null) {
-                $text = trim((string) $value);
-                $pairs[] = [$label, mb_substr($text === '' ? '-' : $text, 0, 120)];
-                continue;
-            }
-
-            if (is_array($value)) {
-                $this->collectScalarPairs($value, $label, $depth + 1, $pairs, $maxPairs);
-            }
         }
     }
 

@@ -2,6 +2,9 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\DataModelSeeder;
+use Database\Seeders\ForbiddenBehaviourSeeder;
+use Database\Seeders\ProjectSettingSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -19,6 +22,7 @@ class DatabaseSeeder extends Seeder
             ToolSeeder::class,
             ForbiddenBehaviourSeeder::class,
             ProjectSettingSeeder::class,
+            DataModelSeeder::class,
         ]);
     }
 }

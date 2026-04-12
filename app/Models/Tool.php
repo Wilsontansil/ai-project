@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\DataModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
 
 class Tool extends Model
@@ -15,6 +17,7 @@ class Tool extends Model
         'description',
         'slug',
         'is_enabled',
+        'data_model_id',
         'parameters',
         'endpoints',
         'keywords',
@@ -79,5 +82,10 @@ class Tool extends Model
     public function getMissingMessage(): string
     {
         return $this->missing_message ?? 'Mohon lengkapi data yang diperlukan.';
+    }
+
+    public function dataModel(): BelongsTo
+    {
+        return $this->belongsTo(DataModel::class);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Models\DataModel;
 use App\Models\ProjectSetting;
 use App\Models\Tool;
 use Illuminate\Http\JsonResponse;
@@ -10,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Log;
 
@@ -32,6 +34,7 @@ class ToolController extends Controller
     {
         return view('backoffice.tools.create', [
             'boActive' => 'tools',
+            'dataModels' => DataModel::query()->orderBy('model_name')->get(),
         ]);
     }
 
@@ -47,6 +50,7 @@ class ToolController extends Controller
             'keywords' => ['nullable', 'string'],
             'missing_message' => ['nullable', 'string', 'max:1000'],
             'information_text' => ['nullable', 'string', 'max:2000'],
+            'data_model_id' => ['nullable', 'integer', 'exists:data_models,id'],
             'endpoint_get_route' => ['nullable', 'string', 'max:255'],
             'endpoint_get_expected_response' => ['nullable', 'string', 'max:4000'],
             'endpoint_get_body' => ['nullable', 'array'],
@@ -58,6 +62,8 @@ class ToolController extends Controller
             'endpoint_update_body.*.key' => ['required_with:endpoint_update_body', 'string', 'max:80'],
             'endpoint_update_body.*.value' => ['nullable', 'string', 'max:255'],
         ]);
+
+        $this->validateDataModelRules($data);
 
         $parameters = $this->buildParametersFromInput($request->input('params', []));
         $endpoints = $this->buildEndpointsFromInput($request);
@@ -74,6 +80,7 @@ class ToolController extends Controller
             'description' => trim($data['description'] ?? ''),
             'slug' => Str::slug($data['tool_name']),
             'is_enabled' => $request->boolean('is_enabled'),
+            'data_model_id' => $data['data_model_id'] ?? null,
             'parameters' => $parameters,
             'endpoints' => $endpoints,
             'keywords' => $keywords,
@@ -92,6 +99,7 @@ class ToolController extends Controller
         return view('backoffice.tools.edit', [
             'tool' => $tool,
             'boActive' => 'tools',
+            'dataModels' => DataModel::query()->orderBy('model_name')->get(),
         ]);
     }
 
@@ -106,6 +114,7 @@ class ToolController extends Controller
             'keywords' => ['nullable', 'string'],
             'missing_message' => ['nullable', 'string', 'max:1000'],
             'information_text' => ['nullable', 'string', 'max:2000'],
+            'data_model_id' => ['nullable', 'integer', 'exists:data_models,id'],
             'endpoint_get_route' => ['nullable', 'string', 'max:255'],
             'endpoint_get_expected_response' => ['nullable', 'string', 'max:4000'],
             'endpoint_get_body' => ['nullable', 'array'],
@@ -117,6 +126,8 @@ class ToolController extends Controller
             'endpoint_update_body.*.key' => ['required_with:endpoint_update_body', 'string', 'max:80'],
             'endpoint_update_body.*.value' => ['nullable', 'string', 'max:255'],
         ]);
+
+        $this->validateDataModelRules($data);
 
         $parameters = $this->buildParametersFromInput($request->input('params', []));
 
@@ -135,6 +146,7 @@ class ToolController extends Controller
             'display_name' => trim($data['display_name']),
             'description' => trim($data['description'] ?? ''),
             'is_enabled' => $request->boolean('is_enabled'),
+            'data_model_id' => $data['data_model_id'] ?? null,
             'parameters' => $parameters,
             'endpoints' => $this->buildEndpointsFromInput($request),
             'keywords' => $keywords,
@@ -241,6 +253,50 @@ class ToolController extends Controller
             $body[$key] = trim((string) ($row['value'] ?? ''));
         }
         return $body;
+    }
+
+    /**
+     * Enforce optional DataModel linkage rules:
+     * - information-only tool may keep data_model_id null.
+     * - non-information tool must select data_model_id.
+     * - parameters must only use selected data model fields.
+     */
+    private function validateDataModelRules(array $data): void
+    {
+        $informationText = trim((string) ($data['information_text'] ?? ''));
+        $dataModelId = $data['data_model_id'] ?? null;
+        $params = (array) ($data['params'] ?? []);
+
+        if ($informationText === '' && empty($dataModelId)) {
+            throw ValidationException::withMessages([
+                'data_model_id' => 'Pilih Data Model untuk tool yang bukan information-only.',
+            ]);
+        }
+
+        if (empty($dataModelId)) {
+            if (!empty($params)) {
+                throw ValidationException::withMessages([
+                    'params' => 'Parameter hanya boleh dipakai jika Data Model dipilih.',
+                ]);
+            }
+            return;
+        }
+
+        $dataModel = DataModel::query()->find($dataModelId);
+        $allowedFields = array_keys((array) ($dataModel?->fields ?? []));
+
+        foreach ($params as $row) {
+            $name = trim((string) ($row['name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+
+            if (!in_array($name, $allowedFields, true)) {
+                throw ValidationException::withMessages([
+                    'params' => "Parameter '{$name}' tidak ada di fields Data Model terpilih.",
+                ]);
+            }
+        }
     }
 
     /**

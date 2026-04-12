@@ -15,6 +15,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('slug')->unique();
             $table->boolean('is_enabled')->default(true);
+            $table->unsignedBigInteger('data_model_id')->nullable();
             $table->json('parameters')->nullable();
             $table->json('endpoints')->nullable();
             $table->json('keywords')->nullable();

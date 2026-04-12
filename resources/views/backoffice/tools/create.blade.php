@@ -48,9 +48,25 @@
             </div>
 
             <div>
-                <label class="mb-2 block text-sm text-slate-200">Parameters</label>
-                <p class="mb-2 text-xs text-slate-400">Data yang perlu dikumpulkan dari user. Kosongkan jika tool hanya
-                    memberikan informasi.</p>
+                <label for="data_model_id" class="mb-2 block text-sm text-slate-200">Data Model Connection</label>
+                <p class="mb-2 text-xs text-slate-400">Pilih Data Model untuk tool action (register/suspend/change
+                    password). Boleh kosong untuk tool information-only seperti game_gacor/pola_gacor.</p>
+                <select id="data_model_id" name="data_model_id"
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
+                    <option value="">-- No Data Model (Information-only) --</option>
+                    @foreach ($dataModels as $dm)
+                        <option value="{{ $dm->id }}"
+                            {{ (string) old('data_model_id') === (string) $dm->id ? 'selected' : '' }}>
+                            {{ $dm->model_name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <p class="mb-2 block text-sm text-slate-200">Parameters</p>
+                <p class="mb-2 text-xs text-slate-400">Parameter hanya boleh menggunakan field dari Data Model yang dipilih.
+                </p>
 
                 <div id="param-list" class="space-y-3">
                     {{-- Rows added by JS --}}
@@ -124,7 +140,8 @@
                 {{-- UPDATE Endpoint --}}
                 <div class="rounded-xl border border-white/10 bg-slate-900/40 p-3 space-y-3">
                     <div class="flex items-center gap-2">
-                        <span class="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">UPDATE</span>
+                        <span
+                            class="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">UPDATE</span>
                         <label for="endpoint_update_route" class="text-sm text-slate-200">Route</label>
                     </div>
                     <input id="endpoint_update_route" type="text" name="endpoint_update_route"
@@ -217,15 +234,46 @@
 
 @section('scripts')
     <script>
+        const dataModels = @json($dataModels->map(fn($dm) => ['id' => $dm->id, 'fields' => array_keys($dm->fields ?? [])])->values());
         let paramIndex = 0;
+
+        function getSelectedDataModelFields() {
+            const selectedId = document.getElementById('data_model_id')?.value || '';
+            const model = dataModels.find(m => String(m.id) === String(selectedId));
+            return model ? model.fields : [];
+        }
+
+        function buildFieldOptions(selected = '') {
+            const fields = getSelectedDataModelFields();
+            let html = '<option value="">-- pilih field --</option>';
+            fields.forEach(field => {
+                const isSelected = String(field) === String(selected) ? 'selected' : '';
+                html += `<option value="${field}" ${isSelected}>${field}</option>`;
+            });
+            return html;
+        }
+
+        function refreshParameterFieldOptions() {
+            const selects = document.querySelectorAll('.param-name-select');
+            selects.forEach(select => {
+                const current = select.value;
+                select.innerHTML = buildFieldOptions(current);
+                const stillExists = Array.from(select.options).some(opt => opt.value === current);
+                if (!stillExists) {
+                    select.value = '';
+                }
+            });
+        }
 
         function addParamRow(name = '', desc = '', required = false) {
             const list = document.getElementById('param-list');
             const row = document.createElement('div');
             row.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
-                    <input type="text" name="params[${paramIndex}][name]" value="${name}" placeholder="Nama field (e.g. username)"
-                        class="w-1/3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    <select name="params[${paramIndex}][name]"
+                        class="param-name-select w-1/3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
+                        ${buildFieldOptions(name)}
+                    </select>
                     <input type="text" name="params[${paramIndex}][description]" value="${desc}" placeholder="Deskripsi (e.g. Username akun)"
                         class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
                     <label class="flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap">
@@ -239,6 +287,16 @@
             list.appendChild(row);
             paramIndex++;
         }
+
+        document.getElementById('data_model_id')?.addEventListener('change', refreshParameterFieldOptions);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const oldParams = @json(old('params', []));
+            if (Array.isArray(oldParams) && oldParams.length > 0) {
+                oldParams.forEach(p => addParamRow(p.name || '', p.description || '', !!p.required));
+            }
+            refreshParameterFieldOptions();
+        });
 
         let getBodyIdx = 0;
 

@@ -65,7 +65,18 @@ class AIService
                 $payload['tool_choice'] = 'auto';
             }
 
+            $this->logAiHttpRequest('openai.chat.completions', 'POST', 'openai://chat/completions', [
+                'model' => $this->model,
+                'messages_count' => count($messages),
+                'tools_count' => count($tools),
+            ]);
+
             $response = $client->chat()->create($payload);
+
+            $this->logAiHttpResponse('openai.chat.completions', 'POST', 'openai://chat/completions', 200, [
+                'finish_reason' => (string) ($response->choices[0]->finishReason ?? ''),
+                'usage' => $response->usage ?? null,
+            ]);
 
             $msg = $response->choices[0]->message;
             $finishReason = (string) ($response->choices[0]->finishReason ?? '');
@@ -91,8 +102,10 @@ class AIService
             return $this->stripEscalationMarker($assistantReply);
 
         } catch (\OpenAI\Exceptions\RateLimitException $e) {
+            $this->logAiHttpException('openai.chat.completions', 'POST', 'openai://chat/completions', $e->getMessage());
             return $this->formatReply("âš ï¸ System busy, please try again...");
         } catch (\Exception $e) {
+            $this->logAiHttpException('openai.chat.completions', 'POST', 'openai://chat/completions', $e->getMessage());
             return $this->formatReply("âš ï¸ Error: " . $e->getMessage());
         }
     }
@@ -410,7 +423,18 @@ class AIService
         }
 
         try {
+            $this->logAiHttpRequest('tool.webhook', 'POST', $url, [
+                'tool_name' => $tool->tool_name,
+                'body' => $body,
+            ]);
+
             $response = Http::timeout(15)->post($url, $body);
+
+            $this->logAiHttpResponse('tool.webhook', 'POST', $url, $response->status(), [
+                'tool_name' => $tool->tool_name,
+                'successful' => $response->successful(),
+                'response_preview' => mb_substr($response->body(), 0, 1000),
+            ]);
 
             if ($response->successful()) {
                 $data = $response->json();
@@ -425,6 +449,11 @@ class AIService
 
             return "Gagal menghubungi server (HTTP {$response->status()}).";
         } catch (\Throwable $e) {
+            $this->logAiHttpException('tool.webhook', 'POST', $url, $e->getMessage(), [
+                'tool_name' => $tool->tool_name,
+                'body' => $body,
+            ]);
+
             Log::error("Webhook exception [{$tool->tool_name}]: {$e->getMessage()}", [
                 'url' => $url,
                 'body' => $body,
@@ -699,6 +728,38 @@ class AIService
         }
 
         return $text;
+    }
+
+    private function logAiHttpRequest(string $channel, string $method, string $url, array $context = []): void
+    {
+        Log::info('AI HTTP Request', array_merge([
+            'channel' => $channel,
+            'method' => $method,
+            'url' => $url,
+            'timestamp' => now()->toIso8601String(),
+        ], $context));
+    }
+
+    private function logAiHttpResponse(string $channel, string $method, string $url, int $status, array $context = []): void
+    {
+        Log::info('AI HTTP Response', array_merge([
+            'channel' => $channel,
+            'method' => $method,
+            'url' => $url,
+            'status' => $status,
+            'timestamp' => now()->toIso8601String(),
+        ], $context));
+    }
+
+    private function logAiHttpException(string $channel, string $method, string $url, string $error, array $context = []): void
+    {
+        Log::error('AI HTTP Exception', array_merge([
+            'channel' => $channel,
+            'method' => $method,
+            'url' => $url,
+            'error' => $error,
+            'timestamp' => now()->toIso8601String(),
+        ], $context));
     }
 
     /**

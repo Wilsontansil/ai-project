@@ -359,38 +359,22 @@ class AIService
 
     /**
      * Execute a tool with extracted arguments.
-     * Calls webhook endpoint if configured, otherwise returns information text or collected data.
+     * Always uses webhook endpoint for tool information requests.
      */
     private function executeTool(Tool $tool, array $arguments, ?Agent $agent): string
     {
         $endpoints = $tool->endpoints;
 
-        if (!empty($endpoints)) {
-            return $this->callWebhookEndpoint($tool, $endpoints, $arguments);
+        if (empty($endpoints)) {
+            return "Endpoint webhook untuk tool {$tool->display_name} belum dikonfigurasi.";
         }
 
-        // No endpoints — return information text or collected arguments summary.
-        if (!empty($tool->information_text)) {
-            return $tool->information_text;
-        }
-
-        $filled = array_filter($arguments, fn ($v) => $v !== null && $v !== '');
-
-        if ($filled === []) {
-            return $tool->getMissingMessage();
-        }
-
-        $lines = ["Data diterima untuk {$tool->display_name}:"];
-        foreach ($filled as $key => $value) {
-            $lines[] = "- {$key}: {$value}";
-        }
-
-        return implode("\n", $lines);
+        return $this->callWebhookEndpoint($tool, $endpoints, $arguments);
     }
 
     /**
-     * Call the webhook base URL + tool endpoint route.
-     * Tries 'get' first; falls back to 'update' if 'get' is not configured.
+    * Call webhook_base_url + tool endpoint route.
+    * For information requests, endpoint priority: 'get', then 'update'.
      */
     private function callWebhookEndpoint(Tool $tool, array $endpoints, array $arguments): string
     {

@@ -52,12 +52,20 @@ class ToolController extends Controller
             'information_text' => ['nullable', 'string', 'max:2000'],
             'data_model_id' => ['nullable', 'integer', 'exists:data_models,id'],
             'endpoint_get_route' => ['nullable', 'string', 'max:255'],
-            'endpoint_get_expected_response' => ['nullable', 'string', 'max:4000'],
+            'endpoint_get_expected_status' => ['nullable', 'integer'],
+            'endpoint_get_expected_message' => ['nullable', 'string', 'max:255'],
+            'endpoint_get_expected_data' => ['nullable', 'array'],
+            'endpoint_get_expected_data.*.key' => ['required_with:endpoint_get_expected_data', 'string', 'max:120'],
+            'endpoint_get_expected_data.*.value' => ['nullable', 'string', 'max:255'],
             'endpoint_get_body' => ['nullable', 'array'],
             'endpoint_get_body.*.key' => ['required_with:endpoint_get_body', 'string', 'max:80'],
             'endpoint_get_body.*.value' => ['nullable', 'string', 'max:255'],
             'endpoint_update_route' => ['nullable', 'string', 'max:255'],
-            'endpoint_update_expected_response' => ['nullable', 'string', 'max:4000'],
+            'endpoint_update_expected_status' => ['nullable', 'integer'],
+            'endpoint_update_expected_message' => ['nullable', 'string', 'max:255'],
+            'endpoint_update_expected_data' => ['nullable', 'array'],
+            'endpoint_update_expected_data.*.key' => ['required_with:endpoint_update_expected_data', 'string', 'max:120'],
+            'endpoint_update_expected_data.*.value' => ['nullable', 'string', 'max:255'],
             'endpoint_update_body' => ['nullable', 'array'],
             'endpoint_update_body.*.key' => ['required_with:endpoint_update_body', 'string', 'max:80'],
             'endpoint_update_body.*.value' => ['nullable', 'string', 'max:255'],
@@ -116,12 +124,20 @@ class ToolController extends Controller
             'information_text' => ['nullable', 'string', 'max:2000'],
             'data_model_id' => ['nullable', 'integer', 'exists:data_models,id'],
             'endpoint_get_route' => ['nullable', 'string', 'max:255'],
-            'endpoint_get_expected_response' => ['nullable', 'string', 'max:4000'],
+            'endpoint_get_expected_status' => ['nullable', 'integer'],
+            'endpoint_get_expected_message' => ['nullable', 'string', 'max:255'],
+            'endpoint_get_expected_data' => ['nullable', 'array'],
+            'endpoint_get_expected_data.*.key' => ['required_with:endpoint_get_expected_data', 'string', 'max:120'],
+            'endpoint_get_expected_data.*.value' => ['nullable', 'string', 'max:255'],
             'endpoint_get_body' => ['nullable', 'array'],
             'endpoint_get_body.*.key' => ['required_with:endpoint_get_body', 'string', 'max:80'],
             'endpoint_get_body.*.value' => ['nullable', 'string', 'max:255'],
             'endpoint_update_route' => ['nullable', 'string', 'max:255'],
-            'endpoint_update_expected_response' => ['nullable', 'string', 'max:4000'],
+            'endpoint_update_expected_status' => ['nullable', 'integer'],
+            'endpoint_update_expected_message' => ['nullable', 'string', 'max:255'],
+            'endpoint_update_expected_data' => ['nullable', 'array'],
+            'endpoint_update_expected_data.*.key' => ['required_with:endpoint_update_expected_data', 'string', 'max:120'],
+            'endpoint_update_expected_data.*.value' => ['nullable', 'string', 'max:255'],
             'endpoint_update_body' => ['nullable', 'array'],
             'endpoint_update_body.*.key' => ['required_with:endpoint_update_body', 'string', 'max:80'],
             'endpoint_update_body.*.value' => ['nullable', 'string', 'max:255'],
@@ -217,22 +233,26 @@ class ToolController extends Controller
         $getRoute = trim((string) $request->input('endpoint_get_route', ''));
         if ($getRoute !== '') {
             $getBody = $this->buildBodyKeyValue((array) $request->input('endpoint_get_body', []));
-            $getExpectedResponse = trim((string) $request->input('endpoint_get_expected_response', ''));
+            if ($getBody === []) {
+                $getBody = $this->buildBodyFromParametersInput((array) $request->input('params', []));
+            }
             $endpoints['get'] = [
                 'route' => $getRoute,
                 'body' => $getBody,
-                'expected_response' => $getExpectedResponse,
+                'expected_response' => $this->buildExpectedResponseFromInput('endpoint_get', $request),
             ];
         }
 
         $updateRoute = trim((string) $request->input('endpoint_update_route', ''));
         if ($updateRoute !== '') {
             $updateBody = $this->buildBodyKeyValue((array) $request->input('endpoint_update_body', []));
-            $updateExpectedResponse = trim((string) $request->input('endpoint_update_expected_response', ''));
+            if ($updateBody === []) {
+                $updateBody = $this->buildBodyFromParametersInput((array) $request->input('params', []));
+            }
             $endpoints['update'] = [
                 'route' => $updateRoute,
                 'body' => $updateBody,
-                'expected_response' => $updateExpectedResponse,
+                'expected_response' => $this->buildExpectedResponseFromInput('endpoint_update', $request),
             ];
         }
 
@@ -253,6 +273,56 @@ class ToolController extends Controller
             $body[$key] = trim((string) ($row['value'] ?? ''));
         }
         return $body;
+    }
+
+    /**
+     * Build default endpoint body keys from tool parameters (value empty string).
+     */
+    private function buildBodyFromParametersInput(array $params): array
+    {
+        $body = [];
+        foreach ($params as $param) {
+            $name = trim((string) ($param['name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+            $body[$name] = '';
+        }
+
+        return $body;
+    }
+
+    /**
+     * Expected response blueprint format:
+     * {
+     *   "status": 200,
+     *   "message": "Success",
+     *   "data": [ ...key-value map... ]
+     * }
+     */
+    private function buildExpectedResponseFromInput(string $prefix, Request $request): array
+    {
+        $status = (int) $request->input($prefix . '_expected_status', 200);
+        $message = trim((string) $request->input($prefix . '_expected_message', 'Success'));
+        $rows = (array) $request->input($prefix . '_expected_data', []);
+
+        $data = [];
+        foreach ($rows as $row) {
+            $key = trim((string) ($row['key'] ?? ''));
+            $value = trim((string) ($row['value'] ?? ''));
+
+            if ($key === '' || $value === '') {
+                continue;
+            }
+
+            $data[$key] = $value;
+        }
+
+        return [
+            'status' => $status,
+            'message' => $message === '' ? 'Success' : $message,
+            'data' => $data,
+        ];
     }
 
     /**

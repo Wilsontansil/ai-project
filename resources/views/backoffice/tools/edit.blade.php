@@ -105,10 +105,24 @@
                         placeholder="e.g. /getplayer"
                         class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400" />
                     <div>
-                        <label for="endpoint_get_expected_response" class="mb-2 block text-xs text-slate-300">Expected
-                            Response</label>
-                        <textarea id="endpoint_get_expected_response" name="endpoint_get_expected_response" rows="3"
-                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-white outline-none transition focus:border-cyan-400">{{ old('endpoint_get_expected_response', $tool->endpoints['get']['expected_response'] ?? '') }}</textarea>
+                        <p class="mb-2 text-xs text-slate-300">Expected Response</p>
+                        <div class="grid gap-2 md:grid-cols-2">
+                            <input type="number" name="endpoint_get_expected_status"
+                                value="{{ old('endpoint_get_expected_status', data_get($tool->endpoints, 'get.expected_response.status', 200)) }}"
+                                placeholder="Status (e.g. 200)"
+                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400" />
+                            <input type="text" name="endpoint_get_expected_message"
+                                value="{{ old('endpoint_get_expected_message', data_get($tool->endpoints, 'get.expected_response.message', 'Success')) }}"
+                                placeholder="Message (e.g. Success)"
+                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400" />
+                        </div>
+                        <p class="mt-2 mb-2 text-xs text-slate-400">Data fields (key → value). Hanya key+value non-empty
+                            yang disimpan.</p>
+                        <div id="get-expected-data-list" class="space-y-2"></div>
+                        <button type="button" onclick="addGetExpectedDataField()"
+                            class="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
+                            + Tambah Expected Data
+                        </button>
                     </div>
                     <div>
                         <p class="mb-2 text-xs text-slate-400">Body fields (key → value). Kosongkan value jika diisi dari
@@ -118,6 +132,10 @@
                             <button type="button" onclick="addGetBodyField()"
                                 class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
                                 + Tambah Field
+                            </button>
+                            <button type="button" onclick="copyParamsToEndpointBody('get')"
+                                class="rounded-lg border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-300 transition hover:bg-cyan-500/20">
+                                Copy from Parameters
                             </button>
                             <button type="button" onclick="testEndpoint('get')"
                                 class="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-300 transition hover:bg-emerald-500/20">
@@ -139,7 +157,8 @@
                 {{-- UPDATE Endpoint --}}
                 <div class="rounded-xl border border-white/10 bg-slate-900/40 p-3 space-y-3">
                     <div class="flex items-center gap-2">
-                        <span class="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">UPDATE</span>
+                        <span
+                            class="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">UPDATE</span>
                         <label for="endpoint_update_route" class="text-sm text-slate-200">Route</label>
                     </div>
                     <input id="endpoint_update_route" type="text" name="endpoint_update_route"
@@ -147,10 +166,24 @@
                         placeholder="e.g. /updateplayer"
                         class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400" />
                     <div>
-                        <label for="endpoint_update_expected_response" class="mb-2 block text-xs text-slate-300">Expected
-                            Response</label>
-                        <textarea id="endpoint_update_expected_response" name="endpoint_update_expected_response" rows="3"
-                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-white outline-none transition focus:border-cyan-400">{{ old('endpoint_update_expected_response', $tool->endpoints['update']['expected_response'] ?? '') }}</textarea>
+                        <p class="mb-2 text-xs text-slate-300">Expected Response</p>
+                        <div class="grid gap-2 md:grid-cols-2">
+                            <input type="number" name="endpoint_update_expected_status"
+                                value="{{ old('endpoint_update_expected_status', data_get($tool->endpoints, 'update.expected_response.status', 200)) }}"
+                                placeholder="Status (e.g. 200)"
+                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400" />
+                            <input type="text" name="endpoint_update_expected_message"
+                                value="{{ old('endpoint_update_expected_message', data_get($tool->endpoints, 'update.expected_response.message', 'Success')) }}"
+                                placeholder="Message (e.g. Success)"
+                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400" />
+                        </div>
+                        <p class="mt-2 mb-2 text-xs text-slate-400">Data fields (key → value). Hanya key+value non-empty
+                            yang disimpan.</p>
+                        <div id="update-expected-data-list" class="space-y-2"></div>
+                        <button type="button" onclick="addUpdateExpectedDataField()"
+                            class="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
+                            + Tambah Expected Data
+                        </button>
                     </div>
                     <div>
                         <p class="mb-2 text-xs text-slate-400">Body fields (key → value). Kosongkan value jika diisi dari
@@ -160,6 +193,10 @@
                             <button type="button" onclick="addUpdateBodyField()"
                                 class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
                                 + Tambah Field
+                            </button>
+                            <button type="button" onclick="copyParamsToEndpointBody('update')"
+                                class="rounded-lg border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-300 transition hover:bg-cyan-500/20">
+                                Copy from Parameters
                             </button>
                             <button type="button" onclick="testEndpoint('update')"
                                 class="rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-300 transition hover:bg-amber-500/20">
@@ -281,6 +318,34 @@
             paramIndex++;
         }
 
+        function getCurrentParameterNames() {
+            const names = [];
+            document.querySelectorAll('.param-name-select').forEach(select => {
+                const value = (select.value || '').trim();
+                if (value !== '' && !names.includes(value)) {
+                    names.push(value);
+                }
+            });
+            return names;
+        }
+
+        function copyParamsToEndpointBody(type) {
+            const names = getCurrentParameterNames();
+            const list = document.getElementById(`${type}-body-list`);
+            if (!list) {
+                return;
+            }
+
+            list.innerHTML = '';
+            if (type === 'get') {
+                getBodyIdx = 0;
+                names.forEach(name => addGetBodyField(name, ''));
+            } else {
+                updateBodyIdx = 0;
+                names.forEach(name => addUpdateBodyField(name, ''));
+            }
+        }
+
         // Pre-populate existing parameters
         document.addEventListener('DOMContentLoaded', function() {
             const existing = @json($tool->parameters ?? []);
@@ -302,6 +367,18 @@
                 for (const [k, v] of Object.entries(endpoints.update.body)) {
                     addUpdateBodyField(k, v);
                 }
+            }
+
+            const getExpectedData = (endpoints.get && endpoints.get.expected_response && endpoints.get
+                .expected_response.data) ? endpoints.get.expected_response.data : {};
+            for (const [k, v] of Object.entries(getExpectedData)) {
+                addGetExpectedDataField(k, v);
+            }
+
+            const updateExpectedData = (endpoints.update && endpoints.update.expected_response && endpoints.update
+                .expected_response.data) ? endpoints.update.expected_response.data : {};
+            for (const [k, v] of Object.entries(updateExpectedData)) {
+                addUpdateExpectedDataField(k, v);
             }
 
             refreshParameterFieldOptions();
@@ -343,6 +420,42 @@
             `;
             list.appendChild(row);
             updateBodyIdx++;
+        }
+
+        let getExpectedDataIdx = 0;
+
+        function addGetExpectedDataField(key = '', val = '') {
+            const list = document.getElementById('get-expected-data-list');
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2';
+            row.innerHTML = `
+                <input type="text" name="endpoint_get_expected_data[${getExpectedDataIdx}][key]" value="${key}" placeholder="Key (e.g. username)"
+                    class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <input type="text" name="endpoint_get_expected_data[${getExpectedDataIdx}][value]" value="${val}" placeholder="Value (e.g. john_doe)"
+                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <button type="button" onclick="this.parentElement.remove()"
+                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+            `;
+            list.appendChild(row);
+            getExpectedDataIdx++;
+        }
+
+        let updateExpectedDataIdx = 0;
+
+        function addUpdateExpectedDataField(key = '', val = '') {
+            const list = document.getElementById('update-expected-data-list');
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2';
+            row.innerHTML = `
+                <input type="text" name="endpoint_update_expected_data[${updateExpectedDataIdx}][key]" value="${key}" placeholder="Key (e.g. username)"
+                    class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <input type="text" name="endpoint_update_expected_data[${updateExpectedDataIdx}][value]" value="${val}" placeholder="Value (e.g. john_doe)"
+                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <button type="button" onclick="this.parentElement.remove()"
+                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+            `;
+            list.appendChild(row);
+            updateExpectedDataIdx++;
         }
 
         async function testEndpoint(type) {

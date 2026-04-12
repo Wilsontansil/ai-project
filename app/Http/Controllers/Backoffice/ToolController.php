@@ -40,55 +40,11 @@ class ToolController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'tool_name' => ['required', 'string', 'max:80', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:tools,tool_name'],
-            'display_name' => ['required', 'string', 'max:120'],
-            'description' => ['nullable', 'string', 'max:500'],
-            'params' => ['nullable', 'array'],
-            'params.*.name' => ['required_with:params', 'string', 'max:80'],
-            'params.*.description' => ['nullable', 'string', 'max:255'],
-            'keywords' => ['nullable', 'string'],
-            'missing_message' => ['nullable', 'string', 'max:1000'],
-            'information_text' => ['nullable', 'string', 'max:2000'],
-            'data_model_id' => ['nullable', 'integer', 'exists:data_models,id'],
-            'endpoint_route' => ['nullable', 'string', 'max:255'],
-            'endpoint_expected_status' => ['nullable', 'integer'],
-            'endpoint_expected_message' => ['nullable', 'string', 'max:255'],
-            'endpoint_expected_data' => ['nullable', 'array'],
-            'endpoint_expected_data.*.key' => ['required_with:endpoint_expected_data', 'string', 'max:120'],
-            'endpoint_expected_data.*.value' => ['nullable', 'string', 'max:255'],
-            'endpoint_body' => ['nullable', 'array'],
-            'endpoint_body.*.key' => ['required_with:endpoint_body', 'string', 'max:80'],
-            'endpoint_body.*.value' => ['nullable', 'string', 'max:255'],
-        ]);
+        $data = $request->validate($this->toolValidationRules(true));
 
         $this->validateDataModelRules($data);
 
-        $parameters = $this->buildParametersFromInput($request->input('params', []));
-        $endpoints = $this->buildEndpointsFromInput($request);
-
-        $keywords = null;
-        if (!empty($data['keywords'])) {
-            $keywords = array_map('trim', explode(',', $data['keywords']));
-            $keywords = array_values(array_filter($keywords, fn ($k) => $k !== ''));
-        }
-
-        Tool::create([
-            'tool_name' => trim($data['tool_name']),
-            'display_name' => trim($data['display_name']),
-            'description' => trim($data['description'] ?? ''),
-            'slug' => Str::slug($data['tool_name']),
-            'is_enabled' => $request->boolean('is_enabled'),
-            'data_model_id' => $data['data_model_id'] ?? null,
-            'parameters' => $parameters,
-            'endpoints' => $endpoints,
-            'keywords' => $keywords,
-            'missing_message' => trim($data['missing_message'] ?? '') ?: null,
-            'information_text' => trim($data['information_text'] ?? '') ?: null,
-            'meta' => [
-                'icon' => trim($request->input('icon', 'M13 10V3L4 14h7v7l9-11h-7z')),
-            ],
-        ]);
+        Tool::create($this->buildToolPayload($request, $data));
 
         return redirect()->route('backoffice.tools.index')->with('success', 'Tool berhasil ditambahkan.');
     }
@@ -104,7 +60,26 @@ class ToolController extends Controller
 
     public function update(Request $request, Tool $tool): RedirectResponse
     {
-        $data = $request->validate([
+        $data = $request->validate($this->toolValidationRules());
+
+        $this->validateDataModelRules($data);
+
+        $tool->update($this->buildToolPayload($request, $data, $tool));
+
+        return redirect()->route('backoffice.tools.index')->with('success', $tool->display_name . ' berhasil diperbarui.');
+    }
+
+    public function destroy(Tool $tool): RedirectResponse
+    {
+        $name = $tool->display_name;
+        $tool->delete();
+
+        return redirect()->route('backoffice.tools.index')->with('success', $name . ' berhasil dihapus.');
+    }
+
+    private function toolValidationRules(bool $isCreate = false): array
+    {
+        $rules = [
             'display_name' => ['required', 'string', 'max:120'],
             'description' => ['nullable', 'string', 'max:500'],
             'params' => ['nullable', 'array'],
@@ -123,47 +98,68 @@ class ToolController extends Controller
             'endpoint_body' => ['nullable', 'array'],
             'endpoint_body.*.key' => ['required_with:endpoint_body', 'string', 'max:80'],
             'endpoint_body.*.value' => ['nullable', 'string', 'max:255'],
-        ]);
+        ];
 
-        $this->validateDataModelRules($data);
-
-        $parameters = $this->buildParametersFromInput($request->input('params', []));
-
-        $keywords = $tool->keywords;
-        if ($request->has('keywords')) {
-            $raw = trim($data['keywords'] ?? '');
-            if ($raw !== '') {
-                $keywords = array_map('trim', explode(',', $raw));
-                $keywords = array_values(array_filter($keywords, fn ($k) => $k !== ''));
-            } else {
-                $keywords = null;
-            }
+        if ($isCreate) {
+            $rules['tool_name'] = ['required', 'string', 'max:80', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:tools,tool_name'];
         }
 
-        $tool->update([
+        return $rules;
+    }
+
+    private function buildToolPayload(Request $request, array $data, ?Tool $tool = null): array
+    {
+        $payload = [
             'display_name' => trim($data['display_name']),
             'description' => trim($data['description'] ?? ''),
             'is_enabled' => $request->boolean('is_enabled'),
             'data_model_id' => $data['data_model_id'] ?? null,
-            'parameters' => $parameters,
+            'parameters' => $this->buildParametersFromInput($request->input('params', [])),
             'endpoints' => $this->buildEndpointsFromInput($request),
-            'keywords' => $keywords,
+            'keywords' => $this->normalizeKeywords($request, $data, $tool),
             'missing_message' => trim($data['missing_message'] ?? '') ?: null,
             'information_text' => trim($data['information_text'] ?? '') ?: null,
-            'meta' => array_merge($tool->meta ?? [], [
-                'icon' => trim($request->input('icon', $tool->meta['icon'] ?? 'M13 10V3L4 14h7v7l9-11h-7z')),
-            ]),
-        ]);
+            'meta' => $this->buildToolMeta($request, $tool),
+        ];
 
-        return redirect()->route('backoffice.tools.index')->with('success', $tool->display_name . ' berhasil diperbarui.');
+        if ($tool === null) {
+            $toolName = trim($data['tool_name']);
+            $payload['tool_name'] = $toolName;
+            $payload['slug'] = Str::slug($toolName);
+        }
+
+        return $payload;
     }
 
-    public function destroy(Tool $tool): RedirectResponse
+    private function normalizeKeywords(Request $request, array $data, ?Tool $tool = null): ?array
     {
-        $name = $tool->display_name;
-        $tool->delete();
+        if ($tool !== null && !$request->has('keywords')) {
+            return $tool->keywords;
+        }
 
-        return redirect()->route('backoffice.tools.index')->with('success', $name . ' berhasil dihapus.');
+        $raw = trim((string) ($data['keywords'] ?? ''));
+        if ($raw === '') {
+            return null;
+        }
+
+        $keywords = array_map('trim', explode(',', $raw));
+
+        return array_values(array_filter($keywords, fn ($keyword) => $keyword !== ''));
+    }
+
+    private function buildToolMeta(Request $request, ?Tool $tool = null): array
+    {
+        $defaultIcon = $tool->meta['icon'] ?? 'M13 10V3L4 14h7v7l9-11h-7z';
+
+        if ($tool === null) {
+            return [
+                'icon' => trim($request->input('icon', $defaultIcon)),
+            ];
+        }
+
+        return array_merge($tool->meta ?? [], [
+            'icon' => trim($request->input('icon', $defaultIcon)),
+        ]);
     }
 
     /**

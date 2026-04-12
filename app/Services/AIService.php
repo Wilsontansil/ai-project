@@ -325,20 +325,15 @@ class AIService
             $arguments = $this->extractArgumentsFromToolCall($msg, $tool->tool_name);
 
             if ($arguments !== null) {
-                $execution = $this->executeTool($tool, $arguments);
-
-                if (($execution['mode'] ?? 'direct') === 'model') {
-                    return $this->generateAssistantReplyFromToolResult(
-                        $client,
-                        $systemPrompt,
-                        $contextPrompt,
-                        $history,
-                        $userMessage,
-                        $execution['tool_context'] ?? []
-                    );
-                }
-
-                return $execution['reply'] ?? null;
+                return $this->resolveToolExecutionReply(
+                    $client,
+                    $tool,
+                    $arguments,
+                    $systemPrompt,
+                    $contextPrompt,
+                    $history,
+                    $userMessage
+                );
             }
         }
 
@@ -362,25 +357,36 @@ class AIService
                 return $bestTool->getMissingMessage();
             }
 
-            $execution = $this->executeTool($bestTool, $arguments ?? []);
-
-            if (($execution['mode'] ?? 'direct') === 'model') {
-                return $this->generateAssistantReplyFromToolResult(
-                    $client,
-                    $systemPrompt,
-                    $contextPrompt,
-                    $history,
-                    $userMessage,
-                    $execution['tool_context'] ?? []
-                );
-            }
-
-            if (!empty($execution['reply'])) {
-                return $execution['reply'];
-            }
+            return $this->resolveToolExecutionReply(
+                $client,
+                $bestTool,
+                $arguments ?? [],
+                $systemPrompt,
+                $contextPrompt,
+                $history,
+                $userMessage
+            );
         }
 
         return null;
+    }
+
+    private function resolveToolExecutionReply($client, Tool $tool, array $arguments, string $systemPrompt, ?string $contextPrompt, array $history, string $userMessage): ?string
+    {
+        $execution = $this->executeTool($tool, $arguments);
+
+        if (($execution['mode'] ?? 'direct') === 'model') {
+            return $this->generateAssistantReplyFromToolResult(
+                $client,
+                $systemPrompt,
+                $contextPrompt,
+                $history,
+                $userMessage,
+                $execution['tool_context'] ?? []
+            );
+        }
+
+        return $execution['reply'] ?? null;
     }
 
     /**

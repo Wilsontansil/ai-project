@@ -310,7 +310,9 @@
             bodyEl.textContent = '';
 
             try {
-                const res = await fetch('{{ route('backoffice.tools.testEndpoint') }}', {
+                const basePath = window.location.pathname.substring(0, window.location.pathname.indexOf(
+                    '/backoffice/'));
+                const res = await fetch(`${basePath}/backoffice/tools/test-endpoint`, {
                     method: 'POST',
                     credentials: 'same-origin',
                     headers: {

@@ -241,7 +241,7 @@ class ToolController extends Controller
     public function testEndpoint(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'route' => ['required', 'string', 'max:255'],
+            'route' => ['required', 'string', 'max:1000'],
             'body' => ['nullable', 'array'],
         ]);
 
@@ -251,8 +251,10 @@ class ToolController extends Controller
             return response()->json(['success' => false, 'error' => 'Webhook base URL belum dikonfigurasi di Settings.'], 422);
         }
 
-        $route = '/' . ltrim($data['route'], '/');
-        $url = $baseUrl . $route;
+        $routeInput = trim((string) $data['route']);
+        $url = Str::startsWith($routeInput, ['http://', 'https://'])
+            ? $routeInput
+            : $baseUrl . '/' . ltrim($routeInput, '/');
         Log::info('Testing tool endpoint', ['url' => $url, 'body' => $data['body'] ?? []]);
 
         $body = $data['body'] ?? [];

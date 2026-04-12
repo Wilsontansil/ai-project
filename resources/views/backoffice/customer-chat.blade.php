@@ -17,6 +17,14 @@
             }
         </style>
     @endif
+    <style>
+        #bo-shell input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+        #bo-shell textarea,
+        #bo-shell select {
+            background-color: rgba(15, 23, 42, 0.7);
+            color: #e2e8f0;
+        }
+    </style>
 </head>
 
 <body class="min-h-screen bg-slate-950 text-slate-100">

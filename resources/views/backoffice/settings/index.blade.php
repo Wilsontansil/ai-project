@@ -17,6 +17,14 @@
             }
         </style>
     @endif
+    <style>
+        #bo-shell input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+        #bo-shell textarea,
+        #bo-shell select {
+            background-color: rgba(15, 23, 42, 0.7);
+            color: #e2e8f0;
+        }
+    </style>
 </head>
 
 <body class="min-h-screen bg-slate-950 text-slate-100">
@@ -88,24 +96,25 @@
                                             <input id="setting_{{ $setting->id }}" type="password"
                                                 name="setting_{{ $setting->id }}"
                                                 placeholder="{{ $setting->value ? '••••••••' : 'Not set' }}"
-                                                autocomplete="new-password" style="background-color:rgba(15,23,42,0.7);color:#e2e8f0"
+                                                autocomplete="new-password"
+                                                style="background-color:#0f172a;color:#e2e8f0"
                                                 class="mt-1 block w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400" />
                                             <p class="mt-1 text-[10px] text-slate-500">Kosongkan jika tidak ingin
                                                 mengubah.</p>
                                         @elseif ($setting->type === 'url')
                                             <input id="setting_{{ $setting->id }}" type="url"
                                                 name="setting_{{ $setting->id }}" value="{{ $setting->value }}"
-                                                placeholder="https://..." style="background-color:rgba(15,23,42,0.7);color:#e2e8f0"
+                                                placeholder="https://..." style="background-color:#0f172a;color:#e2e8f0"
                                                 class="mt-1 block w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400" />
                                         @elseif ($setting->type === 'number')
                                             <input id="setting_{{ $setting->id }}" type="number"
                                                 name="setting_{{ $setting->id }}" value="{{ $setting->value }}"
-                                                style="background-color:rgba(15,23,42,0.7);color:#e2e8f0"
+                                                style="background-color:#0f172a;color:#e2e8f0"
                                                 class="mt-1 block w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400" />
                                         @else
                                             <input id="setting_{{ $setting->id }}" type="text"
                                                 name="setting_{{ $setting->id }}" value="{{ $setting->value }}"
-                                                style="background-color:rgba(15,23,42,0.7);color:#e2e8f0"
+                                                style="background-color:#0f172a;color:#e2e8f0"
                                                 class="mt-1 block w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400" />
                                         @endif
 

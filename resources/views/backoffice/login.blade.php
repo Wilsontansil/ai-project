@@ -28,6 +28,13 @@
             }
         </style>
     @endif
+    <style>
+        input[type="email"],
+        input[type="password"] {
+            background-color: rgba(15, 23, 42, 0.7);
+            color: #e2e8f0;
+        }
+    </style>
 </head>
 
 <body class="min-h-screen bg-slate-950 text-slate-100">
@@ -59,13 +66,13 @@
                 <div>
                     <label for="email" class="mb-2 block text-sm text-slate-200">Email</label>
                     <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus
-                        style="background-color:rgba(15,23,42,0.7);color:#e2e8f0" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-white outline-none transition focus:border-cyan-400" />
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-white outline-none transition focus:border-cyan-400" />
                 </div>
 
                 <div>
                     <label for="password" class="mb-2 block text-sm text-slate-200">Password</label>
                     <input id="password" name="password" type="password" required
-                        style="background-color:rgba(15,23,42,0.7);color:#e2e8f0" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-white outline-none transition focus:border-cyan-400" />
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-white outline-none transition focus:border-cyan-400" />
                 </div>
 
                 <label class="flex items-center gap-3 text-sm text-slate-300">

@@ -28,6 +28,14 @@
             }
         </style>
     @endif
+    <style>
+        #bo-shell input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+        #bo-shell textarea,
+        #bo-shell select {
+            background-color: rgba(15, 23, 42, 0.7);
+            color: #e2e8f0;
+        }
+    </style>
 </head>
 
 <body class="min-h-screen bg-slate-950 text-slate-100">
@@ -52,22 +60,34 @@
 
                 {{-- Compact Stat Cards --}}
                 <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
-                    <div class="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-2.5">
-                        <p class="text-[11px] text-cyan-200/70">Total</p>
-                        <p class="text-lg font-bold text-white">{{ number_format($stats['total_customers']) }}</p>
+                    <div class="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-2.5"
+                        style="background-color:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.25);border-radius:12px">
+                        <p class="text-[11px] text-cyan-200/70" style="color:rgba(34,211,238,0.7);font-size:11px">Total
+                        </p>
+                        <p class="text-lg font-bold text-white" style="color:#fff;font-size:18px;font-weight:700">
+                            {{ number_format($stats['total_customers']) }}</p>
                     </div>
-                    <div class="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2.5">
-                        <p class="text-[11px] text-emerald-200/70">Telegram</p>
-                        <p class="text-lg font-bold text-white">{{ number_format($stats['telegram_customers']) }}</p>
+                    <div class="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2.5"
+                        style="background-color:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.25);border-radius:12px">
+                        <p class="text-[11px] text-emerald-200/70" style="color:rgba(52,211,153,0.7);font-size:11px">
+                            Telegram</p>
+                        <p class="text-lg font-bold text-white" style="color:#fff;font-size:18px;font-weight:700">
+                            {{ number_format($stats['telegram_customers']) }}</p>
                     </div>
-                    <div class="rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-2.5">
-                        <p class="text-[11px] text-amber-200/70">WhatsApp</p>
-                        <p class="text-lg font-bold text-white">{{ number_format($stats['whatsapp_customers']) }}</p>
+                    <div class="rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-2.5"
+                        style="background-color:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:12px">
+                        <p class="text-[11px] text-amber-200/70" style="color:rgba(251,191,36,0.7);font-size:11px">
+                            WhatsApp</p>
+                        <p class="text-lg font-bold text-white" style="color:#fff;font-size:18px;font-weight:700">
+                            {{ number_format($stats['whatsapp_customers']) }}</p>
                     </div>
                     <a href="{{ route('backoffice.escalations.index') }}"
-                        class="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-2.5 transition hover:bg-red-400/15">
-                        <p class="text-[11px] text-red-200/70">Need Human</p>
-                        <p class="text-lg font-bold text-white">{{ number_format($stats['needs_human']) }}</p>
+                        class="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-2.5 transition hover:bg-red-400/15"
+                        style="background-color:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);border-radius:12px;display:block">
+                        <p class="text-[11px] text-red-200/70" style="color:rgba(248,113,113,0.7);font-size:11px">Need
+                            Human</p>
+                        <p class="text-lg font-bold text-white" style="color:#fff;font-size:18px;font-weight:700">
+                            {{ number_format($stats['needs_human']) }}</p>
                     </a>
                 </div>
 

@@ -17,6 +17,14 @@
             }
         </style>
     @endif
+    <style>
+        #bo-shell input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+        #bo-shell textarea,
+        #bo-shell select {
+            background-color: rgba(15, 23, 42, 0.7);
+            color: #e2e8f0;
+        }
+    </style>
 </head>
 
 <body class="min-h-screen bg-slate-950 text-slate-100">
@@ -49,7 +57,7 @@
                             <div class="rounded-2xl border border-white/10 bg-slate-900/50 px-4 py-3">
                                 <label for="bot_name" class="text-xs text-slate-400">Bot Name</label>
                                 <input id="bot_name" type="text" name="bot_name" value="{{ $aiInfo['bot_name'] }}"
-                                    style="background-color:rgba(15,23,42,0.7);color:#e2e8f0" class="mt-1 block w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm font-semibold text-white outline-none transition focus:border-cyan-400" />
+                                    class="mt-1 block w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm font-semibold text-white outline-none transition focus:border-cyan-400" />
                             </div>
                             <div class="rounded-2xl border border-white/10 bg-slate-900/50 px-4 py-3">
                                 <p class="text-xs text-slate-400">Model</p>

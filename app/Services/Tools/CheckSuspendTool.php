@@ -4,6 +4,7 @@ namespace App\Services\Tools;
 
 use App\Models\Agent;
 use App\Models\Player;
+use App\Models\ProjectSetting;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -77,7 +78,7 @@ class CheckSuspendTool
      */
     public function execute(string $username, ?Agent $agent): string
     {
-        $agentKode = $agent ? $agent->kode : (string) config('services.agent.kode', 'PG');
+        $agentKode = $agent ? $agent->kode : (string) ProjectSetting::getValue('agent_kode', config('services.agent.kode', 'PG'));
 
         $player = Player::where('username', $username)
             ->where('agent', $agentKode)

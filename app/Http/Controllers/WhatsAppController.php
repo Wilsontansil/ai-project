@@ -11,6 +11,7 @@ use App\Services\Agent\ConversationMemoryService;
 use App\Services\Agent\CustomerIdentityService;
 use App\Services\AIService;
 use App\Models\Agent;
+use App\Models\ProjectSetting;
 
 class WhatsAppController extends Controller
 {
@@ -26,12 +27,12 @@ class WhatsAppController extends Controller
 
     public function __construct()
     {
-        $this->baseUrl = rtrim((string) config('services.whatsapp.base_url', ''), '/');
-        $this->session = (string) config('services.whatsapp.session', 'default');
-        $this->apiKey = (string) config('services.whatsapp.api_key', '');
+        $this->baseUrl = rtrim((string) ProjectSetting::getValue('whatsapp_base_url', config('services.whatsapp.base_url', '')), '/');
+        $this->session = (string) ProjectSetting::getValue('whatsapp_session', config('services.whatsapp.session', 'default'));
+        $this->apiKey = (string) ProjectSetting::getValue('whatsapp_api_key', config('services.whatsapp.api_key', ''));
         $this->agent = Agent::getActive();
-        $this->supportPhone = (string) config('services.support.phone', '08120000000');
-        $this->supportUrl = (string) config('services.support.whatsapp_url', '');
+        $this->supportPhone = (string) ProjectSetting::getValue('support_phone', config('services.support.phone', '08120000000'));
+        $this->supportUrl = (string) ProjectSetting::getValue('support_whatsapp_url', config('services.support.whatsapp_url', ''));
     }
 
     public function handleWebhook(Request $request)

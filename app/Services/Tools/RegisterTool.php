@@ -4,6 +4,7 @@ namespace App\Services\Tools;
 
 use App\Models\Agent;
 use App\Models\Player;
+use App\Models\ProjectSetting;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -112,7 +113,7 @@ class RegisterTool
      */
     public function executeWithArguments(array $arguments, ?Agent $agent): string
     {
-        $agentKode = $agent ? $agent->kode : (string) config('services.agent.kode', 'PG');
+        $agentKode = $agent ? $agent->kode : (string) ProjectSetting::getValue('agent_kode', config('services.agent.kode', 'PG'));
         $username = mb_strtolower(trim((string) ($arguments['username'] ?? '')));
         $email = mb_strtolower(trim((string) ($arguments['email'] ?? '')));
         $hp = trim((string) ($arguments['hp'] ?? ''));

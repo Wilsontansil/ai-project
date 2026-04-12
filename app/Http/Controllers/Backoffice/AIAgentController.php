@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
 use App\Models\ForbiddenBehaviour;
+use App\Models\ProjectSetting;
 use App\Models\Tool;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,8 +29,8 @@ class AIAgentController extends Controller
             'aiInfo' => [
                 'model' => 'gpt-4o-mini',
                 'bot_name' => $botName,
-                'agent_kode' => config('services.agent.kode', 'PG'),
-                'agent_id' => config('services.agent.id', 1),
+                'agent_kode' => ProjectSetting::getValue('agent_kode', config('services.agent.kode', 'PG')),
+                'agent_id' => ProjectSetting::getValue('agent_id', config('services.agent.id', 1)),
                 'max_tokens' => 420,
                 'active_forbidden' => $activeForbidden,
             ],

@@ -66,7 +66,7 @@
             <div class="bo-label flex flex-col">
                 <span class="text-sm font-bold tracking-wide text-white">AI Backoffice</span>
                 <span class="text-[10px] font-medium text-white/60">Agent:
-                    {{ config('services.agent.kode', 'PG') }}</span>
+                    {{ \App\Models\ProjectSetting::getValue('agent_kode', config('services.agent.kode', 'PG')) }}</span>
             </div>
         </div>
         <button id="bo-sidebar-toggle" type="button"

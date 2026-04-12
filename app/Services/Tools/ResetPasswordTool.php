@@ -4,6 +4,7 @@ namespace App\Services\Tools;
 
 use App\Models\Agent;
 use App\Models\Player;
+use App\Models\ProjectSetting;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
@@ -105,7 +106,7 @@ class ResetPasswordTool
      */
     public function executeWithArguments(array $arguments, ?Agent $agent): string
     {
-        $agentKode = $agent ? $agent->kode : (string) config('services.agent.kode', 'PG');
+        $agentKode = $agent ? $agent->kode : (string) ProjectSetting::getValue('agent_kode', config('services.agent.kode', 'PG'));
         $username = trim((string) ($arguments['username'] ?? ''));
         $namarek = trim((string) ($arguments['namarek'] ?? ''));
         $norek = trim((string) ($arguments['norek'] ?? ''));

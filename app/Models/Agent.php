@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 class Agent extends Model
 {
     protected $connection = 'mysqlgame';
@@ -17,7 +16,7 @@ class Agent extends Model
      */
     public static function getActive(): ?self
     {
-        $agentId = (int) config('services.agent.id', 1);
+        $agentId = (int) ProjectSetting::getValue('agent_id', config('services.agent.id', 1));
 
         return static::find($agentId);
     }

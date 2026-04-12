@@ -6,6 +6,7 @@ use App\Models\Agent;
 use App\Models\ForbiddenBehaviour;
 use App\Models\Customer;
 use App\Models\EscalationNotification;
+use App\Models\ProjectSetting;
 use App\Models\Tool;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -29,7 +30,7 @@ class AIService
      */
     public function reply($message, $chatId = null, ?Agent $agent = null, string $channel = 'telegram', array $agentContext = [])
     {
-        $apiKey = (string) config('services.openai.api_key', '');
+        $apiKey = (string) ProjectSetting::getValue('openai_api_key', config('services.openai.api_key', ''));
 
         if ($apiKey === '') {
             return $this->formatReply('OpenAI API key is not configured. Please set OPENAI_API_KEY on server .env.');
@@ -190,7 +191,7 @@ class AIService
      */
     private function getSystemPrompt(): string
     {
-        $phone = (string) config('services.support.phone', '08120000000');
+        $phone = (string) ProjectSetting::getValue('support_phone', config('services.support.phone', '08120000000'));
         $botName = $this->getBotName();
 
         $basePrompt = "You are {$botName}, a friendly customer support assistant for a gaming platform.

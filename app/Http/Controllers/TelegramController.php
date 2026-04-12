@@ -10,6 +10,7 @@ use App\Services\Agent\ConversationMemoryService;
 use App\Services\Agent\CustomerIdentityService;
 use App\Services\AIService;
 use App\Models\Agent;
+use App\Models\ProjectSetting;
 
 class TelegramController extends Controller
 {
@@ -20,10 +21,10 @@ class TelegramController extends Controller
 
     public function __construct()
     {
-        $this->telegramToken = config('services.telegram.bot_token', '');
+        $this->telegramToken = (string) ProjectSetting::getValue('telegram_bot_token', config('services.telegram.bot_token', ''));
         $this->agent = Agent::getActive();
-        $this->supportPhone = (string) config('services.support.phone', '08120000000');
-        $this->supportUrl = (string) config('services.support.telegram_url', '');
+        $this->supportPhone = (string) ProjectSetting::getValue('support_phone', config('services.support.phone', '08120000000'));
+        $this->supportUrl = (string) ProjectSetting::getValue('support_telegram_url', config('services.support.telegram_url', ''));
     }
 
     public function handleWebhook(Request $request)

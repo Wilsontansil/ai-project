@@ -138,22 +138,27 @@
                     {{-- Expected Response --}}
                     <div>
                         <p class="mb-2 text-xs text-slate-300">Expected Response</p>
-                        <div class="grid gap-2 md:grid-cols-2">
-                            <input type="number" name="endpoint_expected_status"
-                                value="{{ old('endpoint_expected_status', 200) }}" placeholder="Status (e.g. 200)"
-                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400" />
-                            <input type="text" name="endpoint_expected_message"
-                                value="{{ old('endpoint_expected_message', 'Success') }}"
-                                placeholder="Message (e.g. Success)"
-                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400" />
+                        <div class="rounded-lg border border-white/10 bg-slate-950/60 p-3">
+                            <pre id="expected-response-preview"
+                                class="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-auto max-h-64">{
+  "status": 200,
+  "message": "Success",
+  "data": {
+    "field1": "value1",
+    "field2": "value2"
+  }
+}</pre>
                         </div>
-                        <p class="mt-2 mb-2 text-xs text-slate-400">Data fields (key → value). Hanya key+value non-empty
-                            yang disimpan.</p>
-                        <div id="expected-data-list" class="space-y-2"></div>
-                        <button type="button" onclick="addExpectedDataField()"
-                            class="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
-                            + Tambah Expected Data
-                        </button>
+                        <p class="mt-2 text-xs text-slate-400">Expected response format dalam JSON. Gunakan format di atas
+                            sebagai referensi.</p>
+
+                        <div class="hidden">
+                            <input type="hidden" name="endpoint_expected_status"
+                                value="{{ old('endpoint_expected_status', 200) }}" />
+                            <input type="hidden" name="endpoint_expected_message"
+                                value="{{ old('endpoint_expected_message', 'Success') }}" />
+                            <div id="expected-data-list"></div>
+                        </div>
                     </div>
                 </div>
             </div>

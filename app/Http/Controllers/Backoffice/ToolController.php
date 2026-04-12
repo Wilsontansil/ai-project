@@ -388,6 +388,8 @@ class ToolController extends Controller
             return response()->json([
                 'success' => $response->successful(),
                 'status' => $response->status(),
+                'url' => $url,
+                'body_sent' => $body,
                 'response' => $response->json() ?? $response->body(),
             ]);
         } catch (\Throwable $e) {

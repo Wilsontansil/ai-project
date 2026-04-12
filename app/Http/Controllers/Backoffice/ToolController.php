@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Models\ProjectSetting;
 use App\Models\Tool;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -229,5 +232,44 @@ class ToolController extends Controller
             $body[$key] = trim((string) ($row['value'] ?? ''));
         }
         return $body;
+    }
+
+    /**
+     * Test an endpoint by making an HTTP request to webhook_base_url + route.
+     */
+    public function testEndpoint(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'route' => ['required', 'string', 'max:255'],
+            'body' => ['nullable', 'array'],
+        ]);
+
+        $baseUrl = rtrim(ProjectSetting::getValue('webhook_base_url', ''), '/');
+
+        if (empty($baseUrl)) {
+            return response()->json(['success' => false, 'error' => 'Webhook base URL belum dikonfigurasi di Settings.'], 422);
+        }
+
+        $route = '/' . ltrim($data['route'], '/');
+        $url = $baseUrl . $route;
+        $body = $data['body'] ?? [];
+
+        try {
+            $response = Http::timeout(15)->post($url, $body);
+
+            return response()->json([
+                'success' => $response->successful(),
+                'status' => $response->status(),
+                'url' => $url,
+                'body_sent' => $body,
+                'response' => $response->json() ?? $response->body(),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'url' => $url,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

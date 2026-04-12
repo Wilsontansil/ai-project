@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/backoffice/tools/{tool}/edit', [ToolController::class, 'edit'])->name('backoffice.tools.edit');
     Route::put('/backoffice/tools/{tool}', [ToolController::class, 'update'])->name('backoffice.tools.update');
     Route::delete('/backoffice/tools/{tool}', [ToolController::class, 'destroy'])->name('backoffice.tools.destroy');
+    Route::post('/backoffice/tools/test-endpoint', [ToolController::class, 'testEndpoint'])->name('backoffice.tools.testEndpoint');
 
     Route::get('/backoffice/forbidden-behaviours', [ForbiddenBehaviourController::class, 'index'])->name('backoffice.forbidden.index');
     Route::get('/backoffice/forbidden-behaviours/create', [ForbiddenBehaviourController::class, 'create'])->name('backoffice.forbidden.create');

@@ -92,10 +92,25 @@
                         <p class="mb-2 text-xs text-slate-400">Body fields (key → value). Kosongkan value jika diisi dari
                             parameter customer.</p>
                         <div id="get-body-list" class="space-y-2"></div>
-                        <button type="button" onclick="addGetBodyField()"
-                            class="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
-                            + Tambah Field
-                        </button>
+                        <div class="flex items-center gap-2 mt-2">
+                            <button type="button" onclick="addGetBodyField()"
+                                class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
+                                + Tambah Field
+                            </button>
+                            <button type="button" onclick="testEndpoint('get')"
+                                class="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-300 transition hover:bg-emerald-500/20">
+                                ▶ Test Request
+                            </button>
+                        </div>
+                        <div id="get-test-result" class="mt-2 hidden rounded-lg border border-white/10 bg-slate-950/60 p-3">
+                            <div class="flex items-center justify-between mb-1">
+                                <span id="get-test-status" class="text-xs font-mono"></span>
+                                <button type="button"
+                                    onclick="document.getElementById('get-test-result').classList.add('hidden')"
+                                    class="text-xs text-slate-500 hover:text-slate-300">&times;</button>
+                            </div>
+                            <pre id="get-test-body" class="text-xs text-slate-300 whitespace-pre-wrap max-h-48 overflow-auto"></pre>
+                        </div>
                     </div>
                 </div>
 
@@ -113,10 +128,26 @@
                         <p class="mb-2 text-xs text-slate-400">Body fields (key → value). Kosongkan value jika diisi dari
                             parameter customer.</p>
                         <div id="update-body-list" class="space-y-2"></div>
-                        <button type="button" onclick="addUpdateBodyField()"
-                            class="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
-                            + Tambah Field
-                        </button>
+                        <div class="flex items-center gap-2 mt-2">
+                            <button type="button" onclick="addUpdateBodyField()"
+                                class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
+                                + Tambah Field
+                            </button>
+                            <button type="button" onclick="testEndpoint('update')"
+                                class="rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-300 transition hover:bg-amber-500/20">
+                                ▶ Test Request
+                            </button>
+                        </div>
+                        <div id="update-test-result"
+                            class="mt-2 hidden rounded-lg border border-white/10 bg-slate-950/60 p-3">
+                            <div class="flex items-center justify-between mb-1">
+                                <span id="update-test-status" class="text-xs font-mono"></span>
+                                <button type="button"
+                                    onclick="document.getElementById('update-test-result').classList.add('hidden')"
+                                    class="text-xs text-slate-500 hover:text-slate-300">&times;</button>
+                            </div>
+                            <pre id="update-test-body" class="text-xs text-slate-300 whitespace-pre-wrap max-h-48 overflow-auto"></pre>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -138,7 +169,8 @@
 
             <div>
                 <label for="icon" class="mb-2 block text-sm text-slate-200">SVG Icon Path</label>
-                <input id="icon" type="text" name="icon" value="{{ old('icon', $tool->meta['icon'] ?? '') }}"
+                <input id="icon" type="text" name="icon"
+                    value="{{ old('icon', $tool->meta['icon'] ?? '') }}"
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm font-mono text-white outline-none transition focus:border-cyan-400" />
             </div>
 
@@ -248,6 +280,58 @@
             `;
             list.appendChild(row);
             updateBodyIdx++;
+        }
+
+        async function testEndpoint(type) {
+            const routeInput = document.getElementById(`endpoint_${type}_route`);
+            const route = routeInput ? routeInput.value.trim() : '';
+            if (!route) {
+                alert('Route belum diisi.');
+                return;
+            }
+
+            const bodyList = document.getElementById(`${type}-body-list`);
+            const rows = bodyList.querySelectorAll(':scope > div');
+            const body = {};
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input[type=text]');
+                const k = inputs[0]?.value.trim();
+                const v = inputs[1]?.value.trim();
+                if (k) body[k] = v;
+            });
+
+            const resultEl = document.getElementById(`${type}-test-result`);
+            const statusEl = document.getElementById(`${type}-test-status`);
+            const bodyEl = document.getElementById(`${type}-test-body`);
+
+            resultEl.classList.remove('hidden');
+            statusEl.textContent = 'Loading...';
+            statusEl.className = 'text-xs font-mono text-slate-400';
+            bodyEl.textContent = '';
+
+            try {
+                const res = await fetch('{{ route('backoffice.tools.testEndpoint') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        route,
+                        body
+                    }),
+                });
+                const data = await res.json();
+                statusEl.textContent = data.success ? `✓ HTTP ${data.status}` :
+                    `✗ ${data.error || 'HTTP ' + data.status}`;
+                statusEl.className = `text-xs font-mono ${data.success ? 'text-emerald-400' : 'text-red-400'}`;
+                bodyEl.textContent = typeof data.response === 'object' ? JSON.stringify(data.response, null, 2) : (data
+                    .response || data.error || '');
+            } catch (e) {
+                statusEl.textContent = '✗ Network error';
+                statusEl.className = 'text-xs font-mono text-red-400';
+                bodyEl.textContent = e.message;
+            }
         }
     </script>
 @endsection

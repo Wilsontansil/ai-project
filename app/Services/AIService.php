@@ -65,18 +65,7 @@ class AIService
                 $payload['tool_choice'] = 'auto';
             }
 
-            $this->logAiHttpRequest('openai.chat.completions', 'POST', 'openai://chat/completions', [
-                'model' => $this->model,
-                'messages_count' => count($messages),
-                'tools_count' => count($tools),
-            ]);
-
             $response = $client->chat()->create($payload);
-
-            $this->logAiHttpResponse('openai.chat.completions', 'POST', 'openai://chat/completions', 200, [
-                'finish_reason' => (string) ($response->choices[0]->finishReason ?? ''),
-                'usage' => $response->usage ?? null,
-            ]);
 
             $msg = $response->choices[0]->message;
             $finishReason = (string) ($response->choices[0]->finishReason ?? '');
@@ -102,10 +91,8 @@ class AIService
             return $this->stripEscalationMarker($assistantReply);
 
         } catch (\OpenAI\Exceptions\RateLimitException $e) {
-            $this->logAiHttpException('openai.chat.completions', 'POST', 'openai://chat/completions', $e->getMessage());
             return $this->formatReply("âš ï¸ System busy, please try again...");
         } catch (\Exception $e) {
-            $this->logAiHttpException('openai.chat.completions', 'POST', 'openai://chat/completions', $e->getMessage());
             return $this->formatReply("âš ï¸ Error: " . $e->getMessage());
         }
     }
@@ -152,10 +139,6 @@ class AIService
                 'is_read' => false,
             ]);
         } catch (\Throwable $e) {
-            Log::warning('Failed to create escalation notification', [
-                'customer_id' => $customer->id,
-                'error' => $e->getMessage(),
-            ]);
         }
     }
 
@@ -381,7 +364,6 @@ class AIService
         $baseUrl = rtrim(ProjectSetting::getValue('webhook_base_url', ''), '/');
 
         if (empty($baseUrl)) {
-            Log::warning("Webhook base URL not configured for tool [{$tool->tool_name}]");
             return 'Webhook base URL belum dikonfigurasi.';
         }
 
@@ -425,21 +407,10 @@ class AIService
                 return is_array($data) ? json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : (string) $response->body();
             }
 
-            Log::error("Webhook error [{$tool->tool_name}]: HTTP {$response->status()}", [
-                'url' => $url,
-                'body' => $body,
-                'response' => $response->body(),
-            ]);
-
             return "Gagal menghubungi server (HTTP {$response->status()}).";
         } catch (\Throwable $e) {
             $this->logAiHttpException('tool.webhook', 'POST', $url, $e->getMessage(), [
                 'tool_name' => $tool->tool_name,
-                'body' => $body,
-            ]);
-
-            Log::error("Webhook exception [{$tool->tool_name}]: {$e->getMessage()}", [
-                'url' => $url,
                 'body' => $body,
             ]);
 

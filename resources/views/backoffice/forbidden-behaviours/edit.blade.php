@@ -26,7 +26,7 @@
             <div>
                 <label for="title" class="mb-2 block text-sm text-slate-200">Rule Title</label>
                 <input id="title" type="text" name="title" value="{{ old('title', $rule->title) }}"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400" />
             </div>
 
             <div>
@@ -34,13 +34,13 @@
                 <p class="mb-2 text-xs text-slate-400">Tulis instruksi yang jelas tentang apa yang AI agent dilarang
                     lakukan.</p>
                 <textarea id="instruction" name="instruction" rows="4"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('instruction', $rule->instruction) }}</textarea>
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400">{{ old('instruction', $rule->instruction) }}</textarea>
             </div>
 
             <div>
                 <label for="level" class="mb-2 block text-sm text-slate-200">Level</label>
                 <select id="level" name="level"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400">
                     <option value="info" {{ old('level', $rule->level) === 'info' ? 'selected' : '' }}>Info</option>
                     <option value="warning" {{ old('level', $rule->level) === 'warning' ? 'selected' : '' }}>Warning
                     </option>

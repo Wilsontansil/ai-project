@@ -89,22 +89,22 @@
                                                 name="setting_{{ $setting->id }}"
                                                 placeholder="{{ $setting->value ? '••••••••' : 'Not set' }}"
                                                 autocomplete="new-password"
-                                                class="mt-1 block w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400" />
+                                                class="mt-1 block w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-500 focus:border-cyan-400" />
                                             <p class="mt-1 text-[10px] text-slate-500">Kosongkan jika tidak ingin
                                                 mengubah.</p>
                                         @elseif ($setting->type === 'url')
                                             <input id="setting_{{ $setting->id }}" type="url"
                                                 name="setting_{{ $setting->id }}" value="{{ $setting->value }}"
                                                 placeholder="https://..."
-                                                class="mt-1 block w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400" />
+                                                class="mt-1 block w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-500 focus:border-cyan-400" />
                                         @elseif ($setting->type === 'number')
                                             <input id="setting_{{ $setting->id }}" type="number"
                                                 name="setting_{{ $setting->id }}" value="{{ $setting->value }}"
-                                                class="mt-1 block w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400" />
+                                                class="mt-1 block w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-500 focus:border-cyan-400" />
                                         @else
                                             <input id="setting_{{ $setting->id }}" type="text"
                                                 name="setting_{{ $setting->id }}" value="{{ $setting->value }}"
-                                                class="mt-1 block w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400" />
+                                                class="mt-1 block w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-500 focus:border-cyan-400" />
                                         @endif
 
                                         <p class="mt-1 text-[10px] text-slate-500 font-mono">{{ $setting->key }}</p>

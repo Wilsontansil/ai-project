@@ -28,14 +28,14 @@
                     <p class="mb-2 text-xs text-slate-400">Identifier unik, contoh: resetPassword, checkBalance</p>
                     <input id="tool_name" type="text" name="tool_name" value="{{ old('tool_name') }}"
                         placeholder="e.g. resetPassword"
-                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400" />
                 </div>
                 <div>
                     <label for="display_name" class="mb-2 block text-sm text-slate-200">Display Name</label>
                     <p class="mb-2 text-xs text-slate-400">Nama yang ditampilkan di sidebar.</p>
                     <input id="display_name" type="text" name="display_name" value="{{ old('display_name') }}"
                         placeholder="e.g. Reset Password"
-                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400" />
                 </div>
             </div>
 
@@ -44,7 +44,7 @@
                 <p class="mb-2 text-xs text-slate-400">Deskripsi fungsi tool ini — dikirim ke OpenAI.</p>
                 <input id="description" type="text" name="description" value="{{ old('description') }}"
                     placeholder="e.g. Reset user password after account data verification"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400" />
             </div>
 
             <div>
@@ -68,7 +68,7 @@
                 </p>
                 <input id="keywords" type="text" name="keywords" value="{{ old('keywords') }}"
                     placeholder="e.g. reset password, resetpass, kata sandi"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400" />
             </div>
 
             <div>
@@ -77,7 +77,7 @@
                 </p>
                 <textarea id="missing_message" name="missing_message" rows="3"
                     placeholder="Untuk reset password, mohon kirim data berikut:&#10;Username(username) :&#10;Nama rekening(namarek) :"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('missing_message') }}</textarea>
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400">{{ old('missing_message') }}</textarea>
             </div>
 
             <div>
@@ -86,7 +86,7 @@
                     tool yang hanya memberikan info tanpa perlu eksekusi.</p>
                 <textarea id="information_text" name="information_text" rows="4"
                     placeholder="e.g. Untuk deposit, silakan transfer ke rekening BCA 1234567890 a/n PT XYZ."
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('information_text') }}</textarea>
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400">{{ old('information_text') }}</textarea>
             </div>
 
             <div>
@@ -95,7 +95,7 @@
                 </p>
                 <input id="icon" type="text" name="icon" value="{{ old('icon') }}"
                     placeholder="M13 10V3L4 14h7v7l9-11h-7z"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm font-mono text-white outline-none transition focus:border-cyan-400" />
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm font-mono text-slate-900 outline-none transition focus:border-cyan-400" />
             </div>
 
             <div>
@@ -130,9 +130,9 @@
             row.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
                     <input type="text" name="params[${paramIndex}][name]" value="${name}" placeholder="Nama field (e.g. username)"
-                        class="w-1/3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                        class="w-1/3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-900 outline-none focus:border-cyan-400" />
                     <input type="text" name="params[${paramIndex}][description]" value="${desc}" placeholder="Deskripsi (e.g. Username akun)"
-                        class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                        class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-900 outline-none focus:border-cyan-400" />
                     <label class="flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap">
                         <input type="checkbox" name="params[${paramIndex}][required]" value="1" ${required ? 'checked' : ''}
                             class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />

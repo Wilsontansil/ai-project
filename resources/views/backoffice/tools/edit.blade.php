@@ -35,7 +35,7 @@
                     <label for="display_name" class="mb-2 block text-sm text-slate-200">Display Name</label>
                     <input id="display_name" type="text" name="display_name"
                         value="{{ old('display_name', $tool->display_name) }}"
-                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400" />
+                        style="color:#000" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-black outline-none transition focus:border-cyan-400" />
                 </div>
             </div>
 
@@ -44,7 +44,7 @@
                 <p class="mb-2 text-xs text-slate-400">Deskripsi fungsi tool ini — dikirim ke OpenAI.</p>
                 <input id="description" type="text" name="description"
                     value="{{ old('description', $tool->description) }}"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400" />
+                    style="color:#000" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-black outline-none transition focus:border-cyan-400" />
             </div>
 
             <div>
@@ -67,14 +67,14 @@
                 <p class="mb-2 text-xs text-slate-400">Kata kunci untuk intent matching fallback.</p>
                 <input id="keywords" type="text" name="keywords"
                     value="{{ old('keywords', $tool->keywords ? implode(', ', $tool->keywords) : '') }}"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400" />
+                    style="color:#000" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-black outline-none transition focus:border-cyan-400" />
             </div>
 
             <div>
                 <label for="missing_message" class="mb-2 block text-sm text-slate-200">Missing Data Message</label>
                 <p class="mb-2 text-xs text-slate-400">Pesan yang ditampilkan jika data belum lengkap.</p>
                 <textarea id="missing_message" name="missing_message" rows="3"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400">{{ old('missing_message', $tool->missing_message) }}</textarea>
+                    style="color:#000" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-black outline-none transition focus:border-cyan-400">{{ old('missing_message', $tool->missing_message) }}</textarea>
             </div>
 
             <div>
@@ -82,13 +82,13 @@
                 <p class="mb-2 text-xs text-slate-400">Teks informasi yang langsung dikirim sebagai jawaban. Cocok untuk
                     tool yang hanya memberikan info.</p>
                 <textarea id="information_text" name="information_text" rows="4"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400">{{ old('information_text', $tool->information_text) }}</textarea>
+                    style="color:#000" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-black outline-none transition focus:border-cyan-400">{{ old('information_text', $tool->information_text) }}</textarea>
             </div>
 
             <div>
                 <label for="icon" class="mb-2 block text-sm text-slate-200">SVG Icon Path</label>
                 <input id="icon" type="text" name="icon" value="{{ old('icon', $tool->meta['icon'] ?? '') }}"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm font-mono text-slate-900 outline-none transition focus:border-cyan-400" />
+                    style="color:#000" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm font-mono text-black outline-none transition focus:border-cyan-400" />
             </div>
 
             <div>
@@ -124,9 +124,9 @@
             row.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
                     <input type="text" name="params[${paramIndex}][name]" value="${name}" placeholder="Nama field (e.g. username)"
-                        class="w-1/3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-900 outline-none focus:border-cyan-400" />
+                        style="color:#000" class="w-1/3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-black outline-none focus:border-cyan-400" />
                     <input type="text" name="params[${paramIndex}][description]" value="${desc}" placeholder="Deskripsi (e.g. Username akun)"
-                        class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-slate-900 outline-none focus:border-cyan-400" />
+                        style="color:#000" class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-black outline-none focus:border-cyan-400" />
                     <label class="flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap">
                         <input type="checkbox" name="params[${paramIndex}][required]" value="1" ${required ? 'checked' : ''}
                             class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />

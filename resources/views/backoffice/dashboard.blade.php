@@ -82,7 +82,7 @@
                             class="flex w-full max-w-md gap-3">
                             <input type="text" name="search" value="{{ $search }}"
                                 placeholder="Cari nama, phone, platform, user id"
-                                class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400" />
+                                style="color:#000" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-black outline-none transition focus:border-cyan-400" />
                             <button type="submit"
                                 class="rounded-2xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">Cari</button>
                         </form>

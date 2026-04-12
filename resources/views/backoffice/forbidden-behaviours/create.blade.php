@@ -26,7 +26,7 @@
                 <label for="title" class="mb-2 block text-sm text-slate-200">Rule Title</label>
                 <input id="title" type="text" name="title" value="{{ old('title') }}"
                     placeholder="e.g. Forbidden to create player without confirmation"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400" />
+                    style="color:#000" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-black outline-none transition focus:border-cyan-400" />
             </div>
 
             <div>
@@ -35,13 +35,13 @@
                     lakukan.</p>
                 <textarea id="instruction" name="instruction" rows="4"
                     placeholder="e.g. AI dilarang membuat data player tanpa konfirmasi dari player"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400">{{ old('instruction') }}</textarea>
+                    style="color:#000" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-black outline-none transition focus:border-cyan-400">{{ old('instruction') }}</textarea>
             </div>
 
             <div>
                 <label for="level" class="mb-2 block text-sm text-slate-200">Level</label>
                 <select id="level" name="level"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400">
+                    style="color:#000" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-black outline-none transition focus:border-cyan-400">
                     <option value="info" {{ old('level') === 'info' ? 'selected' : '' }}>Info</option>
                     <option value="warning" {{ old('level', 'warning') === 'warning' ? 'selected' : '' }}>Warning</option>
                     <option value="danger" {{ old('level') === 'danger' ? 'selected' : '' }}>Danger</option>

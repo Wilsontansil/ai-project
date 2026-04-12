@@ -80,7 +80,9 @@ class CheckSuspendTool
     {
         $agentKode = $agent ? $agent->kode : (string) ProjectSetting::getValue('agent_kode', config('services.agent.kode', 'PG'));
 
-        $player = Player::where('username', $username)
+        $usernameLower = mb_strtolower(trim($username));
+
+        $player = Player::whereRaw('LOWER(username) = ?', [$usernameLower])
             ->where('agent', $agentKode)
             ->first();
 

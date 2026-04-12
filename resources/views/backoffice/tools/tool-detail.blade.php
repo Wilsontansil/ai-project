@@ -40,12 +40,12 @@
                 <div>
                     <label for="display_name" class="mb-2 block text-sm text-slate-200">Display Name</label>
                     <input id="display_name" type="text" name="display_name" value="{{ $tool->display_name }}"
-                        style="color:#000" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-black outline-none transition focus:border-cyan-400" />
+                        style="background-color:rgba(15,23,42,0.7);color:#e2e8f0" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
                 </div>
                 <div>
                     <label for="description" class="mb-2 block text-sm text-slate-200">Description</label>
                     <input id="description" type="text" name="description" value="{{ $tool->description }}"
-                        style="color:#000" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-black outline-none transition focus:border-cyan-400" />
+                        style="background-color:rgba(15,23,42,0.7);color:#e2e8f0" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
                 </div>
             </div>
 

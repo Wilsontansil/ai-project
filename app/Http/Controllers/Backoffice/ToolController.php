@@ -240,7 +240,6 @@ class ToolController extends Controller
      */
     public function testEndpoint(Request $request): JsonResponse
     {
-        Log::info('Testing tool endpoint', ['request' => $request->all()]);
         $data = $request->validate([
             'route' => ['required', 'string', 'max:255'],
             'body' => ['nullable', 'array'],
@@ -254,12 +253,33 @@ class ToolController extends Controller
 
         $route = '/' . ltrim($data['route'], '/');
         $url = $baseUrl . $route;
-        Log::info('Testing tool endpoint', ['url' => $url, 'body' => $data['body'] ?? []]);
 
         $body = $data['body'] ?? [];
 
+        Log::info('Webhook test request', [
+            'channel' => 'tool.test_endpoint',
+            'method' => 'POST',
+            'base_url' => $baseUrl,
+            'route' => $route,
+            'url' => $url,
+            'body' => $body,
+            'timestamp' => now()->toIso8601String(),
+        ]);
+
         try {
             $response = Http::timeout(15)->post($url, $body);
+
+            Log::info('Webhook test response', [
+                'channel' => 'tool.test_endpoint',
+                'method' => 'POST',
+                'base_url' => $baseUrl,
+                'route' => $route,
+                'url' => $url,
+                'status' => $response->status(),
+                'successful' => $response->successful(),
+                'response_preview' => mb_substr($response->body(), 0, 1000),
+                'timestamp' => now()->toIso8601String(),
+            ]);
 
             return response()->json([
                 'success' => $response->successful(),
@@ -269,6 +289,17 @@ class ToolController extends Controller
                 'response' => $response->json() ?? $response->body(),
             ]);
         } catch (\Throwable $e) {
+            Log::error('Webhook test exception', [
+                'channel' => 'tool.test_endpoint',
+                'method' => 'POST',
+                'base_url' => $baseUrl,
+                'route' => $route,
+                'url' => $url,
+                'body' => $body,
+                'error' => $e->getMessage(),
+                'timestamp' => now()->toIso8601String(),
+            ]);
+
             return response()->json([
                 'success' => false,
                 'url' => $url,

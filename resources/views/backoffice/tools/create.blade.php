@@ -87,130 +87,73 @@
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
             </div>
 
-            {{-- API Endpoints --}}
+            {{-- API Endpoint --}}
             <div class="rounded-2xl border border-white/10 bg-slate-900/30 p-4 space-y-4">
                 <div>
-                    <h3 class="text-sm font-semibold text-white">API Endpoints</h3>
+                    <h3 class="text-sm font-semibold text-white">API Endpoint</h3>
                     <p class="text-xs text-slate-400">Route yang dipanggil ke webhook base URL saat tool dieksekusi.</p>
                 </div>
 
-                {{-- GET Endpoint --}}
                 <div class="rounded-xl border border-white/10 bg-slate-900/40 p-3 space-y-3">
-                    <div class="flex items-center gap-2">
-                        <span
-                            class="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300">GET</span>
-                        <label for="endpoint_get_route" class="text-sm text-slate-200">Route</label>
-                    </div>
-                    <input id="endpoint_get_route" type="text" name="endpoint_get_route"
-                        value="{{ old('endpoint_get_route') }}" placeholder="e.g. /getplayer"
-                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400" />
+                    {{-- Route --}}
                     <div>
-                        <p class="mb-2 text-xs text-slate-300">Expected Response</p>
-                        <div class="grid gap-2 md:grid-cols-2">
-                            <input type="number" name="endpoint_get_expected_status"
-                                value="{{ old('endpoint_get_expected_status', 200) }}" placeholder="Status (e.g. 200)"
-                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400" />
-                            <input type="text" name="endpoint_get_expected_message"
-                                value="{{ old('endpoint_get_expected_message', 'Success') }}"
-                                placeholder="Message (e.g. Success)"
-                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400" />
-                        </div>
-                        <p class="mt-2 mb-2 text-xs text-slate-400">Data fields (key → value). Hanya key+value non-empty
-                            yang disimpan.</p>
-                        <div id="get-expected-data-list" class="space-y-2"></div>
-                        <button type="button" onclick="addGetExpectedDataField()"
-                            class="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
-                            + Tambah Expected Data
-                        </button>
+                        <label for="endpoint_route" class="mb-1 block text-xs text-slate-300">Route</label>
+                        <input id="endpoint_route" type="text" name="endpoint_route" value="{{ old('endpoint_route') }}"
+                            placeholder="e.g. /getplayer"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400" />
                     </div>
+
+                    {{-- Body --}}
                     <div>
-                        <p class="mb-2 text-xs text-slate-400">Body fields (key → value). Kosongkan value jika diisi dari
-                            parameter customer.</p>
-                        <div id="get-body-list" class="space-y-2"></div>
+                        <p class="mb-1 text-xs text-slate-300">Body</p>
+                        <p class="mb-2 text-xs text-slate-400">Key → value pairs. Kosongkan value jika diisi dari parameter
+                            customer.</p>
+                        <div id="body-list" class="space-y-2"></div>
                         <div class="flex items-center gap-2 mt-2">
-                            <button type="button" onclick="addGetBodyField()"
+                            <button type="button" onclick="addBodyField()"
                                 class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
                                 + Tambah Field
                             </button>
-                            <button type="button" onclick="copyParamsToEndpointBody('get')"
+                            <button type="button" onclick="copyParamsToBody()"
                                 class="rounded-lg border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-300 transition hover:bg-cyan-500/20">
                                 Copy from Parameters
                             </button>
-                            <button type="button" onclick="testEndpoint('get')"
+                            <button type="button" onclick="testEndpoint()"
                                 class="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-300 transition hover:bg-emerald-500/20">
                                 ▶ Test Request
                             </button>
                         </div>
-                        <div id="get-test-result"
+                        <div id="endpoint-test-result"
                             class="mt-2 hidden rounded-lg border border-white/10 bg-slate-950/60 p-3">
                             <div class="flex items-center justify-between mb-1">
-                                <span id="get-test-status" class="text-xs font-mono"></span>
+                                <span id="endpoint-test-status" class="text-xs font-mono"></span>
                                 <button type="button"
-                                    onclick="document.getElementById('get-test-result').classList.add('hidden')"
+                                    onclick="document.getElementById('endpoint-test-result').classList.add('hidden')"
                                     class="text-xs text-slate-500 hover:text-slate-300">&times;</button>
                             </div>
-                            <pre id="get-test-body" class="text-xs text-slate-300 whitespace-pre-wrap max-h-48 overflow-auto"></pre>
+                            <pre id="endpoint-test-body" class="text-xs text-slate-300 whitespace-pre-wrap max-h-48 overflow-auto"></pre>
                         </div>
                     </div>
-                </div>
 
-                {{-- UPDATE Endpoint --}}
-                <div class="rounded-xl border border-white/10 bg-slate-900/40 p-3 space-y-3">
-                    <div class="flex items-center gap-2">
-                        <span
-                            class="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">UPDATE</span>
-                        <label for="endpoint_update_route" class="text-sm text-slate-200">Route</label>
-                    </div>
-                    <input id="endpoint_update_route" type="text" name="endpoint_update_route"
-                        value="{{ old('endpoint_update_route') }}" placeholder="e.g. /updateplayer"
-                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400" />
+                    {{-- Expected Response --}}
                     <div>
                         <p class="mb-2 text-xs text-slate-300">Expected Response</p>
                         <div class="grid gap-2 md:grid-cols-2">
-                            <input type="number" name="endpoint_update_expected_status"
-                                value="{{ old('endpoint_update_expected_status', 200) }}" placeholder="Status (e.g. 200)"
+                            <input type="number" name="endpoint_expected_status"
+                                value="{{ old('endpoint_expected_status', 200) }}" placeholder="Status (e.g. 200)"
                                 class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400" />
-                            <input type="text" name="endpoint_update_expected_message"
-                                value="{{ old('endpoint_update_expected_message', 'Success') }}"
+                            <input type="text" name="endpoint_expected_message"
+                                value="{{ old('endpoint_expected_message', 'Success') }}"
                                 placeholder="Message (e.g. Success)"
                                 class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400" />
                         </div>
                         <p class="mt-2 mb-2 text-xs text-slate-400">Data fields (key → value). Hanya key+value non-empty
                             yang disimpan.</p>
-                        <div id="update-expected-data-list" class="space-y-2"></div>
-                        <button type="button" onclick="addUpdateExpectedDataField()"
+                        <div id="expected-data-list" class="space-y-2"></div>
+                        <button type="button" onclick="addExpectedDataField()"
                             class="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
                             + Tambah Expected Data
                         </button>
-                    </div>
-                    <div>
-                        <p class="mb-2 text-xs text-slate-400">Body fields (key → value). Kosongkan value jika diisi dari
-                            parameter customer.</p>
-                        <div id="update-body-list" class="space-y-2"></div>
-                        <div class="flex items-center gap-2 mt-2">
-                            <button type="button" onclick="addUpdateBodyField()"
-                                class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
-                                + Tambah Field
-                            </button>
-                            <button type="button" onclick="copyParamsToEndpointBody('update')"
-                                class="rounded-lg border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-300 transition hover:bg-cyan-500/20">
-                                Copy from Parameters
-                            </button>
-                            <button type="button" onclick="testEndpoint('update')"
-                                class="rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-300 transition hover:bg-amber-500/20">
-                                ▶ Test Request
-                            </button>
-                        </div>
-                        <div id="update-test-result"
-                            class="mt-2 hidden rounded-lg border border-white/10 bg-slate-950/60 p-3">
-                            <div class="flex items-center justify-between mb-1">
-                                <span id="update-test-status" class="text-xs font-mono"></span>
-                                <button type="button"
-                                    onclick="document.getElementById('update-test-result').classList.add('hidden')"
-                                    class="text-xs text-slate-500 hover:text-slate-300">&times;</button>
-                            </div>
-                            <pre id="update-test-body" class="text-xs text-slate-300 whitespace-pre-wrap max-h-48 overflow-auto"></pre>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -332,21 +275,13 @@
             return names;
         }
 
-        function copyParamsToEndpointBody(type) {
+        function copyParamsToBody() {
             const names = getCurrentParameterNames();
-            const list = document.getElementById(`${type}-body-list`);
-            if (!list) {
-                return;
-            }
-
+            const list = document.getElementById('body-list');
+            if (!list) return;
             list.innerHTML = '';
-            if (type === 'get') {
-                getBodyIdx = 0;
-                names.forEach(name => addGetBodyField(name, ''));
-            } else {
-                updateBodyIdx = 0;
-                names.forEach(name => addUpdateBodyField(name, ''));
-            }
+            bodyIdx = 0;
+            names.forEach(name => addBodyField(name, ''));
         }
 
         document.getElementById('data_model_id')?.addEventListener('change', refreshParameterFieldOptions);
@@ -357,100 +292,64 @@
                 oldParams.forEach(p => addParamRow(p.name || '', p.description || '', !!p.required));
             }
 
-            const oldGetExpected = @json(old('endpoint_get_expected_data', []));
-            if (Array.isArray(oldGetExpected)) {
-                oldGetExpected.forEach(row => addGetExpectedDataField(row.key || '', row.value || ''));
+            const oldBody = @json(old('endpoint_body', []));
+            if (Array.isArray(oldBody)) {
+                oldBody.forEach(row => addBodyField(row.key || '', row.value || ''));
             }
 
-            const oldUpdateExpected = @json(old('endpoint_update_expected_data', []));
-            if (Array.isArray(oldUpdateExpected)) {
-                oldUpdateExpected.forEach(row => addUpdateExpectedDataField(row.key || '', row.value || ''));
+            const oldExpected = @json(old('endpoint_expected_data', []));
+            if (Array.isArray(oldExpected)) {
+                oldExpected.forEach(row => addExpectedDataField(row.key || '', row.value || ''));
             }
 
             refreshParameterFieldOptions();
         });
 
-        let getBodyIdx = 0;
+        let bodyIdx = 0;
 
-        function addGetBodyField(key = '', val = '') {
-            const list = document.getElementById('get-body-list');
+        function addBodyField(key = '', val = '') {
+            const list = document.getElementById('body-list');
             const row = document.createElement('div');
             row.className = 'flex items-center gap-2';
             row.innerHTML = `
-                <input type="text" name="endpoint_get_body[${getBodyIdx}][key]" value="${key}" placeholder="Key (e.g. username)"
+                <input type="text" name="endpoint_body[${bodyIdx}][key]" value="${key}" placeholder="Key (e.g. username)"
                     class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <input type="text" name="endpoint_get_body[${getBodyIdx}][value]" value="${val}" placeholder="Value (kosong = dari parameter)"
+                <input type="text" name="endpoint_body[${bodyIdx}][value]" value="${val}" placeholder="Value (kosong = dari parameter)"
                     class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
                 <button type="button" onclick="this.parentElement.remove()"
                     class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
-            getBodyIdx++;
+            bodyIdx++;
         }
 
-        let updateBodyIdx = 0;
+        let expectedDataIdx = 0;
 
-        function addUpdateBodyField(key = '', val = '') {
-            const list = document.getElementById('update-body-list');
+        function addExpectedDataField(key = '', val = '') {
+            const list = document.getElementById('expected-data-list');
             const row = document.createElement('div');
             row.className = 'flex items-center gap-2';
             row.innerHTML = `
-                <input type="text" name="endpoint_update_body[${updateBodyIdx}][key]" value="${key}" placeholder="Key (e.g. username)"
+                <input type="text" name="endpoint_expected_data[${expectedDataIdx}][key]" value="${key}" placeholder="Key (e.g. username)"
                     class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <input type="text" name="endpoint_update_body[${updateBodyIdx}][value]" value="${val}" placeholder="Value (kosong = dari parameter)"
+                <input type="text" name="endpoint_expected_data[${expectedDataIdx}][value]" value="${val}" placeholder="Value (e.g. john_doe)"
                     class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
                 <button type="button" onclick="this.parentElement.remove()"
                     class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
-            updateBodyIdx++;
+            expectedDataIdx++;
         }
 
-        let getExpectedDataIdx = 0;
-
-        function addGetExpectedDataField(key = '', val = '') {
-            const list = document.getElementById('get-expected-data-list');
-            const row = document.createElement('div');
-            row.className = 'flex items-center gap-2';
-            row.innerHTML = `
-                <input type="text" name="endpoint_get_expected_data[${getExpectedDataIdx}][key]" value="${key}" placeholder="Key (e.g. username)"
-                    class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <input type="text" name="endpoint_get_expected_data[${getExpectedDataIdx}][value]" value="${val}" placeholder="Value (e.g. john_doe)"
-                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <button type="button" onclick="this.parentElement.remove()"
-                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
-            `;
-            list.appendChild(row);
-            getExpectedDataIdx++;
-        }
-
-        let updateExpectedDataIdx = 0;
-
-        function addUpdateExpectedDataField(key = '', val = '') {
-            const list = document.getElementById('update-expected-data-list');
-            const row = document.createElement('div');
-            row.className = 'flex items-center gap-2';
-            row.innerHTML = `
-                <input type="text" name="endpoint_update_expected_data[${updateExpectedDataIdx}][key]" value="${key}" placeholder="Key (e.g. username)"
-                    class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <input type="text" name="endpoint_update_expected_data[${updateExpectedDataIdx}][value]" value="${val}" placeholder="Value (e.g. john_doe)"
-                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <button type="button" onclick="this.parentElement.remove()"
-                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
-            `;
-            list.appendChild(row);
-            updateExpectedDataIdx++;
-        }
-
-        async function testEndpoint(type) {
-            const routeInput = document.getElementById(`endpoint_${type}_route`);
+        async function testEndpoint() {
+            const routeInput = document.getElementById('endpoint_route');
             const route = routeInput ? routeInput.value.trim() : '';
             if (!route) {
                 alert('Route belum diisi.');
                 return;
             }
 
-            const bodyList = document.getElementById(`${type}-body-list`);
+            const bodyList = document.getElementById('body-list');
             const rows = bodyList.querySelectorAll(':scope > div');
             const body = {};
             rows.forEach(row => {
@@ -460,9 +359,9 @@
                 if (k) body[k] = v;
             });
 
-            const resultEl = document.getElementById(`${type}-test-result`);
-            const statusEl = document.getElementById(`${type}-test-status`);
-            const bodyEl = document.getElementById(`${type}-test-body`);
+            const resultEl = document.getElementById('endpoint-test-result');
+            const statusEl = document.getElementById('endpoint-test-status');
+            const bodyEl = document.getElementById('endpoint-test-body');
 
             resultEl.classList.remove('hidden');
             statusEl.textContent = 'Loading...';

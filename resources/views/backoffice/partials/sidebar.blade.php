@@ -176,6 +176,31 @@
             </div>
         </div>
 
+        {{-- Section: SYSTEM --}}
+        <div class="bo-section" data-section="system">
+            <button type="button"
+                class="bo-section-header flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-white/80 transition hover:bg-white/10">
+                <span class="bo-section-label text-[11px] font-bold uppercase tracking-widest">System</span>
+                <svg class="bo-section-chevron h-3.5 w-3.5 rotated" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+            <div class="bo-section-items mt-1 space-y-0.5">
+                <a href="{{ route('backoffice.settings.index') }}"
+                    class="bo-nav-item group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition {{ ($boActive ?? ($active ?? '')) === 'settings' ? 'bg-white/20 font-semibold text-white' : 'text-white/90 hover:bg-white/10' }}">
+                    <span
+                        class="flex h-7 w-7 items-center justify-center rounded-md {{ ($boActive ?? ($active ?? '')) === 'settings' ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/15' }}">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                    </span>
+                    <span class="bo-label">Settings</span>
+                </a>
+            </div>
+        </div>
+
     </nav>
 
     {{-- Footer / Logout --}}

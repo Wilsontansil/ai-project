@@ -5,6 +5,7 @@ use App\Http\Controllers\Backoffice\AuthController;
 use App\Http\Controllers\Backoffice\ForbiddenBehaviourController;
 use App\Http\Controllers\Backoffice\DashboardController;
 use App\Http\Controllers\Backoffice\EscalationController;
+use App\Http\Controllers\Backoffice\SettingController;
 use App\Http\Controllers\Backoffice\ToolController;
 use Illuminate\Support\Facades\Route;
 
@@ -43,6 +44,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/backoffice/escalations/{escalation}/resolve', [EscalationController::class, 'resolve'])->name('backoffice.escalations.resolve');
     Route::post('/backoffice/escalations/mark-all-read', [EscalationController::class, 'markAllRead'])->name('backoffice.escalations.markAllRead');
     Route::get('/backoffice/escalations/unread-count', [EscalationController::class, 'unreadCount'])->name('backoffice.escalations.unreadCount');
+
+    Route::get('/backoffice/settings', [SettingController::class, 'index'])->name('backoffice.settings.index');
+    Route::post('/backoffice/settings', [SettingController::class, 'update'])->name('backoffice.settings.update');
 
     Route::post('/backoffice/logout', [AuthController::class, 'logout'])->name('logout');
 });

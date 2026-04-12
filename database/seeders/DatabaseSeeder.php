@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             ToolSeeder::class,
             ForbiddenBehaviourSeeder::class,
+            ProjectSettingSeeder::class,
         ]);
     }
 }

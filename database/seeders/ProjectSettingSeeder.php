@@ -1,0 +1,110 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\ProjectSetting;
+use Illuminate\Database\Seeder;
+
+class ProjectSettingSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $settings = [
+            // Webhook
+            [
+                'key' => 'webhook_base_url',
+                'value' => env('WEBHOOK_BASE_URL'),
+                'label' => 'Base URL',
+                'group' => 'webhook',
+                'type' => 'url',
+            ],
+
+            // OpenAI
+            [
+                'key' => 'openai_api_key',
+                'value' => env('OPENAI_API_KEY'),
+                'label' => 'API Key',
+                'group' => 'openai',
+                'type' => 'secret',
+            ],
+
+            // Telegram
+            [
+                'key' => 'telegram_bot_token',
+                'value' => env('TELEGRAM_BOT_TOKEN'),
+                'label' => 'Bot Token',
+                'group' => 'telegram',
+                'type' => 'secret',
+            ],
+
+            // WhatsApp (WAHA)
+            [
+                'key' => 'whatsapp_base_url',
+                'value' => env('WAHA_BASE_URL'),
+                'label' => 'Base URL',
+                'group' => 'whatsapp',
+                'type' => 'url',
+            ],
+            [
+                'key' => 'whatsapp_session',
+                'value' => env('WAHA_SESSION', 'default'),
+                'label' => 'Session',
+                'group' => 'whatsapp',
+                'type' => 'text',
+            ],
+            [
+                'key' => 'whatsapp_api_key',
+                'value' => env('WAHA_API_KEY'),
+                'label' => 'API Key',
+                'group' => 'whatsapp',
+                'type' => 'secret',
+            ],
+
+            // Agent
+            [
+                'key' => 'agent_id',
+                'value' => env('AGENT_ID', '1'),
+                'label' => 'Agent ID',
+                'group' => 'agent',
+                'type' => 'number',
+            ],
+            [
+                'key' => 'agent_kode',
+                'value' => env('AGENT_KODE', 'PG'),
+                'label' => 'Agent Kode',
+                'group' => 'agent',
+                'type' => 'text',
+            ],
+
+            // Support
+            [
+                'key' => 'support_phone',
+                'value' => env('SUPPORT_PHONE', '08120000000'),
+                'label' => 'Phone Number',
+                'group' => 'support',
+                'type' => 'text',
+            ],
+            [
+                'key' => 'support_telegram_url',
+                'value' => env('SUPPORT_TELEGRAM_URL'),
+                'label' => 'Telegram URL',
+                'group' => 'support',
+                'type' => 'url',
+            ],
+            [
+                'key' => 'support_whatsapp_url',
+                'value' => env('SUPPORT_WHATSAPP_URL'),
+                'label' => 'WhatsApp URL',
+                'group' => 'support',
+                'type' => 'url',
+            ],
+        ];
+
+        foreach ($settings as $setting) {
+            ProjectSetting::updateOrCreate(
+                ['key' => $setting['key']],
+                $setting
+            );
+        }
+    }
+}

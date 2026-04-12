@@ -89,7 +89,8 @@
                         placeholder="e.g. /getplayer"
                         class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400" />
                     <div>
-                        <p class="mb-2 text-xs text-slate-400">Body fields yang dikirim untuk GET request.</p>
+                        <p class="mb-2 text-xs text-slate-400">Body fields (key → value). Kosongkan value jika diisi dari
+                            parameter customer.</p>
                         <div id="get-body-list" class="space-y-2"></div>
                         <button type="button" onclick="addGetBodyField()"
                             class="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
@@ -109,7 +110,8 @@
                         placeholder="e.g. /updateplayer"
                         class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400" />
                     <div>
-                        <p class="mb-2 text-xs text-slate-400">Body fields yang dikirim untuk UPDATE request.</p>
+                        <p class="mb-2 text-xs text-slate-400">Body fields (key → value). Kosongkan value jika diisi dari
+                            parameter customer.</p>
                         <div id="update-body-list" class="space-y-2"></div>
                         <button type="button" onclick="addUpdateBodyField()"
                             class="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
@@ -198,40 +200,54 @@
                 addParamRow(name, prop.description || '', required.includes(name));
             }
 
-            // Pre-populate endpoint body fields
+            // Pre-populate endpoint body fields (key-value)
             const endpoints = @json($tool->endpoints ?? []);
             if (endpoints.get && endpoints.get.body) {
-                endpoints.get.body.forEach(field => addGetBodyField(field));
+                for (const [k, v] of Object.entries(endpoints.get.body)) {
+                    addGetBodyField(k, v);
+                }
             }
             if (endpoints.update && endpoints.update.body) {
-                endpoints.update.body.forEach(field => addUpdateBodyField(field));
+                for (const [k, v] of Object.entries(endpoints.update.body)) {
+                    addUpdateBodyField(k, v);
+                }
             }
         });
 
-        function addGetBodyField(value = '') {
+        let getBodyIdx = 0;
+
+        function addGetBodyField(key = '', val = '') {
             const list = document.getElementById('get-body-list');
             const row = document.createElement('div');
             row.className = 'flex items-center gap-2';
             row.innerHTML = `
-                <input type="text" name="endpoint_get_body[]" value="${value}" placeholder="e.g. username"
+                <input type="text" name="endpoint_get_body[${getBodyIdx}][key]" value="${key}" placeholder="Key (e.g. username)"
+                    class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <input type="text" name="endpoint_get_body[${getBodyIdx}][value]" value="${val}" placeholder="Value (kosong = dari parameter)"
                     class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
                 <button type="button" onclick="this.parentElement.remove()"
                     class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
+            getBodyIdx++;
         }
 
-        function addUpdateBodyField(value = '') {
+        let updateBodyIdx = 0;
+
+        function addUpdateBodyField(key = '', val = '') {
             const list = document.getElementById('update-body-list');
             const row = document.createElement('div');
             row.className = 'flex items-center gap-2';
             row.innerHTML = `
-                <input type="text" name="endpoint_update_body[]" value="${value}" placeholder="e.g. username"
+                <input type="text" name="endpoint_update_body[${updateBodyIdx}][key]" value="${key}" placeholder="Key (e.g. username)"
+                    class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <input type="text" name="endpoint_update_body[${updateBodyIdx}][value]" value="${val}" placeholder="Value (kosong = dari parameter)"
                     class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
                 <button type="button" onclick="this.parentElement.remove()"
                     class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
+            updateBodyIdx++;
         }
     </script>
 @endsection

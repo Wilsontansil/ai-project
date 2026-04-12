@@ -398,12 +398,14 @@ class AIService
         $route = '/' . ltrim($endpoint['route'], '/');
         $url = $baseUrl . $route;
 
-        // Build body from configured fields, mapping values from AI arguments
+        // Build body: use fixed value if set, otherwise map from AI arguments
         $bodyFields = $endpoint['body'] ?? [];
         $body = [];
-        foreach ($bodyFields as $field) {
-            if (isset($arguments[$field])) {
-                $body[$field] = $arguments[$field];
+        foreach ($bodyFields as $key => $value) {
+            if ($value !== '') {
+                $body[$key] = $value; // fixed/default value
+            } elseif (isset($arguments[$key])) {
+                $body[$key] = $arguments[$key]; // from AI parameter
             }
         }
 

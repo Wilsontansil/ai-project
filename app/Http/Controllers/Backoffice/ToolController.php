@@ -45,10 +45,12 @@ class ToolController extends Controller
             'information_text' => ['nullable', 'string', 'max:2000'],
             'endpoint_get_route' => ['nullable', 'string', 'max:255'],
             'endpoint_get_body' => ['nullable', 'array'],
-            'endpoint_get_body.*' => ['string', 'max:80'],
+            'endpoint_get_body.*.key' => ['required_with:endpoint_get_body', 'string', 'max:80'],
+            'endpoint_get_body.*.value' => ['nullable', 'string', 'max:255'],
             'endpoint_update_route' => ['nullable', 'string', 'max:255'],
             'endpoint_update_body' => ['nullable', 'array'],
-            'endpoint_update_body.*' => ['string', 'max:80'],
+            'endpoint_update_body.*.key' => ['required_with:endpoint_update_body', 'string', 'max:80'],
+            'endpoint_update_body.*.value' => ['nullable', 'string', 'max:255'],
         ]);
 
         $parameters = $this->buildParametersFromInput($request->input('params', []));
@@ -100,10 +102,12 @@ class ToolController extends Controller
             'information_text' => ['nullable', 'string', 'max:2000'],
             'endpoint_get_route' => ['nullable', 'string', 'max:255'],
             'endpoint_get_body' => ['nullable', 'array'],
-            'endpoint_get_body.*' => ['string', 'max:80'],
+            'endpoint_get_body.*.key' => ['required_with:endpoint_get_body', 'string', 'max:80'],
+            'endpoint_get_body.*.value' => ['nullable', 'string', 'max:255'],
             'endpoint_update_route' => ['nullable', 'string', 'max:255'],
             'endpoint_update_body' => ['nullable', 'array'],
-            'endpoint_update_body.*' => ['string', 'max:80'],
+            'endpoint_update_body.*.key' => ['required_with:endpoint_update_body', 'string', 'max:80'],
+            'endpoint_update_body.*.value' => ['nullable', 'string', 'max:255'],
         ]);
 
         $parameters = $this->buildParametersFromInput($request->input('params', []));
@@ -192,10 +196,7 @@ class ToolController extends Controller
 
         $getRoute = trim((string) $request->input('endpoint_get_route', ''));
         if ($getRoute !== '') {
-            $getBody = array_values(array_filter(
-                array_map('trim', (array) $request->input('endpoint_get_body', [])),
-                fn ($v) => $v !== ''
-            ));
+            $getBody = $this->buildBodyKeyValue((array) $request->input('endpoint_get_body', []));
             $endpoints['get'] = [
                 'route' => $getRoute,
                 'body' => $getBody,
@@ -204,10 +205,7 @@ class ToolController extends Controller
 
         $updateRoute = trim((string) $request->input('endpoint_update_route', ''));
         if ($updateRoute !== '') {
-            $updateBody = array_values(array_filter(
-                array_map('trim', (array) $request->input('endpoint_update_body', [])),
-                fn ($v) => $v !== ''
-            ));
+            $updateBody = $this->buildBodyKeyValue((array) $request->input('endpoint_update_body', []));
             $endpoints['update'] = [
                 'route' => $updateRoute,
                 'body' => $updateBody,
@@ -215,5 +213,21 @@ class ToolController extends Controller
         }
 
         return $endpoints !== [] ? $endpoints : null;
+    }
+
+    /**
+     * Convert body rows [{key, value}, ...] into { key: value } map.
+     */
+    private function buildBodyKeyValue(array $rows): array
+    {
+        $body = [];
+        foreach ($rows as $row) {
+            $key = trim((string) ($row['key'] ?? ''));
+            if ($key === '') {
+                continue;
+            }
+            $body[$key] = trim((string) ($row['value'] ?? ''));
+        }
+        return $body;
     }
 }

@@ -21,10 +21,6 @@ return new class extends Migration
             $table->timestamp('last_seen_at')->nullable();
             $table->unsignedInteger('total_messages')->default(0);
             $table->json('tags')->nullable();
-            $table->boolean('needs_human')->default(false);
-            $table->text('escalation_reason')->nullable();
-            $table->timestamp('escalated_at')->nullable();
-            $table->timestamp('resolved_at')->nullable();
             $table->timestamps();
 
             $table->unique(['platform', 'platform_user_id']);

@@ -22,8 +22,6 @@ class WhatsAppController extends Controller
     private string $apiKey = '';
 
     private ?Agent $agent = null;
-    private string $supportPhone = '';
-    private string $supportUrl = '';
 
     public function __construct()
     {
@@ -31,8 +29,6 @@ class WhatsAppController extends Controller
         $this->session = (string) ProjectSetting::getValue('whatsapp_session', config('services.whatsapp.session', 'default'));
         $this->apiKey = (string) ProjectSetting::getValue('whatsapp_api_key', config('services.whatsapp.api_key', ''));
         $this->agent = Agent::getActive();
-        $this->supportPhone = (string) ProjectSetting::getValue('support_phone', config('services.support.phone', '08120000000'));
-        $this->supportUrl = (string) ProjectSetting::getValue('support_whatsapp_url', config('services.support.whatsapp_url', ''));
     }
 
     public function handleWebhook(Request $request)
@@ -112,17 +108,10 @@ class WhatsAppController extends Controller
 
         try {
             $aiService = app(AIService::class);
-            $rawReply = $aiService->reply($combinedText, $chatId, $this->agent, 'whatsapp', $agentContext);
+            $reply = $aiService->reply($combinedText, $chatId, $this->agent, 'whatsapp', $agentContext);
         } finally {
             $this->stopTyping($chatId);
         }
-
-        // Check if AI flagged this conversation for human escalation.
-        if ($aiService->needsEscalation($rawReply)) {
-            $aiService->createEscalation($customer, 'whatsapp', $chatId, $combinedText, $rawReply);
-        }
-
-        $reply = $this->appendHandoverContactIfNeeded($rawReply);
 
         if ($customer !== null) {
             try {
@@ -247,22 +236,4 @@ class WhatsAppController extends Controller
         return !$isNew;
     }
 
-    private function appendHandoverContactIfNeeded(string $reply): string
-    {
-        $needsHandover = stripos($reply, 'human support') !== false
-            || stripos($reply, 'transfer') !== false
-            || stripos($reply, 'agent manusia') !== false;
-
-        if (!$needsHandover) {
-            return $reply;
-        }
-
-        $lines = ["\nKontak human support: {$this->supportPhone}"];
-
-        if ($this->supportUrl !== '') {
-            $lines[] = "Link WhatsApp support: {$this->supportUrl}";
-        }
-
-        return $reply . "\n" . implode("\n", $lines);
-    }
 }

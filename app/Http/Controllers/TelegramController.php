@@ -16,15 +16,11 @@ class TelegramController extends Controller
 {
     private string $telegramToken = '';
     private ?Agent $agent = null;
-    private string $supportPhone = '';
-    private string $supportUrl = '';
 
     public function __construct()
     {
         $this->telegramToken = (string) ProjectSetting::getValue('telegram_bot_token', config('services.telegram.bot_token', ''));
         $this->agent = Agent::getActive();
-        $this->supportPhone = (string) ProjectSetting::getValue('support_phone', config('services.support.phone', '08120000000'));
-        $this->supportUrl = (string) ProjectSetting::getValue('support_telegram_url', config('services.support.telegram_url', ''));
     }
 
     public function handleWebhook(Request $request)
@@ -71,16 +67,8 @@ class TelegramController extends Controller
 
         $this->sendTyping($chatId);
 
-        // Send channel so AI can include platform-specific handover info.
         $aiService = app(AIService::class);
-        $rawReply = $aiService->reply($combinedText, $chatId, $this->agent, 'telegram', $agentContext);
-
-        // Check if AI flagged this conversation for human escalation.
-        if ($aiService->needsEscalation($rawReply)) {
-            $aiService->createEscalation($customer, 'telegram', $chatId, $combinedText, $rawReply);
-        }
-
-        $reply = $this->appendHandoverContactIfNeeded($rawReply);
+        $reply = $aiService->reply($combinedText, $chatId, $this->agent, 'telegram', $agentContext);
 
         if ($customer !== null) {
             try {
@@ -129,22 +117,4 @@ class TelegramController extends Controller
         ]);
     }
 
-    private function appendHandoverContactIfNeeded(string $reply): string
-    {
-        $needsHandover = stripos($reply, 'human support') !== false
-            || stripos($reply, 'transfer') !== false
-            || stripos($reply, 'agent manusia') !== false;
-
-        if (!$needsHandover) {
-            return $reply;
-        }
-
-        $lines = ["\nKontak human support: {$this->supportPhone}"];
-
-        if ($this->supportUrl !== '') {
-            $lines[] = "Link Telegram support: {$this->supportUrl}";
-        }
-
-        return $reply . "\n" . implode("\n", $lines);
-    }
 }

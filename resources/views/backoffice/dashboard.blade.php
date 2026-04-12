@@ -59,7 +59,7 @@
                 </div>
 
                 {{-- Compact Stat Cards --}}
-                <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+                <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
                     <div class="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-2.5"
                         style="background-color:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.25);border-radius:12px">
                         <p class="text-[11px] text-cyan-200/70" style="color:rgba(34,211,238,0.7);font-size:11px">Total
@@ -81,14 +81,6 @@
                         <p class="text-lg font-bold text-white" style="color:#fff;font-size:18px;font-weight:700">
                             {{ number_format($stats['whatsapp_customers']) }}</p>
                     </div>
-                    <a href="{{ route('backoffice.escalations.index') }}"
-                        class="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-2.5 transition hover:bg-red-400/15"
-                        style="background-color:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);border-radius:12px;display:block">
-                        <p class="text-[11px] text-red-200/70" style="color:rgba(248,113,113,0.7);font-size:11px">Need
-                            Human</p>
-                        <p class="text-lg font-bold text-white" style="color:#fff;font-size:18px;font-weight:700">
-                            {{ number_format($stats['needs_human']) }}</p>
-                    </a>
                 </div>
 
                 {{-- Customer Table --}}
@@ -124,10 +116,6 @@
                                         <tr class="hover:bg-white/5">
                                             <td class="px-3 py-2 text-white">
                                                 {{ $customer->name ?: '-' }}
-                                                @if ($customer->needs_human)
-                                                    <span
-                                                        class="ml-1 rounded bg-red-500/20 px-1 py-0.5 text-[9px] font-bold text-red-300">ESCALATED</span>
-                                                @endif
                                             </td>
                                             <td class="px-3 py-2 text-slate-300">{{ ucfirst($customer->platform) }}</td>
                                             <td class="px-3 py-2 text-slate-400">{{ $customer->phone_number ?: '-' }}

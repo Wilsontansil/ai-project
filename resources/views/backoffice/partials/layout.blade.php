@@ -29,12 +29,12 @@
 
 <body class="min-h-screen bg-slate-950 text-slate-100">
     <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] p-3 sm:p-4 md:p-6">
-        <div id="bo-shell" class="mx-auto flex max-w-7xl flex-col gap-4 lg:gap-6 xl:flex-row">
+        <div id="bo-shell" class="mx-auto flex max-w-7xl flex-col gap-4 lg:gap-6 xl:flex-row xl:items-start xl:gap-8">
             @include('backoffice.partials.sidebar', [
                 'active' => $boActive ?? '',
             ])
 
-            <main class="min-w-0 flex-1 space-y-6">
+            <main class="relative z-0 min-w-0 flex-1 space-y-6 xl:pt-1">
                 @yield('content')
             </main>
         </div>

@@ -10,6 +10,8 @@
         background: #3bb5a5;
         flex-shrink: 0;
         flex-grow: 0;
+        z-index: 20;
+        box-shadow: 0 16px 40px rgba(2, 6, 23, 0.35);
     }
 
     #bo-shell.bo-collapsed #bo-sidebar {

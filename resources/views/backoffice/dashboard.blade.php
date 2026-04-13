@@ -45,13 +45,13 @@
         </div>
     @endif
     <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] p-3 sm:p-4 md:p-6">
-        <div id="bo-shell" class="mx-auto flex max-w-7xl flex-col gap-4 lg:gap-6 xl:flex-row">
+        <div id="bo-shell" class="mx-auto flex max-w-7xl flex-col gap-4 lg:gap-6 xl:flex-row xl:items-start xl:gap-8">
             @include('backoffice.partials.sidebar', ['active' => 'customer', 'currentTool' => null])
 
-            <main class="min-w-0 flex-1 space-y-5 lg:space-y-6">
+            <main class="relative z-0 min-w-0 flex-1 space-y-5 lg:space-y-6 xl:pt-1">
                 {{-- Header --}}
                 <div
-                    class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-4 sm:px-5 backdrop-blur">
+                    class="flex items-center justify-between rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
                     <div>
                         <h1 class="text-lg font-semibold sm:text-2xl">Customer Dashboard</h1>
                         <p class="text-xs text-slate-400">Monitoring customer dari Telegram & WhatsApp.</p>
@@ -84,7 +84,7 @@
                 </div>
 
                 {{-- Customer Table --}}
-                <div class="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 backdrop-blur">
+                <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-4 sm:p-5">
                     <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <h2 class="text-sm font-semibold">Customers</h2>
                         <form method="GET" action="{{ route('backoffice.dashboard') }}"

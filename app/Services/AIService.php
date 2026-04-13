@@ -376,12 +376,14 @@ class AIService
      */
     private function executeHttpEndpoint(Tool $tool, array $arguments): array
     {
+        $userFacingEndpointError = 'Maaf, permintaan belum bisa diproses saat ini. Silakan coba lagi beberapa saat ya.';
+
         $endpointConfig = $tool->endpoints['endpoint'] ?? null;
 
         if (!is_array($endpointConfig)) {
             return [
                 'mode' => 'direct',
-                'reply' => 'Konfigurasi HTTP endpoint tidak valid.',
+                'reply' => $userFacingEndpointError,
             ];
         }
 
@@ -389,7 +391,7 @@ class AIService
         if ($route === '') {
             return [
                 'mode' => 'direct',
-                'reply' => 'Route HTTP endpoint belum dikonfigurasi.',
+                'reply' => $userFacingEndpointError,
             ];
         }
 
@@ -405,8 +407,43 @@ class AIService
             }
         }
 
+        $bodyTemplate = (array) ($endpointConfig['body'] ?? []);
+        $modelRecord = [];
+
+        if ($this->endpointBodyUsesDataModelToken($bodyTemplate)) {
+            $modelRecord = $this->resolveDataModelRecordForEndpoint($tool, $arguments);
+            if ($modelRecord === null) {
+                Log::warning('HTTP endpoint DataModel token unresolved: record not found', [
+                    'tool_name' => $tool->tool_name,
+                    'arguments' => $arguments,
+                    'body_template' => $bodyTemplate,
+                ]);
+
+                return [
+                    'mode' => 'direct',
+                    'reply' => $userFacingEndpointError,
+                ];
+            }
+        }
+
         // Build request body from template and arguments
-        $requestBody = $this->buildHttpRequestBody($tool, $arguments, $endpointConfig['body'] ?? []);
+        $builtBody = $this->buildHttpRequestBody($tool, $arguments, $bodyTemplate, $modelRecord);
+        if (($builtBody['ok'] ?? false) !== true) {
+            Log::warning('HTTP endpoint body template unresolved', [
+                'tool_name' => $tool->tool_name,
+                'error' => $builtBody['error'] ?? 'unknown',
+                'arguments' => $arguments,
+                'body_template' => $bodyTemplate,
+                'model_record' => $modelRecord,
+            ]);
+
+            return [
+                'mode' => 'direct',
+                'reply' => $userFacingEndpointError,
+            ];
+        }
+
+        $requestBody = (array) ($builtBody['body'] ?? []);
         $expectedResponse = $endpointConfig['expected_response'] ?? [
             'status' => 200,
             'message' => 'Success',
@@ -420,7 +457,7 @@ class AIService
                 Log::warning('Webhook base URL not configured', ['tool_name' => $tool->tool_name]);
                 return [
                     'mode' => 'direct',
-                    'reply' => 'Server configuration error: webhook base URL not set.',
+                    'reply' => $userFacingEndpointError,
                 ];
             }
 
@@ -451,7 +488,7 @@ class AIService
             if ($validation['valid'] === false) {
                 return [
                     'mode' => 'direct',
-                    'reply' => $validation['error_message'],
+                    'reply' => $userFacingEndpointError,
                 ];
             }
 
@@ -479,7 +516,7 @@ class AIService
 
             return [
                 'mode' => 'direct',
-                'reply' => 'Koneksi ke endpoint gagal. Mohon coba lagi nanti.',
+                'reply' => $userFacingEndpointError,
             ];
         } catch (\Throwable $e) {
             Log::error('HTTP endpoint execution failed', [
@@ -490,7 +527,7 @@ class AIService
 
             return [
                 'mode' => 'direct',
-                'reply' => 'Terjadi kesalahan saat memproses permintaan.',
+                'reply' => $userFacingEndpointError,
             ];
         }
     }
@@ -499,31 +536,154 @@ class AIService
      * Build request body by merging template with arguments.
      * Empty template values are filled from arguments if key exists.
      */
-    private function buildHttpRequestBody(Tool $tool, array $arguments, array $bodyTemplate): array
+    private function buildHttpRequestBody(Tool $tool, array $arguments, array $bodyTemplate, array $modelRecord = []): array
     {
         $body = [];
 
         foreach ($bodyTemplate as $key => $templateValue) {
             $key = (string) $key;
 
-            // If template has value, use it as-is
             if (is_string($templateValue) && trim($templateValue) !== '') {
-                $body[$key] = trim($templateValue);
+                $resolved = $this->resolveEndpointBodyTemplateValue(trim($templateValue), $arguments, $modelRecord);
+                if (($resolved['ok'] ?? false) !== true) {
+                    return [
+                        'ok' => false,
+                        'error' => $resolved['error'] ?? "Unable to resolve endpoint body value for key {$key}",
+                    ];
+                }
+
+                $body[$key] = $resolved['value'] ?? '';
                 continue;
             }
 
-            // If template is empty, try to fill from arguments
             if (isset($arguments[$key])) {
                 $argValue = $arguments[$key];
                 $body[$key] = is_string($argValue) ? trim($argValue) : $argValue;
                 continue;
             }
 
-            // Otherwise use template value (might be empty string or null)
             $body[$key] = $templateValue ?? '';
         }
 
-        return $body;
+        return [
+            'ok' => true,
+            'body' => $body,
+        ];
+    }
+
+    private function endpointBodyUsesDataModelToken(array $bodyTemplate): bool
+    {
+        foreach ($bodyTemplate as $value) {
+            if (!is_string($value)) {
+                continue;
+            }
+
+            if ($this->extractDataModelFieldFromToken($value) !== null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function extractDataModelFieldFromToken(string $value): ?string
+    {
+        $token = trim($value);
+        if ($token === '') {
+            return null;
+        }
+
+        if (preg_match('/^\$[a-zA-Z_][a-zA-Z0-9_]*->([a-zA-Z_][a-zA-Z0-9_]*)$/', $token, $matches) === 1) {
+            return $matches[1];
+        }
+
+        return null;
+    }
+
+    private function resolveEndpointBodyTemplateValue(string $templateValue, array $arguments, array $modelRecord): array
+    {
+        $dataModelField = $this->extractDataModelFieldFromToken($templateValue);
+        if ($dataModelField !== null) {
+            if (!array_key_exists($dataModelField, $modelRecord)) {
+                return [
+                    'ok' => false,
+                    'error' => "DataModel field '{$dataModelField}' not found in resolved record",
+                ];
+            }
+
+            return [
+                'ok' => true,
+                'value' => $modelRecord[$dataModelField],
+            ];
+        }
+
+        if (preg_match('/^\$arg->([a-zA-Z_][a-zA-Z0-9_]*)$/', $templateValue, $matches) === 1) {
+            $argumentField = $matches[1];
+
+            if (!array_key_exists($argumentField, $arguments)) {
+                return [
+                    'ok' => false,
+                    'error' => "Argument field '{$argumentField}' not found",
+                ];
+            }
+
+            return [
+                'ok' => true,
+                'value' => $arguments[$argumentField],
+            ];
+        }
+
+        return [
+            'ok' => true,
+            'value' => $templateValue,
+        ];
+    }
+
+    private function resolveDataModelRecordForEndpoint(Tool $tool, array $arguments): ?array
+    {
+        $dataModel = $tool->dataModel;
+
+        if ($dataModel === null) {
+            return null;
+        }
+
+        $tableName = trim((string) ($dataModel->table_name ?? ''));
+        $connectionName = trim((string) ($dataModel->connection_name ?? 'mysqlgame'));
+        $connectionName = $connectionName === '' ? 'mysqlgame' : $connectionName;
+        $allowedFields = array_keys((array) ($dataModel->fields ?? []));
+
+        if ($tableName === '' || $allowedFields === []) {
+            return null;
+        }
+
+        $query = DB::connection($connectionName)->table($tableName)->select($allowedFields);
+        $hasFilter = false;
+
+        foreach ($arguments as $field => $value) {
+            if (!in_array($field, $allowedFields, true)) {
+                continue;
+            }
+
+            $normalizedValue = is_string($value) ? trim($value) : $value;
+            if ($normalizedValue === '' || $normalizedValue === null) {
+                continue;
+            }
+
+            $query->where($field, $normalizedValue);
+            $hasFilter = true;
+        }
+
+        if ($hasFilter === false) {
+            return null;
+        }
+
+        $row = $query->first();
+
+        if ($row === null) {
+            return null;
+        }
+
+        return (array) $row;
     }
 
     /**

@@ -106,8 +106,8 @@
                     {{-- Body --}}
                     <div>
                         <p class="mb-1 text-xs text-slate-300">Body</p>
-                        <p class="mb-2 text-xs text-slate-400">Key → value pairs. Kosongkan value jika diisi dari parameter
-                            customer.</p>
+                        <p class="mb-2 text-xs text-slate-400">Key → value pairs. Value bisa custom text, kosong (ambil dari
+                            parameter dengan key yang sama), atau token field DataModel (contoh: $player->id).</p>
                         <div id="body-list" class="space-y-2"></div>
                         <div class="flex items-center gap-2 mt-2">
                             <button type="button" onclick="addBodyField()"
@@ -245,6 +245,47 @@
                     select.value = '';
                 }
             });
+
+            refreshBodyFieldOptions();
+        }
+
+        function buildBodyModelFieldOptions(selected = '') {
+            const fields = getSelectedDataModelFields();
+            let html = '<option value="">-- pilih field DataModel --</option>';
+            fields.forEach(field => {
+                const isSelected = String(field) === String(selected) ? 'selected' : '';
+                html += `<option value="${field}" ${isSelected}>${field}</option>`;
+            });
+            return html;
+        }
+
+        function refreshBodyFieldOptions() {
+            const selects = document.querySelectorAll('.body-model-field-select');
+            selects.forEach(select => {
+                const current = select.value;
+                select.innerHTML = buildBodyModelFieldOptions(current);
+                const stillExists = Array.from(select.options).some(opt => opt.value === current);
+                if (!stillExists) {
+                    select.value = '';
+                }
+            });
+        }
+
+        function applyModelFieldToBodyValue(button) {
+            const row = button.closest('.endpoint-body-row');
+            if (!row) {
+                return;
+            }
+
+            const fieldSelect = row.querySelector('.body-model-field-select');
+            const valueInput = row.querySelector('.body-value-input');
+            const selectedField = fieldSelect?.value || '';
+
+            if (!selectedField || !valueInput) {
+                return;
+            }
+
+            valueInput.value = `$player->${selectedField}`;
         }
 
         function addParamRow(name = '', desc = '', required = false) {
@@ -316,12 +357,17 @@
         function addBodyField(key = '', val = '') {
             const list = document.getElementById('body-list');
             const row = document.createElement('div');
-            row.className = 'flex items-center gap-2';
+            row.className = 'endpoint-body-row flex items-center gap-2';
             row.innerHTML = `
                 <input type="text" name="endpoint_body[${bodyIdx}][key]" value="${key}" placeholder="Key (e.g. username)"
                     class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <input type="text" name="endpoint_body[${bodyIdx}][value]" value="${val}" placeholder="Value (kosong = dari parameter)"
-                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <input type="text" name="endpoint_body[${bodyIdx}][value]" value="${val}" placeholder="Value custom / kosong / $player->field"
+                    class="body-value-input flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <select class="body-model-field-select w-48 rounded-xl border border-white/10 bg-slate-900/70 px-2 py-2 text-xs text-white outline-none focus:border-cyan-400">
+                    ${buildBodyModelFieldOptions()}
+                </select>
+                <button type="button" onclick="applyModelFieldToBodyValue(this)"
+                    class="shrink-0 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2 py-1.5 text-xs text-cyan-300 hover:bg-cyan-500/20">Use Field</button>
                 <button type="button" onclick="this.parentElement.remove()"
                     class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
@@ -394,7 +440,8 @@
 
                 if ((key && !value) || (!key && value)) {
                     alert(
-                        'Expected data fields must have both KEY and VALUE filled. Please complete all fields or remove empty rows.');
+                        'Expected data fields must have both KEY and VALUE filled. Please complete all fields or remove empty rows.'
+                        );
                     return false;
                 }
             }

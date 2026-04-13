@@ -302,6 +302,7 @@ class ToolController extends Controller
         $informationText = trim((string) ($data['information_text'] ?? ''));
         $dataModelId = $data['data_model_id'] ?? null;
         $params = (array) ($data['params'] ?? []);
+        $endpointBodyRows = (array) ($data['endpoint_body'] ?? []);
 
         if ($informationText === '' && empty($dataModelId)) {
             throw ValidationException::withMessages([
@@ -330,6 +331,24 @@ class ToolController extends Controller
             if (!in_array($name, $allowedFields, true)) {
                 throw ValidationException::withMessages([
                     'params' => "Parameter '{$name}' tidak ada di fields Data Model terpilih.",
+                ]);
+            }
+        }
+
+        foreach ($endpointBodyRows as $row) {
+            $value = trim((string) ($row['value'] ?? ''));
+            if ($value === '') {
+                continue;
+            }
+
+            if (preg_match('/^\$[a-zA-Z_][a-zA-Z0-9_]*->([a-zA-Z_][a-zA-Z0-9_]*)$/', $value, $matches) !== 1) {
+                continue;
+            }
+
+            $fieldName = $matches[1];
+            if (!in_array($fieldName, $allowedFields, true)) {
+                throw ValidationException::withMessages([
+                    'endpoint_body' => "Endpoint body value '{$value}' memakai field '{$fieldName}' yang tidak ada di Data Model terpilih.",
                 ]);
             }
         }

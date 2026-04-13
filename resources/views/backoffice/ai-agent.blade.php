@@ -25,7 +25,8 @@
 
         <form method="POST" action="{{ route('backoffice.ai-agent.update') }}">
             @csrf
-            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0.75rem">
+            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+                style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0.75rem">
                 <div class="rounded-xl border border-slate-700/70 bg-slate-950/60 px-3 py-2.5">
                     <label for="bot_name" class="text-[11px] text-slate-400">Bot Name</label>
                     <input id="bot_name" type="text" name="bot_name" value="{{ $aiInfo['bot_name'] }}"

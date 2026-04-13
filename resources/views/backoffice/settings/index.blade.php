@@ -19,7 +19,8 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('backoffice.settings.update') }}" autocomplete="off" class="space-y-5" style="display:flex;flex-direction:column;gap:1.25rem">
+    <form method="POST" action="{{ route('backoffice.settings.update') }}" autocomplete="off" class="space-y-5"
+        style="display:flex;flex-direction:column;gap:1.25rem">
         @csrf
 
         @forelse ($grouped as $group => $settings)
@@ -55,7 +56,8 @@
                     @endswitch
                 </h2>
 
-                <div class="grid gap-3 sm:grid-cols-2" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0.75rem">
+                <div class="grid gap-3 sm:grid-cols-2"
+                    style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0.75rem">
                     @foreach ($settings as $setting)
                         <div class="rounded-xl border border-slate-700/70 bg-slate-950/60 px-3 py-2.5">
                             <label for="setting_{{ $setting->id }}" class="text-[11px] font-medium text-slate-400">

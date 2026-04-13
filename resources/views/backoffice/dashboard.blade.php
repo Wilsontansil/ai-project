@@ -15,44 +15,83 @@
                 background: #0f172a;
                 color: #f8fafc;
             }
-
-            .fallback-note {
-                max-width: 1100px;
-                margin: 16px auto 0;
-                padding: 12px 16px;
-                border: 1px solid #334155;
-                background: #111827;
-                border-radius: 10px;
-                color: #cbd5e1;
-                font-size: 13px;
-            }
         </style>
     @endif
     <style>
-        html {
-            scrollbar-gutter: stable;
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
         }
 
-        #bo-shell input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
-        #bo-shell textarea,
-        #bo-shell select {
+        #bo-shell {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #bo-sidebar {
+            width: 260px;
+            min-width: 260px;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #3bb5a5;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        #bo-content {
+            flex: 1;
+            min-width: 0;
+            height: 100vh;
+            overflow-y: auto;
+            background: linear-gradient(180deg, #020617, #0f172a 40%, #111827);
+        }
+
+        #bo-content input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+        #bo-content textarea,
+        #bo-content select {
             background-color: rgba(15, 23, 42, 0.7);
             color: #e2e8f0;
+        }
+
+        #bo-shell.bo-collapsed #bo-sidebar {
+            width: 72px;
+            min-width: 72px;
+        }
+
+        @media (max-width: 1023px) {
+            #bo-shell {
+                flex-direction: column;
+            }
+
+            #bo-sidebar {
+                width: 100% !important;
+                min-width: 100% !important;
+                height: auto;
+                overflow-y: visible;
+            }
+
+            #bo-content {
+                height: auto;
+                overflow-y: visible;
+            }
+
+            html,
+            body {
+                overflow: auto;
+            }
         }
     </style>
 </head>
 
-<body class="min-h-screen bg-slate-950 text-slate-100">
-    @if (!file_exists(public_path('build/manifest.json')) && !file_exists(public_path('hot')))
-        <div class="fallback-note">
-            Frontend assets belum di-build. Jalankan <strong>npm run build</strong> di server untuk tampilan penuh.
-        </div>
-    @endif
-    <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] p-3 sm:p-4 md:p-6">
-        <div id="bo-shell" class="mx-auto flex max-w-7xl flex-col gap-4 lg:gap-6 xl:flex-row xl:items-start xl:gap-8">
-            @include('backoffice.partials.sidebar', ['active' => 'customer', 'currentTool' => null])
+<body class="bg-slate-950 text-slate-100">
+    <div id="bo-shell">
+        @include('backoffice.partials.sidebar', ['active' => 'customer', 'currentTool' => null])
 
-            <main class="relative z-0 min-w-0 flex-1 space-y-5 lg:space-y-6 xl:pt-1">
+        <div id="bo-content" class="p-4 sm:p-5 md:p-6">
+            <div class="mx-auto max-w-6xl space-y-5">
                 {{-- Header --}}
                 <div
                     class="flex items-center justify-between rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
@@ -148,7 +187,7 @@
                         {{ $customers->links() }}
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     </div>
 </body>

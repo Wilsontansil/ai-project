@@ -1,40 +1,8 @@
 <style>
-    @media (min-width: 1280px) {
-        #bo-shell {
-            display: grid !important;
-            grid-template-columns: 260px minmax(0, 1fr);
-            column-gap: 2rem;
-            align-items: start;
-        }
-
-        #bo-shell.bo-collapsed {
-            grid-template-columns: 72px minmax(0, 1fr);
-        }
-
-        #bo-shell>main {
-            min-width: 0;
-        }
-    }
-
-    #bo-sidebar {
-        width: 260px;
-        min-width: 260px;
-        max-width: 260px;
-        height: calc(100vh - 3rem);
-        position: sticky;
-        top: 1.5rem;
-        transition: width 0.25s ease, min-width 0.25s ease, max-width 0.25s ease;
-        background: #3bb5a5;
-        flex-shrink: 0;
-        flex-grow: 0;
-        z-index: 5;
-        box-shadow: 0 16px 40px rgba(2, 6, 23, 0.35);
-    }
-
+    /* Collapsed state */
     #bo-shell.bo-collapsed #bo-sidebar {
         width: 72px;
         min-width: 72px;
-        max-width: 72px;
     }
 
     #bo-shell.bo-collapsed .bo-label,
@@ -74,25 +42,10 @@
         transform: rotate(90deg);
     }
 
-    @media (max-width: 1279px) {
-        #bo-shell {
-            display: flex !important;
-            flex-direction: column !important;
-        }
-
-        #bo-sidebar {
-            width: 100%;
-            min-width: 100%;
-            max-width: 100%;
-            height: auto;
-            position: static;
-            top: auto;
-        }
-
+    @media (max-width: 1023px) {
         #bo-shell.bo-collapsed #bo-sidebar {
-            width: 100%;
-            min-width: 100%;
-            max-width: 100%;
+            width: 100% !important;
+            min-width: 100% !important;
         }
 
         #bo-shell.bo-collapsed .bo-label,
@@ -115,7 +68,7 @@
     }
 </style>
 
-<aside id="bo-sidebar" class="shrink-0 flex flex-col rounded-2xl overflow-hidden">
+<aside id="bo-sidebar" class="flex flex-col" style="display:flex;flex-direction:column">
     {{-- Brand area --}}
     <div class="flex items-center justify-between px-5 py-4" style="background: rgba(0,0,0,0.15);">
         <div class="flex items-center gap-3">

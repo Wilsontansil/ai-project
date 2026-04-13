@@ -54,6 +54,41 @@
     .bo-section-chevron.rotated {
         transform: rotate(90deg);
     }
+
+    @media (max-width: 1279px) {
+        #bo-sidebar {
+            width: 100%;
+            min-width: 100%;
+            max-width: 100%;
+            height: auto;
+            position: static;
+            top: auto;
+        }
+
+        #bo-shell.bo-collapsed #bo-sidebar {
+            width: 100%;
+            min-width: 100%;
+            max-width: 100%;
+        }
+
+        #bo-shell.bo-collapsed .bo-label,
+        #bo-shell.bo-collapsed .bo-section-label,
+        #bo-shell.bo-collapsed .bo-section-chevron,
+        #bo-shell.bo-collapsed .bo-section-items {
+            display: initial;
+        }
+
+        #bo-shell.bo-collapsed .bo-nav-item,
+        #bo-shell.bo-collapsed .bo-section-header {
+            justify-content: space-between;
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        #bo-sidebar-toggle {
+            display: none;
+        }
+    }
 </style>
 
 <aside id="bo-sidebar" class="shrink-0 flex flex-col rounded-2xl overflow-hidden">
@@ -85,7 +120,13 @@
         <div class="bo-section" data-section="customer-data">
             <button type="button"
                 class="bo-section-header flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-white/80 transition hover:bg-white/10">
-                <span class="bo-section-label text-[11px] font-bold uppercase tracking-widest">Customer Data</span>
+                <span class="bo-section-label flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Customer Data
+                </span>
                 <svg class="bo-section-chevron h-3.5 w-3.5 rotated" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -110,7 +151,13 @@
         <div class="bo-section" data-section="ai-agent">
             <button type="button"
                 class="bo-section-header flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-white/80 transition hover:bg-white/10">
-                <span class="bo-section-label text-[11px] font-bold uppercase tracking-widest">AI Agent</span>
+                <span class="bo-section-label flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.75 3a2.25 2.25 0 00-2.25 2.25V9H5.25A2.25 2.25 0 003 11.25v3.5A2.25 2.25 0 005.25 17h2.25v3.75A2.25 2.25 0 009.75 23h4.5a2.25 2.25 0 002.25-2.25V17h2.25A2.25 2.25 0 0021 14.75v-3.5A2.25 2.25 0 0018.75 9H16.5V5.25A2.25 2.25 0 0014.25 3h-4.5z" />
+                    </svg>
+                    AI Agent
+                </span>
                 <svg class="bo-section-chevron h-3.5 w-3.5 rotated" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -170,7 +217,13 @@
         <div class="bo-section" data-section="system">
             <button type="button"
                 class="bo-section-header flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-white/80 transition hover:bg-white/10">
-                <span class="bo-section-label text-[11px] font-bold uppercase tracking-widest">System</span>
+                <span class="bo-section-label flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    </svg>
+                    System
+                </span>
                 <svg class="bo-section-chevron h-3.5 w-3.5 rotated" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

@@ -28,8 +28,8 @@
 </head>
 
 <body class="min-h-screen bg-slate-950 text-slate-100">
-    <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] p-4 md:p-6">
-        <div id="bo-shell" class="mx-auto flex max-w-7xl gap-6">
+    <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] p-3 sm:p-4 md:p-6">
+        <div id="bo-shell" class="mx-auto flex max-w-7xl flex-col gap-4 lg:gap-6 xl:flex-row">
             @include('backoffice.partials.sidebar', [
                 'active' => $boActive ?? '',
             ])

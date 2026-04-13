@@ -44,37 +44,37 @@
             Frontend assets belum di-build. Jalankan <strong>npm run build</strong> di server untuk tampilan penuh.
         </div>
     @endif
-    <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] p-4 md:p-6">
-        <div id="bo-shell" class="mx-auto flex max-w-7xl gap-6">
+    <div class="min-h-screen bg-[linear-gradient(180deg,_#020617,_#0f172a_40%,_#111827)] p-3 sm:p-4 md:p-6">
+        <div id="bo-shell" class="mx-auto flex max-w-7xl flex-col gap-4 lg:gap-6 xl:flex-row">
             @include('backoffice.partials.sidebar', ['active' => 'customer', 'currentTool' => null])
 
-            <main class="min-w-0 flex-1 space-y-4">
+            <main class="min-w-0 flex-1 space-y-5 lg:space-y-6">
                 {{-- Header --}}
                 <div
-                    class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-5 py-3 backdrop-blur">
+                    class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-4 sm:px-5 backdrop-blur">
                     <div>
-                        <h1 class="text-lg font-semibold">Customer Dashboard</h1>
+                        <h1 class="text-lg font-semibold sm:text-2xl">Customer Dashboard</h1>
                         <p class="text-xs text-slate-400">Monitoring customer dari Telegram & WhatsApp.</p>
                     </div>
                 </div>
 
                 {{-- Compact Stat Cards --}}
-                <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-                    <div class="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-2.5"
+                <div class="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
+                    <div class="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 sm:px-5 sm:py-4"
                         style="background-color:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.25);border-radius:12px">
                         <p class="text-[11px] text-cyan-200/70" style="color:rgba(34,211,238,0.7);font-size:11px">Total
                         </p>
                         <p class="text-lg font-bold text-white" style="color:#fff;font-size:18px;font-weight:700">
                             {{ number_format($stats['total_customers']) }}</p>
                     </div>
-                    <div class="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2.5"
+                    <div class="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 sm:px-5 sm:py-4"
                         style="background-color:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.25);border-radius:12px">
                         <p class="text-[11px] text-emerald-200/70" style="color:rgba(52,211,153,0.7);font-size:11px">
                             Telegram</p>
                         <p class="text-lg font-bold text-white" style="color:#fff;font-size:18px;font-weight:700">
                             {{ number_format($stats['telegram_customers']) }}</p>
                     </div>
-                    <div class="rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-2.5"
+                    <div class="rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 sm:px-5 sm:py-4"
                         style="background-color:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:12px">
                         <p class="text-[11px] text-amber-200/70" style="color:rgba(251,191,36,0.7);font-size:11px">
                             WhatsApp</p>
@@ -84,11 +84,11 @@
                 </div>
 
                 {{-- Customer Table --}}
-                <div class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-                    <div class="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 backdrop-blur">
+                    <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <h2 class="text-sm font-semibold">Customers</h2>
                         <form method="GET" action="{{ route('backoffice.dashboard') }}"
-                            class="flex w-full max-w-xs gap-2">
+                            class="flex w-full max-w-full gap-2 sm:max-w-md">
                             <input type="text" name="search" value="{{ $search }}"
                                 placeholder="Cari nama, phone, platform..."
                                 style="background-color:rgba(15,23,42,0.7);color:#e2e8f0"
@@ -98,7 +98,7 @@
                         </form>
                     </div>
 
-                    <div class="overflow-hidden rounded-lg border border-white/10">
+                    <div class="overflow-hidden rounded-xl border border-white/10">
                         <div class="overflow-x-auto">
                             <table class="min-w-full text-xs">
                                 <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
@@ -140,7 +140,7 @@
                         </div>
                     </div>
 
-                    <div class="mt-3">
+                    <div class="mt-4 overflow-x-auto">
                         {{ $customers->links() }}
                     </div>
                 </div>

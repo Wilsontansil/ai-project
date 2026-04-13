@@ -329,14 +329,21 @@ class AIService
 
     /**
      * Execute a tool with extracted arguments.
-     * For data-model tools, resolve data directly from configured database table.
+     * Priority: HTTP endpoint > DataModel lookup > information_text > unconfigured
      */
     private function executeTool(Tool $tool, array $arguments): array
     {
+        // 1. Check if tool has HTTP endpoint (with non-empty route)
+        if (!empty($tool->endpoints)) {
+            return $this->executeHttpEndpoint($tool, $arguments);
+        }
+
+        // 2. Check if tool has data model (read-only DB lookup)
         if ($tool->dataModel !== null) {
             return $this->executeDataModelLookup($tool, $arguments);
         }
 
+        // 3. Check if tool has static information text
         if (!empty($tool->information_text)) {
             return [
                 'mode' => 'direct',
@@ -344,9 +351,262 @@ class AIService
             ];
         }
 
+        // 4. Tool not configured
         return [
             'mode' => 'direct',
             'reply' => "Tool {$tool->display_name} belum dikonfigurasi.",
+        ];
+    }
+
+    /**
+     * Execute HTTP endpoint with parameter validation and response validation.
+     * 
+     * Endpoint structure:
+     * {
+     *   "endpoint": {
+     *     "route": "/api/getplayer",
+     *     "body": { "username": "", "type": "player" },
+     *     "expected_response": {
+     *       "status": 200,
+     *       "message": "Success",
+     *       "data": { "username": "string", "status": "string" }
+     *     }
+     *   }
+     * }
+     */
+    private function executeHttpEndpoint(Tool $tool, array $arguments): array
+    {
+        $endpointConfig = $tool->endpoints['endpoint'] ?? null;
+
+        if (!is_array($endpointConfig)) {
+            return [
+                'mode' => 'direct',
+                'reply' => 'Konfigurasi HTTP endpoint tidak valid.',
+            ];
+        }
+
+        $route = trim((string) ($endpointConfig['route'] ?? ''));
+        if ($route === '') {
+            return [
+                'mode' => 'direct',
+                'reply' => 'Route HTTP endpoint belum dikonfigurasi.',
+            ];
+        }
+
+        // Validate required parameters are present
+        $requiredFields = (array) data_get($tool->parameters, 'required', []);
+        foreach ($requiredFields as $requiredField) {
+            $value = trim((string) ($arguments[$requiredField] ?? ''));
+            if ($value === '') {
+                return [
+                    'mode' => 'direct',
+                    'reply' => $tool->getMissingMessage(),
+                ];
+            }
+        }
+
+        // Build request body from template and arguments
+        $requestBody = $this->buildHttpRequestBody($tool, $arguments, $endpointConfig['body'] ?? []);
+        $expectedResponse = $endpointConfig['expected_response'] ?? [
+            'status' => 200,
+            'message' => 'Success',
+            'data' => [],
+        ];
+
+        try {
+            // Get webhook base URL from ProjectSetting
+            $webhookBaseUrl = trim((string) ProjectSetting::getValue('webhook_base_url', ''));
+            if ($webhookBaseUrl === '') {
+                Log::warning('Webhook base URL not configured', ['tool_name' => $tool->tool_name]);
+                return [
+                    'mode' => 'direct',
+                    'reply' => 'Server configuration error: webhook base URL not set.',
+                ];
+            }
+
+            $fullUrl = rtrim($webhookBaseUrl, '/') . $route;
+
+            Log::info('Executing HTTP endpoint', [
+                'tool_name' => $tool->tool_name,
+                'url' => $fullUrl,
+                'request_body' => $requestBody,
+            ]);
+
+            // Send HTTP request
+            $response = \Illuminate\Support\Facades\Http::timeout(10)
+                ->post($fullUrl, $requestBody);
+
+            $statusCode = $response->status();
+            $responseBody = $response->json() ?? [];
+
+            // Validate response structure
+            $validation = $this->validateHttpResponse(
+                $tool,
+                $statusCode,
+                $responseBody,
+                $expectedResponse,
+                $requestBody
+            );
+
+            if ($validation['valid'] === false) {
+                return [
+                    'mode' => 'direct',
+                    'reply' => $validation['error_message'],
+                ];
+            }
+
+            // Success - return tool context for AI processing
+            return [
+                'mode' => 'model',
+                'tool_context' => [
+                    'tool_name' => $tool->tool_name,
+                    'tool_display_name' => $tool->display_name,
+                    'tool_description' => $tool->description,
+                    'execution_type' => 'http_endpoint',
+                    'endpoint_route' => $route,
+                    'request_parameters' => $requestBody,
+                    'http_status_code' => $statusCode,
+                    'response_data' => $responseBody['data'] ?? $responseBody,
+                ],
+            ];
+
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::error('HTTP endpoint connection failed', [
+                'tool_name' => $tool->tool_name,
+                'url' => $fullUrl ?? $route,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'mode' => 'direct',
+                'reply' => 'Koneksi ke endpoint gagal. Mohon coba lagi nanti.',
+            ];
+        } catch (\Throwable $e) {
+            Log::error('HTTP endpoint execution failed', [
+                'tool_name' => $tool->tool_name,
+                'url' => $fullUrl ?? $route,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'mode' => 'direct',
+                'reply' => 'Terjadi kesalahan saat memproses permintaan.',
+            ];
+        }
+    }
+
+    /**
+     * Build request body by merging template with arguments.
+     * Empty template values are filled from arguments if key exists.
+     */
+    private function buildHttpRequestBody(Tool $tool, array $arguments, array $bodyTemplate): array
+    {
+        $body = [];
+
+        foreach ($bodyTemplate as $key => $templateValue) {
+            $key = (string) $key;
+
+            // If template has value, use it as-is
+            if (is_string($templateValue) && trim($templateValue) !== '') {
+                $body[$key] = trim($templateValue);
+                continue;
+            }
+
+            // If template is empty, try to fill from arguments
+            if (isset($arguments[$key])) {
+                $argValue = $arguments[$key];
+                $body[$key] = is_string($argValue) ? trim($argValue) : $argValue;
+                continue;
+            }
+
+            // Otherwise use template value (might be empty string or null)
+            $body[$key] = $templateValue ?? '';
+        }
+
+        return $body;
+    }
+
+    /**
+     * Validate HTTP response against expected structure.
+     * Returns array with 'valid' boolean and error message if invalid.
+     */
+    private function validateHttpResponse(
+        Tool $tool,
+        int $statusCode,
+        array $responseBody,
+        array $expectedResponse,
+        array $requestBody
+    ): array {
+        $expectedStatus = (int) ($expectedResponse['status'] ?? 200);
+        $expectedMessage = trim((string) ($expectedResponse['message'] ?? 'Success'));
+        $expectedData = (array) ($expectedResponse['data'] ?? []);
+
+        // Check HTTP status code
+        if ($statusCode !== $expectedStatus) {
+            Log::warning('HTTP endpoint status mismatch', [
+                'tool_name' => $tool->tool_name,
+                'expected_status' => $expectedStatus,
+                'actual_status' => $statusCode,
+                'response_body' => $responseBody,
+            ]);
+
+            return [
+                'valid' => false,
+                'error_message' => "Endpoint returned status {$statusCode}, expected {$expectedStatus}.",
+            ];
+        }
+
+        // Check response structure has required fields
+        if (!isset($responseBody['status']) || !isset($responseBody['message'])) {
+            Log::warning('HTTP endpoint response structure invalid', [
+                'tool_name' => $tool->tool_name,
+                'expected_format' => '{ "status": int, "message": string, "data": object }',
+                'actual_response' => $responseBody,
+            ]);
+
+            return [
+                'valid' => false,
+                'error_message' => 'Endpoint response format tidak sesuai (missing status/message field).',
+            ];
+        }
+
+        // Check message field matches
+        $actualMessage = trim((string) ($responseBody['message'] ?? ''));
+        if ($expectedMessage !== '' && $actualMessage !== $expectedMessage) {
+            Log::warning('HTTP endpoint message mismatch', [
+                'tool_name' => $tool->tool_name,
+                'expected_message' => $expectedMessage,
+                'actual_message' => $actualMessage,
+            ]);
+
+            return [
+                'valid' => false,
+                'error_message' => "Endpoint message '{$actualMessage}' tidak sesuai harapan.",
+            ];
+        }
+
+        // Check expected data fields exist in response
+        if ($expectedData !== []) {
+            $responseData = (array) ($responseBody['data'] ?? []);
+
+            foreach (array_keys($expectedData) as $expectedKey) {
+                if (!isset($responseData[$expectedKey])) {
+                    Log::warning('HTTP endpoint data field missing', [
+                        'tool_name' => $tool->tool_name,
+                        'expected_field' => $expectedKey,
+                        'response_data' => $responseData,
+                    ]);
+
+                    return [
+                        'valid' => false,
+                        'error_message' => "Response data field '{$expectedKey}' tidak ditemukan.",
+                    ];
+                }
+            }
+        }
+
+        return [
+            'valid' => true,
         ];
     }
 

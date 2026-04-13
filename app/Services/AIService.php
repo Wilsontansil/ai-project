@@ -362,11 +362,19 @@ class AIService
         $tableName = trim((string) ($dataModel->table_name ?? ''));
         $connectionName = trim((string) ($dataModel->connection_name ?? 'mysqlgame'));
         $connectionName = $connectionName === '' ? 'mysqlgame' : $connectionName;
+        $allowedFields = array_keys((array) ($dataModel->fields ?? []));
 
         if ($tableName === '') {
             return [
                 'mode' => 'direct',
                 'reply' => 'Data model table belum dikonfigurasi.',
+            ];
+        }
+
+        if ($allowedFields === []) {
+            return [
+                'mode' => 'direct',
+                'reply' => 'Field data model belum dikonfigurasi.',
             ];
         }
 
@@ -382,14 +390,21 @@ class AIService
         }
 
         try {
-            $query = DB::connection($connectionName)->table($tableName);
+            $query = DB::connection($connectionName)->table($tableName)->select($allowedFields);
+            $lookupFilters = [];
 
             foreach ($arguments as $field => $value) {
+                if (!in_array($field, $allowedFields, true)) {
+                    continue;
+                }
+
                 $normalizedValue = is_string($value) ? trim($value) : $value;
                 if ($normalizedValue === '' || $normalizedValue === null) {
                     continue;
                 }
+
                 $query->where($field, $normalizedValue);
+                $lookupFilters[$field] = $normalizedValue;
             }
 
             $row = $query->first();
@@ -413,8 +428,9 @@ class AIService
                         'model_name' => $dataModel->model_name,
                         'table_name' => $tableName,
                         'connection_name' => $connectionName,
+                        'allowed_fields' => $allowedFields,
                     ],
-                    'lookup_filters' => $arguments,
+                    'lookup_filters' => $lookupFilters,
                     'resolved_data' => $resolvedData,
                 ],
             ];

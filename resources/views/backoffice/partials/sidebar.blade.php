@@ -1,4 +1,21 @@
 <style>
+    @media (min-width: 1280px) {
+        #bo-shell {
+            display: grid !important;
+            grid-template-columns: 260px minmax(0, 1fr);
+            column-gap: 2rem;
+            align-items: start;
+        }
+
+        #bo-shell.bo-collapsed {
+            grid-template-columns: 72px minmax(0, 1fr);
+        }
+
+        #bo-shell>main {
+            min-width: 0;
+        }
+    }
+
     #bo-sidebar {
         width: 260px;
         min-width: 260px;
@@ -10,7 +27,7 @@
         background: #3bb5a5;
         flex-shrink: 0;
         flex-grow: 0;
-        z-index: 20;
+        z-index: 5;
         box-shadow: 0 16px 40px rgba(2, 6, 23, 0.35);
     }
 
@@ -58,6 +75,11 @@
     }
 
     @media (max-width: 1279px) {
+        #bo-shell {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
         #bo-sidebar {
             width: 100%;
             min-width: 100%;

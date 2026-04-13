@@ -5,7 +5,7 @@
 @section('content')
     <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
         <h1 class="text-3xl font-semibold">Add New Data Model</h1>
-        <p class="mt-2 text-sm text-slate-300">Buat model referensi field (JSON), tidak terhubung ke tabel DB eksternal.</p>
+        <p class="mt-2 text-sm text-slate-300">Buat model referensi field (JSON) yang terhubung ke tabel DB game.</p>
     </div>
 
     @if ($errors->any())
@@ -36,6 +36,22 @@
                     <input id="description" type="text" name="description" value="{{ old('description') }}"
                         placeholder="e.g. Struktur data player dari provider"
                         class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                </div>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label for="table_name" class="mb-2 block text-sm text-slate-200">Table Name</label>
+                    <p class="mb-2 text-xs text-slate-400">Nama tabel pada DB game, contoh: players</p>
+                    <input id="table_name" type="text" name="table_name" value="{{ old('table_name') }}"
+                        placeholder="e.g. players"
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                </div>
+                <div>
+                    <label for="connection_name" class="mb-2 block text-sm text-slate-200">Connection</label>
+                    <p class="mb-2 text-xs text-slate-400">Semua data model menggunakan koneksi game.</p>
+                    <input id="connection_name" type="text" value="mysqlgame" readonly
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-3 text-sm text-slate-300 outline-none" />
                 </div>
             </div>
 

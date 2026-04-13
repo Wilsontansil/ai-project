@@ -33,6 +33,7 @@ class DataModelController extends Controller
         $data = $request->validate([
             'model_name' => ['required', 'string', 'max:120', 'regex:/^[a-zA-Z0-9_\\-]+$/', 'unique:data_models,model_name'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'table_name' => ['required', 'string', 'max:120', 'regex:/^[a-zA-Z0-9_]+$/'],
             'fields' => ['nullable', 'array'],
             'fields.*.name' => ['required_with:fields', 'string', 'max:120'],
             'fields.*.type' => ['required_with:fields', 'string', 'max:120'],
@@ -42,6 +43,8 @@ class DataModelController extends Controller
             'model_name' => trim($data['model_name']),
             'slug' => Str::slug($data['model_name']),
             'description' => trim((string) ($data['description'] ?? '')) ?: null,
+            'table_name' => trim($data['table_name']),
+            'connection_name' => 'mysqlgame',
             'fields' => $this->buildFieldMap((array) ($data['fields'] ?? [])),
         ]);
 
@@ -61,6 +64,7 @@ class DataModelController extends Controller
         $data = $request->validate([
             'model_name' => ['required', 'string', 'max:120', 'regex:/^[a-zA-Z0-9_\\-]+$/', 'unique:data_models,model_name,' . $dataModel->id],
             'description' => ['nullable', 'string', 'max:1000'],
+            'table_name' => ['required', 'string', 'max:120', 'regex:/^[a-zA-Z0-9_]+$/'],
             'fields' => ['nullable', 'array'],
             'fields.*.name' => ['required_with:fields', 'string', 'max:120'],
             'fields.*.type' => ['required_with:fields', 'string', 'max:120'],
@@ -70,6 +74,8 @@ class DataModelController extends Controller
             'model_name' => trim($data['model_name']),
             'slug' => Str::slug($data['model_name']),
             'description' => trim((string) ($data['description'] ?? '')) ?: null,
+            'table_name' => trim($data['table_name']),
+            'connection_name' => 'mysqlgame',
             'fields' => $this->buildFieldMap((array) ($data['fields'] ?? [])),
         ]);
 

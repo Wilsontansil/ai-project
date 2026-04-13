@@ -7,7 +7,7 @@ use App\Models\ForbiddenBehaviour;
 use App\Models\ProjectSetting;
 use App\Models\Tool;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use OpenAI;
@@ -157,7 +157,7 @@ class AIService
         - Speak naturally, warm, casual-professional — like a real CS agent on chat.
         - Never make up information. Be honest if unsure.
         - If a user asks about account status, suspend status, verification, or any action covered by a configured tool, you MUST use the relevant tool and never guess the answer.
-        - For tools with endpoint data, treat webhook results as the only source of truth. (High Priority) If the tool returns empty data, respond that the data was not found and ask user to re-check their input.
+        - For tools linked to a data model, treat database lookup results as the only source of truth.
         - Always confirm before performing any sensitive action or updating player data.
         - If input values seem wrong, suggest valid options and ask user to re-check.[IMPORTANT]
         - Stay professional with angry/abusive users — respond politely, add emoji to soften tone.
@@ -242,6 +242,7 @@ class AIService
         }
 
         return Tool::query()
+            ->with('dataModel')
             ->where('is_enabled', true)
             ->where('tool_name', '!=', '_bot_config')
             ->get();
@@ -326,14 +327,12 @@ class AIService
 
     /**
      * Execute a tool with extracted arguments.
-     * Always uses webhook endpoint for tool information requests.
+     * For data-model tools, resolve data directly from configured database table.
      */
     private function executeTool(Tool $tool, array $arguments): array
     {
-        $endpoints = (array) ($tool->endpoints ?? []);
-
-        if ($endpoints !== []) {
-            return $this->callWebhookEndpoint($tool, $endpoints, $arguments);
+        if ($tool->dataModel !== null) {
+            return $this->executeDataModelLookup($tool, $arguments);
         }
 
         if (!empty($tool->information_text)) {
@@ -349,82 +348,60 @@ class AIService
         ];
     }
 
-    /**
-    * Call webhook_base_url + tool endpoint route.
-    * Uses current endpoint schema first, with legacy compatibility fallback.
-     */
-    private function callWebhookEndpoint(Tool $tool, array $endpoints, array $arguments): array
+    private function executeDataModelLookup(Tool $tool, array $arguments): array
     {
-        $baseUrl = rtrim(ProjectSetting::getValue('webhook_base_url', ''), '/');
+        $dataModel = $tool->dataModel;
 
-        if (empty($baseUrl)) {
-            return [
-                'mode' => 'direct',
-                'reply' => 'Webhook base URL belum dikonfigurasi.',
-            ];
-        }
-
-        $endpoint = $this->resolveEndpointConfig($endpoints);
-
-        if ($endpoint === null || empty($endpoint['route'])) {
-            return [
-                'mode' => 'direct',
-                'reply' => !empty($tool->information_text) ? $tool->information_text : $tool->getMissingMessage(),
-            ];
-        }
-
-        $route = '/' . ltrim($endpoint['route'], '/');
-        $url = $baseUrl . $route;
-
-        [$body, $missingFields] = $this->buildEndpointRequestBody($endpoint, $arguments);
-
-        if ($missingFields !== []) {
+        if ($dataModel === null) {
             return [
                 'mode' => 'direct',
                 'reply' => $tool->getMissingMessage(),
             ];
         }
 
+        $tableName = trim((string) ($dataModel->table_name ?? ''));
+        $connectionName = trim((string) ($dataModel->connection_name ?? 'mysqlgame'));
+        $connectionName = $connectionName === '' ? 'mysqlgame' : $connectionName;
+
+        if ($tableName === '') {
+            return [
+                'mode' => 'direct',
+                'reply' => 'Data model table belum dikonfigurasi.',
+            ];
+        }
+
+        $requiredFields = (array) data_get($tool->parameters, 'required', []);
+        foreach ($requiredFields as $requiredField) {
+            $value = trim((string) ($arguments[$requiredField] ?? ''));
+            if ($value === '') {
+                return [
+                    'mode' => 'direct',
+                    'reply' => $tool->getMissingMessage(),
+                ];
+            }
+        }
+
         try {
-            $this->logAiHttpRequest('tool.webhook', 'POST', $url, [
-                'tool_name' => $tool->tool_name,
-                'body' => $body,
-            ]);
+            $query = DB::connection($connectionName)->table($tableName);
 
-            $response = Http::timeout(15)->post($url, $body);
+            foreach ($arguments as $field => $value) {
+                $normalizedValue = is_string($value) ? trim($value) : $value;
+                if ($normalizedValue === '' || $normalizedValue === null) {
+                    continue;
+                }
+                $query->where($field, $normalizedValue);
+            }
 
-            $this->logAiHttpResponse('tool.webhook', 'POST', $url, $response->status(), [
-                'tool_name' => $tool->tool_name,
-                'successful' => $response->successful(),
-                'response_preview' => mb_substr($response->body(), 0, 1000),
-            ]);
+            $row = $query->first();
 
-            $payload = $response->json();
-            $payload = is_array($payload) ? $payload : [];
-
-            $expectedResponse = (array) ($endpoint['expected_response'] ?? []);
-            $expectedStatus = (int) ($expectedResponse['status'] ?? 200);
-            $actualBusinessStatus = (int) ($payload['status'] ?? $response->status());
-
-            if (!$response->successful() || $actualBusinessStatus !== $expectedStatus) {
+            if ($row === null) {
                 return [
                     'mode' => 'direct',
                     'reply' => 'Data tidak ditemukan.',
                 ];
             }
 
-            $responseData = $payload['data'] ?? [];
-            $responseData = is_array($responseData) ? $responseData : ['value' => $responseData];
-            $responseData = $this->normalizeToolData($responseData);
-
-            $expectedDataShape = (array) ($expectedResponse['data'] ?? []);
-            $resolvedData = $expectedDataShape === []
-                ? $responseData
-                : array_intersect_key($responseData, $expectedDataShape);
-
-            if ($resolvedData === []) {
-                $resolvedData = $responseData;
-            }
+            $resolvedData = $this->normalizeToolData((array) $row);
 
             return [
                 'mode' => 'model',
@@ -432,59 +409,29 @@ class AIService
                     'tool_name' => $tool->tool_name,
                     'tool_display_name' => $tool->display_name,
                     'tool_description' => $tool->description,
-                    'request_route' => $route,
-                    'request_body' => $body,
-                    'expected_response' => $expectedResponse,
-                    'actual_response' => $payload === [] ? ['raw_body' => $response->body()] : $payload,
+                    'data_model' => [
+                        'model_name' => $dataModel->model_name,
+                        'table_name' => $tableName,
+                        'connection_name' => $connectionName,
+                    ],
+                    'lookup_filters' => $arguments,
                     'resolved_data' => $resolvedData,
                 ],
             ];
         } catch (\Throwable $e) {
-            $this->logAiHttpException('tool.webhook', 'POST', $url, $e->getMessage(), [
+            Log::error('AI data model lookup failed', [
                 'tool_name' => $tool->tool_name,
-                'body' => $body,
+                'table_name' => $tableName,
+                'connection_name' => $connectionName,
+                'filters' => $arguments,
+                'error' => $e->getMessage(),
             ]);
 
             return [
                 'mode' => 'direct',
-                'reply' => 'Terjadi kesalahan saat menghubungi server.',
+                'reply' => 'Terjadi kesalahan saat mengambil data.',
             ];
         }
-    }
-
-    private function resolveEndpointConfig(array $endpoints): ?array
-    {
-        $endpoint = $endpoints['endpoint'] ?? $endpoints['get'] ?? $endpoints['update'] ?? null;
-
-        return is_array($endpoint) ? $endpoint : null;
-    }
-
-    private function buildEndpointRequestBody(array $endpoint, array $arguments): array
-    {
-        $bodyFields = (array) ($endpoint['body'] ?? []);
-        $body = [];
-        $missingFields = [];
-
-        foreach ($bodyFields as $key => $value) {
-            $fixedValue = is_string($value) ? trim($value) : $value;
-
-            if ($fixedValue !== '') {
-                $body[$key] = $value;
-                continue;
-            }
-
-            $argumentValue = $arguments[$key] ?? null;
-            $argumentValue = is_string($argumentValue) ? trim($argumentValue) : $argumentValue;
-
-            if ($argumentValue === null || $argumentValue === '') {
-                $missingFields[] = $key;
-                continue;
-            }
-
-            $body[$key] = $argumentValue;
-        }
-
-        return [$body, $missingFields];
     }
 
     private function forceToolArgumentsFromMessage($client, Tool $tool, string $systemPrompt, ?string $contextPrompt, array $history, string $userMessage): ?array
@@ -593,7 +540,7 @@ class AIService
 
         $messages[] = [
             'role' => 'system',
-            'content' => "Internal tool result already fetched. Use it to answer naturally like a human customer service agent. Do not mention webhook, endpoint, JSON, internal tools, or raw response structure. Do not copy the response literally. Use the resolved_data and tool_description as the source of truth. If resolved_data is empty, say the data was not found and ask the user to re-check their input.
+            'content' => "Internal tool result already fetched. Use it to answer naturally like a human customer service agent. Do not mention internal tools, SQL, database query details, or raw response structure. Do not copy data literally as JSON. Use the resolved_data and tool_description as the source of truth. If resolved_data is empty, say the data was not found and ask the user to re-check their input.
 
 Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
         ];
@@ -905,38 +852,6 @@ Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_
         }
 
         return $text;
-    }
-
-    private function logAiHttpRequest(string $channel, string $method, string $url, array $context = []): void
-    {
-        Log::info('AI HTTP Request', array_merge([
-            'channel' => $channel,
-            'method' => $method,
-            'url' => $url,
-            'timestamp' => now()->toIso8601String(),
-        ], $context));
-    }
-
-    private function logAiHttpResponse(string $channel, string $method, string $url, int $status, array $context = []): void
-    {
-        Log::info('AI HTTP Response', array_merge([
-            'channel' => $channel,
-            'method' => $method,
-            'url' => $url,
-            'status' => $status,
-            'timestamp' => now()->toIso8601String(),
-        ], $context));
-    }
-
-    private function logAiHttpException(string $channel, string $method, string $url, string $error, array $context = []): void
-    {
-        Log::error('AI HTTP Exception', array_merge([
-            'channel' => $channel,
-            'method' => $method,
-            'url' => $url,
-            'error' => $error,
-            'timestamp' => now()->toIso8601String(),
-        ], $context));
     }
 
     /**

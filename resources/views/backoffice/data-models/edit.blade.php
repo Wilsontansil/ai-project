@@ -39,6 +39,21 @@
                 </div>
             </div>
 
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label for="table_name" class="mb-2 block text-sm text-slate-200">Table Name</label>
+                    <input id="table_name" type="text" name="table_name"
+                        value="{{ old('table_name', $dataModel->table_name) }}"
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                </div>
+                <div>
+                    <label for="connection_name" class="mb-2 block text-sm text-slate-200">Connection</label>
+                    <input id="connection_name" type="text"
+                        value="{{ old('connection_name', $dataModel->connection_name ?: 'mysqlgame') }}" readonly
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-3 text-sm text-slate-300 outline-none" />
+                </div>
+            </div>
+
             <div>
                 <p class="mb-2 block text-sm text-slate-200">Fields</p>
                 <p class="mb-2 text-xs text-slate-400">Edit struktur field model. Disimpan sebagai JSON map.</p>

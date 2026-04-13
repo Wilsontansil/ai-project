@@ -13,6 +13,8 @@ class DataModel extends Model
         'model_name',
         'slug',
         'description',
+        'table_name',
+        'connection_name',
         'fields',
     ];
 

@@ -17,6 +17,8 @@ class DataModelSeeder extends Seeder
             [
                 'model_name' => 'players',
                 'description' => 'Default players data model schema.',
+                'table_name' => 'players',
+                'connection_name' => 'mysqlgame',
                 'fields' => [
                     'id' => 'BIGINT',
                     'name' => 'VARCHAR',

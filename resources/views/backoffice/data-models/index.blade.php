@@ -35,6 +35,8 @@
                     <thead class="bg-white/5 text-left text-slate-300">
                         <tr>
                             <th class="px-5 py-3.5 font-medium">Model Name</th>
+                            <th class="px-5 py-3.5 font-medium">Table</th>
+                            <th class="px-5 py-3.5 font-medium">Connection</th>
                             <th class="px-5 py-3.5 font-medium">Description</th>
                             <th class="px-5 py-3.5 font-medium">Fields</th>
                             <th class="px-5 py-3.5 font-medium text-right">Actions</th>
@@ -52,6 +54,10 @@
                                         <p class="text-xs font-mono text-slate-400">{{ $model->slug }}</p>
                                     </div>
                                 </td>
+                                <td class="px-5 py-3.5 text-slate-300 font-mono text-xs">{{ $model->table_name ?: '-' }}
+                                </td>
+                                <td class="px-5 py-3.5 text-slate-300 font-mono text-xs">
+                                    {{ $model->connection_name ?: 'mysqlgame' }}</td>
                                 <td class="px-5 py-3.5 text-slate-300">{{ $model->description ?: '-' }}</td>
                                 <td class="px-5 py-3.5">
                                     <span class="font-mono text-xs text-slate-300">{{ $fieldCount }}

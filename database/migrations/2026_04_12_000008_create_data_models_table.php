@@ -13,6 +13,8 @@ return new class extends Migration
             $table->string('model_name')->unique();
             $table->string('slug')->unique();
             $table->text('description')->nullable();
+            $table->string('table_name');
+            $table->string('connection_name')->default('mysqlgame');
             $table->json('fields')->nullable();
             $table->timestamps();
         });

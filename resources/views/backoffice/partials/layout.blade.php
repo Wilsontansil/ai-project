@@ -18,6 +18,10 @@
         </style>
     @endif
     <style>
+        html {
+            scrollbar-gutter: stable;
+        }
+
         #bo-shell input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
         #bo-shell textarea,
         #bo-shell select {

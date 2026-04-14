@@ -788,12 +788,9 @@ class AIService
         $toolRequiredFields = (array) data_get($tool->parameters, 'required', []);
         $requiredFields = array_values(array_unique(array_merge($modelRequiredFields, $toolRequiredFields)));
 
-        // Auto-inject fixed values for required fields that are missing from arguments
+        // Auto-inject fixed values for required fields (always override arguments)
         foreach ($fixedValues as $fieldName => $fixedValue) {
-            $argValue = trim((string) ($arguments[$fieldName] ?? ''));
-            if ($argValue === '') {
-                $arguments[$fieldName] = $fixedValue;
-            }
+            $arguments[$fieldName] = $fixedValue;
         }
 
         if ($tableName === '') {

@@ -83,12 +83,19 @@
 
                 {{-- API Endpoint --}}
                 <div class="rounded-2xl border border-white/10 bg-slate-900/30 p-4 space-y-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-white">API Endpoint</h3>
-                        <p class="text-xs text-slate-400">Route yang dipanggil ke webhook base URL saat tool dieksekusi.</p>
+                    <div class="flex items-center justify-between cursor-pointer" onclick="toggleEndpointSection()">
+                        <div>
+                            <h3 class="text-sm font-semibold text-white">API Endpoint</h3>
+                            <p class="text-xs text-slate-400">Route yang dipanggil ke webhook base URL saat tool dieksekusi.
+                            </p>
+                        </div>
+                        <button type="button" id="endpoint-toggle-btn"
+                            class="shrink-0 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-400 transition hover:bg-white/10">
+                            <span id="endpoint-toggle-icon">▼</span>
+                        </button>
                     </div>
 
-                    <div class="rounded-xl border border-white/10 bg-slate-900/40 p-3 space-y-3">
+                    <div id="endpoint-section-body" class="rounded-xl border border-white/10 bg-slate-900/40 p-3 space-y-3">
                         {{-- Route --}}
                         <div>
                             <label for="endpoint_route" class="mb-1 block text-xs text-slate-300">Route</label>
@@ -372,7 +379,26 @@
 
             refreshParameterFieldOptions();
             toggleModelDependentSection();
+
+            // Collapse endpoint section if no endpoint route exists
+            const routeVal = document.getElementById('endpoint_route')?.value?.trim();
+            if (!routeVal) {
+                document.getElementById('endpoint-section-body').style.display = 'none';
+                document.getElementById('endpoint-toggle-icon').textContent = '▶';
+            }
         });
+
+        function toggleEndpointSection() {
+            const body = document.getElementById('endpoint-section-body');
+            const icon = document.getElementById('endpoint-toggle-icon');
+            if (body.style.display === 'none') {
+                body.style.display = '';
+                icon.textContent = '▼';
+            } else {
+                body.style.display = 'none';
+                icon.textContent = '▶';
+            }
+        }
 
         function toggleModelDependentSection() {
             const select = document.getElementById('data_model_id');

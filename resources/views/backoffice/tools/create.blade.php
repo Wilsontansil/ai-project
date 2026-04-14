@@ -184,7 +184,13 @@
                             <p class="mb-2 text-xs text-slate-400">Definisikan kemungkinan error response dari API. AI akan
                                 membaca message dan merespon sesuai konteks.</p>
                             <div class="rounded-lg border border-white/10 bg-slate-950/60 p-3 mb-3">
-                                <pre id="error-response-preview" class="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-auto max-h-64">[]</pre>
+                                <pre id="error-response-preview" class="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-auto max-h-64">[
+  {
+    "status": 500,
+    "message": "error message",
+    "data": {}
+  }
+]</pre>
                             </div>
                             <div id="error-response-list" class="space-y-2 mb-2"></div>
                             <button type="button" onclick="addErrorResponse()"
@@ -497,8 +503,11 @@
                 .value || ''));
 
             const oldErrors = @json(old('error_responses', []));
-            if (Array.isArray(oldErrors)) oldErrors.forEach(row => addErrorResponse(row.status || '', row.message ||
-                ''));
+            if (Array.isArray(oldErrors) && oldErrors.length > 0) {
+                oldErrors.forEach(row => addErrorResponse(row.status || '', row.message || ''));
+            } else {
+                addErrorResponse(500, 'error message');
+            }
 
             refreshParameterFieldOptions();
         });

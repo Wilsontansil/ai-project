@@ -2,8 +2,6 @@
 
 @section('title', 'Global Settings')
 
-@php($boActive = 'settings')
-
 @section('content')
     {{-- Header --}}
     <div class="flex items-center justify-between rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">

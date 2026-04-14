@@ -35,7 +35,7 @@
                             <tr>
                                 <th class="px-3 py-2 font-medium">Tool Name</th>
                                 <th class="px-3 py-2 font-medium">Display Name</th>
-                                <th class="px-3 py-2 font-medium">Parameters</th>
+                                <th class="px-3 py-2 font-medium">Type</th>
                                 <th class="px-3 py-2 font-medium text-center">Status</th>
                                 <th class="px-3 py-2 font-medium text-right">Actions</th>
                             </tr>
@@ -56,15 +56,15 @@
                                         </div>
                                     </td>
                                     <td class="px-3 py-2">
-                                        @php
-                                            $params = $tool->parameters['properties'] ?? [];
-                                            $paramCount = count($params);
-                                        @endphp
-                                        @if ($paramCount > 0)
-                                            <span class="font-mono text-xs text-slate-400">{{ $paramCount }}
-                                                param{{ $paramCount > 1 ? 's' : '' }}</span>
-                                        @else
-                                            <span class="text-xs text-slate-500">–</span>
+                                        @if ($tool->type === 'info')
+                                            <span
+                                                class="inline-flex items-center rounded-full bg-blue-500/20 px-2.5 py-0.5 text-xs font-semibold text-blue-300 ring-1 ring-blue-400/30">INFO</span>
+                                        @elseif ($tool->type === 'get')
+                                            <span
+                                                class="inline-flex items-center rounded-full bg-amber-500/20 px-2.5 py-0.5 text-xs font-semibold text-amber-300 ring-1 ring-amber-400/30">GET</span>
+                                        @elseif ($tool->type === 'update')
+                                            <span
+                                                class="inline-flex items-center rounded-full bg-purple-500/20 px-2.5 py-0.5 text-xs font-semibold text-purple-300 ring-1 ring-purple-400/30">UPDATE</span>
                                         @endif
                                     </td>
                                     <td class="px-3 py-2 text-center">

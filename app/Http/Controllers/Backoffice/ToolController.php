@@ -80,6 +80,7 @@ class ToolController extends Controller
     private function toolValidationRules(bool $isCreate = false): array
     {
         $rules = [
+            'type' => ['required', 'string', 'in:info,get,update'],
             'display_name' => ['required', 'string', 'max:120'],
             'description' => ['nullable', 'string', 'max:500'],
             'params' => ['nullable', 'array'],
@@ -110,11 +111,14 @@ class ToolController extends Controller
 
     private function buildToolPayload(Request $request, array $data, ?Tool $tool = null): array
     {
+        $type = $data['type'];
+
         $payload = [
+            'type' => $type,
             'display_name' => trim($data['display_name']),
             'description' => trim($data['description'] ?? ''),
             'is_enabled' => $request->boolean('is_enabled'),
-            'data_model_id' => $data['data_model_id'] ?? null,
+            'data_model_id' => $type === 'get' ? ($data['data_model_id'] ?? null) : null,
             'parameters' => $this->buildParametersFromInput($request->input('params', [])),
             'endpoints' => $this->buildEndpointsFromInput($request),
             'keywords' => $this->normalizeKeywords($request, $data, $tool),
@@ -300,57 +304,45 @@ class ToolController extends Controller
      */
     private function validateDataModelRules(array $data): void
     {
-        $infoTexts = array_filter(array_map('trim', (array) ($data['information_texts'] ?? [])), fn ($t) => $t !== '');
-        $hasInformationText = count($infoTexts) > 0;
-        $dataModelId = $data['data_model_id'] ?? null;
-        $params = (array) ($data['params'] ?? []);
-        $endpointBodyRows = (array) ($data['endpoint_body'] ?? []);
+        $type = $data['type'] ?? 'info';
 
-        if (!$hasInformationText && empty($dataModelId)) {
-            throw ValidationException::withMessages([
-                'data_model_id' => 'Pilih Data Model untuk tool yang bukan information-only.',
-            ]);
-        }
-
-        if (empty($dataModelId)) {
-            if (!empty($params)) {
+        if ($type === 'info') {
+            $infoTexts = array_filter(array_map('trim', (array) ($data['information_texts'] ?? [])), fn ($t) => $t !== '');
+            if (count($infoTexts) === 0) {
                 throw ValidationException::withMessages([
-                    'params' => 'Parameter hanya boleh dipakai jika Data Model dipilih.',
+                    'information_texts' => 'Tool bertipe Info harus memiliki minimal satu Information Text.',
                 ]);
             }
             return;
         }
 
-        $dataModel = DataModel::query()->find($dataModelId);
-        $allowedFields = array_keys((array) ($dataModel?->fields ?? []));
-
-        foreach ($params as $row) {
-            $name = trim((string) ($row['name'] ?? ''));
-            if ($name === '') {
-                continue;
+        if ($type === 'get') {
+            if (empty($data['data_model_id'])) {
+                throw ValidationException::withMessages([
+                    'data_model_id' => 'Tool bertipe Get harus memilih Data Model.',
+                ]);
             }
 
-            if (!in_array($name, $allowedFields, true)) {
+            $dataModel = DataModel::query()->find($data['data_model_id']);
+            $allowedFields = array_keys((array) ($dataModel?->fields ?? []));
+
+            foreach ((array) ($data['params'] ?? []) as $row) {
+                $name = trim((string) ($row['name'] ?? ''));
+                if ($name === '' || in_array($name, $allowedFields, true)) {
+                    continue;
+                }
                 throw ValidationException::withMessages([
                     'params' => "Parameter '{$name}' tidak ada di fields Data Model terpilih.",
                 ]);
             }
+            return;
         }
 
-        foreach ($endpointBodyRows as $row) {
-            $value = trim((string) ($row['value'] ?? ''));
-            if ($value === '') {
-                continue;
-            }
-
-            if (preg_match('/^\$[a-zA-Z_][a-zA-Z0-9_]*->([a-zA-Z_][a-zA-Z0-9_]*)$/', $value, $matches) !== 1) {
-                continue;
-            }
-
-            $fieldName = $matches[1];
-            if (!in_array($fieldName, $allowedFields, true)) {
+        if ($type === 'update') {
+            $route = trim((string) ($data['endpoint_route'] ?? ''));
+            if ($route === '') {
                 throw ValidationException::withMessages([
-                    'endpoint_body' => "Endpoint body value '{$value}' memakai field '{$fieldName}' yang tidak ada di Data Model terpilih.",
+                    'endpoint_route' => 'Tool bertipe Update harus memiliki endpoint route.',
                 ]);
             }
         }

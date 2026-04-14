@@ -24,7 +24,7 @@
             @csrf
             @method('PUT')
 
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid gap-4 md:grid-cols-3">
                 <div>
                     <p class="mb-2 block text-sm text-slate-200">Tool Name (key)</p>
                     <p
@@ -36,6 +36,18 @@
                     <input id="display_name" type="text" name="display_name"
                         value="{{ old('display_name', $tool->display_name) }}"
                         class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                </div>
+                <div>
+                    <label for="type" class="mb-2 block text-sm text-slate-200">Type</label>
+                    <select id="type" name="type"
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
+                        <option value="info" {{ old('type', $tool->type) === 'info' ? 'selected' : '' }}>Info — Static
+                            information</option>
+                        <option value="get" {{ old('type', $tool->type) === 'get' ? 'selected' : '' }}>Get — DataModel
+                            lookup</option>
+                        <option value="update" {{ old('type', $tool->type) === 'update' ? 'selected' : '' }}>Update — API
+                            endpoint</option>
+                    </select>
                 </div>
             </div>
 
@@ -55,70 +67,66 @@
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
             </div>
 
-            <div>
-                <label for="data_model_id" class="mb-2 block text-sm text-slate-200">Data Model Connection</label>
-                <p class="mb-2 text-xs text-slate-400">Pilih Data Model untuk tool action. Boleh kosong untuk
-                    information-only tool.</p>
-                <select id="data_model_id" name="data_model_id"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
-                    <option value="">-- No Data Model (Information-only) --</option>
-                    @foreach ($dataModels as $dm)
-                        <option value="{{ $dm->id }}"
-                            {{ (string) old('data_model_id', $tool->data_model_id) === (string) $dm->id ? 'selected' : '' }}>
-                            {{ $dm->model_name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+            {{-- ─── GET type: Data Model + Parameters ─── --}}
+            <div id="section-get" class="space-y-4" style="display:none">
+                <div>
+                    <label for="data_model_id" class="mb-2 block text-sm text-slate-200">Data Model Connection</label>
+                    <p class="mb-2 text-xs text-slate-400">Pilih Data Model untuk lookup data.</p>
+                    <select id="data_model_id" name="data_model_id"
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
+                        <option value="">-- Pilih Data Model --</option>
+                        @foreach ($dataModels as $dm)
+                            <option value="{{ $dm->id }}"
+                                {{ (string) old('data_model_id', $tool->data_model_id) === (string) $dm->id ? 'selected' : '' }}>
+                                {{ $dm->model_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
-            <div id="model-dependent-section">
                 <div>
                     <p class="mb-2 block text-sm text-slate-200">Parameters</p>
                     <p class="mb-2 text-xs text-slate-400">Parameter hanya boleh menggunakan field dari Data Model yang
-                        dipilih.
-                    </p>
-
-                    <div id="param-list" class="space-y-3">
-                        {{-- Rows populated by JS --}}
-                    </div>
-
+                        dipilih.</p>
+                    <div id="param-list" class="space-y-3"></div>
                     <button type="button" onclick="addParamRow()"
                         class="mt-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300 transition hover:bg-white/10">
                         + Tambah Parameter
                     </button>
                 </div>
+            </div>
 
+            {{-- ─── UPDATE type: Parameters + API Endpoint ─── --}}
+            <div id="section-update" class="space-y-4" style="display:none">
+                <div>
+                    <p class="mb-2 block text-sm text-slate-200">Parameters</p>
+                    <p class="mb-2 text-xs text-slate-400">Parameter yang diperlukan untuk API endpoint.</p>
+                    <div id="update-param-list" class="space-y-3"></div>
+                    <button type="button" onclick="addUpdateParamRow()"
+                        class="mt-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300 transition hover:bg-white/10">
+                        + Tambah Parameter
+                    </button>
+                </div>
 
-                {{-- API Endpoint --}}
                 <div class="rounded-2xl border border-white/10 bg-slate-900/30 p-4 space-y-4">
-                    <div class="flex items-center justify-between cursor-pointer" onclick="toggleEndpointSection()">
-                        <div>
-                            <h3 class="text-sm font-semibold text-white">API Endpoint</h3>
-                            <p class="text-xs text-slate-400">Route yang dipanggil ke webhook base URL saat tool dieksekusi.
-                            </p>
-                        </div>
-                        <button type="button" id="endpoint-toggle-btn"
-                            class="shrink-0 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-400 transition hover:bg-white/10">
-                            <span id="endpoint-toggle-icon">▼</span>
-                        </button>
+                    <div>
+                        <h3 class="text-sm font-semibold text-white">API Endpoint</h3>
+                        <p class="text-xs text-slate-400">Route yang dipanggil ke webhook base URL saat tool dieksekusi.</p>
                     </div>
 
-                    <div id="endpoint-section-body" class="rounded-xl border border-white/10 bg-slate-900/40 p-3 space-y-3">
-                        {{-- Route --}}
+                    <div class="rounded-xl border border-white/10 bg-slate-900/40 p-3 space-y-3">
                         <div>
                             <label for="endpoint_route" class="mb-1 block text-xs text-slate-300">Route</label>
                             <input id="endpoint_route" type="text" name="endpoint_route"
                                 value="{{ old('endpoint_route', $tool->endpoints['endpoint']['route'] ?? ($tool->endpoints['get']['route'] ?? '')) }}"
-                                placeholder="e.g. /getplayer"
+                                placeholder="e.g. /resetpassword"
                                 class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400" />
                         </div>
 
-                        {{-- Body --}}
                         <div>
                             <p class="mb-1 text-xs text-slate-300">Body</p>
                             <p class="mb-2 text-xs text-slate-400">Key → value pairs. Value bisa custom text, kosong (ambil
-                                dari
-                                parameter dengan key yang sama), atau token field DataModel (contoh: $player->id).</p>
+                                dari parameter), atau $arg->field.</p>
                             <div id="body-list" class="space-y-2"></div>
                             <div class="flex items-center gap-2 mt-2">
                                 <button type="button" onclick="addBodyField()"
@@ -146,24 +154,22 @@
                             </div>
                         </div>
 
-                        {{-- Expected Response --}}
                         <div>
                             <p class="mb-2 text-xs text-slate-300">Expected Response</p>
                             <div class="rounded-lg border border-white/10 bg-slate-950/60 p-3 mb-3">
-                                <pre id="expected-response-preview" class="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-auto max-h-64">{
+                                <pre id="expected-response-preview"
+                                    class="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-auto max-h-64">{
   "status": 200,
   "message": "Success",
   "data": {}
 }</pre>
                             </div>
-
                             <p class="mb-2 text-xs text-slate-400">Add expected data fields (key → value):</p>
                             <div id="expected-data-list" class="space-y-2 mb-2"></div>
                             <button type="button" onclick="addExpectedDataField()"
                                 class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
                                 + Tambah Expected Data
                             </button>
-
                             <div class="hidden">
                                 <input type="hidden" name="endpoint_expected_status"
                                     value="{{ old('endpoint_expected_status', data_get($tool->endpoints, 'endpoint.expected_response.status', data_get($tool->endpoints, 'get.expected_response.status', 200))) }}" />
@@ -173,8 +179,7 @@
                         </div>
                     </div>
                 </div>
-
-            </div>{{-- end #model-dependent-section --}}
+            </div>
 
             <div>
                 <label for="tool_rules" class="mb-2 block text-sm text-slate-200">Tool Rules</label>
@@ -183,35 +188,38 @@
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('tool_rules', $tool->tool_rules) }}</textarea>
             </div>
 
-            <div>
-                <label class="mb-2 block text-sm text-slate-200">Information Texts</label>
-                <p class="mb-2 text-xs text-slate-400">Teks informasi yang langsung dikirim sebagai jawaban. Tambahkan
-                    beberapa variasi agar bot tidak monoton.</p>
-                <div id="info-texts-wrapper" class="space-y-2">
-                    @php
-                        $infoTexts = old('information_texts', $tool->information_text ?? []);
-                        if (is_string($infoTexts)) {
-                            $infoTexts = [$infoTexts];
-                        }
-                        if (empty($infoTexts)) {
-                            $infoTexts = [''];
-                        }
-                    @endphp
-                    @foreach ($infoTexts as $text)
-                        <div class="info-text-row flex gap-2">
-                            <textarea name="information_texts[]" rows="3"
-                                class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-                                placeholder="Teks informasi...">{{ $text }}</textarea>
-                            <button type="button" onclick="this.closest('.info-text-row').remove()"
-                                class="shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20">✕</button>
-                        </div>
-                    @endforeach
+            {{-- ─── INFO type: Information Texts ─── --}}
+            <div id="section-info" class="space-y-4" style="display:none">
+                <div>
+                    <label class="mb-2 block text-sm text-slate-200">Information Texts</label>
+                    <p class="mb-2 text-xs text-slate-400">Teks informasi yang langsung dikirim sebagai jawaban. Tambahkan
+                        beberapa variasi agar bot tidak monoton.</p>
+                    <div id="info-texts-wrapper" class="space-y-2">
+                        @php
+                            $infoTexts = old('information_texts', $tool->information_text ?? []);
+                            if (is_string($infoTexts)) {
+                                $infoTexts = [$infoTexts];
+                            }
+                            if (empty($infoTexts)) {
+                                $infoTexts = [''];
+                            }
+                        @endphp
+                        @foreach ($infoTexts as $text)
+                            <div class="info-text-row flex gap-2">
+                                <textarea name="information_texts[]" rows="3"
+                                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                                    placeholder="Teks informasi...">{{ $text }}</textarea>
+                                <button type="button" onclick="this.closest('.info-text-row').remove()"
+                                    class="shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20">✕</button>
+                            </div>
+                        @endforeach
+                    </div>
+                    <button type="button" onclick="addInfoText()"
+                        class="mt-2 rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-3 py-1.5 text-xs text-cyan-300 transition hover:bg-cyan-400/20">
+                        + Add Text
+                    </button>
                 </div>
-                <button type="button" onclick="addInfoText()"
-                    class="mt-2 rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-3 py-1.5 text-xs text-cyan-300 transition hover:bg-cyan-400/20">
-                    + Add Text
-                </button>
-            </div>
+            </div>{{-- end #section-info --}}
 
             <div>
                 <label
@@ -240,7 +248,19 @@
     <script>
         const dataModels = @json($dataModels->map(fn($dm) => ['id' => $dm->id, 'fields' => array_keys($dm->fields ?? [])])->values());
         let paramIndex = 0;
+        let updateParamIndex = 0;
 
+        /* ── Type section toggling ── */
+        function toggleTypeSections() {
+            const type = document.getElementById('type').value;
+            document.getElementById('section-info').style.display = type === 'info' ? '' : 'none';
+            document.getElementById('section-get').style.display = type === 'get' ? '' : 'none';
+            document.getElementById('section-update').style.display = type === 'update' ? '' : 'none';
+        }
+
+        document.getElementById('type').addEventListener('change', toggleTypeSections);
+
+        /* ── Data Model field helpers (GET type) ── */
         function getSelectedDataModelFields() {
             const selectedId = document.getElementById('data_model_id')?.value || '';
             const model = dataModels.find(m => String(m.id) === String(selectedId));
@@ -258,88 +278,67 @@
         }
 
         function refreshParameterFieldOptions() {
-            const selects = document.querySelectorAll('.param-name-select');
-            selects.forEach(select => {
+            document.querySelectorAll('#param-list .param-name-select').forEach(select => {
                 const current = select.value;
                 select.innerHTML = buildFieldOptions(current);
-                const stillExists = Array.from(select.options).some(opt => opt.value === current);
-                if (!stillExists) {
-                    select.value = '';
-                }
-            });
-
-            refreshBodyFieldOptions();
-        }
-
-        function buildBodyModelFieldOptions(selected = '') {
-            const fields = getSelectedDataModelFields();
-            let html = '<option value="">-- pilih field DataModel --</option>';
-            fields.forEach(field => {
-                const isSelected = String(field) === String(selected) ? 'selected' : '';
-                html += `<option value="${field}" ${isSelected}>${field}</option>`;
-            });
-            return html;
-        }
-
-        function refreshBodyFieldOptions() {
-            const selects = document.querySelectorAll('.body-model-field-select');
-            selects.forEach(select => {
-                const current = select.value;
-                select.innerHTML = buildBodyModelFieldOptions(current);
-                const stillExists = Array.from(select.options).some(opt => opt.value === current);
-                if (!stillExists) {
-                    select.value = '';
-                }
+                if (!Array.from(select.options).some(opt => opt.value === current)) select.value = '';
             });
         }
 
-        function applyModelFieldToBodyValue(button) {
-            const row = button.closest('.endpoint-body-row');
-            if (!row) {
-                return;
-            }
+        document.getElementById('data_model_id')?.addEventListener('change', refreshParameterFieldOptions);
 
-            const fieldSelect = row.querySelector('.body-model-field-select');
-            const valueInput = row.querySelector('.body-value-input');
-            const selectedField = fieldSelect?.value || '';
-
-            if (!selectedField || !valueInput) {
-                return;
-            }
-
-            valueInput.value = `$player->${selectedField}`;
-        }
-
+        /* ── GET type: parameter rows ── */
         function addParamRow(name = '', desc = '', required = false) {
             const list = document.getElementById('param-list');
             const row = document.createElement('div');
             row.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
-                    <select name="params[${paramIndex}][name]"
-                        class="param-name-select w-1/3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
-                        ${buildFieldOptions(name)}
-                    </select>
-                    <input type="text" name="params[${paramIndex}][description]" value="${desc}" placeholder="Deskripsi (e.g. Username akun)"
-                        class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                    <label class="flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap">
-                        <input type="checkbox" name="params[${paramIndex}][required]" value="1" ${required ? 'checked' : ''}
-                            class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
-                        Wajib
-                    </label>
-                    <button type="button" onclick="this.parentElement.remove()"
-                        class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
-                `;
+                <select name="params[${paramIndex}][name]"
+                    class="param-name-select w-1/3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
+                    ${buildFieldOptions(name)}
+                </select>
+                <input type="text" name="params[${paramIndex}][description]" value="${desc}" placeholder="Deskripsi (e.g. Username akun)"
+                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <label class="flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap">
+                    <input type="checkbox" name="params[${paramIndex}][required]" value="1" ${required ? 'checked' : ''}
+                        class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
+                    Wajib
+                </label>
+                <button type="button" onclick="this.parentElement.remove()"
+                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+            `;
             list.appendChild(row);
             paramIndex++;
         }
 
+        /* ── UPDATE type: parameter rows (free-text name) ── */
+        function addUpdateParamRow(name = '', desc = '', required = false) {
+            const list = document.getElementById('update-param-list');
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
+            row.innerHTML = `
+                <input type="text" name="params[${updateParamIndex}][name]" value="${name}" placeholder="Parameter name"
+                    class="w-1/3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <input type="text" name="params[${updateParamIndex}][description]" value="${desc}" placeholder="Deskripsi (e.g. Username akun)"
+                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <label class="flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap">
+                    <input type="checkbox" name="params[${updateParamIndex}][required]" value="1" ${required ? 'checked' : ''}
+                        class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
+                    Wajib
+                </label>
+                <button type="button" onclick="this.parentElement.remove()"
+                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+            `;
+            list.appendChild(row);
+            updateParamIndex++;
+        }
+
+        /* ── Endpoint body helpers (UPDATE type) ── */
         function getCurrentParameterNames() {
             const names = [];
-            document.querySelectorAll('.param-name-select').forEach(select => {
-                const value = (select.value || '').trim();
-                if (value !== '' && !names.includes(value)) {
-                    names.push(value);
-                }
+            document.querySelectorAll('#update-param-list input[name$="[name]"]').forEach(input => {
+                const value = (input.value || '').trim();
+                if (value && !names.includes(value)) names.push(value);
             });
             return names;
         }
@@ -353,66 +352,6 @@
             names.forEach(name => addBodyField(name, ''));
         }
 
-        // Pre-populate existing parameters
-        document.addEventListener('DOMContentLoaded', function() {
-            const existing = @json($tool->parameters ?? []);
-            const properties = existing.properties || {};
-            const required = existing.required || [];
-
-            for (const [name, prop] of Object.entries(properties)) {
-                addParamRow(name, prop.description || '', required.includes(name));
-            }
-
-            // Pre-populate endpoint body and expected data (supports new 'endpoint' key and legacy 'get' key)
-            const endpoints = @json($tool->endpoints ?? []);
-            const ep = endpoints.endpoint || endpoints.get || {};
-            if (ep.body) {
-                for (const [k, v] of Object.entries(ep.body)) {
-                    addBodyField(k, v);
-                }
-            }
-            if (ep.expected_response && ep.expected_response.data) {
-                for (const [k, v] of Object.entries(ep.expected_response.data)) {
-                    addExpectedDataField(k, v);
-                }
-            }
-
-            refreshParameterFieldOptions();
-            toggleModelDependentSection();
-
-            // Collapse endpoint section if no endpoint route exists
-            const routeVal = document.getElementById('endpoint_route')?.value?.trim();
-            if (!routeVal) {
-                document.getElementById('endpoint-section-body').style.display = 'none';
-                document.getElementById('endpoint-toggle-icon').textContent = '▶';
-            }
-        });
-
-        function toggleEndpointSection() {
-            const body = document.getElementById('endpoint-section-body');
-            const icon = document.getElementById('endpoint-toggle-icon');
-            if (body.style.display === 'none') {
-                body.style.display = '';
-                icon.textContent = '▼';
-            } else {
-                body.style.display = 'none';
-                icon.textContent = '▶';
-            }
-        }
-
-        function toggleModelDependentSection() {
-            const select = document.getElementById('data_model_id');
-            const section = document.getElementById('model-dependent-section');
-            if (select && section) {
-                section.style.display = select.value ? '' : 'none';
-            }
-        }
-
-        document.getElementById('data_model_id')?.addEventListener('change', function() {
-            refreshParameterFieldOptions();
-            toggleModelDependentSection();
-        });
-
         let bodyIdx = 0;
 
         function addBodyField(key = '', val = '') {
@@ -422,13 +361,8 @@
             row.innerHTML = `
                 <input type="text" name="endpoint_body[${bodyIdx}][key]" value="${key}" placeholder="Key (e.g. username)"
                     class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <input type="text" name="endpoint_body[${bodyIdx}][value]" value="${val}" placeholder="Value custom / kosong / $player->field"
+                <input type="text" name="endpoint_body[${bodyIdx}][value]" value="${val}" placeholder="Value custom / kosong / $arg->field"
                     class="body-value-input flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <select class="body-model-field-select w-48 rounded-xl border border-white/10 bg-slate-900/70 px-2 py-2 text-xs text-white outline-none focus:border-cyan-400">
-                    ${buildBodyModelFieldOptions()}
-                </select>
-                <button type="button" onclick="applyModelFieldToBodyValue(this)"
-                    class="shrink-0 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2 py-1.5 text-xs text-cyan-300 hover:bg-cyan-500/20">Use Field</button>
                 <button type="button" onclick="this.parentElement.remove()"
                     class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
@@ -436,29 +370,24 @@
             bodyIdx++;
         }
 
+        /* ── Expected response helpers ── */
         let expectedDataIdx = 0;
 
         function updateExpectedResponsePreview() {
             const list = document.getElementById('expected-data-list');
             const rows = list.querySelectorAll(':scope > div');
             const data = {};
-
             rows.forEach(row => {
                 const inputs = row.querySelectorAll('input[type=text]');
                 const key = inputs[0]?.value.trim();
                 const value = inputs[1]?.value.trim();
-                if (key && value) {
-                    data[key] = value;
-                }
+                if (key && value) data[key] = value;
             });
-
-            const preview = {
+            document.getElementById('expected-response-preview').textContent = JSON.stringify({
                 status: 200,
                 message: "Success",
-                data: data
-            };
-
-            document.getElementById('expected-response-preview').textContent = JSON.stringify(preview, null, 2);
+                data
+            }, null, 2);
         }
 
         function addExpectedDataField(key = '', val = '') {
@@ -472,38 +401,60 @@
                     class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400 expected-data-input" />
                 <button type="button" class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20 remove-expected">&times;</button>
             `;
-
-            // Add event listeners for dynamic preview update
-            const inputs = row.querySelectorAll('.expected-data-input');
-            inputs.forEach(input => {
-                input.addEventListener('input', updateExpectedResponsePreview);
-            });
-
-            // Add event listener for remove button
+            row.querySelectorAll('.expected-data-input').forEach(input => input.addEventListener('input',
+                updateExpectedResponsePreview));
             row.querySelector('.remove-expected').addEventListener('click', function() {
                 row.remove();
                 updateExpectedResponsePreview();
             });
-
             list.appendChild(row);
             expectedDataIdx++;
             updateExpectedResponsePreview();
         }
 
+        /* ── Form init ── */
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleTypeSections();
+
+            const type = document.getElementById('type').value;
+            const existing = @json($tool->parameters ?? []);
+            const properties = existing.properties || {};
+            const required = existing.required || [];
+
+            for (const [name, prop] of Object.entries(properties)) {
+                if (type === 'update') {
+                    addUpdateParamRow(name, prop.description || '', required.includes(name));
+                } else {
+                    addParamRow(name, prop.description || '', required.includes(name));
+                }
+            }
+
+            // Pre-populate endpoint body and expected data
+            const endpoints = @json($tool->endpoints ?? []);
+            const ep = endpoints.endpoint || endpoints.get || {};
+            if (ep.body) {
+                for (const [k, v] of Object.entries(ep.body)) addBodyField(k, v);
+            }
+            if (ep.expected_response && ep.expected_response.data) {
+                for (const [k, v] of Object.entries(ep.expected_response.data)) addExpectedDataField(k, v);
+            }
+
+            refreshParameterFieldOptions();
+        });
+
+        /* ── Validation ── */
         function validateForm() {
-            const expectedDataList = document.getElementById('expected-data-list');
-            const rows = expectedDataList.querySelectorAll(':scope > div');
-
-            for (let row of rows) {
-                const inputs = row.querySelectorAll('input[type=text]');
-                const key = inputs[0]?.value.trim();
-                const value = inputs[1]?.value.trim();
-
-                if ((key && !value) || (!key && value)) {
-                    alert(
-                        'Expected data fields must have both KEY and VALUE filled. Please complete all fields or remove empty rows.'
-                    );
-                    return false;
+            const type = document.getElementById('type').value;
+            if (type === 'update') {
+                const rows = document.getElementById('expected-data-list').querySelectorAll(':scope > div');
+                for (let row of rows) {
+                    const inputs = row.querySelectorAll('input[type=text]');
+                    const key = inputs[0]?.value.trim();
+                    const value = inputs[1]?.value.trim();
+                    if ((key && !value) || (!key && value)) {
+                        alert('Expected data fields must have both KEY and VALUE filled.');
+                        return false;
+                    }
                 }
             }
             return true;
@@ -552,7 +503,7 @@
 
             try {
                 const basePath = window.location.pathname.substring(0, window.location.pathname.indexOf(
-                    '/backoffice/'));
+                '/backoffice/'));
                 const res = await fetch(`${basePath}/backoffice/tools/test-endpoint`, {
                     method: 'POST',
                     credentials: 'same-origin',

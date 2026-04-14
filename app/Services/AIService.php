@@ -161,8 +161,7 @@ class AIService
         - DataModel/game database access is READ-ONLY: never create, update, delete, insert, or alter records/tables when handling DataModel tools.
         - This read-only restriction applies only to DataModel-linked game tables, not to internal application model/workflow handling.
         - Always confirm before performing any sensitive action or updating player data.
-        - If input values seem wrong, suggest valid options and ask user to re-check.[IMPORTANT]
-        - For any tool with parameters and a data model: the system will automatically verify ALL parameter values against the database before executing the action. If verification fails (no matching record found), inform the user which data is incorrect and ask them to re-check.
+        - If input values seem wrong, suggest valid options and ask user to re-check.
         - Stay professional with angry/abusive users — respond politely, add emoji to soften tone.
         - Introduce yourself as {$botName} on first interaction only.
         - Format replies cleanly — no messy line breaks or long unbroken text.
@@ -386,22 +385,27 @@ class AIService
     }
 
     /**
-     * Execute a tool with extracted arguments.
-     * Priority: HTTP endpoint > DataModel lookup > information_text > unconfigured
+     * Execute a tool based on its type.
+     * Types: info (static text), get (DataModel lookup), update (HTTP endpoint)
      */
     private function executeTool(Tool $tool, array $arguments): array
     {
-        // 1. Check if tool has HTTP endpoint (with non-empty route)
-        if (!empty($tool->endpoints)) {
-            return $this->executeHttpEndpoint($tool, $arguments);
-        }
+        return match ($tool->type) {
+            'info' => $this->executeInfoTool($tool),
+            'get' => $this->executeDataModelLookup($tool, $arguments),
+            'update' => $this->executeHttpEndpoint($tool, $arguments),
+            default => [
+                'mode' => 'direct',
+                'reply' => "Tool {$tool->display_name} belum dikonfigurasi.",
+            ],
+        };
+    }
 
-        // 2. Check if tool has data model (read-only DB lookup)
-        if ($tool->dataModel !== null) {
-            return $this->executeDataModelLookup($tool, $arguments);
-        }
-
-        // 3. Check if tool has static information text(s)
+    /**
+     * Execute an info tool — return static information text.
+     */
+    private function executeInfoTool(Tool $tool): array
+    {
         if (!empty($tool->information_text)) {
             $texts = (array) $tool->information_text;
             $reply = $texts[array_rand($texts)];
@@ -411,10 +415,9 @@ class AIService
             ];
         }
 
-        // 4. Tool not configured
         return [
             'mode' => 'direct',
-            'reply' => "Tool {$tool->display_name} belum dikonfigurasi.",
+            'reply' => "Informasi untuk {$tool->display_name} belum tersedia.",
         ];
     }
 
@@ -467,38 +470,16 @@ class AIService
             }
         }
 
-        // Validate ALL parameters against the data model before executing
-        $modelRecord = [];
-        if ($tool->dataModel !== null) {
-            $modelRecord = $this->resolveDataModelRecordForEndpoint($tool, $arguments);
-            if ($modelRecord === null) {
-                Log::warning('Data validation failed: no matching record for all parameters', [
-                    'tool_name' => $tool->tool_name,
-                    'arguments' => $arguments,
-                ]);
-
-                // Build list of parameter names for the error message
-                $paramNames = array_keys((array) data_get($tool->parameters, 'properties', []));
-                $fieldList = implode(', ', $paramNames);
-
-                return [
-                    'mode' => 'direct',
-                    'reply' => "Data tidak ditemukan berdasarkan {$fieldList} yang diberikan. Mohon periksa kembali data yang diinput.",
-                ];
-            }
-        }
-
         $bodyTemplate = (array) ($endpointConfig['body'] ?? []);
 
         // Build request body from template and arguments
-        $builtBody = $this->buildHttpRequestBody($tool, $arguments, $bodyTemplate, $modelRecord);
+        $builtBody = $this->buildHttpRequestBody($tool, $arguments, $bodyTemplate);
         if (($builtBody['ok'] ?? false) !== true) {
             Log::warning('HTTP endpoint body template unresolved', [
                 'tool_name' => $tool->tool_name,
                 'error' => $builtBody['error'] ?? 'unknown',
                 'arguments' => $arguments,
                 'body_template' => $bodyTemplate,
-                'model_record' => $modelRecord,
             ]);
 
             return [
@@ -600,7 +581,7 @@ class AIService
      * Build request body by merging template with arguments.
      * Empty template values are filled from arguments if key exists.
      */
-    private function buildHttpRequestBody(Tool $tool, array $arguments, array $bodyTemplate, array $modelRecord = []): array
+    private function buildHttpRequestBody(Tool $tool, array $arguments, array $bodyTemplate): array
     {
         $body = [];
 
@@ -608,7 +589,7 @@ class AIService
             $key = (string) $key;
 
             if (is_string($templateValue) && trim($templateValue) !== '') {
-                $resolved = $this->resolveEndpointBodyTemplateValue(trim($templateValue), $arguments, $modelRecord);
+                $resolved = $this->resolveEndpointBodyTemplateValue(trim($templateValue), $arguments);
                 if (($resolved['ok'] ?? false) !== true) {
                     return [
                         'ok' => false,
@@ -635,37 +616,8 @@ class AIService
         ];
     }
 
-    private function extractDataModelFieldFromToken(string $value): ?string
+    private function resolveEndpointBodyTemplateValue(string $templateValue, array $arguments): array
     {
-        $token = trim($value);
-        if ($token === '') {
-            return null;
-        }
-
-        if (preg_match('/^\$[a-zA-Z_][a-zA-Z0-9_]*->([a-zA-Z_][a-zA-Z0-9_]*)$/', $token, $matches) === 1) {
-            return $matches[1];
-        }
-
-        return null;
-    }
-
-    private function resolveEndpointBodyTemplateValue(string $templateValue, array $arguments, array $modelRecord): array
-    {
-        $dataModelField = $this->extractDataModelFieldFromToken($templateValue);
-        if ($dataModelField !== null) {
-            if (!array_key_exists($dataModelField, $modelRecord)) {
-                return [
-                    'ok' => false,
-                    'error' => "DataModel field '{$dataModelField}' not found in resolved record",
-                ];
-            }
-
-            return [
-                'ok' => true,
-                'value' => $modelRecord[$dataModelField],
-            ];
-        }
-
         if (preg_match('/^\$arg->([a-zA-Z_][a-zA-Z0-9_]*)$/', $templateValue, $matches) === 1) {
             $argumentField = $matches[1];
 
@@ -686,67 +638,6 @@ class AIService
             'ok' => true,
             'value' => $templateValue,
         ];
-    }
-
-    private function resolveDataModelRecordForEndpoint(Tool $tool, array $arguments): ?array
-    {
-        $dataModel = $tool->dataModel;
-
-        if ($dataModel === null) {
-            return null;
-        }
-
-        $tableName = trim((string) ($dataModel->table_name ?? ''));
-        $connectionName = trim((string) ($dataModel->connection_name ?? 'mysqlgame'));
-        $connectionName = $connectionName === '' ? 'mysqlgame' : $connectionName;
-        $allowedFields = array_keys((array) ($dataModel->fields ?? []));
-
-        if ($tableName === '' || $allowedFields === []) {
-            return null;
-        }
-
-        // Collect argument fields that exist in the DataModel
-        $matchableFilters = [];
-        foreach ($arguments as $field => $value) {
-            if (!in_array($field, $allowedFields, true)) {
-                continue;
-            }
-
-            $normalizedValue = is_string($value) ? trim($value) : $value;
-            if ($normalizedValue === '' || $normalizedValue === null) {
-                continue;
-            }
-
-            $matchableFilters[$field] = $normalizedValue;
-        }
-
-        if ($matchableFilters === []) {
-            return null;
-        }
-
-        // 1) Try exact match with ALL matching arguments
-        $query = DB::connection($connectionName)->table($tableName)->select($allowedFields);
-        foreach ($matchableFilters as $field => $value) {
-            $query->where($field, $value);
-        }
-        $row = $query->first();
-
-        if ($row !== null) {
-            return (array) $row;
-        }
-
-        // 2) Fallback: try case-insensitive match with ALL matching arguments
-        $query = DB::connection($connectionName)->table($tableName)->select($allowedFields);
-        foreach ($matchableFilters as $field => $value) {
-            $query->whereRaw("LOWER(`{$field}`) = ?", [strtolower((string) $value)]);
-        }
-        $row = $query->first();
-
-        if ($row !== null) {
-            return (array) $row;
-        }
-
-        return null;
     }
 
     /**

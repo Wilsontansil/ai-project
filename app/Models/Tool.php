@@ -16,6 +16,7 @@ class Tool extends Model
         'display_name',
         'description',
         'slug',
+        'type',
         'is_enabled',
         'data_model_id',
         'parameters',

@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('display_name');
             $table->text('description')->nullable();
             $table->string('slug')->unique();
+            $table->string('type')->default('info'); // info, get, update
             $table->boolean('is_enabled')->default(true);
             $table->unsignedBigInteger('data_model_id')->nullable();
             $table->json('parameters')->nullable();

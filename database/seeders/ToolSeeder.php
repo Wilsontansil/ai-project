@@ -137,6 +137,28 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => null,
             ],
+            [
+                'tool_name' => 'toStatus',
+                'display_name' => 'TurnOver Status',
+                'description' => 'Provide information about TurnOver (TO) status for a player. Uses "to" and "targetTo" fields from the Player model.',
+                'slug' => 'to-status',
+                'type' => 'get',
+                'is_enabled' => true,
+                'data_model_id' => $playersDataModelId,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'username' => ['type' => 'string', 'description' => 'Username untuk cek status TurnOver'],
+                        'agent' => ['type' => 'string', 'description' => 'Agent/provider game (default: PG)'],
+                    ],
+                    'required' => ['username'],
+                ],
+                'endpoints' => null,
+                'keywords' => ['to', 'turnover', 'status to', 'jumlah to', 'target to'],
+                'tool_rules' => "- Minta username terlebih dahulu jika belum diberikan\n- Hanya tampilkan informasi field 'to' (jumlah TO saat ini) dan 'targetTo' (target TO yang harus dicapai)\n- Jangan tampilkan field lain dari data player\n- Hitung sisa TO yang harus dicapai: targetTo - to\n- Jika TO sudah mencapai atau melebihi target, infokan bahwa TO sudah terpenuhi dan player bisa melakukan withdraw\n- Jika TO belum tercapai, infokan sisa TO yang harus dipenuhi sebelum bisa withdraw\n- Sarankan player untuk terus bermain agar target TO cepat terpenuhi",
+                'information_text' => null,
+                'meta' => null,
+            ],
 
             // ─── INFO type tools (static information) ───
             [
@@ -217,8 +239,8 @@ class ToolSeeder extends Seeder
                 'parameters' => null,
                 'endpoints' => null,
                 'keywords' => ['link apk', 'download apk', 'apk', 'url apk'],
-                'tool_rules' => "- Berikan link APK dari information text jika tersedia\n- Jika tidak ada information text, infokan bahwa link APK belum tersedia dan sarankan hubungi CS",
-                'information_text' => null,
+                'tool_rules' => "- Berikan link APK dari information text\n- Jangan buat atau tebak link sendiri, gunakan HANYA link yang tersedia\n- Ajak user untuk mendaftar atau bermain dengan nada ramah dan semangat",
+                'information_text' => ["silahkan akses link apk untuk daftar ataupun bermain di bigmsg ya kak\n\nhttps://apk.hi11office.com/BIGMSG(2.0.6).apk\n\nselamat bermain dan semoga beruntung"],
                 'meta' => null,
             ],
         ];

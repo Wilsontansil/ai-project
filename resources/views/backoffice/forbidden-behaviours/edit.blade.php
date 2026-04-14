@@ -1,15 +1,16 @@
 @extends('backoffice.partials.layout')
 
-@section('title', 'Edit Rule')
+@section('title', 'Edit Rule — ' . $rule->title)
 
 @section('content')
-    <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-        <h1 class="text-3xl font-semibold">Edit Rule</h1>
-        <p class="mt-2 text-sm text-slate-300">Update aturan forbidden behaviour AI agent.</p>
+    {{-- Header --}}
+    <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
+        <h1 class="text-lg font-semibold sm:text-2xl">Edit Rule</h1>
+        <p class="text-xs text-slate-400">{{ $rule->title }}</p>
     </div>
 
     @if ($errors->any())
-        <div class="rounded-2xl border border-rose-300/30 bg-rose-500/15 px-4 py-3 text-sm text-rose-100">
+        <div class="rounded-xl border border-rose-300/30 bg-rose-500/15 px-4 py-3 text-xs text-rose-100">
             <ul class="list-inside list-disc space-y-1">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -18,29 +19,29 @@
         </div>
     @endif
 
-    <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-        <form method="POST" action="{{ route('backoffice.forbidden.update', $rule) }}" class="space-y-5">
+    <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-4 sm:p-5">
+        <form method="POST" action="{{ route('backoffice.forbidden.update', $rule) }}" class="space-y-4">
             @csrf
             @method('PUT')
 
             <div>
-                <label for="title" class="mb-2 block text-sm text-slate-200">Rule Title</label>
+                <label for="title" class="mb-1.5 block text-sm text-slate-200">Rule Title</label>
                 <input id="title" type="text" name="title" value="{{ old('title', $rule->title) }}"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                    class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2.5 text-sm text-white outline-none transition focus:border-cyan-400" />
             </div>
 
             <div>
-                <label for="instruction" class="mb-2 block text-sm text-slate-200">Instruction for AI</label>
-                <p class="mb-2 text-xs text-slate-400">Tulis instruksi yang jelas tentang apa yang AI agent dilarang
+                <label for="instruction" class="mb-1.5 block text-sm text-slate-200">Instruction for AI</label>
+                <p class="mb-1.5 text-xs text-slate-400">Tulis instruksi yang jelas tentang apa yang AI agent dilarang
                     lakukan.</p>
                 <textarea id="instruction" name="instruction" rows="4"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('instruction', $rule->instruction) }}</textarea>
+                    class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2.5 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('instruction', $rule->instruction) }}</textarea>
             </div>
 
             <div>
-                <label for="level" class="mb-2 block text-sm text-slate-200">Level</label>
+                <label for="level" class="mb-1.5 block text-sm text-slate-200">Level</label>
                 <select id="level" name="level"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
+                    class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2.5 text-sm text-white outline-none transition focus:border-cyan-400">
                     <option value="info" {{ old('level', $rule->level) === 'info' ? 'selected' : '' }}>Info</option>
                     <option value="warning" {{ old('level', $rule->level) === 'warning' ? 'selected' : '' }}>Warning
                     </option>
@@ -50,20 +51,20 @@
 
             <div class="flex items-center gap-3">
                 <label
-                    class="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-slate-900/50 px-4 py-2 text-sm text-slate-200">
+                    class="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-slate-900/50 px-3 py-2 text-sm text-slate-200">
                     <input type="checkbox" name="is_active" value="1" {{ $rule->is_active ? 'checked' : '' }}
                         class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
                     Active
                 </label>
             </div>
 
-            <div class="flex items-center gap-4 pt-2">
+            <div class="flex items-center gap-3 pt-2">
                 <button type="submit"
-                    class="rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
+                    class="rounded-lg bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
                     Update Rule
                 </button>
                 <a href="{{ route('backoffice.forbidden.index') }}"
-                    class="rounded-2xl border border-white/10 px-6 py-3 text-sm text-slate-300 transition hover:bg-white/5">
+                    class="rounded-lg border border-white/10 px-5 py-2.5 text-sm text-slate-300 transition hover:bg-white/5">
                     Cancel
                 </a>
             </div>

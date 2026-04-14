@@ -38,6 +38,7 @@ class DataModelController extends Controller
             'fields.*.name' => ['required_with:fields', 'string', 'max:120'],
             'fields.*.type' => ['required_with:fields', 'string', 'max:120'],
             'fields.*.required' => ['nullable'],
+            'fields.*.value' => ['nullable', 'string', 'max:500'],
         ]);
 
         DataModel::create([
@@ -70,6 +71,7 @@ class DataModelController extends Controller
             'fields.*.name' => ['required_with:fields', 'string', 'max:120'],
             'fields.*.type' => ['required_with:fields', 'string', 'max:120'],
             'fields.*.required' => ['nullable'],
+            'fields.*.value' => ['nullable', 'string', 'max:500'],
         ]);
 
         $dataModel->update([
@@ -100,15 +102,22 @@ class DataModelController extends Controller
             $name = trim((string) ($row['name'] ?? ''));
             $type = trim((string) ($row['type'] ?? ''));
             $required = !empty($row['required']);
+            $value = trim((string) ($row['value'] ?? ''));
 
             if ($name === '' || $type === '') {
                 continue;
             }
 
-            $fields[$name] = [
+            $entry = [
                 'type' => $type,
                 'required' => $required,
             ];
+
+            if ($required && $value !== '') {
+                $entry['value'] = $value;
+            }
+
+            $fields[$name] = $entry;
         }
 
         return $fields;

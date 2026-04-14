@@ -772,17 +772,29 @@ class AIService
         $fieldsRaw = (array) ($dataModel->fields ?? []);
         $allowedFields = array_keys($fieldsRaw);
 
-        // Collect required fields from DataModel field definitions
+        // Collect required fields and fixed values from DataModel field definitions
         $modelRequiredFields = [];
+        $fixedValues = [];
         foreach ($fieldsRaw as $fieldName => $meta) {
             if (is_array($meta) && !empty($meta['required'])) {
                 $modelRequiredFields[] = $fieldName;
+                if (isset($meta['value']) && trim((string) $meta['value']) !== '') {
+                    $fixedValues[$fieldName] = trim((string) $meta['value']);
+                }
             }
         }
 
         // Merge with tool-level required fields (union, no duplicates)
         $toolRequiredFields = (array) data_get($tool->parameters, 'required', []);
         $requiredFields = array_values(array_unique(array_merge($modelRequiredFields, $toolRequiredFields)));
+
+        // Auto-inject fixed values for required fields that are missing from arguments
+        foreach ($fixedValues as $fieldName => $fixedValue) {
+            $argValue = trim((string) ($arguments[$fieldName] ?? ''));
+            if ($argValue === '') {
+                $arguments[$fieldName] = $fixedValue;
+            }
+        }
 
         if ($tableName === '') {
             return [

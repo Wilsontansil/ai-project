@@ -88,23 +88,32 @@
     <script>
         let fieldIndex = 0;
 
-        function addFieldRow(name = '', type = '', required = false) {
+        function addFieldRow(name = '', type = '', required = false, value = '') {
             const list = document.getElementById('field-list');
             const row = document.createElement('div');
-            row.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
+            row.className = 'rounded-2xl border border-white/10 bg-slate-900/50 p-3 space-y-2';
             const checkedAttr = required ? 'checked' : '';
+            const valueDisplay = required ? '' : 'display:none;';
+            const escapedValue = value.replace(/"/g, '&quot;');
             row.innerHTML = `
-                <input type="text" name="fields[${fieldIndex}][name]" value="${name}" placeholder="Field name"
-                    class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <input type="text" name="fields[${fieldIndex}][type]" value="${type}" placeholder="Format"
-                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <label class="flex shrink-0 items-center gap-1.5 text-xs text-slate-300 cursor-pointer select-none">
-                    <input type="checkbox" name="fields[${fieldIndex}][required]" value="1" ${checkedAttr}
-                        class="h-4 w-4 rounded border-white/20 bg-slate-900/70 text-cyan-400 focus:ring-cyan-400" />
-                    Required
-                </label>
-                <button type="button" onclick="removeFieldRow(this)"
-                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                <div class="flex items-center gap-3">
+                    <input type="text" name="fields[${fieldIndex}][name]" value="${name}" placeholder="Field name"
+                        class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    <input type="text" name="fields[${fieldIndex}][type]" value="${type}" placeholder="Format"
+                        class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    <label class="flex shrink-0 items-center gap-1.5 text-xs text-slate-300 cursor-pointer select-none">
+                        <input type="checkbox" name="fields[${fieldIndex}][required]" value="1" ${checkedAttr}
+                            class="field-required-cb h-4 w-4 rounded border-white/20 bg-slate-900/70 text-cyan-400 focus:ring-cyan-400" />
+                        Required
+                    </label>
+                    <button type="button" onclick="removeFieldRow(this)"
+                        class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                </div>
+                <div class="field-value-row flex items-center gap-3 pl-0" style="${valueDisplay}">
+                    <span class="w-2/5 text-xs text-slate-400 pl-1">↳ Fixed value</span>
+                    <input type="text" name="fields[${fieldIndex}][value]" value="${escapedValue}" placeholder="Value (kosongkan jika diisi oleh AI)"
+                        class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                </div>
             `;
             list.appendChild(row);
             fieldIndex++;
@@ -113,7 +122,7 @@
         }
 
         function removeFieldRow(button) {
-            button.parentElement.remove();
+            button.closest('#field-list > div').remove();
             updateJsonPreview();
         }
 
@@ -121,6 +130,17 @@
             row.querySelectorAll('input').forEach(input => {
                 input.addEventListener(input.type === 'checkbox' ? 'change' : 'input', updateJsonPreview);
             });
+            const cb = row.querySelector('.field-required-cb');
+            const valueRow = row.querySelector('.field-value-row');
+            if (cb && valueRow) {
+                cb.addEventListener('change', function() {
+                    valueRow.style.display = this.checked ? '' : 'none';
+                    if (!this.checked) {
+                        valueRow.querySelector('input[type=text]').value = '';
+                    }
+                    updateJsonPreview();
+                });
+            }
         }
 
         function updateJsonPreview() {
@@ -132,10 +152,15 @@
                 const name = (inputs[0]?.value || '').trim();
                 const type = (inputs[1]?.value || '').trim();
                 const required = checkbox?.checked || false;
-                if (name && type) obj[name] = {
-                    type,
-                    required
-                };
+                const value = (inputs[2]?.value || '').trim();
+                if (name && type) {
+                    const entry = {
+                        type,
+                        required
+                    };
+                    if (required && value) entry.value = value;
+                    obj[name] = entry;
+                }
             });
             document.getElementById('json-preview').textContent = JSON.stringify(obj, null, 2);
         }
@@ -145,13 +170,14 @@
             const existingMap = @json($dataModel->fields ?? []);
 
             if (Array.isArray(oldRows) && oldRows.length > 0) {
-                oldRows.forEach(row => addFieldRow(row.name || '', row.type || '', !!row.required));
+                oldRows.forEach(row => addFieldRow(row.name || '', row.type || '', !!row.required, row.value ||
+                ''));
             } else {
                 for (const [name, meta] of Object.entries(existingMap)) {
                     if (typeof meta === 'object' && meta !== null) {
-                        addFieldRow(name, meta.type || '', !!meta.required);
+                        addFieldRow(name, meta.type || '', !!meta.required, meta.value || '');
                     } else {
-                        addFieldRow(name, meta || '', false);
+                        addFieldRow(name, meta || '', false, '');
                     }
                 }
             }

@@ -658,9 +658,8 @@ class AIService
             return null;
         }
 
-        $query = DB::connection($connectionName)->table($tableName)->select($allowedFields);
-        $hasFilter = false;
-
+        // Collect argument fields that exist in the DataModel
+        $matchableFilters = [];
         foreach ($arguments as $field => $value) {
             if (!in_array($field, $allowedFields, true)) {
                 continue;
@@ -671,21 +670,56 @@ class AIService
                 continue;
             }
 
-            $query->where($field, $normalizedValue);
-            $hasFilter = true;
+            $matchableFilters[$field] = $normalizedValue;
         }
 
-        if ($hasFilter === false) {
+        if ($matchableFilters === []) {
             return null;
         }
 
+        // 1) Try exact match with ALL matching arguments
+        $query = DB::connection($connectionName)->table($tableName)->select($allowedFields);
+        foreach ($matchableFilters as $field => $value) {
+            $query->where($field, $value);
+        }
         $row = $query->first();
 
-        if ($row === null) {
-            return null;
+        if ($row !== null) {
+            return (array) $row;
         }
 
-        return (array) $row;
+        // 2) Fallback: try case-insensitive match with ALL matching arguments
+        $query = DB::connection($connectionName)->table($tableName)->select($allowedFields);
+        foreach ($matchableFilters as $field => $value) {
+            $query->whereRaw("LOWER(`{$field}`) = ?", [strtolower((string) $value)]);
+        }
+        $row = $query->first();
+
+        if ($row !== null) {
+            return (array) $row;
+        }
+
+        // 3) Fallback: try lookup using only the first required parameter (usually the unique identifier)
+        $requiredFields = (array) data_get($tool->parameters, 'required', []);
+        foreach ($requiredFields as $primaryField) {
+            if (!isset($matchableFilters[$primaryField])) {
+                continue;
+            }
+
+            $query = DB::connection($connectionName)->table($tableName)->select($allowedFields);
+            $query->whereRaw("LOWER(`{$primaryField}`) = ?", [strtolower((string) $matchableFilters[$primaryField])]);
+            $row = $query->first();
+
+            if ($row !== null) {
+                Log::info('DataModel record resolved via fallback single-field lookup', [
+                    'tool_name' => $tool->tool_name,
+                    'lookup_field' => $primaryField,
+                ]);
+                return (array) $row;
+            }
+        }
+
+        return null;
     }
 
     /**

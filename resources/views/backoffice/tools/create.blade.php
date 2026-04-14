@@ -40,6 +40,15 @@
             </div>
 
             <div>
+                <label for="keywords" class="mb-2 block text-sm text-slate-200">Keywords (comma-separated)</label>
+                <p class="mb-2 text-xs text-slate-400">Kata kunci untuk intent matching fallback, pisahkan dengan koma.
+                </p>
+                <input id="keywords" type="text" name="keywords" value="{{ old('keywords') }}"
+                    placeholder="e.g. reset password, resetpass, kata sandi"
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+            </div>
+
+            <div>
                 <label for="description" class="mb-2 block text-sm text-slate-200">Description</label>
                 <p class="mb-2 text-xs text-slate-400">Deskripsi fungsi tool ini — dikirim ke OpenAI.</p>
                 <input id="description" type="text" name="description" value="{{ old('description') }}"
@@ -141,7 +150,8 @@
                         <div>
                             <p class="mb-2 text-xs text-slate-300">Expected Response</p>
                             <div class="rounded-lg border border-white/10 bg-slate-950/60 p-3 mb-3">
-                                <pre id="expected-response-preview" class="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-auto max-h-64">{
+                                <pre id="expected-response-preview"
+                                    class="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-auto max-h-64">{
   "status": 200,
   "message": "Success",
   "data": {}
@@ -166,15 +176,6 @@
                 </div>
 
             </div>{{-- end #model-dependent-section --}}
-
-            <div>
-                <label for="keywords" class="mb-2 block text-sm text-slate-200">Keywords (comma-separated)</label>
-                <p class="mb-2 text-xs text-slate-400">Kata kunci untuk intent matching fallback, pisahkan dengan koma.
-                </p>
-                <input id="keywords" type="text" name="keywords" value="{{ old('keywords') }}"
-                    placeholder="e.g. reset password, resetpass, kata sandi"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
-            </div>
 
             <div>
                 <label for="missing_message" class="mb-2 block text-sm text-slate-200">Missing Data Message</label>

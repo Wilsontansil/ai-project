@@ -80,13 +80,6 @@
                     </button>
                 </div>
 
-                <div>
-                    <label for="keywords" class="mb-2 block text-sm text-slate-200">Keywords (comma-separated)</label>
-                    <p class="mb-2 text-xs text-slate-400">Kata kunci untuk intent matching fallback.</p>
-                    <input id="keywords" type="text" name="keywords"
-                        value="{{ old('keywords', $tool->keywords ? implode(', ', $tool->keywords) : '') }}"
-                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
-                </div>
 
                 {{-- API Endpoint --}}
                 <div class="rounded-2xl border border-white/10 bg-slate-900/30 p-4 space-y-4">
@@ -167,6 +160,14 @@
                 </div>
 
             </div>{{-- end #model-dependent-section --}}
+
+            <div>
+                <label for="keywords" class="mb-2 block text-sm text-slate-200">Keywords (comma-separated)</label>
+                <p class="mb-2 text-xs text-slate-400">Kata kunci untuk intent matching fallback.</p>
+                <input id="keywords" type="text" name="keywords"
+                    value="{{ old('keywords', $tool->keywords ? implode(', ', $tool->keywords) : '') }}"
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+            </div>
 
             <div>
                 <label for="missing_message" class="mb-2 block text-sm text-slate-200">Missing Data Message</label>

@@ -162,6 +162,7 @@ class AIService
         - This read-only restriction applies only to DataModel-linked game tables, not to internal application model/workflow handling.
         - Always confirm before performing any sensitive action or updating player data.
         - If input values seem wrong, suggest valid options and ask user to re-check.[IMPORTANT]
+        - For any tool with parameters and a data model: the system will automatically verify ALL parameter values against the database before executing the action. If verification fails (no matching record found), inform the user which data is incorrect and ask them to re-check.
         - Stay professional with angry/abusive users — respond politely, add emoji to soften tone.
         - Introduce yourself as {$botName} on first interaction only.
         - Format replies cleanly — no messy line breaks or long unbroken text.
@@ -409,24 +410,28 @@ class AIService
             }
         }
 
-        $bodyTemplate = (array) ($endpointConfig['body'] ?? []);
+        // Validate ALL parameters against the data model before executing
         $modelRecord = [];
-
-        if ($this->endpointBodyUsesDataModelToken($bodyTemplate)) {
+        if ($tool->dataModel !== null) {
             $modelRecord = $this->resolveDataModelRecordForEndpoint($tool, $arguments);
             if ($modelRecord === null) {
-                Log::warning('HTTP endpoint DataModel token unresolved: record not found', [
+                Log::warning('Data validation failed: no matching record for all parameters', [
                     'tool_name' => $tool->tool_name,
                     'arguments' => $arguments,
-                    'body_template' => $bodyTemplate,
                 ]);
+
+                // Build list of parameter names for the error message
+                $paramNames = array_keys((array) data_get($tool->parameters, 'properties', []));
+                $fieldList = implode(', ', $paramNames);
 
                 return [
                     'mode' => 'direct',
-                    'reply' => $userFacingEndpointError,
+                    'reply' => "Data tidak ditemukan berdasarkan {$fieldList} yang diberikan. Mohon periksa kembali data yang diinput.",
                 ];
             }
         }
+
+        $bodyTemplate = (array) ($endpointConfig['body'] ?? []);
 
         // Build request body from template and arguments
         $builtBody = $this->buildHttpRequestBody($tool, $arguments, $bodyTemplate, $modelRecord);

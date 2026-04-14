@@ -768,7 +768,21 @@ class AIService
         $tableName = trim((string) ($dataModel->table_name ?? ''));
         $connectionName = trim((string) ($dataModel->connection_name ?? 'mysqlgame'));
         $connectionName = $connectionName === '' ? 'mysqlgame' : $connectionName;
-        $allowedFields = array_keys((array) ($dataModel->fields ?? []));
+
+        $fieldsRaw = (array) ($dataModel->fields ?? []);
+        $allowedFields = array_keys($fieldsRaw);
+
+        // Collect required fields from DataModel field definitions
+        $modelRequiredFields = [];
+        foreach ($fieldsRaw as $fieldName => $meta) {
+            if (is_array($meta) && !empty($meta['required'])) {
+                $modelRequiredFields[] = $fieldName;
+            }
+        }
+
+        // Merge with tool-level required fields (union, no duplicates)
+        $toolRequiredFields = (array) data_get($tool->parameters, 'required', []);
+        $requiredFields = array_values(array_unique(array_merge($modelRequiredFields, $toolRequiredFields)));
 
         if ($tableName === '') {
             return [
@@ -784,7 +798,6 @@ class AIService
             ];
         }
 
-        $requiredFields = (array) data_get($tool->parameters, 'required', []);
         foreach ($requiredFields as $requiredField) {
             $value = trim((string) ($arguments[$requiredField] ?? ''));
             if ($value === '') {

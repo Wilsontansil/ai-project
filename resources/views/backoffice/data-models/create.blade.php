@@ -57,8 +57,8 @@
 
             <div>
                 <p class="mb-2 block text-sm text-slate-200">Fields</p>
-                <p class="mb-2 text-xs text-slate-400">Tambah/edit/hapus field. Disimpan sebagai JSON map: <span
-                        class="font-mono">{"field":"TYPE"}</span></p>
+                <p class="mb-2 text-xs text-slate-400">Tambah/edit/hapus field. Disimpan sebagai JSON map. Centang
+                    <strong>Required</strong> agar field wajib diisi saat tool menggunakan model ini.</p>
                 <div id="field-list" class="space-y-3"></div>
                 <button type="button" onclick="addFieldRow()"
                     class="mt-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300 transition hover:bg-white/10">
@@ -89,15 +89,21 @@
     <script>
         let fieldIndex = 0;
 
-        function addFieldRow(name = '', type = '') {
+        function addFieldRow(name = '', type = '', required = false) {
             const list = document.getElementById('field-list');
             const row = document.createElement('div');
             row.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
+            const checkedAttr = required ? 'checked' : '';
             row.innerHTML = `
                 <input type="text" name="fields[${fieldIndex}][name]" value="${name}" placeholder="Field name (e.g. username)"
                     class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
                 <input type="text" name="fields[${fieldIndex}][type]" value="${type}" placeholder="Format (e.g. VARCHAR, BIGINT, DECIMAL(14,3))"
                     class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <label class="flex shrink-0 items-center gap-1.5 text-xs text-slate-300 cursor-pointer select-none">
+                    <input type="checkbox" name="fields[${fieldIndex}][required]" value="1" ${checkedAttr}
+                        class="h-4 w-4 rounded border-white/20 bg-slate-900/70 text-cyan-400 focus:ring-cyan-400" />
+                    Required
+                </label>
                 <button type="button" onclick="removeFieldRow(this)"
                     class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
@@ -114,7 +120,7 @@
 
         function bindPreviewListeners(row) {
             row.querySelectorAll('input').forEach(input => {
-                input.addEventListener('input', updateJsonPreview);
+                input.addEventListener(input.type === 'checkbox' ? 'change' : 'input', updateJsonPreview);
             });
         }
 
@@ -123,9 +129,14 @@
             const obj = {};
             rows.forEach(row => {
                 const inputs = row.querySelectorAll('input[type=text]');
+                const checkbox = row.querySelector('input[type=checkbox]');
                 const name = (inputs[0]?.value || '').trim();
                 const type = (inputs[1]?.value || '').trim();
-                if (name && type) obj[name] = type;
+                const required = checkbox?.checked || false;
+                if (name && type) obj[name] = {
+                    type,
+                    required
+                };
             });
             document.getElementById('json-preview').textContent = JSON.stringify(obj, null, 2);
         }
@@ -133,7 +144,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const oldRows = @json(old('fields', []));
             if (Array.isArray(oldRows) && oldRows.length > 0) {
-                oldRows.forEach(row => addFieldRow(row.name || '', row.type || ''));
+                oldRows.forEach(row => addFieldRow(row.name || '', row.type || '', !!row.required));
             } else {
                 addFieldRow();
             }

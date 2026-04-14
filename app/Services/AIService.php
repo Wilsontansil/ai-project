@@ -531,6 +531,33 @@ class AIService
             );
 
             if ($validation['valid'] === false) {
+                // If the response has a readable structure (status + message),
+                // pass it to the AI so it can analyze the error and reply.
+                if (isset($responseBody['status'], $responseBody['message'])) {
+                    Log::info('HTTP endpoint returned non-success response, forwarding to AI', [
+                        'tool_name' => $tool->tool_name,
+                        'http_status' => $statusCode,
+                        'response_message' => $responseBody['message'],
+                    ]);
+
+                    return [
+                        'mode' => 'model',
+                        'tool_context' => [
+                            'tool_name' => $tool->tool_name,
+                            'tool_display_name' => $tool->display_name,
+                            'tool_description' => $tool->description,
+                            'execution_type' => 'http_endpoint',
+                            'endpoint_route' => $route,
+                            'request_parameters' => $requestBody,
+                            'http_status_code' => $statusCode,
+                            'response_status' => $responseBody['status'],
+                            'response_message' => $responseBody['message'],
+                            'response_data' => $responseBody['data'] ?? [],
+                            'success' => false,
+                        ],
+                    ];
+                }
+
                 return [
                     'mode' => 'direct',
                     'reply' => $userFacingEndpointError,
@@ -548,7 +575,10 @@ class AIService
                     'endpoint_route' => $route,
                     'request_parameters' => $requestBody,
                     'http_status_code' => $statusCode,
+                    'response_status' => $responseBody['status'] ?? $statusCode,
+                    'response_message' => $responseBody['message'] ?? '',
                     'response_data' => $responseBody['data'] ?? $responseBody,
+                    'success' => true,
                 ],
             ];
 

@@ -100,6 +100,9 @@ class ToolController extends Controller
             'endpoint_body' => ['nullable', 'array'],
             'endpoint_body.*.key' => ['required_with:endpoint_body', 'string', 'max:80'],
             'endpoint_body.*.value' => ['nullable', 'string', 'max:255'],
+            'error_responses' => ['nullable', 'array'],
+            'error_responses.*.status' => ['required_with:error_responses', 'integer'],
+            'error_responses.*.message' => ['required_with:error_responses', 'string', 'max:255'],
         ];
 
         if ($isCreate) {
@@ -226,6 +229,7 @@ class ToolController extends Controller
                 'route' => $route,
                 'body' => $body,
                 'expected_response' => $this->buildExpectedResponseFromInput('endpoint', $request),
+                'error_responses' => $this->buildErrorResponsesFromInput($request),
             ],
         ];
     }
@@ -294,6 +298,32 @@ class ToolController extends Controller
             'message' => $message === '' ? 'Success' : $message,
             'data' => $data,
         ];
+    }
+
+    /**
+     * Build error responses array from form input.
+     */
+    private function buildErrorResponsesFromInput(Request $request): array
+    {
+        $rows = (array) $request->input('error_responses', []);
+        $errors = [];
+
+        foreach ($rows as $row) {
+            $status = (int) ($row['status'] ?? 0);
+            $message = trim((string) ($row['message'] ?? ''));
+
+            if ($status === 0 || $message === '') {
+                continue;
+            }
+
+            $errors[] = [
+                'status' => $status,
+                'message' => $message,
+                'data' => new \stdClass(),
+            ];
+        }
+
+        return $errors;
     }
 
     /**

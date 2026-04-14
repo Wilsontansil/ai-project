@@ -177,6 +177,21 @@
                                     value="{{ old('endpoint_expected_message', 'Success') }}" />
                             </div>
                         </div>
+
+                        {{-- Expected Error Responses --}}
+                        <div>
+                            <p class="mb-2 text-xs text-slate-300">Expected Error Responses</p>
+                            <p class="mb-2 text-xs text-slate-400">Definisikan kemungkinan error response dari API. AI akan
+                                membaca message dan merespon sesuai konteks.</p>
+                            <div class="rounded-lg border border-white/10 bg-slate-950/60 p-3 mb-3">
+                                <pre id="error-response-preview" class="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-auto max-h-64">[]</pre>
+                            </div>
+                            <div id="error-response-list" class="space-y-2 mb-2"></div>
+                            <button type="button" onclick="addErrorResponse()"
+                                class="rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-300 transition hover:bg-amber-500/20">
+                                + Tambah Error Response
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -415,6 +430,49 @@
             updateExpectedResponsePreview();
         }
 
+        /* ── Error response helpers ── */
+        let errorResponseIdx = 0;
+
+        function updateErrorResponsePreview() {
+            const list = document.getElementById('error-response-list');
+            const rows = list.querySelectorAll(':scope > .error-response-row');
+            const errors = [];
+            rows.forEach(row => {
+                const status = row.querySelector('.err-status')?.value.trim();
+                const message = row.querySelector('.err-message')?.value.trim();
+                if (status && message) {
+                    errors.push({
+                        status: parseInt(status) || 0,
+                        message,
+                        data: {}
+                    });
+                }
+            });
+            document.getElementById('error-response-preview').textContent =
+                errors.length > 0 ? JSON.stringify(errors, null, 2) : '[]';
+        }
+
+        function addErrorResponse(status = '', message = '') {
+            const list = document.getElementById('error-response-list');
+            const row = document.createElement('div');
+            row.className = 'error-response-row flex items-center gap-2';
+            row.innerHTML = `
+                <input type="number" name="error_responses[${errorResponseIdx}][status]" value="${status}" placeholder="Status (e.g. 500)"
+                    class="err-status w-24 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
+                <input type="text" name="error_responses[${errorResponseIdx}][message]" value="${message}" placeholder="Message (e.g. Player not found)"
+                    class="err-message flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
+                <button type="button" class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20 remove-error">&times;</button>
+            `;
+            row.querySelectorAll('input').forEach(input => input.addEventListener('input', updateErrorResponsePreview));
+            row.querySelector('.remove-error').addEventListener('click', function() {
+                row.remove();
+                updateErrorResponsePreview();
+            });
+            list.appendChild(row);
+            errorResponseIdx++;
+            updateErrorResponsePreview();
+        }
+
         /* ── Form init ── */
         document.addEventListener('DOMContentLoaded', function() {
             toggleTypeSections();
@@ -437,6 +495,10 @@
             const oldExpected = @json(old('endpoint_expected_data', []));
             if (Array.isArray(oldExpected)) oldExpected.forEach(row => addExpectedDataField(row.key || '', row
                 .value || ''));
+
+            const oldErrors = @json(old('error_responses', []));
+            if (Array.isArray(oldErrors)) oldErrors.forEach(row => addErrorResponse(row.status || '', row.message ||
+                ''));
 
             refreshParameterFieldOptions();
         });
@@ -502,7 +564,7 @@
 
             try {
                 const basePath = window.location.pathname.substring(0, window.location.pathname.indexOf(
-                '/backoffice/'));
+                    '/backoffice/'));
                 const res = await fetch(`${basePath}/backoffice/tools/test-endpoint`, {
                     method: 'POST',
                     credentials: 'same-origin',

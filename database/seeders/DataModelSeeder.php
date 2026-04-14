@@ -36,7 +36,7 @@ class DataModelSeeder extends Seeder
                     'is_first_deposit' => 'TINYINT',
                     'gametoken' => 'VARCHAR',
                     'lastip' => 'VARCHAR',
-                    'status' => 'VARCHAR',
+                    // 'status' => 'VARCHAR',
                     'referral' => 'VARCHAR',
                     'ref_update_at' => 'TIMESTAMP',
                     'agents_id' => 'BIGINT',

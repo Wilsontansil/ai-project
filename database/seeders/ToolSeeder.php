@@ -44,6 +44,19 @@ class ToolSeeder extends Seeder
                     ],
                     'required' => ['username', 'namarek', 'norek', 'bank'],
                 ],
+                'endpoints' => [
+                    'endpoint' => [
+                        'route' => '/resetpassword',
+                        'body' => [
+                            'player_id' => '$player->id',
+                        ],
+                        'expected_response' => [
+                            'status' => 200,
+                            'message' => 'Success',
+                            'data' => (object) [],
+                        ],
+                    ],
+                ],
                 'keywords' => ['reset password', 'resetpass', 'kata sandi', 'password'],
                 'missing_message' => "Untuk reset password, mohon kirim data berikut:\nUsername(username) :\nNama rekening(namarek) :\nNomor rekening(norek) :\nNama Bank(bank) :",
                 'information_text' => null,

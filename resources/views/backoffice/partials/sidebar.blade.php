@@ -110,7 +110,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
             </button>
-            <div class="bo-section-items mt-1 space-y-0.5">
+            <div class="bo-section-items mt-1 space-y-0.5 pl-5">
                 <a href="{{ route('backoffice.dashboard') }}"
                     class="bo-nav-item group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition {{ $active === 'customer' ? 'bg-white/15 font-semibold text-white' : 'text-white/70 hover:bg-white/10 hover:text-white/90' }}">
                     <svg class="h-4 w-4 shrink-0 {{ $active === 'customer' ? 'text-white' : 'text-white/50 group-hover:text-white/70' }}"
@@ -141,7 +141,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
             </button>
-            <div class="bo-section-items mt-1 space-y-0.5">
+            <div class="bo-section-items mt-1 space-y-0.5 pl-5">
                 {{-- Tools --}}
                 <a href="{{ route('backoffice.tools.index') }}"
                     class="bo-nav-item group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition {{ ($boActive ?? ($active ?? '')) === 'tools' ? 'bg-white/15 font-semibold text-white' : 'text-white/70 hover:bg-white/10 hover:text-white/90' }}">
@@ -210,7 +210,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
             </button>
-            <div class="bo-section-items mt-1 space-y-0.5">
+            <div class="bo-section-items mt-1 space-y-0.5 pl-5">
                 <a href="{{ route('backoffice.settings.index') }}"
                     class="bo-nav-item group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition {{ ($boActive ?? ($active ?? '')) === 'settings' ? 'bg-white/15 font-semibold text-white' : 'text-white/70 hover:bg-white/10 hover:text-white/90' }}">
                     <svg class="h-4 w-4 shrink-0 {{ ($boActive ?? ($active ?? '')) === 'settings' ? 'text-white' : 'text-white/50 group-hover:text-white/70' }}"

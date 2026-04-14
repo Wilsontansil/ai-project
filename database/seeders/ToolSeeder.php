@@ -164,6 +164,19 @@ class ToolSeeder extends Seeder
                 'information_text' => ["klik link untuk cek rtp kami disini dengan winrate game tertinggi kak 🙂\n- realtime - akurat - anti rungkat -\n\nhttps://rtpbigmsg77.xyz\n\ndan sudah tersedia jadwal dan pola gacor nya kak"],
                 'meta' => null,
             ],
+            [
+                'tool_name' => 'link_apk',
+                'display_name' => 'Link APK',
+                'description' => 'Provide a link to download the APK for the specified app. Ensure the link is from a trusted source to guarantee security.',
+                'slug' => 'link-apk',
+                'is_enabled' => true,
+                'data_model_id' => null,
+                'parameters' => null,
+                'keywords' => ['link apk', 'download apk', 'apk', 'url apk'],
+                'missing_message' => null,
+                'information_text' => null,
+                'meta' => null,
+            ],
         ];
 
         foreach ($tools as $tool) {

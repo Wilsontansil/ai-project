@@ -77,5 +77,23 @@ class DataModelSeeder extends Seeder
                 ],
             ]
         );
+
+        DataModel::updateOrCreate(
+            ['slug' => 'settings'],
+            [
+                'model_name' => 'Setting',
+                'description' => 'Settings data model schema.',
+                'table_name' => 'settings',
+                'connection_name' => 'mysqlgame',
+                'fields' => [
+                    'id' => 'bigint(20) UNSIGNED',
+                    'kode' => 'varchar(125)',
+                    'value' => 'mediumtext',
+                    'agent' => 'varchar(125)',
+                    'created_at' => 'timestamp',
+                    'updated_at' => 'timestamp',
+                ],
+            ]
+        );
     }
 }

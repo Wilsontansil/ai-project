@@ -114,7 +114,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'game_gacor',
                 'display_name' => 'Game Gacor',
-                'description' => 'Bocoran slot gacor hari ini',
+                'description' => 'the latest Bocoran Slot Gacor for today. Only take information from the provided list. Do not create new content',
                 'slug' => 'game-gacor',
                 'is_enabled' => true,
                 'data_model_id' => null,
@@ -129,7 +129,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'pola_gacor',
                 'display_name' => 'Pola Gacor',
-                'description' => 'Pola VIP terupdate hari ini',
+                'description' => 'the latest Pola Gacor for today. Only take information from the provided list. Do not create new content',
                 'slug' => 'pola-gacor',
                 'is_enabled' => true,
                 'data_model_id' => null,

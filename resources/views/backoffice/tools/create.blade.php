@@ -63,106 +63,111 @@
                 </select>
             </div>
 
-            <div>
-                <p class="mb-2 block text-sm text-slate-200">Parameters</p>
-                <p class="mb-2 text-xs text-slate-400">Parameter hanya boleh menggunakan field dari Data Model yang dipilih.
-                </p>
-
-                <div id="param-list" class="space-y-3">
-                    {{-- Rows added by JS --}}
-                </div>
-
-                <button type="button" onclick="addParamRow()"
-                    class="mt-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300 transition hover:bg-white/10">
-                    + Tambah Parameter
-                </button>
-            </div>
-
-            <div>
-                <label for="keywords" class="mb-2 block text-sm text-slate-200">Keywords (comma-separated)</label>
-                <p class="mb-2 text-xs text-slate-400">Kata kunci untuk intent matching fallback, pisahkan dengan koma.
-                </p>
-                <input id="keywords" type="text" name="keywords" value="{{ old('keywords') }}"
-                    placeholder="e.g. reset password, resetpass, kata sandi"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
-            </div>
-
-            {{-- API Endpoint --}}
-            <div class="rounded-2xl border border-white/10 bg-slate-900/30 p-4 space-y-4">
+            <div id="model-dependent-section">
                 <div>
-                    <h3 class="text-sm font-semibold text-white">API Endpoint</h3>
-                    <p class="text-xs text-slate-400">Route yang dipanggil ke webhook base URL saat tool dieksekusi.</p>
+                    <p class="mb-2 block text-sm text-slate-200">Parameters</p>
+                    <p class="mb-2 text-xs text-slate-400">Parameter hanya boleh menggunakan field dari Data Model yang
+                        dipilih.
+                    </p>
+
+                    <div id="param-list" class="space-y-3">
+                        {{-- Rows added by JS --}}
+                    </div>
+
+                    <button type="button" onclick="addParamRow()"
+                        class="mt-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300 transition hover:bg-white/10">
+                        + Tambah Parameter
+                    </button>
                 </div>
 
-                <div class="rounded-xl border border-white/10 bg-slate-900/40 p-3 space-y-3">
-                    {{-- Route --}}
+                <div>
+                    <label for="keywords" class="mb-2 block text-sm text-slate-200">Keywords (comma-separated)</label>
+                    <p class="mb-2 text-xs text-slate-400">Kata kunci untuk intent matching fallback, pisahkan dengan koma.
+                    </p>
+                    <input id="keywords" type="text" name="keywords" value="{{ old('keywords') }}"
+                        placeholder="e.g. reset password, resetpass, kata sandi"
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                </div>
+
+                {{-- API Endpoint --}}
+                <div class="rounded-2xl border border-white/10 bg-slate-900/30 p-4 space-y-4">
                     <div>
-                        <label for="endpoint_route" class="mb-1 block text-xs text-slate-300">Route</label>
-                        <input id="endpoint_route" type="text" name="endpoint_route" value="{{ old('endpoint_route') }}"
-                            placeholder="e.g. /getplayer"
-                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400" />
+                        <h3 class="text-sm font-semibold text-white">API Endpoint</h3>
+                        <p class="text-xs text-slate-400">Route yang dipanggil ke webhook base URL saat tool dieksekusi.</p>
                     </div>
 
-                    {{-- Body --}}
-                    <div>
-                        <p class="mb-1 text-xs text-slate-300">Body</p>
-                        <p class="mb-2 text-xs text-slate-400">Key → value pairs. Value bisa custom text, kosong (ambil dari
-                            parameter dengan key yang sama), atau token field DataModel (contoh: $player->id).</p>
-                        <div id="body-list" class="space-y-2"></div>
-                        <div class="flex items-center gap-2 mt-2">
-                            <button type="button" onclick="addBodyField()"
-                                class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
-                                + Tambah Field
-                            </button>
-                            <button type="button" onclick="copyParamsToBody()"
-                                class="rounded-lg border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-300 transition hover:bg-cyan-500/20">
-                                Copy from Parameters
-                            </button>
-                            <button type="button" onclick="testEndpoint()"
-                                class="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-300 transition hover:bg-emerald-500/20">
-                                ▶ Test Request
-                            </button>
+                    <div class="rounded-xl border border-white/10 bg-slate-900/40 p-3 space-y-3">
+                        {{-- Route --}}
+                        <div>
+                            <label for="endpoint_route" class="mb-1 block text-xs text-slate-300">Route</label>
+                            <input id="endpoint_route" type="text" name="endpoint_route"
+                                value="{{ old('endpoint_route') }}" placeholder="e.g. /getplayer"
+                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400" />
                         </div>
-                        <div id="endpoint-test-result"
-                            class="mt-2 hidden rounded-lg border border-white/10 bg-slate-950/60 p-3">
-                            <div class="flex items-center justify-between mb-1">
-                                <span id="endpoint-test-status" class="text-xs font-mono"></span>
-                                <button type="button"
-                                    onclick="document.getElementById('endpoint-test-result').classList.add('hidden')"
-                                    class="text-xs text-slate-500 hover:text-slate-300">&times;</button>
+
+                        {{-- Body --}}
+                        <div>
+                            <p class="mb-1 text-xs text-slate-300">Body</p>
+                            <p class="mb-2 text-xs text-slate-400">Key → value pairs. Value bisa custom text, kosong (ambil
+                                dari
+                                parameter dengan key yang sama), atau token field DataModel (contoh: $player->id).</p>
+                            <div id="body-list" class="space-y-2"></div>
+                            <div class="flex items-center gap-2 mt-2">
+                                <button type="button" onclick="addBodyField()"
+                                    class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
+                                    + Tambah Field
+                                </button>
+                                <button type="button" onclick="copyParamsToBody()"
+                                    class="rounded-lg border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-300 transition hover:bg-cyan-500/20">
+                                    Copy from Parameters
+                                </button>
+                                <button type="button" onclick="testEndpoint()"
+                                    class="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-300 transition hover:bg-emerald-500/20">
+                                    ▶ Test Request
+                                </button>
                             </div>
-                            <pre id="endpoint-test-body" class="text-xs text-slate-300 whitespace-pre-wrap max-h-48 overflow-auto"></pre>
+                            <div id="endpoint-test-result"
+                                class="mt-2 hidden rounded-lg border border-white/10 bg-slate-950/60 p-3">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span id="endpoint-test-status" class="text-xs font-mono"></span>
+                                    <button type="button"
+                                        onclick="document.getElementById('endpoint-test-result').classList.add('hidden')"
+                                        class="text-xs text-slate-500 hover:text-slate-300">&times;</button>
+                                </div>
+                                <pre id="endpoint-test-body" class="text-xs text-slate-300 whitespace-pre-wrap max-h-48 overflow-auto"></pre>
+                            </div>
                         </div>
-                    </div>
 
-                    {{-- Expected Response --}}
-                    <div>
-                        <p class="mb-2 text-xs text-slate-300">Expected Response</p>
-                        <div class="rounded-lg border border-white/10 bg-slate-950/60 p-3 mb-3">
-                            <pre id="expected-response-preview"
-                                class="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-auto max-h-64">{
+                        {{-- Expected Response --}}
+                        <div>
+                            <p class="mb-2 text-xs text-slate-300">Expected Response</p>
+                            <div class="rounded-lg border border-white/10 bg-slate-950/60 p-3 mb-3">
+                                <pre id="expected-response-preview"
+                                    class="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-auto max-h-64">{
   "status": 200,
   "message": "Success",
   "data": {}
 }</pre>
-                        </div>
+                            </div>
 
-                        <p class="mb-2 text-xs text-slate-400">Add expected data fields (key → value):</p>
-                        <div id="expected-data-list" class="space-y-2 mb-2"></div>
-                        <button type="button" onclick="addExpectedDataField()"
-                            class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
-                            + Tambah Expected Data
-                        </button>
+                            <p class="mb-2 text-xs text-slate-400">Add expected data fields (key → value):</p>
+                            <div id="expected-data-list" class="space-y-2 mb-2"></div>
+                            <button type="button" onclick="addExpectedDataField()"
+                                class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
+                                + Tambah Expected Data
+                            </button>
 
-                        <div class="hidden">
-                            <input type="hidden" name="endpoint_expected_status"
-                                value="{{ old('endpoint_expected_status', 200) }}" />
-                            <input type="hidden" name="endpoint_expected_message"
-                                value="{{ old('endpoint_expected_message', 'Success') }}" />
+                            <div class="hidden">
+                                <input type="hidden" name="endpoint_expected_status"
+                                    value="{{ old('endpoint_expected_status', 200) }}" />
+                                <input type="hidden" name="endpoint_expected_message"
+                                    value="{{ old('endpoint_expected_message', 'Success') }}" />
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+
+            </div>{{-- end #model-dependent-section --}}
 
             <div>
                 <label for="missing_message" class="mb-2 block text-sm text-slate-200">Missing Data Message</label>
@@ -353,7 +358,18 @@
             names.forEach(name => addBodyField(name, ''));
         }
 
-        document.getElementById('data_model_id')?.addEventListener('change', refreshParameterFieldOptions);
+        function toggleModelDependentSection() {
+            const select = document.getElementById('data_model_id');
+            const section = document.getElementById('model-dependent-section');
+            if (select && section) {
+                section.style.display = select.value ? '' : 'none';
+            }
+        }
+
+        document.getElementById('data_model_id')?.addEventListener('change', function() {
+            refreshParameterFieldOptions();
+            toggleModelDependentSection();
+        });
 
         document.addEventListener('DOMContentLoaded', function() {
             const oldParams = @json(old('params', []));
@@ -372,6 +388,7 @@
             }
 
             refreshParameterFieldOptions();
+            toggleModelDependentSection();
         });
 
         let bodyIdx = 0;

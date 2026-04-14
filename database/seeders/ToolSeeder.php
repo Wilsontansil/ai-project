@@ -47,6 +47,7 @@ class ToolSeeder extends Seeder
                         'namarek' => ['type' => 'string', 'description' => 'Nama rekening'],
                         'norek' => ['type' => 'string', 'description' => 'Nomor rekening'],
                         'bank' => ['type' => 'string', 'description' => 'Nama bank'],
+                        'agent' => ['type' => 'string', 'description' => 'Agent/provider game (default: PG)'],
                     ],
                     'required' => ['username', 'namarek', 'norek', 'bank'],
                 ],
@@ -58,6 +59,7 @@ class ToolSeeder extends Seeder
                             'namarek' => '',
                             'norek' => '',
                             'bank' => '',
+                            'agent' => 'PG',
                         ],
                         'expected_response' => [
                             'status' => 200,
@@ -88,6 +90,7 @@ class ToolSeeder extends Seeder
                         'bank' => ['type' => 'string', 'description' => 'Nama bank'],
                         'namarek' => ['type' => 'string', 'description' => 'Nama rekening'],
                         'norek' => ['type' => 'string', 'description' => 'Nomor rekening'],
+                        'agent' => ['type' => 'string', 'description' => 'Agent/provider game (default: PG)'],
                     ],
                     'required' => ['username', 'email', 'hp', 'bank', 'namarek', 'norek'],
                 ],
@@ -101,6 +104,7 @@ class ToolSeeder extends Seeder
                             'bank' => '',
                             'namarek' => '',
                             'norek' => '',
+                            'agent' => 'PG',
                         ],
                         'expected_response' => [
                             'status' => 200,
@@ -128,6 +132,7 @@ class ToolSeeder extends Seeder
                     'type' => 'object',
                     'properties' => [
                         'username' => ['type' => 'string', 'description' => 'Username to check suspend status'],
+                        'agent' => ['type' => 'string', 'description' => 'Agent/provider game (default: PG)'],
                     ],
                     'required' => ['username'],
                 ],

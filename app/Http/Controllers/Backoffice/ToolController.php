@@ -150,17 +150,7 @@ class ToolController extends Controller
 
     private function buildToolMeta(Request $request, ?Tool $tool = null): array
     {
-        $defaultIcon = $tool->meta['icon'] ?? 'M13 10V3L4 14h7v7l9-11h-7z';
-
-        if ($tool === null) {
-            return [
-                'icon' => trim($request->input('icon', $defaultIcon)),
-            ];
-        }
-
-        return array_merge($tool->meta ?? [], [
-            'icon' => trim($request->input('icon', $defaultIcon)),
-        ]);
+        return $tool ? ($tool->meta ?? []) : [];
     }
 
     private function buildInformationTexts(Request $request): ?array

@@ -210,15 +210,6 @@
             </div>
 
             <div>
-                <label for="icon" class="mb-2 block text-sm text-slate-200">SVG Icon Path (optional)</label>
-                <p class="mb-2 text-xs text-slate-400">SVG path data untuk icon di sidebar. Kosongkan untuk icon default.
-                </p>
-                <input id="icon" type="text" name="icon" value="{{ old('icon') }}"
-                    placeholder="M13 10V3L4 14h7v7l9-11h-7z"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm font-mono text-white outline-none transition focus:border-cyan-400" />
-            </div>
-
-            <div>
                 <label
                     class="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-slate-900/50 px-4 py-2 text-sm text-slate-200">
                     <input type="checkbox" name="is_enabled" value="1"

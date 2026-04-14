@@ -206,13 +206,6 @@
             </div>
 
             <div>
-                <label for="icon" class="mb-2 block text-sm text-slate-200">SVG Icon Path</label>
-                <input id="icon" type="text" name="icon"
-                    value="{{ old('icon', $tool->meta['icon'] ?? '') }}"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm font-mono text-white outline-none transition focus:border-cyan-400" />
-            </div>
-
-            <div>
                 <label
                     class="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-slate-900/50 px-4 py-2 text-sm text-slate-200">
                     <input type="checkbox" name="is_enabled" value="1"

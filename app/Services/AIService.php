@@ -343,11 +343,13 @@ class AIService
             return $this->executeDataModelLookup($tool, $arguments);
         }
 
-        // 3. Check if tool has static information text
+        // 3. Check if tool has static information text(s)
         if (!empty($tool->information_text)) {
+            $texts = (array) $tool->information_text;
+            $reply = $texts[array_rand($texts)];
             return [
                 'mode' => 'direct',
-                'reply' => $tool->information_text,
+                'reply' => $reply,
             ];
         }
 

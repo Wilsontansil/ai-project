@@ -31,6 +31,7 @@ class Tool extends Model
         'parameters' => 'array',
         'endpoints' => 'array',
         'keywords' => 'array',
+        'information_text' => 'array',
         'meta' => 'array',
     ];
 

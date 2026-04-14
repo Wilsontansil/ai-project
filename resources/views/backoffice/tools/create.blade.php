@@ -174,12 +174,34 @@
             </div>
 
             <div>
-                <label for="information_text" class="mb-2 block text-sm text-slate-200">Information Text</label>
-                <p class="mb-2 text-xs text-slate-400">Teks informasi yang langsung dikirim sebagai jawaban. Cocok untuk
-                    tool yang hanya memberikan info tanpa perlu eksekusi.</p>
-                <textarea id="information_text" name="information_text" rows="4"
-                    placeholder="e.g. Untuk deposit, silakan transfer ke rekening BCA 1234567890 a/n PT XYZ."
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('information_text') }}</textarea>
+                <label class="mb-2 block text-sm text-slate-200">Information Texts</label>
+                <p class="mb-2 text-xs text-slate-400">Teks informasi yang langsung dikirim sebagai jawaban. Tambahkan
+                    beberapa variasi agar bot tidak monoton. Bot akan memilih salah satu secara acak.</p>
+                <div id="info-texts-wrapper" class="space-y-2">
+                    @if (old('information_texts'))
+                        @foreach (old('information_texts') as $i => $text)
+                            <div class="info-text-row flex gap-2">
+                                <textarea name="information_texts[]" rows="3"
+                                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                                    placeholder="Teks informasi...">{{ $text }}</textarea>
+                                <button type="button" onclick="this.closest('.info-text-row').remove()"
+                                    class="shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20">✕</button>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="info-text-row flex gap-2">
+                            <textarea name="information_texts[]" rows="3"
+                                class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                                placeholder="Teks informasi..."></textarea>
+                            <button type="button" onclick="this.closest('.info-text-row').remove()"
+                                class="shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20">✕</button>
+                        </div>
+                    @endif
+                </div>
+                <button type="button" onclick="addInfoText()"
+                    class="mt-2 rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-3 py-1.5 text-xs text-cyan-300 transition hover:bg-cyan-400/20">
+                    + Add Text
+                </button>
             </div>
 
             <div>
@@ -441,11 +463,25 @@
                 if ((key && !value) || (!key && value)) {
                     alert(
                         'Expected data fields must have both KEY and VALUE filled. Please complete all fields or remove empty rows.'
-                        );
+                    );
                     return false;
                 }
             }
             return true;
+        }
+
+        function addInfoText() {
+            const wrapper = document.getElementById('info-texts-wrapper');
+            const row = document.createElement('div');
+            row.className = 'info-text-row flex gap-2';
+            row.innerHTML =
+                `<textarea name="information_texts[]" rows="3"
+                class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                style="background-color:rgba(15,23,42,0.7);color:#e2e8f0"
+                placeholder="Teks informasi..."></textarea>
+                <button type="button" onclick="this.closest('.info-text-row').remove()"
+                    class="shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20">✕</button>`;
+            wrapper.appendChild(row);
         }
 
         async function testEndpoint() {

@@ -87,7 +87,8 @@ class ToolController extends Controller
             'params.*.description' => ['nullable', 'string', 'max:255'],
             'keywords' => ['nullable', 'string'],
             'missing_message' => ['nullable', 'string', 'max:1000'],
-            'information_text' => ['nullable', 'string', 'max:2000'],
+            'information_texts' => ['nullable', 'array'],
+            'information_texts.*' => ['nullable', 'string', 'max:2000'],
             'data_model_id' => ['nullable', 'integer', 'exists:data_models,id'],
             'endpoint_route' => ['nullable', 'string', 'max:255'],
             'endpoint_expected_status' => ['nullable', 'integer'],
@@ -118,7 +119,7 @@ class ToolController extends Controller
             'endpoints' => $this->buildEndpointsFromInput($request),
             'keywords' => $this->normalizeKeywords($request, $data, $tool),
             'missing_message' => trim($data['missing_message'] ?? '') ?: null,
-            'information_text' => trim($data['information_text'] ?? '') ?: null,
+            'information_text' => $this->buildInformationTexts($request),
             'meta' => $this->buildToolMeta($request, $tool),
         ];
 
@@ -160,6 +161,16 @@ class ToolController extends Controller
         return array_merge($tool->meta ?? [], [
             'icon' => trim($request->input('icon', $defaultIcon)),
         ]);
+    }
+
+    private function buildInformationTexts(Request $request): ?array
+    {
+        $texts = array_filter(
+            array_map('trim', (array) $request->input('information_texts', [])),
+            fn ($t) => $t !== ''
+        );
+
+        return count($texts) > 0 ? array_values($texts) : null;
     }
 
     /**
@@ -299,12 +310,13 @@ class ToolController extends Controller
      */
     private function validateDataModelRules(array $data): void
     {
-        $informationText = trim((string) ($data['information_text'] ?? ''));
+        $infoTexts = array_filter(array_map('trim', (array) ($data['information_texts'] ?? [])), fn ($t) => $t !== '');
+        $hasInformationText = count($infoTexts) > 0;
         $dataModelId = $data['data_model_id'] ?? null;
         $params = (array) ($data['params'] ?? []);
         $endpointBodyRows = (array) ($data['endpoint_body'] ?? []);
 
-        if ($informationText === '' && empty($dataModelId)) {
+        if (!$hasInformationText && empty($dataModelId)) {
             throw ValidationException::withMessages([
                 'data_model_id' => 'Pilih Data Model untuk tool yang bukan information-only.',
             ]);

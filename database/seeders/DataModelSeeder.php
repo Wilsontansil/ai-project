@@ -101,7 +101,7 @@ class DataModelSeeder extends Seeder
             [
                 'model_name' => 'Deposit',
                 'description' => 'Deposit data model schema.',
-                'table_name' => 'desposits',
+                'table_name' => 'deposits',
                 'connection_name' => 'mysqlgame',
                 'fields' => [
                     'id' => ['type' => 'bigint(20) UNSIGNED', 'required' => false],

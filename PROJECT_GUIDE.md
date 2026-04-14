@@ -1,164 +1,227 @@
 # AI Project Guide
 
-## Project Explanation
+## Project Overview
 
-This project is a Laravel 13 API that connects Telegram and WhatsApp messages to an OpenAI-powered assistant named xoneBot.
+Laravel 13 API that connects Telegram, WhatsApp (WAHA), and LiveChat messages to an OpenAI-powered assistant (xoneBot). Includes a full backoffice for managing tools, data models, forbidden behaviours, and global settings.
 
-Main purpose:
+## Architecture
 
-- Receive user messages from Telegram webhook.
-- Receive user messages from WAHA WhatsApp webhook.
-- Send user message and conversation history to OpenAI.
-- Return the AI reply back to Telegram or WhatsApp.
+```
+Telegram/WhatsApp/LiveChat → Webhook Controller → AIService → OpenAI
+                                    ↓
+                            Agent Context (identity, memory, behavior)
+                                    ↓
+                            Tool Execution (info / get / update)
+                                    ↓
+                            Reply → Telegram/WhatsApp/LiveChat API
+```
 
-Current key endpoints:
+## API Endpoints
 
-- `GET /api/test`: simple API health check.
-- `POST /api/telegram/webhook`: Telegram webhook receiver.
-- `GET|POST /api/whatsapp/webhook`: WAHA WhatsApp webhook receiver.
+| Method   | Path                    | Controller         | Purpose               |
+| -------- | ----------------------- | ------------------ | --------------------- |
+| GET      | `/api/test`             | closure            | Health check          |
+| POST     | `/api/telegram/webhook` | TelegramController | Telegram webhook      |
+| GET/POST | `/api/whatsapp/webhook` | WhatsAppController | WAHA WhatsApp webhook |
+| GET/POST | `/api/livechat/webhook` | LiveChatController | LiveChat webhook      |
 
-Main components:
+## Backoffice Routes
 
-- `app/Http/Controllers/TelegramController.php`
-    - Validates incoming Telegram payload.
-    - Extracts `message.text` and `message.chat.id`.
-    - Calls `AIService` and sends the reply to Telegram.
-- `app/Services/AIService.php`
-    - Builds OpenAI chat request.
-    - Adds system prompt and prior conversation context.
-    - Stores per-chat memory using Laravel Cache.
-    - Handles function/tool call flow for password reset intent.
-- `app/Services/Agent/CustomerIdentityService.php`
-    - Resolves unique customer identity from each platform payload.
-    - Learns/updates customer name from message patterns (example: "nama saya ...", "my name is ...") when value is more reliable.
-- `app/Services/Agent/ConversationMemoryService.php`
-    - Stores and fetches short-term conversation memory.
-- `app/Services/Agent/BehaviorProfilerService.php`
-    - Updates intent/sentiment/frequency behavior profile per customer.
-- `app/Services/Agent/AgentContextService.php`
-    - Builds unified AI context: profile + behavior + memory.
-- `app/Http/Controllers/Backoffice/AuthController.php`
-    - Handles admin login and logout for backoffice.
-- `app/Http/Controllers/Backoffice/DashboardController.php`
-    - Displays customer dashboard table and summary stats.
-- `app/Http/Controllers/Backoffice/AIAgentController.php`
-    - Displays and updates AI tools setting from backoffice page.
-- `app/Http/Controllers/WhatsAppController.php`
-    - Accepts WAHA webhook payloads.
-    - Extracts text and chat id from common WAHA message fields.
-    - Sends WAHA typing indicator while waiting for AI response.
-    - Calls `AIService` and sends the reply through WAHA `sendText` API.
+All backoffice routes require authentication (`auth` middleware).
 
-Conversation memory behavior:
+| Path                               | Controller                   | Purpose                        |
+| ---------------------------------- | ---------------------------- | ------------------------------ |
+| `/backoffice/login`                | AuthController               | Admin login                    |
+| `/backoffice`                      | DashboardController          | Customer dashboard + stats     |
+| `/backoffice/customer/{id}/chat`   | DashboardController          | Chat history view              |
+| `/backoffice/ai-agent`             | AIAgentController            | Agent persona settings         |
+| `/backoffice/tools`                | ToolController               | CRUD for AI tools              |
+| `/backoffice/tools/test-endpoint`  | ToolController               | Test tool HTTP endpoint        |
+| `/backoffice/data-models`          | DataModelController          | CRUD for data models           |
+| `/backoffice/forbidden-behaviours` | ForbiddenBehaviourController | CRUD for banned behavior rules |
+| `/backoffice/settings`             | SettingController            | Global project settings        |
 
-- Context is stored per chat id with cache key format: `chat_context:{chatId}`.
-- Maximum stored messages: 20 (rolling window).
-- Cache TTL: 12 hours.
+## Controllers
 
-Learning persistence tables:
+### Webhook Controllers
 
-- `customers`
-- `conversations`
-- `customer_behaviors`
-- `tool_settings`
-- `users`
+- **TelegramController** — Validates Telegram payload, debounces rapid messages, calls AIService, sends reply via Telegram Bot API.
+- **WhatsAppController** — Accepts WAHA webhook payloads, sends typing indicator, calls AIService, sends reply via WAHA `sendText` API.
+- **LiveChatController** — Handles LiveChat webhook payloads, calls AIService, responds.
 
-Backoffice:
+### Backoffice Controllers
 
-- Login page: `/backoffice/login`
-- Dashboard page: `/backoffice`
-- AI Agent tools page: `/backoffice/ai-agent`
-- Dashboard currently shows customer table with basic search and summary stats.
-- AI Agent page controls tool enable/disable and tool metadata for runtime usage.
-- Default seeded admin user:
-    - Email: `admin@xonebot.local`
-    - Password: `admin12345`
+- **AuthController** — Login/logout with session auth.
+- **DashboardController** — Customer list with search, summary stats, customer chat history viewer.
+- **AIAgentController** — View/update AI agent persona (name, system prompt, welcome message, etc.).
+- **ToolController** — Full CRUD for tools (info/get/update types), includes endpoint tester.
+- **DataModelController** — Full CRUD for data model field schemas with required/value support.
+- **ForbiddenBehaviourController** — Full CRUD for forbidden behaviour rules.
+- **SettingController** — Grouped global settings editor (API keys, bot tokens, support URLs, etc.).
 
-## Message Flow
+## Services
 
-1. Telegram sends webhook to `/api/telegram/webhook`.
-2. Telegram or WAHA controller reads user text and chat id.
-3. Controller calls `AIService::reply($text, $chatId)`.
-4. Service loads previous context from cache.
-5. Service sends `system + history + current user message` to OpenAI.
-6. Service saves new user/assistant turn to cache.
-7. Controller sends assistant response back to Telegram.
+### AIService
 
-## Environment Requirements
+Core AI orchestration service.
 
-- PHP 8.3+
-- Composer
-- Laravel dependencies installed
-- OpenAI API key configured in environment:
-    - `OPENAI_API_KEY=...`
-- WAHA WhatsApp configured in environment when using WhatsApp:
-    - `WAHA_BASE_URL=...`
-    - `WAHA_SESSION=...`
-    - `WAHA_API_KEY=...`
+- `reply($message, $chatId, ...)` — Main entry point. Builds system prompt, loads conversation history, calls OpenAI, handles tool calls, returns final reply.
+- `collectDebouncedMessage($chatId, $message)` — Debounces rapid messages from same chat before AI processing.
+- Tool types: **info** (static text), **get** (DataModel DB lookup), **update** (HTTP endpoint call).
+- Model: `gpt-4.1-mini`
+- History: 20 messages, 12h TTL.
+- Debounce: 2 seconds.
 
-Recommended cache driver for production conversation memory:
+### Agent Services (`app/Services/Agent/`)
 
-- Redis (preferred), or database cache.
+- **CustomerIdentityService** — Resolves unique customer identity per platform. Learns customer name from message patterns.
+- **ConversationMemoryService** — Stores/fetches short-term conversation memory.
+- **BehaviorProfilerService** — Updates intent/sentiment/frequency behavior profile per customer.
+- **AgentContextService** — Builds unified AI context combining profile, behavior, and memory.
+
+## Models
+
+| Model              | Table                | Key Fields                                                   | Relationships            |
+| ------------------ | -------------------- | ------------------------------------------------------------ | ------------------------ |
+| User               | users                | name, email, password                                        | —                        |
+| Agent              | agents               | name, system_prompt, is_active                               | —                        |
+| Customer           | customers            | platform, platform_id, display_name                          | conversations, behaviors |
+| Conversation       | conversations        | customer_id, role, content                                   | customer                 |
+| CustomerBehavior   | customer_behaviors   | customer_id, key, value                                      | customer                 |
+| Tool               | tools                | tool_name, type, parameters, endpoints, keywords             | dataModel                |
+| DataModel          | data_models          | model_name, slug, table_name, connection_name, fields (JSON) | tools                    |
+| ForbiddenBehaviour | forbidden_behaviours | title, description, is_enabled                               | —                        |
+| ProjectSetting     | project_settings     | key, value, group, label                                     | —                        |
+
+## Tool Types
+
+### info
+
+Static information tools. Returns pre-configured text from `information_text` field. No parameters needed.
+
+### get (DataModel Lookup)
+
+Queries an external database table via DataModel schema.
+
+- Fields defined in DataModel JSON with `type`, `required`, and optional `value`.
+- Required fields with a fixed `value` are auto-injected as WHERE filters (always override AI arguments).
+- Required fields without a value must be provided by the AI (user must supply data).
+- Field required status is enforced: if any required field is empty after injection, returns a missing-data message.
+
+### update (HTTP Endpoint)
+
+Calls an external HTTP API endpoint.
+
+- Endpoint route, body template, and expected response defined in `endpoints` JSON.
+- Body template supports `$arg->fieldName` placeholders resolved from AI arguments.
+- Required parameters validated before execution.
+
+## DataModel Field Schema
+
+Fields stored as JSON in `data_models.fields`:
+
+```json
+{
+    "username": { "type": "VARCHAR", "required": true },
+    "agent": { "type": "VARCHAR", "required": true, "value": "PG" },
+    "balance": { "type": "DECIMAL(14,3)", "required": false }
+}
+```
+
+- `type` — SQL column type (for display/documentation).
+- `required` — If true, field must be present when tool queries this model. Cannot be deleted from tool parameters.
+- `value` — Optional fixed value. When set on a required field, AIService auto-injects it into every query as a WHERE filter.
+
+## Database Tables
+
+| Table                            | Migration         |
+| -------------------------------- | ----------------- |
+| users                            | 0001_01_01_000000 |
+| cache / cache_locks              | 0001_01_01_000001 |
+| jobs / job_batches / failed_jobs | 0001_01_01_000002 |
+| personal_access_tokens           | 2026_04_08_160524 |
+| customers                        | 2026_04_10_000001 |
+| conversations                    | 2026_04_10_000002 |
+| customer_behaviors               | 2026_04_10_000004 |
+| tools                            | 2026_04_10_000006 |
+| forbidden_behaviours             | 2026_04_10_120317 |
+| project_settings                 | 2026_04_12_000001 |
+| data_models                      | 2026_04_12_000008 |
+
+## Seeders
+
+| Seeder                   | Purpose                                                                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| AdminUserSeeder          | Default admin: `admin@xonebot.local` / `admin12345`                                                                             |
+| DataModelSeeder          | Players and Settings data model schemas                                                                                         |
+| ToolSeeder               | Default tools: \_bot_config, resetPassword, register, checkSuspend, toStatus, game_gacor, pola_gacor, bonus, link_rtp, link_apk |
+| ForbiddenBehaviourSeeder | Banned behavior rules                                                                                                           |
+| ProjectSettingSeeder     | Global settings (API keys, bot tokens, support URLs, agent config)                                                              |
+
+## Environment Variables
+
+```env
+# OpenAI
+OPENAI_API_KEY=
+
+# Telegram
+TELEGRAM_BOT_TOKEN=
+
+# WhatsApp (WAHA)
+WAHA_BASE_URL=
+WAHA_SESSION=default
+WAHA_API_KEY=
+
+# Agent
+AGENT_ID=1
+AGENT_KODE=PG
+
+# Support
+SUPPORT_PHONE=08120000000
+SUPPORT_TELEGRAM_URL=
+SUPPORT_WHATSAPP_URL=
+```
+
+All settings can also be overridden from the backoffice Settings page (stored in `project_settings` table, takes priority over `.env`).
 
 ## Project Rules
 
-### 1. Security Rules
+### Security
 
-- Never hardcode secrets (OpenAI key, Telegram bot token, database credentials).
-- Keep all secrets in `.env` and access via `config(...)`.
-- Do not commit real tokens, keys, or passwords to git history.
-- If a secret leaks, rotate it immediately.
+- Never hardcode secrets. Use `.env` + `config(...)`.
+- Rotate leaked secrets immediately.
 
-### 2. Configuration Rules
+### Configuration
 
-- Define third-party credentials in `config/services.php`.
-- Read configuration in code via `config(...)`, not direct `env(...)` in business logic.
-- After changing env/config in server, run:
-    - `php artisan config:clear`
-    - `php artisan optimize:clear`
+- Third-party credentials in `config/services.php`.
+- Read config via `config(...)`, not `env(...)` in business logic.
+- After config changes: `php artisan config:clear && php artisan optimize:clear`
 
-### 3. API and Bot Behavior Rules
+### Bot Behavior
 
-- Always validate webhook payload before processing.
-- If payload is invalid, return safe response and do not call OpenAI.
-- Keep assistant identity consistent as xoneBot.
-- Default assistant response language is Bahasa Indonesia, unless user asks for another language.
-- Keep default reply short and to the point unless user asks for detailed explanation.
-- Keep conversation context per user/chat id.
-- For password reset flow, identify account by `username` and validate player by `username + agent` before any action.
-- Current reset flow sets player password to `1234567` after username+agent validation.
-- Reset password now requires verification fields: `username`, `namarek`, `norek`, and `bank` (matching database fields).
-- If player verification fields (`namarek`, `norek`, `bank`) are nullable/empty in database, bot should direct user to human support.
-- Reset request can be triggered by OpenAI tool call or fallback local intent parsing (`username: ...`) to improve reliability.
-- If bot is stuck or uncertain, it should offer handover to human support using default phone `08120000000`.
-- Handover link can be different per channel using `SUPPORT_TELEGRAM_URL` and `SUPPORT_WHATSAPP_URL`.
-- Incoming rapid messages from same chat are debounced and can be combined before AI processing to reduce duplicate replies.
+- Assistant identity: xoneBot. Default language: Bahasa Indonesia.
+- Keep replies short unless user requests detail.
+- Conversation context per chat ID (20 messages, 12h TTL).
+- Rapid messages debounced (2s) before AI processing.
+- If uncertain, offer handover to human support.
+- Required DataModel fields with fixed values are always auto-injected into queries.
 
-### 4. Code Quality Rules
+### Code Quality
 
-- Use PSR-4 compatible class and file naming (example: `AIService.php`).
-- Keep controllers thin and business logic in services.
-- Add clear logs for webhook receive and invalid payload cases.
-- Handle OpenAI errors gracefully and return user-friendly messages.
+- PSR-4 naming. Keep controllers thin, logic in services.
+- Log webhook receive and invalid payloads.
+- Handle OpenAI errors gracefully with user-friendly messages.
+- No dead/commented-out code.
 
-### 5. Git and Deployment Rules
+### Deployment
 
-- Run syntax checks before pushing:
-    - `php -l app/Services/AIService.php`
-    - `php -l app/Http/Controllers/TelegramController.php`
-- Keep commits focused and descriptive.
-- Deploy with:
-    - `composer install --no-dev --optimize-autoloader`
-    - `php artisan optimize:clear`
+```bash
+composer install --no-dev --optimize-autoloader
+php artisan optimize:clear
+php artisan migrate --force
+php artisan db:seed --force
+```
 
-### 6. Documentation Update Rules
+### Documentation
 
-- On every code/config update, review `PROJECT_GUIDE.md` and update it if behavior, setup, structure, or rules changed.
-- If no guide update is needed, confirm this in the PR/commit note (example: "PROJECT_GUIDE reviewed, no changes needed").
-
-## Suggested Next Improvements
-
-- Move Telegram bot token to `.env` and `config/services.php`.
-- Add automated tests for webhook payload and service response handling.
-- Add command/endpoint to reset chat memory for a specific user.
-- Move function-call operations to dedicated action classes.
+- Update `PROJECT_GUIDE.md` when behavior, structure, or rules change.

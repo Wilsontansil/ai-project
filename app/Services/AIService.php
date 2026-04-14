@@ -20,7 +20,6 @@ class AIService
 
     private int $debounceSeconds = 2;
 
-    // private string $model = 'gpt-4o-mini';
     private string $model = 'gpt-4.1-mini';
 
     /**

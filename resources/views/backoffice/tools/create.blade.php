@@ -178,12 +178,12 @@
             </div>{{-- end #model-dependent-section --}}
 
             <div>
-                <label for="missing_message" class="mb-2 block text-sm text-slate-200">Missing Data Message</label>
-                <p class="mb-2 text-xs text-slate-400">Pesan yang ditampilkan jika data yang diperlukan belum lengkap.
-                </p>
-                <textarea id="missing_message" name="missing_message" rows="3"
-                    placeholder="Untuk reset password, mohon kirim data berikut:&#10;Username(username) :&#10;Nama rekening(namarek) :"
-                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('missing_message') }}</textarea>
+                <label for="tool_rules" class="mb-2 block text-sm text-slate-200">Tool Rules</label>
+                <p class="mb-2 text-xs text-slate-400">Instruksi spesifik untuk AI saat menggunakan tool ini. Contoh: cara
+                    minta data, format jawaban, aturan validasi.</p>
+                <textarea id="tool_rules" name="tool_rules" rows="4"
+                    placeholder="- Minta semua data sekaligus dalam satu pesan&#10;- Setelah berhasil, infokan hasilnya dengan format rapi&#10;- Jangan eksekusi sebelum semua data terkumpul"
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('tool_rules') }}</textarea>
             </div>
 
             <div>

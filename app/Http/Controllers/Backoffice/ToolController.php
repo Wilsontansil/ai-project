@@ -86,7 +86,7 @@ class ToolController extends Controller
             'params.*.name' => ['required_with:params', 'string', 'max:80'],
             'params.*.description' => ['nullable', 'string', 'max:255'],
             'keywords' => ['nullable', 'string'],
-            'missing_message' => ['nullable', 'string', 'max:1000'],
+            'tool_rules' => ['nullable', 'string', 'max:2000'],
             'information_texts' => ['nullable', 'array'],
             'information_texts.*' => ['nullable', 'string', 'max:2000'],
             'data_model_id' => ['nullable', 'integer', 'exists:data_models,id'],
@@ -118,7 +118,7 @@ class ToolController extends Controller
             'parameters' => $this->buildParametersFromInput($request->input('params', [])),
             'endpoints' => $this->buildEndpointsFromInput($request),
             'keywords' => $this->normalizeKeywords($request, $data, $tool),
-            'missing_message' => trim($data['missing_message'] ?? '') ?: null,
+            'tool_rules' => trim($data['tool_rules'] ?? '') ?: null,
             'information_text' => $this->buildInformationTexts($request),
             'meta' => $this->buildToolMeta($request, $tool),
         ];

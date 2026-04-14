@@ -21,7 +21,7 @@ class Tool extends Model
         'parameters',
         'endpoints',
         'keywords',
-        'missing_message',
+        'tool_rules',
         'information_text',
         'meta',
     ];
@@ -75,14 +75,6 @@ class Tool extends Model
         }
 
         return $best;
-    }
-
-    /**
-     * Get fallback message when required parameters are missing.
-     */
-    public function getMissingMessage(): string
-    {
-        return $this->missing_message ?? 'Mohon lengkapi data yang diperlukan.';
     }
 
     public function dataModel(): BelongsTo

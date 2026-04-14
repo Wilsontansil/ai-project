@@ -174,10 +174,59 @@ class AIService
         // Append active case instructions from database
         $caseInstructions = $this->getCaseInstructions();
         if ($caseInstructions !== '') {
-            return $basePrompt . "\n\n" . $caseInstructions;
+            $basePrompt .= "\n\n" . $caseInstructions;
+        }
+
+        // Append per-tool rules
+        $toolRules = $this->getToolRulesPrompt();
+        if ($toolRules !== '') {
+            $basePrompt .= "\n\n" . $toolRules;
         }
 
         return $basePrompt;
+    }
+
+    /**
+     * Build per-tool rules section for the system prompt.
+     */
+    private function getToolRulesPrompt(): string
+    {
+        $tools = $this->getEnabledTools();
+        $lines = [];
+
+        foreach ($tools as $tool) {
+            $rules = trim((string) ($tool->tool_rules ?? ''));
+            if ($rules === '') {
+                continue;
+            }
+
+            $lines[] = "TOOL [{$tool->tool_name}] ({$tool->display_name}) RULES:\n{$rules}";
+        }
+
+        if ($lines === []) {
+            return '';
+        }
+
+        return "PER-TOOL INSTRUCTIONS (follow these strictly when using each tool):\n\n" . implode("\n\n", $lines);
+    }
+
+    /**
+     * Build a missing data message from tool parameters.
+     */
+    private function buildMissingDataMessage(Tool $tool): string
+    {
+        $properties = (array) data_get($tool->parameters, 'properties', []);
+        if ($properties === []) {
+            return 'Mohon lengkapi data yang diperlukan.';
+        }
+
+        $lines = ["Untuk {$tool->display_name}, mohon kirimkan data berikut:"];
+        foreach ($properties as $name => $prop) {
+            $desc = $prop['description'] ?? $name;
+            $lines[] = "- {$desc} ({$name})";
+        }
+
+        return implode("\n", $lines);
     }
 
     /**
@@ -293,7 +342,7 @@ class AIService
                 : [];
 
             if ($bestTool->getDefinition() !== null && $arguments === null) {
-                return $bestTool->getMissingMessage();
+                return $this->buildMissingDataMessage($bestTool);
             }
 
             return $this->resolveToolExecutionReply(
@@ -315,13 +364,21 @@ class AIService
         $execution = $this->executeTool($tool, $arguments);
 
         if (($execution['mode'] ?? 'direct') === 'model') {
+            $toolContext = $execution['tool_context'] ?? [];
+
+            // Inject per-tool rules into context so the AI follows them when generating the reply
+            $rules = trim((string) ($tool->tool_rules ?? ''));
+            if ($rules !== '') {
+                $toolContext['tool_rules'] = $rules;
+            }
+
             return $this->generateAssistantReplyFromToolResult(
                 $client,
                 $systemPrompt,
                 $contextPrompt,
                 $history,
                 $userMessage,
-                $execution['tool_context'] ?? []
+                $toolContext
             );
         }
 
@@ -405,7 +462,7 @@ class AIService
             if ($value === '') {
                 return [
                     'mode' => 'direct',
-                    'reply' => $tool->getMissingMessage(),
+                    'reply' => $this->buildMissingDataMessage($tool),
                 ];
             }
         }
@@ -576,21 +633,6 @@ class AIService
             'ok' => true,
             'body' => $body,
         ];
-    }
-
-    private function endpointBodyUsesDataModelToken(array $bodyTemplate): bool
-    {
-        foreach ($bodyTemplate as $value) {
-            if (!is_string($value)) {
-                continue;
-            }
-
-            if ($this->extractDataModelFieldFromToken($value) !== null) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private function extractDataModelFieldFromToken(string $value): ?string
@@ -798,7 +840,7 @@ class AIService
         if ($dataModel === null) {
             return [
                 'mode' => 'direct',
-                'reply' => $tool->getMissingMessage(),
+                'reply' => 'Data model belum dikonfigurasi untuk tool ini.',
             ];
         }
 
@@ -827,7 +869,7 @@ class AIService
             if ($value === '') {
                 return [
                     'mode' => 'direct',
-                    'reply' => $tool->getMissingMessage(),
+                    'reply' => $this->buildMissingDataMessage($tool),
                 ];
             }
         }
@@ -997,9 +1039,14 @@ class AIService
             $messages[] = ['role' => 'system', 'content' => $contextPrompt];
         }
 
+        $toolRulesInstruction = '';
+        if (!empty($toolContext['tool_rules'])) {
+            $toolRulesInstruction = "\n\nIMPORTANT — Follow these tool-specific rules strictly:\n" . $toolContext['tool_rules'];
+        }
+
         $messages[] = [
             'role' => 'system',
-            'content' => "Internal tool result already fetched. Use it to answer naturally like a human customer service agent. Do not mention internal tools, SQL, database query details, or raw response structure. Do not copy data literally as JSON. Use the resolved_data and tool_description as the source of truth. If resolved_data is empty, say the data was not found and ask the user to re-check their input.
+            'content' => "Internal tool result already fetched. Use it to answer naturally like a human customer service agent. Do not mention internal tools, SQL, database query details, or raw response structure. Do not copy data literally as JSON. Use the resolved_data and tool_description as the source of truth. If resolved_data is empty, say the data was not found and ask the user to re-check their input.{$toolRulesInstruction}
 
 Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
         ];

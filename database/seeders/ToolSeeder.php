@@ -138,6 +138,32 @@ class ToolSeeder extends Seeder
                 'information_text' => "𝐏𝐎𝐋𝐀 𝐕𝐈𝐏  𝐓𝐄𝐑𝐔𝐏𝐃𝐀𝐓𝐄 𝐇𝐀𝐑𝐈 𝐈𝐍𝐈!\nPOLA MAHJONG WAYS 1\nTurbo ✅– MANUAL Spin 10x\nTurbo ✅- AUTO Spin 10x\nTurbo ❌– MANUAL Spin 15x\n📌𝐑𝐄𝐊𝐎𝐌𝐄𝐍𝐃𝐀𝐒𝐈 𝐁𝐄𝐓: 400 - 8.000\n\nPOLA WILD BANDITO\nTurbo ✅ – Auto 30\nTurbo ✅ – Manual 18\nTurbo ❌ – Auto 30\nTurbo ✅ – Manual 12\n📌𝐑𝐄𝐊𝐎𝐌𝐄𝐍𝐃𝐀𝐒𝐈 𝐁𝐄𝐓: 400\n\nPOLA Mahjong Ways 2\nTurbo ✅– MANUAL Spin 14x\nTurbo ✅- AUTO Spin 30x\nTurbo ❌– MANUAL Spin 10x\n📌𝐑𝐄𝐊𝐎𝐌𝐄𝐍𝐃𝐀𝐒𝐈 𝐁𝐄𝐓: 400 - 8.000\n\n📌𝐏𝐎𝐋𝐀 𝐓𝐄𝐑𝐁𝐀𝐈𝐊 \n📈 𝐆𝐚𝐭𝐞 𝐎𝐟 𝐎𝐥𝐲𝐦𝐩𝐮𝐬 𝟏.𝟎𝟎𝟎⚡️\n-----------------------\n✅❌✅ - 20 AUTO DC ON\n❌✅✅ - 10 MANUAL DC OFF\n❌✅✅ - 30 AUTO DC OFF\n❌❌✅ - 50 MANUAL DC ON\n🔔𝐁𝐔𝐘 𝐒𝐏𝐈𝐍 𝐘𝐀𝐍𝐆 𝐃𝐈𝐒𝐀𝐑𝐀𝐍𝐊𝐀𝐍 𝟐𝟎 𝐑𝐈𝐁𝐔 𝐗5\n🔔𝐁𝐔𝐘 𝐒𝐏𝐈𝐍 𝐘𝐀𝐍𝐆 𝐃𝐈𝐒𝐀𝐑𝐀𝐍𝐊𝐀𝐍 6𝟎 𝐑𝐈𝐁𝐔 𝐗3",
                 'meta' => null,
             ],
+            [
+                'tool_name' => 'bonus',
+                'display_name' => 'Bonus',
+                'description' => 'detailed information about the bonus claims. Answer any questions members may have regarding how to claim bonuses, eligibility, and any specific conditions or requirements',
+                'slug' => 'bonus',
+                'is_enabled' => true,
+                'data_model_id' => null,
+                'parameters' => null,
+                'keywords' => ['bonus claim', 'klaim bonus', 'bonus', 'bonus reward'],
+                'missing_message' => null,
+                'information_text' => ['Halo Kak! Sebelum mulai bermain, jangan lupa untuk melakukan klaim bonusnya terlebih dahulu melalui menu Reward ya'],
+                'meta' => null,
+            ],
+            [
+                'tool_name' => 'link_rtp',
+                'display_name' => 'Link RTP',
+                'description' => 'Provide information about RTP links for online slots or games. Answer any questions regarding how RTP is calculated, where to find RTP links, and how it affects gameplay or chances of winning.',
+                'slug' => 'link-rtp',
+                'is_enabled' => true,
+                'data_model_id' => null,
+                'parameters' => null,
+                'keywords' => ['link rtp', 'rtp', 'link anti rungkat'],
+                'missing_message' => null,
+                'information_text' => ["klik link untuk cek rtp kami disini dengan winrate game tertinggi kak 🙂\n- realtime - akurat - anti rungkat -\n\nhttps://rtpbigmsg77.xyz\n\ndan sudah tersedia jadwal dan pola gacor nya kak"],
+                'meta' => null,
+            ],
         ];
 
         foreach ($tools as $tool) {

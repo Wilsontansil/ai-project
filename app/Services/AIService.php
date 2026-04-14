@@ -704,26 +704,6 @@ class AIService
             return (array) $row;
         }
 
-        // 3) Fallback: try lookup using only the first required parameter (usually the unique identifier)
-        $requiredFields = (array) data_get($tool->parameters, 'required', []);
-        foreach ($requiredFields as $primaryField) {
-            if (!isset($matchableFilters[$primaryField])) {
-                continue;
-            }
-
-            $query = DB::connection($connectionName)->table($tableName)->select($allowedFields);
-            $query->whereRaw("LOWER(`{$primaryField}`) = ?", [strtolower((string) $matchableFilters[$primaryField])]);
-            $row = $query->first();
-
-            if ($row !== null) {
-                Log::info('DataModel record resolved via fallback single-field lookup', [
-                    'tool_name' => $tool->tool_name,
-                    'lookup_field' => $primaryField,
-                ]);
-                return (array) $row;
-            }
-        }
-
         return null;
     }
 

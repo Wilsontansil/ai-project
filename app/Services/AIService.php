@@ -149,8 +149,13 @@ class AIService
     private function getSystemPrompt(): string
     {
         $botName = $this->getBotName();
+        $serverTime = now()->format('Y-m-d H:i:s (l)');
+        $serverTimezone = now()->getTimezone()->getName();
 
         $basePrompt = "You are {$botName}, a friendly customer support assistant for a gaming platform.
+
+        CURRENT SERVER TIME: {$serverTime} ({$serverTimezone})
+        Use this as the authoritative current datetime for all time-based calculations (e.g. today, yesterday, last week Monday-Sunday, this month, etc.).
 
         RULES:
         - Default language: Bahasa Indonesia. Follow user's language if different.

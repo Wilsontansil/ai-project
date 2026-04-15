@@ -94,7 +94,7 @@
             <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 overflow-hidden transition"
                 style="--gc: {{ $meta['color'] }}">
                 {{-- Group header --}}
-                <div class="flex items-center gap-3 border-b border-slate-700/50 px-5 py-3.5">
+                <div class="flex items-center gap-3 border-b border-slate-700/50" style="padding:1rem 1.25rem">
                     <div class="flex shrink-0 items-center justify-center rounded-xl"
                         style="background: {{ $meta['bg'] }}; color: {{ $meta['color'] }}; width: 36px; height: 36px;">
                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="18"

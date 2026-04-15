@@ -65,6 +65,10 @@
                                         @elseif ($tool->type === 'update')
                                             <span
                                                 class="inline-flex items-center rounded-full bg-purple-500/20 px-2.5 py-0.5 text-xs font-semibold text-purple-300 ring-1 ring-purple-400/30">UPDATE</span>
+                                        @elseif ($tool->type === 'get_multiple')
+                                            <span
+                                                class="inline-flex items-center rounded-full bg-teal-500/20 px-2.5 py-0.5 text-xs font-semibold text-teal-300 ring-1 ring-teal-400/30">GET
+                                                MULTIPLE</span>
                                         @endif
                                     </td>
                                     <td class="px-3 py-2 text-center">

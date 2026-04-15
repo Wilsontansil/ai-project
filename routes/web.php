@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Backoffice\AIAgentController;
 use App\Http\Controllers\Backoffice\AuthController;
 use App\Http\Controllers\Backoffice\ChatAgentController;
 use App\Http\Controllers\Backoffice\DataModelController;
@@ -23,9 +22,6 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/backoffice', [DashboardController::class, 'index'])->name('backoffice.dashboard');
     Route::get('/backoffice/customer/{customer}/chat', [DashboardController::class, 'chat'])->name('backoffice.customer.chat');
-    Route::get('/backoffice/ai-agent', [AIAgentController::class, 'index'])->name('backoffice.ai-agent');
-    Route::post('/backoffice/ai-agent', [AIAgentController::class, 'update'])->name('backoffice.ai-agent.update');
-
     Route::get('/backoffice/chat-agents', [ChatAgentController::class, 'index'])->name('backoffice.chat-agents.index');
     Route::get('/backoffice/chat-agents/create', [ChatAgentController::class, 'create'])->name('backoffice.chat-agents.create');
     Route::post('/backoffice/chat-agents', [ChatAgentController::class, 'store'])->name('backoffice.chat-agents.store');
@@ -33,6 +29,13 @@ Route::middleware('auth')->group(function () {
     Route::put('/backoffice/chat-agents/{chatAgent}', [ChatAgentController::class, 'update'])->name('backoffice.chat-agents.update');
     Route::delete('/backoffice/chat-agents/{chatAgent}', [ChatAgentController::class, 'destroy'])->name('backoffice.chat-agents.destroy');
     Route::post('/backoffice/chat-agents/{chatAgent}/duplicate', [ChatAgentController::class, 'duplicate'])->name('backoffice.chat-agents.duplicate');
+
+    // Forbidden behaviours scoped per agent
+    Route::get('/backoffice/chat-agents/{chatAgent}/forbidden/create', [ForbiddenBehaviourController::class, 'create'])->name('backoffice.forbidden.create');
+    Route::post('/backoffice/chat-agents/{chatAgent}/forbidden', [ForbiddenBehaviourController::class, 'store'])->name('backoffice.forbidden.store');
+    Route::get('/backoffice/chat-agents/{chatAgent}/forbidden/{forbidden_behaviour}/edit', [ForbiddenBehaviourController::class, 'edit'])->name('backoffice.forbidden.edit');
+    Route::put('/backoffice/chat-agents/{chatAgent}/forbidden/{forbidden_behaviour}', [ForbiddenBehaviourController::class, 'update'])->name('backoffice.forbidden.update');
+    Route::delete('/backoffice/chat-agents/{chatAgent}/forbidden/{forbidden_behaviour}', [ForbiddenBehaviourController::class, 'destroy'])->name('backoffice.forbidden.destroy');
 
     Route::get('/backoffice/tools', [ToolController::class, 'index'])->name('backoffice.tools.index');
     Route::get('/backoffice/tools/create', [ToolController::class, 'create'])->name('backoffice.tools.create');
@@ -48,13 +51,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/backoffice/data-models/{dataModel}/edit', [DataModelController::class, 'edit'])->name('backoffice.data-models.edit');
     Route::put('/backoffice/data-models/{dataModel}', [DataModelController::class, 'update'])->name('backoffice.data-models.update');
     Route::delete('/backoffice/data-models/{dataModel}', [DataModelController::class, 'destroy'])->name('backoffice.data-models.destroy');
-
-    Route::get('/backoffice/forbidden-behaviours', [ForbiddenBehaviourController::class, 'index'])->name('backoffice.forbidden.index');
-    Route::get('/backoffice/forbidden-behaviours/create', [ForbiddenBehaviourController::class, 'create'])->name('backoffice.forbidden.create');
-    Route::post('/backoffice/forbidden-behaviours', [ForbiddenBehaviourController::class, 'store'])->name('backoffice.forbidden.store');
-    Route::get('/backoffice/forbidden-behaviours/{forbidden_behaviour}/edit', [ForbiddenBehaviourController::class, 'edit'])->name('backoffice.forbidden.edit');
-    Route::put('/backoffice/forbidden-behaviours/{forbidden_behaviour}', [ForbiddenBehaviourController::class, 'update'])->name('backoffice.forbidden.update');
-    Route::delete('/backoffice/forbidden-behaviours/{forbidden_behaviour}', [ForbiddenBehaviourController::class, 'destroy'])->name('backoffice.forbidden.destroy');
 
     Route::get('/backoffice/settings', [SettingController::class, 'index'])->name('backoffice.settings.index');
     Route::post('/backoffice/settings', [SettingController::class, 'update'])->name('backoffice.settings.update');

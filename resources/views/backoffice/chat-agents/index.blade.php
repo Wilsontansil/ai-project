@@ -20,11 +20,12 @@
     @endif
 
     {{-- Agent Card Grid --}}
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem">
         {{-- Create New Card --}}
         <a href="{{ route('backoffice.chat-agents.create') }}"
             class="group flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-600/60 bg-slate-900/50 p-6 transition hover:border-cyan-400/50 hover:bg-slate-900/70"
-            style="min-height:220px">
+            style="min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center">
             <div
                 class="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-400/10 text-cyan-400 transition group-hover:bg-cyan-400/20">
                 <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"
@@ -39,45 +40,53 @@
         {{-- Agent Cards --}}
         @foreach ($agents as $agent)
             <div class="relative flex flex-col rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 transition hover:border-slate-600"
-                style="min-height:220px">
+                style="min-height:240px;display:flex;flex-direction:column;position:relative">
                 {{-- Status badge --}}
-                <div class="absolute right-4 top-4 flex items-center gap-2">
+                <div style="position:absolute;right:1rem;top:1rem;display:flex;align-items:center;gap:0.5rem">
                     @if ($agent->is_default)
                         <span
-                            class="inline-flex items-center rounded-full bg-cyan-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-300 ring-1 ring-cyan-400/30">DEFAULT</span>
+                            class="inline-flex items-center rounded-full bg-cyan-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-300 ring-1 ring-cyan-400/30"
+                            style="display:inline-flex;align-items:center;font-size:11px">DEFAULT</span>
                     @endif
                     @if ($agent->is_enabled)
-                        <span class="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" title="Enabled"></span>
+                        <span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#34d399"
+                            title="Enabled"></span>
                     @else
-                        <span class="inline-flex h-2.5 w-2.5 rounded-full bg-red-400" title="Disabled"></span>
+                        <span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#f87171"
+                            title="Disabled"></span>
                     @endif
                 </div>
 
                 {{-- Avatar + Name --}}
-                <div class="flex items-center gap-3">
+                <div style="display:flex;align-items:center;gap:0.75rem">
                     <div
-                        class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500/30 to-blue-600/30 text-lg font-bold text-white">
+                        style="display:flex;width:48px;height:48px;min-width:48px;align-items:center;justify-content:center;border-radius:12px;background:linear-gradient(135deg,rgba(6,182,212,0.3),rgba(37,99,235,0.3));font-size:18px;font-weight:700;color:#fff">
                         {{ strtoupper(mb_substr($agent->name, 0, 2)) }}
                     </div>
-                    <div class="min-w-0">
-                        <h3 class="truncate text-sm font-semibold text-white">{{ $agent->name }}</h3>
-                        <p class="text-[11px] text-slate-400">{{ $agent->model }}</p>
+                    <div style="min-width:0">
+                        <h3
+                            style="font-size:14px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                            {{ $agent->name }}</h3>
+                        <p style="font-size:11px;color:#94a3b8">{{ $agent->model }}</p>
                     </div>
                 </div>
 
                 {{-- Description --}}
-                <p class="mt-3 flex-1 text-xs text-slate-400 line-clamp-2">
+                <p
+                    style="margin-top:0.75rem;flex:1;font-size:12px;color:#94a3b8;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">
                     {{ $agent->description ?: 'No description' }}
                 </p>
 
                 {{-- Meta info --}}
-                <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500">
+                <div style="margin-top:0.75rem;display:flex;flex-wrap:wrap;gap:1rem;font-size:11px;color:#64748b">
                     <span>Max tokens: {{ $agent->max_tokens }}</span>
                     <span>Temp: {{ $agent->temperature }}</span>
+                    <span>Forbidden: {{ $agent->forbiddenBehaviours()->where('is_active', true)->count() }}</span>
                 </div>
 
                 {{-- Actions --}}
-                <div class="mt-4 flex items-center gap-2 border-t border-slate-700/50 pt-3">
+                <div
+                    style="margin-top:1rem;display:flex;align-items:center;gap:0.5rem;border-top:1px solid rgba(51,65,85,0.5);padding-top:0.75rem">
                     <a href="{{ route('backoffice.chat-agents.edit', $agent) }}"
                         class="rounded-lg bg-white/10 px-3.5 py-1.5 text-xs font-medium text-slate-200 transition hover:bg-white/20">
                         Settings
@@ -96,7 +105,7 @@
                         </button>
                     </form>
                     <form method="POST" action="{{ route('backoffice.chat-agents.destroy', $agent) }}"
-                        onsubmit="return confirm('Hapus agent {{ $agent->name }}?')" class="ml-auto">
+                        onsubmit="return confirm('Hapus agent {{ $agent->name }}?')" style="margin-left:auto">
                         @csrf
                         @method('DELETE')
                         <button type="submit"

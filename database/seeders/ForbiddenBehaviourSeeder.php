@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\ChatAgent;
 use App\Models\ForbiddenBehaviour;
 use Illuminate\Database\Seeder;
 
@@ -9,6 +10,9 @@ class ForbiddenBehaviourSeeder extends Seeder
 {
     public function run(): void
     {
+        $defaultAgent = ChatAgent::query()->where('is_default', true)->first();
+        $agentId = $defaultAgent?->id;
+
         $rules = [
             [
                 'title' => 'Dilarang membuat data player tanpa konfirmasi',
@@ -33,7 +37,7 @@ class ForbiddenBehaviourSeeder extends Seeder
         foreach ($rules as $rule) {
             ForbiddenBehaviour::query()->updateOrCreate(
                 ['title' => $rule['title']],
-                $rule
+                array_merge($rule, ['chat_agent_id' => $agentId])
             );
         }
     }

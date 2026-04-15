@@ -1,12 +1,19 @@
 @extends('backoffice.partials.layout')
 
-@section('title', 'New Forbidden Rule')
+@section('title', 'New Forbidden Rule — ' . $chatAgent->name)
 
 @section('content')
     {{-- Header --}}
-    <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
-        <h1 class="text-lg font-semibold sm:text-2xl">New Forbidden Rule</h1>
-        <p class="text-xs text-slate-400">Tambahkan aturan baru yang AI agent dilarang lakukan.</p>
+    <div class="flex items-center justify-between rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
+        <div>
+            <h1 class="text-lg font-semibold sm:text-2xl">New Forbidden Rule</h1>
+            <p class="text-xs text-slate-400">Agent: {{ $chatAgent->name }} — Tambahkan aturan baru yang AI agent dilarang
+                lakukan.</p>
+        </div>
+        <a href="{{ route('backoffice.chat-agents.edit', $chatAgent) }}"
+            class="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300 transition hover:bg-white/10">
+            &larr; Back to Agent
+        </a>
     </div>
 
     @if ($errors->any())
@@ -20,7 +27,7 @@
     @endif
 
     <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-4 sm:p-5">
-        <form method="POST" action="{{ route('backoffice.forbidden.store') }}" class="space-y-4">
+        <form method="POST" action="{{ route('backoffice.forbidden.store', $chatAgent) }}" class="space-y-4">
             @csrf
 
             <div>
@@ -54,7 +61,7 @@
                     class="rounded-lg bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
                     Submit Rule
                 </button>
-                <a href="{{ route('backoffice.forbidden.index') }}"
+                <a href="{{ route('backoffice.chat-agents.edit', $chatAgent) }}"
                     class="rounded-lg border border-white/10 px-5 py-2.5 text-sm text-slate-300 transition hover:bg-white/5">
                     Cancel
                 </a>

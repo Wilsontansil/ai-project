@@ -49,4 +49,9 @@ class ChatAgent extends Model
     {
         return $query->where('is_enabled', true);
     }
+
+    public function forbiddenBehaviours()
+    {
+        return $this->hasMany(ForbiddenBehaviour::class);
+    }
 }

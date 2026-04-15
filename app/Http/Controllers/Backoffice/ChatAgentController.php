@@ -52,7 +52,14 @@ class ChatAgentController extends Controller
 
     public function edit(ChatAgent $chatAgent): View
     {
-        return view('backoffice.chat-agents.edit', ['agent' => $chatAgent]);
+        $forbiddenRules = $chatAgent->forbiddenBehaviours()
+            ->orderByRaw("FIELD(level, 'danger', 'warning', 'info')")
+            ->get();
+
+        return view('backoffice.chat-agents.edit', [
+            'agent' => $chatAgent,
+            'forbiddenRules' => $forbiddenRules,
+        ]);
     }
 
     public function update(Request $request, ChatAgent $chatAgent): RedirectResponse

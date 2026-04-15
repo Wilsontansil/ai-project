@@ -192,7 +192,7 @@ class AIService
         }
 
         // Append active case instructions from database
-        $caseInstructions = $this->getCaseInstructions();
+        $caseInstructions = $this->getCaseInstructions($chatAgent);
         if ($caseInstructions !== '') {
             $basePrompt .= "\n\n" . $caseInstructions;
         }
@@ -266,15 +266,22 @@ class AIService
     /**
      * Build additional instructions from active forbidden behaviour rules.
      */
-    private function getCaseInstructions(): string
+    private function getCaseInstructions(?ChatAgent $chatAgent = null): string
     {
         if (!Schema::hasTable('forbidden_behaviours')) {
             return '';
         }
 
-        $rules = ForbiddenBehaviour::query()
-            ->where('is_active', true)
-            ->orderByRaw("FIELD(level, 'danger', 'warning', 'info')")
+        $query = ForbiddenBehaviour::query()
+            ->where('is_active', true);
+
+        if ($chatAgent) {
+            $query->where('chat_agent_id', $chatAgent->id);
+        } else {
+            $query->whereNull('chat_agent_id');
+        }
+
+        $rules = $query->orderByRaw("FIELD(level, 'danger', 'warning', 'info')")
             ->get();
 
         if ($rules->isEmpty()) {

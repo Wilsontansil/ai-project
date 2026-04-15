@@ -142,4 +142,92 @@
             </div>
         </form>
     </div>
+
+    {{-- Forbidden Rules Section --}}
+    <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+            <div>
+                <h2 class="text-sm font-semibold text-white">Forbidden Rules</h2>
+                <p class="text-xs text-slate-400">Aturan perilaku yang dilarang untuk agent ini.</p>
+            </div>
+            <a href="{{ route('backoffice.forbidden.create', $agent) }}"
+                class="rounded-lg bg-cyan-400 px-4 py-2 text-xs font-semibold text-slate-950 transition hover:bg-cyan-300">
+                + New Rule
+            </a>
+        </div>
+
+        @if ($forbiddenRules->isEmpty())
+            <div class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-6 text-center">
+                <p class="text-sm text-slate-400">Belum ada rule. Tambahkan rule pertama untuk membatasi perilaku agent
+                    ini.</p>
+            </div>
+        @else
+            <div class="overflow-hidden rounded-xl border border-white/10">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-xs" style="width:100%">
+                        <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
+                            <tr>
+                                <th class="px-3 py-2 font-medium">Title</th>
+                                <th class="px-3 py-2 font-medium">Instruction</th>
+                                <th class="px-3 py-2 font-medium text-center">Level</th>
+                                <th class="px-3 py-2 font-medium text-center">Status</th>
+                                <th class="px-3 py-2 font-medium text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            @foreach ($forbiddenRules as $rule)
+                                <tr class="transition hover:bg-white/5">
+                                    <td class="px-3 py-2">
+                                        <p class="font-medium text-white">{{ $rule->title }}</p>
+                                    </td>
+                                    <td class="max-w-xs px-3 py-2">
+                                        <p class="text-xs text-slate-300 line-clamp-2">{{ $rule->instruction }}</p>
+                                    </td>
+                                    <td class="px-3 py-2 text-center">
+                                        @if ($rule->level === 'danger')
+                                            <span
+                                                style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(239,68,68,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#fca5a5">DANGER</span>
+                                        @elseif ($rule->level === 'warning')
+                                            <span
+                                                style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(245,158,11,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#fcd34d">WARNING</span>
+                                        @else
+                                            <span
+                                                style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(59,130,246,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#93c5fd">INFO</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-3 py-2 text-center">
+                                        @if ($rule->is_active)
+                                            <span
+                                                style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(16,185,129,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#6ee7b7">ON</span>
+                                        @else
+                                            <span
+                                                style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(239,68,68,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#fca5a5">OFF</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-3 py-2 text-right">
+                                        <div style="display:flex;align-items:center;justify-content:flex-end;gap:0.5rem">
+                                            <a href="{{ route('backoffice.forbidden.edit', [$agent, $rule]) }}"
+                                                class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
+                                                Edit
+                                            </a>
+                                            <form method="POST"
+                                                action="{{ route('backoffice.forbidden.destroy', [$agent, $rule]) }}"
+                                                onsubmit="return confirm('Hapus rule {{ $rule->title }}?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-1.5 text-xs text-red-300 transition hover:bg-red-500/20">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+    </div>
 @endsection

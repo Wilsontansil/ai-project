@@ -3,36 +3,24 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Models\ChatAgent;
 use App\Models\ForbiddenBehaviour;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class ForbiddenBehaviourController extends Controller
 {
-    public function index(): View
-    {
-        $rules = Schema::hasTable('forbidden_behaviours')
-            ? ForbiddenBehaviour::query()->orderByRaw("FIELD(level, 'danger', 'warning', 'info')")->get()
-            : collect();
-
-        return view('backoffice.forbidden-behaviours.index', [
-            'rules' => $rules,
-            'boActive' => 'forbidden',
-            'currentTool' => null,
-        ]);
-    }
-
-    public function create(): View
+    public function create(ChatAgent $chatAgent): View
     {
         return view('backoffice.forbidden-behaviours.create', [
-            'boActive' => 'forbidden',
+            'chatAgent' => $chatAgent,
+            'boActive' => 'chat-agents',
             'currentTool' => null,
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, ChatAgent $chatAgent): RedirectResponse
     {
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
@@ -40,27 +28,28 @@ class ForbiddenBehaviourController extends Controller
             'level' => ['required', 'in:info,warning,danger'],
         ]);
 
-        ForbiddenBehaviour::create([
+        $chatAgent->forbiddenBehaviours()->create([
             'title' => trim($data['title']),
             'instruction' => trim($data['instruction']),
             'level' => $data['level'],
             'is_active' => true,
         ]);
 
-        return redirect()->route('backoffice.forbidden.index')
+        return redirect()->route('backoffice.chat-agents.edit', $chatAgent)
             ->with('success', 'Rule berhasil ditambahkan.');
     }
 
-    public function edit(ForbiddenBehaviour $forbidden_behaviour): View
+    public function edit(ChatAgent $chatAgent, ForbiddenBehaviour $forbidden_behaviour): View
     {
         return view('backoffice.forbidden-behaviours.edit', [
+            'chatAgent' => $chatAgent,
             'rule' => $forbidden_behaviour,
-            'boActive' => 'forbidden',
+            'boActive' => 'chat-agents',
             'currentTool' => null,
         ]);
     }
 
-    public function update(Request $request, ForbiddenBehaviour $forbidden_behaviour): RedirectResponse
+    public function update(Request $request, ChatAgent $chatAgent, ForbiddenBehaviour $forbidden_behaviour): RedirectResponse
     {
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
@@ -76,15 +65,15 @@ class ForbiddenBehaviourController extends Controller
             'is_active' => $request->boolean('is_active'),
         ]);
 
-        return redirect()->route('backoffice.forbidden.index')
+        return redirect()->route('backoffice.chat-agents.edit', $chatAgent)
             ->with('success', 'Rule berhasil diupdate.');
     }
 
-    public function destroy(ForbiddenBehaviour $forbidden_behaviour): RedirectResponse
+    public function destroy(ChatAgent $chatAgent, ForbiddenBehaviour $forbidden_behaviour): RedirectResponse
     {
         $forbidden_behaviour->delete();
 
-        return redirect()->route('backoffice.forbidden.index')
+        return redirect()->route('backoffice.chat-agents.edit', $chatAgent)
             ->with('success', 'Rule berhasil dihapus.');
     }
 }

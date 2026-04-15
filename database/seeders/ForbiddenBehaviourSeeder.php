@@ -40,5 +40,12 @@ class ForbiddenBehaviourSeeder extends Seeder
                 array_merge($rule, ['chat_agent_id' => $agentId])
             );
         }
+
+        // Assign any orphaned rules (chat_agent_id = null) to the default agent
+        if ($agentId) {
+            ForbiddenBehaviour::query()
+                ->whereNull('chat_agent_id')
+                ->update(['chat_agent_id' => $agentId]);
+        }
     }
 }

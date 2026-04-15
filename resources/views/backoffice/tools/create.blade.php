@@ -357,7 +357,7 @@
             const row = document.createElement('div');
             row.className = 'flex items-end gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
-                <div class="flex-1">
+                <div class="w-2/5">
                     <label class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.parameter_name') }}</label>
                     <select name="params[${paramIndex}][name]"
                         class="param-name-select w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
@@ -389,7 +389,7 @@
             const row = document.createElement('div');
             row.className = 'flex items-end gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
-                <div class="flex-1">
+                <div class="w-2/5">
                     <label class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.parameter_name') }}</label>
                     <input type="text" name="params[${getMultiParamIndex}][name]" value="${name}" placeholder="{{ __('backoffice.pages.tools.parameter_name') }}"
                         class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
@@ -416,7 +416,7 @@
             const row = document.createElement('div');
             row.className = 'flex items-end gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
-                <div class="flex-1">
+                <div class="w-2/5">
                     <label class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.parameter_name') }}</label>
                     <input type="text" name="params[${updateParamIndex}][name]" value="${name}" placeholder="{{ __('backoffice.pages.tools.parameter_name') }}"
                         class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />

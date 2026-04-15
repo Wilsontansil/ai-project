@@ -6,13 +6,14 @@
 
 @section('content')
     {{-- Header --}}
-    <div class="flex items-center justify-between rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
+    <div style="display:flex;align-items:center;justify-content:space-between"
+        class="rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
         <div>
             <h1 class="text-lg font-semibold sm:text-2xl">Create New Agent</h1>
             <p class="text-xs text-slate-400">Buat AI agent baru dengan konfigurasi kustom.</p>
         </div>
-        <a href="{{ route('backoffice.chat-agents.index') }}"
-            class="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300 transition hover:bg-white/10">
+        <a href="{{ route('backoffice.chat-agents.index') }}" class="bo-btn-secondary"
+            style="font-size:0.75rem;padding:0.5rem 1rem">
             &larr; Back
         </a>
     </div>
@@ -32,17 +33,15 @@
             @csrf
 
             {{-- Name & Model row --}}
-            <div class="grid gap-4 md:grid-cols-2">
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem">
                 <div>
-                    <label for="name" class="mb-1.5 block text-sm text-slate-200">Agent Name</label>
+                    <label for="name" class="bo-label">Agent Name</label>
                     <input id="name" type="text" name="name" value="{{ old('name') }}"
-                        placeholder="e.g. Customer Support Bot"
-                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-2.5 text-sm text-white outline-none transition focus:border-cyan-400" />
+                        placeholder="e.g. Customer Support Bot" />
                 </div>
                 <div>
-                    <label for="model" class="mb-1.5 block text-sm text-slate-200">Model</label>
-                    <select id="model" name="model"
-                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-2.5 text-sm text-white outline-none transition focus:border-cyan-400">
+                    <label for="model" class="bo-label">Model</label>
+                    <select id="model" name="model">
                         <option value="gpt-4.1-mini"
                             {{ old('model', 'gpt-4.1-mini') === 'gpt-4.1-mini' ? 'selected' : '' }}>gpt-4.1-mini</option>
                         <option value="gpt-4.1" {{ old('model') === 'gpt-4.1' ? 'selected' : '' }}>gpt-4.1</option>
@@ -57,67 +56,54 @@
 
             {{-- Description --}}
             <div>
-                <label for="description" class="mb-1.5 block text-sm text-slate-200">Description</label>
+                <label for="description" class="bo-label">Description</label>
                 <input id="description" type="text" name="description" value="{{ old('description') }}"
-                    placeholder="Short description of this agent's purpose"
-                    class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-2.5 text-sm text-white outline-none transition focus:border-cyan-400" />
+                    placeholder="Short description of this agent's purpose" />
             </div>
 
             {{-- System Prompt --}}
             <div>
-                <label for="system_prompt" class="mb-1.5 block text-sm text-slate-200">System Prompt</label>
-                <p class="mb-2 text-xs text-slate-400">Prompt utama yang dikirim ke AI model. Variabel: <code
-                        class="text-cyan-400">{bot_name}</code>, <code class="text-cyan-400">{server_time}</code>, <code
-                        class="text-cyan-400">{server_timezone}</code></p>
+                <label for="system_prompt" class="bo-label">System Prompt</label>
+                <p style="margin-bottom:0.5rem;font-size:0.75rem;color:#94a3b8">Prompt utama yang dikirim ke AI model.
+                    Variabel: <code style="color:#22d3ee">{bot_name}</code>, <code
+                        style="color:#22d3ee">{server_time}</code>, <code style="color:#22d3ee">{server_timezone}</code></p>
                 <textarea id="system_prompt" name="system_prompt" rows="14"
                     placeholder="You are {bot_name}, a friendly customer support assistant..."
-                    class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-2.5 text-sm leading-relaxed text-white outline-none transition focus:border-cyan-400"
                     style="font-family:ui-monospace,SFMono-Regular,monospace;font-size:12px">{{ old('system_prompt') }}</textarea>
             </div>
 
             {{-- Max Tokens, Temperature, Toggles --}}
-            <div class="grid gap-4 md:grid-cols-4">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;align-items:end">
                 <div>
-                    <label for="max_tokens" class="mb-1.5 block text-sm text-slate-200">Max Tokens</label>
+                    <label for="max_tokens" class="bo-label">Max Tokens</label>
                     <input id="max_tokens" type="number" name="max_tokens" value="{{ old('max_tokens', 420) }}"
-                        min="50" max="4096"
-                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-2.5 text-sm text-white outline-none transition focus:border-cyan-400" />
+                        min="50" max="4096" />
                 </div>
                 <div>
-                    <label for="temperature" class="mb-1.5 block text-sm text-slate-200">Temperature</label>
+                    <label for="temperature" class="bo-label">Temperature</label>
                     <input id="temperature" type="number" name="temperature" value="{{ old('temperature', '0.7') }}"
-                        min="0" max="2" step="0.1"
-                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-2.5 text-sm text-white outline-none transition focus:border-cyan-400" />
+                        min="0" max="2" step="0.1" />
                 </div>
-                <div class="flex items-end">
-                    <label
-                        class="flex items-center gap-2.5 rounded-xl border border-white/10 bg-slate-900/70 px-4 py-2.5 cursor-pointer">
+                <div>
+                    <label class="bo-checkbox-label">
                         <input type="checkbox" name="is_enabled" value="1"
-                            {{ old('is_enabled', true) ? 'checked' : '' }}
-                            class="h-4 w-4 rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
-                        <span class="text-sm text-slate-200">Enabled</span>
+                            {{ old('is_enabled', true) ? 'checked' : '' }} />
+                        <span>Enabled</span>
                     </label>
                 </div>
-                <div class="flex items-end">
-                    <label
-                        class="flex items-center gap-2.5 rounded-xl border border-white/10 bg-slate-900/70 px-4 py-2.5 cursor-pointer">
-                        <input type="checkbox" name="is_default" value="1" {{ old('is_default') ? 'checked' : '' }}
-                            class="h-4 w-4 rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
-                        <span class="text-sm text-slate-200">Default Agent</span>
+                <div>
+                    <label class="bo-checkbox-label">
+                        <input type="checkbox" name="is_default" value="1" {{ old('is_default') ? 'checked' : '' }} />
+                        <span>Default Agent</span>
                     </label>
                 </div>
             </div>
 
             {{-- Submit --}}
-            <div class="flex items-center gap-3 border-t border-slate-700/50 pt-4">
-                <button type="submit"
-                    class="rounded-lg bg-cyan-400 px-6 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
-                    Create Agent
-                </button>
-                <a href="{{ route('backoffice.chat-agents.index') }}"
-                    class="rounded-lg border border-white/10 px-5 py-2.5 text-sm text-slate-400 transition hover:bg-white/5 hover:text-slate-200">
-                    Cancel
-                </a>
+            <div
+                style="display:flex;align-items:center;gap:0.75rem;border-top:1px solid rgba(51,65,85,0.5);padding-top:1rem">
+                <button type="submit" class="bo-btn-primary">Create Agent</button>
+                <a href="{{ route('backoffice.chat-agents.index') }}" class="bo-btn-secondary">Cancel</a>
             </div>
         </form>
     </div>

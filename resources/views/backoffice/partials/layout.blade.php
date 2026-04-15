@@ -54,6 +54,123 @@
         #bo-content select {
             background-color: rgba(15, 23, 42, 0.7);
             color: #e2e8f0;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 0.625rem 1rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.15s;
+        }
+
+        #bo-content input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):focus,
+        #bo-content textarea:focus,
+        #bo-content select:focus {
+            border-color: #22d3ee;
+        }
+
+        #bo-content textarea {
+            line-height: 1.6;
+        }
+
+        #bo-content select option {
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        /* Buttons */
+        #bo-content .bo-btn-primary {
+            display: inline-block;
+            border-radius: 0.5rem;
+            background: #22d3ee;
+            padding: 0.625rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #0f172a;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+
+        #bo-content .bo-btn-primary:hover {
+            background: #67e8f9;
+        }
+
+        #bo-content .bo-btn-secondary {
+            display: inline-block;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            color: #94a3b8;
+            background: transparent;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        #bo-content .bo-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+        }
+
+        #bo-content .bo-btn-danger {
+            display: inline-block;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            background: rgba(239, 68, 68, 0.1);
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+            color: #fca5a5;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+
+        #bo-content .bo-btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        #bo-content .bo-btn-sm {
+            display: inline-block;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+            color: #cbd5e1;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+
+        #bo-content .bo-btn-sm:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Checkbox container */
+        #bo-content .bo-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.7);
+            padding: 0.625rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: #e2e8f0;
+        }
+
+        /* Form label */
+        #bo-content .bo-label {
+            display: block;
+            margin-bottom: 0.375rem;
+            font-size: 0.875rem;
+            color: #e2e8f0;
         }
 
         /* Collapsed state */

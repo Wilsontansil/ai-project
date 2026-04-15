@@ -271,6 +271,23 @@ class ToolSeeder extends Seeder
                         $depositModel?->id,
                         $withdrawModel?->id,
                     ]),
+                    'query' => [
+                        'filters' => [
+                            ['field' => 'status', 'operator' => '=', 'value' => 'accept'],
+                        ],
+                        'date_range' => [
+                            'field' => 'date',
+                            'range' => 'last_week',
+                        ],
+                        'aggregate' => [
+                            'function' => 'sum',
+                            'field' => 'amount',
+                        ],
+                        'order_by' => [
+                            'field' => 'id',
+                            'direction' => 'desc',
+                        ],
+                    ],
                 ],
             ],
         ];

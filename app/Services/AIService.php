@@ -887,8 +887,18 @@ class AIService
     /**
      * Execute a get_multiple tool — lookup across multiple DataModels.
      * Parameters are custom (not tied to any DataModel fields).
-     * Each DataModel is queried independently with the same arguments,
-     * applying only fields that exist in each model.
+     * Each DataModel is queried independently with the same arguments.
+     *
+     * All query behaviour is driven by meta.query — zero hardcoding:
+     *
+     *   meta.query.select     — string[] fields to return (empty = all DataModel fields)
+     *   meta.query.filters    — array of {field, operator, value} objects
+     *                           operator: =, !=, >, <, >=, <=, like, not like, in, not in
+     *   meta.query.date_range — {field, range} named range (last_week, this_week, today, yesterday, last_month, this_month)
+     *   meta.query.aggregate  — {function, field} — sum, count, avg, min, max
+     *   meta.query.group_by   — string[] fields to group by (used with aggregate)
+     *   meta.query.order_by   — {field, direction} or [{field, direction}, ...]
+     *   meta.query.limit      — int, max rows (ignored when aggregate without group_by)
      */
     private function executeMultiDataModelLookup(Tool $tool, array $arguments): array
     {
@@ -922,6 +932,19 @@ class AIService
             }
         }
 
+        // Read meta.query config (everything comes from here)
+        $queryConfig = (array) data_get($tool->meta, 'query', []);
+        $cfgSelect = (array) ($queryConfig['select'] ?? []);
+        $cfgFilters = (array) ($queryConfig['filters'] ?? []);
+        $cfgDateRange = (array) ($queryConfig['date_range'] ?? []);
+        $cfgAggregate = (array) ($queryConfig['aggregate'] ?? []);
+        $cfgGroupBy = (array) ($queryConfig['group_by'] ?? []);
+        $cfgOrderBy = (array) ($queryConfig['order_by'] ?? []);
+        $cfgLimit = (int) ($queryConfig['limit'] ?? 0);
+
+        // Resolve named date range
+        $dateRange = $this->resolveDateRange($cfgDateRange['range'] ?? '');
+
         $allResults = [];
 
         foreach ($dataModels as $dataModel) {
@@ -935,7 +958,7 @@ class AIService
                 continue;
             }
 
-            // Collect fixed values from this DataModel
+            // Merge fixed values from DataModel into arguments
             $localArguments = $arguments;
             foreach ($fieldsRaw as $fieldName => $meta) {
                 if (is_array($meta) && !empty($meta['required'])) {
@@ -946,31 +969,133 @@ class AIService
             }
 
             try {
-                $query = DB::connection($connectionName)->table($tableName)->select($allowedFields);
                 $lookupFilters = [];
 
+                // Determine aggregate mode
+                $aggFunc = strtolower(trim($cfgAggregate['function'] ?? ''));
+                $aggField = trim($cfgAggregate['field'] ?? '');
+                $isAggregate = in_array($aggFunc, ['sum', 'count', 'avg', 'min', 'max'], true)
+                    && $aggField !== ''
+                    && in_array($aggField, $allowedFields, true);
+
+                // Build SELECT
+                if ($isAggregate && $cfgGroupBy === []) {
+                    $query = DB::connection($connectionName)->table($tableName);
+                } else {
+                    $selectFields = !empty($cfgSelect)
+                        ? array_values(array_intersect($cfgSelect, $allowedFields))
+                        : $allowedFields;
+                    $query = DB::connection($connectionName)->table($tableName)->select($selectFields);
+                }
+
+                // Apply argument-based WHERE (only matching DataModel fields)
                 foreach ($localArguments as $field => $value) {
                     if (!in_array($field, $allowedFields, true)) {
                         continue;
                     }
-
                     $normalizedValue = is_string($value) ? trim($value) : $value;
                     if ($normalizedValue === '' || $normalizedValue === null) {
                         continue;
                     }
-
                     $query->where($field, $normalizedValue);
                     $lookupFilters[$field] = $normalizedValue;
                 }
 
-                $row = $query->first();
+                // Apply meta.query.filters (with operator support)
+                foreach ($cfgFilters as $filter) {
+                    $fField = trim((string) ($filter['field'] ?? ''));
+                    $fOp = strtolower(trim((string) ($filter['operator'] ?? '=')));
+                    $fValue = $filter['value'] ?? null;
 
-                $allResults[] = [
-                    'model_name' => $dataModel->model_name,
-                    'table_name' => $tableName,
-                    'filters' => $lookupFilters,
-                    'data' => $row !== null ? $this->normalizeToolData((array) $row) : null,
-                ];
+                    if ($fField === '' || !in_array($fField, $allowedFields, true)) {
+                        continue;
+                    }
+
+                    $safeOperators = ['=', '!=', '<>', '>', '<', '>=', '<=', 'like', 'not like'];
+
+                    if (in_array($fOp, ['in', 'not in'], true) && is_array($fValue)) {
+                        $fOp === 'in'
+                            ? $query->whereIn($fField, $fValue)
+                            : $query->whereNotIn($fField, $fValue);
+                    } elseif (in_array($fOp, $safeOperators, true)) {
+                        $query->where($fField, $fOp, $fValue);
+                    } else {
+                        $query->where($fField, '=', $fValue);
+                    }
+
+                    $lookupFilters[$fField] = ($fOp === '=') ? $fValue : "{$fOp} {$fValue}";
+                }
+
+                // Apply meta.query.date_range
+                $dateField = trim($cfgDateRange['field'] ?? '');
+                if ($dateField !== '' && $dateRange !== null && in_array($dateField, $allowedFields, true)) {
+                    $query->whereBetween($dateField, [$dateRange['from'], $dateRange['to']]);
+                    $lookupFilters[$dateField . '_from'] = $dateRange['from'];
+                    $lookupFilters[$dateField . '_to'] = $dateRange['to'];
+                }
+
+                // Apply meta.query.group_by
+                if ($cfgGroupBy !== []) {
+                    $safeGroupBy = array_values(array_intersect($cfgGroupBy, $allowedFields));
+                    if ($safeGroupBy !== []) {
+                        $query->groupBy($safeGroupBy);
+                    }
+                }
+
+                // Apply meta.query.order_by (single or multiple)
+                $orderByList = isset($cfgOrderBy['field']) ? [$cfgOrderBy] : $cfgOrderBy;
+                foreach ($orderByList as $orderItem) {
+                    $orderField = trim((string) ($orderItem['field'] ?? ''));
+                    $orderDir = strtolower(trim((string) ($orderItem['direction'] ?? 'desc')));
+                    if ($orderField !== '' && in_array($orderField, $allowedFields, true)) {
+                        $query->orderBy($orderField, $orderDir === 'asc' ? 'asc' : 'desc');
+                    }
+                }
+
+                // Execute: aggregate or normal rows
+                if ($isAggregate && $cfgGroupBy === []) {
+                    $aggResult = $query->{$aggFunc}($aggField);
+
+                    $allResults[] = [
+                        'model_name' => $dataModel->model_name,
+                        'table_name' => $tableName,
+                        'filters' => $lookupFilters,
+                        'aggregate' => [
+                            'function' => $aggFunc,
+                            'field' => $aggField,
+                            'value' => $aggResult,
+                        ],
+                        'data' => null,
+                    ];
+                } elseif ($isAggregate && $cfgGroupBy !== []) {
+                    // Aggregate with group_by: add aggregate as raw select
+                    $query->selectRaw("{$aggFunc}({$aggField}) as {$aggFunc}_{$aggField}");
+                    $rows = ($cfgLimit > 0 ? $query->limit($cfgLimit) : $query)
+                        ->get()
+                        ->map(fn ($r) => (array) $r)
+                        ->toArray();
+
+                    $allResults[] = [
+                        'model_name' => $dataModel->model_name,
+                        'table_name' => $tableName,
+                        'filters' => $lookupFilters,
+                        'data' => $rows ?: null,
+                    ];
+                } else {
+                    if ($cfgLimit > 0) {
+                        $rows = $query->limit($cfgLimit)->get()->map(fn ($r) => $this->normalizeToolData((array) $r))->toArray();
+                    } else {
+                        $row = $query->first();
+                        $rows = $row !== null ? [$this->normalizeToolData((array) $row)] : [];
+                    }
+
+                    $allResults[] = [
+                        'model_name' => $dataModel->model_name,
+                        'table_name' => $tableName,
+                        'filters' => $lookupFilters,
+                        'data' => $rows ?: null,
+                    ];
+                }
             } catch (\Throwable $e) {
                 Log::error('AI multi-model lookup failed for model', [
                     'tool_name' => $tool->tool_name,
@@ -989,8 +1114,8 @@ class AIService
             }
         }
 
-        // Check if all results are null
-        $hasData = collect($allResults)->contains(fn ($r) => $r['data'] !== null);
+        // Check if all results are empty
+        $hasData = collect($allResults)->contains(fn ($r) => $r['data'] !== null || isset($r['aggregate']));
         if (!$hasData) {
             return [
                 'mode' => 'direct',
@@ -1008,6 +1133,44 @@ class AIService
                 'results' => $allResults,
             ],
         ];
+    }
+
+    /**
+     * Resolve a named date range to from/to datetime strings.
+     */
+    private function resolveDateRange(string $range): ?array
+    {
+        if ($range === '') {
+            return null;
+        }
+
+        return match ($range) {
+            'last_week' => [
+                'from' => now()->subWeek()->startOfWeek()->format('Y-m-d 00:00:00'),
+                'to' => now()->subWeek()->endOfWeek()->format('Y-m-d 23:59:59'),
+            ],
+            'this_week' => [
+                'from' => now()->startOfWeek()->format('Y-m-d 00:00:00'),
+                'to' => now()->endOfWeek()->format('Y-m-d 23:59:59'),
+            ],
+            'today' => [
+                'from' => now()->format('Y-m-d 00:00:00'),
+                'to' => now()->format('Y-m-d 23:59:59'),
+            ],
+            'yesterday' => [
+                'from' => now()->subDay()->format('Y-m-d 00:00:00'),
+                'to' => now()->subDay()->format('Y-m-d 23:59:59'),
+            ],
+            'last_month' => [
+                'from' => now()->subMonth()->startOfMonth()->format('Y-m-d 00:00:00'),
+                'to' => now()->subMonth()->endOfMonth()->format('Y-m-d 23:59:59'),
+            ],
+            'this_month' => [
+                'from' => now()->startOfMonth()->format('Y-m-d 00:00:00'),
+                'to' => now()->format('Y-m-d 23:59:59'),
+            ],
+            default => null,
+        };
     }
 
     private function forceToolArgumentsFromMessage($client, Tool $tool, string $systemPrompt, ?string $contextPrompt, array $history, string $userMessage): ?array

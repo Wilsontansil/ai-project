@@ -164,8 +164,11 @@ class ToolController extends Controller
         if ($type === 'get_multiple') {
             $ids = array_filter(array_map('intval', (array) $request->input('data_model_ids', [])));
             $meta['data_model_ids'] = array_values($ids);
+
+            // Preserve meta.query config (filters, date_range, aggregate, order_by, etc.)
+            // Query config is managed via seeder / direct DB; the form does not overwrite it.
         } else {
-            unset($meta['data_model_ids']);
+            unset($meta['data_model_ids'], $meta['query']);
         }
 
         return $meta;

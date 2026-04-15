@@ -5,6 +5,7 @@ use App\Http\Controllers\Backoffice\ChatAgentController;
 use App\Http\Controllers\Backoffice\DataModelController;
 use App\Http\Controllers\Backoffice\ForbiddenBehaviourController;
 use App\Http\Controllers\Backoffice\DashboardController;
+use App\Http\Controllers\Backoffice\DatabaseConnectionController;
 use App\Http\Controllers\Backoffice\SettingController;
 use App\Http\Controllers\Backoffice\ToolController;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +55,14 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/backoffice/settings', [SettingController::class, 'index'])->name('backoffice.settings.index');
     Route::post('/backoffice/settings', [SettingController::class, 'update'])->name('backoffice.settings.update');
+
+    Route::get('/backoffice/database-connections', [DatabaseConnectionController::class, 'index'])->name('backoffice.database-connections.index');
+    Route::get('/backoffice/database-connections/create', [DatabaseConnectionController::class, 'create'])->name('backoffice.database-connections.create');
+    Route::post('/backoffice/database-connections', [DatabaseConnectionController::class, 'store'])->name('backoffice.database-connections.store');
+    Route::get('/backoffice/database-connections/{databaseConnection}/edit', [DatabaseConnectionController::class, 'edit'])->name('backoffice.database-connections.edit');
+    Route::put('/backoffice/database-connections/{databaseConnection}', [DatabaseConnectionController::class, 'update'])->name('backoffice.database-connections.update');
+    Route::delete('/backoffice/database-connections/{databaseConnection}', [DatabaseConnectionController::class, 'destroy'])->name('backoffice.database-connections.destroy');
+    Route::post('/backoffice/database-connections/{databaseConnection}/test', [DatabaseConnectionController::class, 'testConnection'])->name('backoffice.database-connections.test');
 
     Route::post('/backoffice/logout', [AuthController::class, 'logout'])->name('logout');
 });

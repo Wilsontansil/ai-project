@@ -50,23 +50,25 @@
                             {{ __('backoffice.pages.tools.type_get') }}</option>
                         <option value="get_multiple" {{ old('type', $tool->type) === 'get_multiple' ? 'selected' : '' }}>
                             {{ __('backoffice.pages.tools.type_get_multiple') }}</option>
-                        <option value="update" {{ old('type', $tool->type) === 'update' ? 'selected' : '' }}>Update — API
-                            endpoint</option>
+                        <option value="update" {{ old('type', $tool->type) === 'update' ? 'selected' : '' }}>
+                            {{ __('backoffice.pages.tools.type_update') }}</option>
                     </select>
                 </div>
             </div>
 
             <div>
-                <label for="keywords" class="mb-2 block text-sm text-slate-200">Keywords (comma-separated)</label>
-                <p class="mb-2 text-xs text-slate-400">Kata kunci untuk intent matching fallback.</p>
+                <label for="keywords"
+                    class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.keywords') }}</label>
+                <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.keywords_help') }}</p>
                 <input id="keywords" type="text" name="keywords"
                     value="{{ old('keywords', $tool->keywords ? implode(', ', $tool->keywords) : '') }}"
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
             </div>
 
             <div>
-                <label for="description" class="mb-2 block text-sm text-slate-200">Description</label>
-                <p class="mb-2 text-xs text-slate-400">Deskripsi fungsi tool ini — dikirim ke OpenAI.</p>
+                <label for="description"
+                    class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.description') }}</label>
+                <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.description_help') }}</p>
                 <input id="description" type="text" name="description"
                     value="{{ old('description', $tool->description) }}"
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
@@ -75,11 +77,12 @@
             {{-- ─── GET type: Data Model + Parameters ─── --}}
             <div id="section-get" class="space-y-4" style="display:none">
                 <div>
-                    <label for="data_model_id" class="mb-2 block text-sm text-slate-200">Data Model Connection</label>
-                    <p class="mb-2 text-xs text-slate-400">Pilih Data Model untuk lookup data.</p>
+                    <label for="data_model_id"
+                        class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.data_model_connection') }}</label>
+                    <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.choose_data_model') }}</p>
                     <select id="data_model_id" name="data_model_id"
                         class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
-                        <option value="">-- Pilih Data Model --</option>
+                        <option value="">{{ __('backoffice.pages.tools.select_data_model') }}</option>
                         @foreach ($dataModels as $dm)
                             <option value="{{ $dm->id }}"
                                 {{ (string) old('data_model_id', $tool->data_model_id) === (string) $dm->id ? 'selected' : '' }}>
@@ -90,13 +93,12 @@
                 </div>
 
                 <div>
-                    <p class="mb-2 block text-sm text-slate-200">Parameters</p>
-                    <p class="mb-2 text-xs text-slate-400">Parameter hanya boleh menggunakan field dari Data Model yang
-                        dipilih.</p>
+                    <p class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.parameters') }}</p>
+                    <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.parameters_help') }}</p>
                     <div id="param-list" class="space-y-3"></div>
                     <button type="button" onclick="addParamRow()"
                         class="mt-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300 transition hover:bg-white/10">
-                        + Tambah Parameter
+                        {{ __('backoffice.pages.tools.add_parameter') }}
                     </button>
                 </div>
             </div>
@@ -104,8 +106,8 @@
             {{-- ─── GET MULTIPLE type: Multiple Data Models + Custom Parameters ─── --}}
             <div id="section-get-multiple" class="space-y-4" style="display:none">
                 <div>
-                    <p class="mb-2 block text-sm text-slate-200">Data Models</p>
-                    <p class="mb-2 text-xs text-slate-400">Pilih satu atau lebih Data Model untuk lookup data.</p>
+                    <p class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.data_models_label') }}</p>
+                    <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.data_models_help') }}</p>
                     @php
                         $savedModelIds = old('data_model_ids', data_get($tool->meta, 'data_model_ids', [])) ?: [];
                         $savedModelIds = array_map('strval', (array) $savedModelIds);
@@ -124,13 +126,12 @@
                 </div>
 
                 <div>
-                    <p class="mb-2 block text-sm text-slate-200">Parameters</p>
-                    <p class="mb-2 text-xs text-slate-400">Parameter bebas (tidak terikat ke field Data Model). Parameter
-                        akan digunakan untuk query semua Data Model terpilih.</p>
+                    <p class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.parameters') }}</p>
+                    <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.free_parameters') }}</p>
                     <div id="getmulti-param-list" class="space-y-3"></div>
                     <button type="button" onclick="addGetMultiParamRow()"
                         class="mt-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300 transition hover:bg-white/10">
-                        + Tambah Parameter
+                        {{ __('backoffice.pages.tools.add_parameter') }}
                     </button>
                 </div>
             </div>
@@ -138,19 +139,19 @@
             {{-- ─── UPDATE type: Parameters + API Endpoint ─── --}}
             <div id="section-update" class="space-y-4" style="display:none">
                 <div>
-                    <p class="mb-2 block text-sm text-slate-200">Parameters</p>
-                    <p class="mb-2 text-xs text-slate-400">Parameter yang diperlukan untuk API endpoint.</p>
+                    <p class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.parameters') }}</p>
+                    <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.parameters_api_help') }}</p>
                     <div id="update-param-list" class="space-y-3"></div>
                     <button type="button" onclick="addUpdateParamRow()"
                         class="mt-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300 transition hover:bg-white/10">
-                        + Tambah Parameter
+                        {{ __('backoffice.pages.tools.add_parameter') }}
                     </button>
                 </div>
 
                 <div class="rounded-2xl border border-white/10 bg-slate-900/30 p-4 space-y-4">
                     <div>
-                        <h3 class="text-sm font-semibold text-white">API Endpoint</h3>
-                        <p class="text-xs text-slate-400">Route yang dipanggil ke webhook base URL saat tool dieksekusi.</p>
+                        <h3 class="text-sm font-semibold text-white">{{ __('backoffice.pages.tools.api_endpoint') }}</h3>
+                        <p class="text-xs text-slate-400">{{ __('backoffice.pages.tools.endpoint_help') }}</p>
                     </div>
 
                     <div class="rounded-xl border border-white/10 bg-slate-900/40 p-3 space-y-3">
@@ -163,22 +164,21 @@
                         </div>
 
                         <div>
-                            <p class="mb-1 text-xs text-slate-300">Body</p>
-                            <p class="mb-2 text-xs text-slate-400">Key → value pairs. Value bisa custom text, kosong (ambil
-                                dari parameter), atau $arg->field.</p>
+                            <p class="mb-1 text-xs text-slate-300">{{ __('backoffice.pages.tools.body') }}</p>
+                            <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.body_help') }}</p>
                             <div id="body-list" class="space-y-2"></div>
                             <div class="flex items-center gap-2 mt-2">
                                 <button type="button" onclick="addBodyField()"
                                     class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
-                                    + Tambah Field
+                                    {{ __('backoffice.pages.tools.add_field') }}
                                 </button>
                                 <button type="button" onclick="copyParamsToBody()"
                                     class="rounded-lg border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-300 transition hover:bg-cyan-500/20">
-                                    Copy from Parameters
+                                    {{ __('backoffice.pages.tools.copy_from_parameters') }}
                                 </button>
                                 <button type="button" onclick="testEndpoint()"
                                     class="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-300 transition hover:bg-emerald-500/20">
-                                    ▶ Test Request
+                                    ▶ {{ __('backoffice.pages.tools.test_request') }}
                                 </button>
                             </div>
                             <div id="endpoint-test-result"
@@ -194,7 +194,8 @@
                         </div>
 
                         <div>
-                            <p class="mb-2 text-xs text-slate-300">Expected Response</p>
+                            <p class="mb-2 text-xs text-slate-300">{{ __('backoffice.pages.tools.expected_response') }}
+                            </p>
                             <div class="rounded-lg border border-white/10 bg-slate-950/60 p-3 mb-3">
                                 <pre id="expected-response-preview"
                                     class="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-auto max-h-64">{
@@ -203,11 +204,12 @@
   "data": {}
 }</pre>
                             </div>
-                            <p class="mb-2 text-xs text-slate-400">Add expected data fields (key → value):</p>
+                            <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.expected_data_help') }}
+                            </p>
                             <div id="expected-data-list" class="space-y-2 mb-2"></div>
                             <button type="button" onclick="addExpectedDataField()"
                                 class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
-                                + Tambah Expected Data
+                                {{ __('backoffice.pages.tools.add_expected_data') }}
                             </button>
                             <div class="hidden">
                                 <input type="hidden" name="endpoint_expected_status"
@@ -219,9 +221,9 @@
 
                         {{-- Expected Error Responses --}}
                         <div>
-                            <p class="mb-2 text-xs text-slate-300">Expected Error Responses</p>
-                            <p class="mb-2 text-xs text-slate-400">Definisikan kemungkinan error response dari API. AI akan
-                                membaca message dan merespon sesuai konteks.</p>
+                            <p class="mb-2 text-xs text-slate-300">{{ __('backoffice.pages.tools.error_responses') }}</p>
+                            <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.error_responses_help') }}
+                            </p>
                             <div class="rounded-lg border border-white/10 bg-slate-950/60 p-3 mb-3">
                                 <pre id="error-response-preview" class="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-auto max-h-64">[
   {
@@ -234,7 +236,7 @@
                             <div id="error-response-list" class="space-y-2 mb-2"></div>
                             <button type="button" onclick="addErrorResponse()"
                                 class="rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-300 transition hover:bg-amber-500/20">
-                                + Tambah Error Response
+                                {{ __('backoffice.pages.tools.add_error_response') }}
                             </button>
                         </div>
                     </div>
@@ -242,8 +244,9 @@
             </div>
 
             <div>
-                <label for="tool_rules" class="mb-2 block text-sm text-slate-200">Tool Rules</label>
-                <p class="mb-2 text-xs text-slate-400">Instruksi spesifik untuk AI saat menggunakan tool ini.</p>
+                <label for="tool_rules"
+                    class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.tool_rules') }}</label>
+                <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.tool_rules_help') }}</p>
                 <textarea id="tool_rules" name="tool_rules" rows="4"
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('tool_rules', $tool->tool_rules) }}</textarea>
             </div>
@@ -251,9 +254,8 @@
             {{-- ─── INFO type: Information Texts ─── --}}
             <div id="section-info" class="space-y-4" style="display:none">
                 <div>
-                    <p class="mb-2 block text-sm text-slate-200">Information Texts</p>
-                    <p class="mb-2 text-xs text-slate-400">Teks informasi yang langsung dikirim sebagai jawaban. Tambahkan
-                        beberapa variasi agar bot tidak monoton.</p>
+                    <p class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.information_texts') }}</p>
+                    <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.information_texts_help') }}</p>
                     <div id="info-texts-wrapper" class="space-y-2">
                         @php
                             $infoTexts = old('information_texts', $tool->information_text ?? []);
@@ -268,7 +270,7 @@
                             <div class="info-text-row flex gap-2">
                                 <textarea name="information_texts[]" rows="3"
                                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-                                    placeholder="Teks informasi...">{{ $text }}</textarea>
+                                    placeholder="{{ __('backoffice.pages.tools.information_text_placeholder') }}">{{ $text }}</textarea>
                                 <button type="button" onclick="this.closest('.info-text-row').remove()"
                                     class="shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20">✕</button>
                             </div>
@@ -276,7 +278,7 @@
                     </div>
                     <button type="button" onclick="addInfoText()"
                         class="mt-2 rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-3 py-1.5 text-xs text-cyan-300 transition hover:bg-cyan-400/20">
-                        + Add Text
+                        {{ __('backoffice.pages.tools.add_text') }}
                     </button>
                 </div>
             </div>{{-- end #section-info --}}
@@ -287,7 +289,7 @@
                     <input type="checkbox" name="is_enabled" value="1"
                         {{ old('is_enabled', $tool->is_enabled) ? 'checked' : '' }}
                         class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
-                    Enable tool
+                    {{ __('backoffice.pages.tools.enable_tool') }}
                 </label>
             </div>
 
@@ -330,7 +332,7 @@
 
         function buildFieldOptions(selected = '') {
             const fields = getSelectedDataModelFields();
-            let html = '<option value="">-- pilih field --</option>';
+            let html = '<option value="">{{ __('backoffice.pages.tools.select_field') }}</option>';
             fields.forEach(field => {
                 const isSelected = String(field) === String(selected) ? 'selected' : '';
                 html += `<option value="${field}" ${isSelected}>${field}</option>`;
@@ -352,21 +354,27 @@
         function addParamRow(name = '', desc = '', required = false) {
             const list = document.getElementById('param-list');
             const row = document.createElement('div');
-            row.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
+            row.className = 'flex items-end gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
-                <select name="params[${paramIndex}][name]"
-                    class="param-name-select w-1/3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
-                    ${buildFieldOptions(name)}
-                </select>
-                <input type="text" name="params[${paramIndex}][description]" value="${desc}" placeholder="Deskripsi (e.g. Username akun)"
-                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <label class="flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap">
+                <div class="w-2/5">
+                    <label class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.parameter_name') }}</label>
+                    <select name="params[${paramIndex}][name]"
+                        class="param-name-select w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
+                        ${buildFieldOptions(name)}
+                    </select>
+                </div>
+                <div class="flex-1">
+                    <label class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.parameter_description') }}</label>
+                    <input type="text" name="params[${paramIndex}][description]" value="${desc}" placeholder="{{ __('backoffice.pages.tools.parameter_description') }}"
+                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                </div>
+                <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer">
                     <input type="checkbox" name="params[${paramIndex}][required]" value="1" ${required ? 'checked' : ''}
                         class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
-                    Wajib
+                    {{ __('backoffice.pages.tools.required') }}
                 </label>
-                <button type="button" onclick="this.parentElement.remove()"
-                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                <button type="button" onclick="this.closest('div').remove()"
+                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
             paramIndex++;
@@ -378,19 +386,25 @@
         function addGetMultiParamRow(name = '', desc = '', required = false) {
             const list = document.getElementById('getmulti-param-list');
             const row = document.createElement('div');
-            row.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
+            row.className = 'flex items-end gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
-                <input type="text" name="params[${getMultiParamIndex}][name]" value="${name}" placeholder="Parameter name"
-                    class="w-1/3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <input type="text" name="params[${getMultiParamIndex}][description]" value="${desc}" placeholder="Deskripsi (e.g. Username akun)"
-                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <label class="flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap">
+                <div class="w-2/5">
+                    <label class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.parameter_name') }}</label>
+                    <input type="text" name="params[${getMultiParamIndex}][name]" value="${name}" placeholder="{{ __('backoffice.pages.tools.parameter_name') }}"
+                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                </div>
+                <div class="flex-1">
+                    <label class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.parameter_description') }}</label>
+                    <input type="text" name="params[${getMultiParamIndex}][description]" value="${desc}" placeholder="{{ __('backoffice.pages.tools.parameter_description') }}"
+                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                </div>
+                <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer">
                     <input type="checkbox" name="params[${getMultiParamIndex}][required]" value="1" ${required ? 'checked' : ''}
                         class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
-                    Wajib
+                    {{ __('backoffice.pages.tools.required') }}
                 </label>
-                <button type="button" onclick="this.parentElement.remove()"
-                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                <button type="button" onclick="this.closest('div').remove()"
+                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
             getMultiParamIndex++;
@@ -399,19 +413,25 @@
         function addUpdateParamRow(name = '', desc = '', required = false) {
             const list = document.getElementById('update-param-list');
             const row = document.createElement('div');
-            row.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
+            row.className = 'flex items-end gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
-                <input type="text" name="params[${updateParamIndex}][name]" value="${name}" placeholder="Parameter name"
-                    class="w-1/3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <input type="text" name="params[${updateParamIndex}][description]" value="${desc}" placeholder="Deskripsi (e.g. Username akun)"
-                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <label class="flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap">
+                <div class="w-2/5">
+                    <label class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.parameter_name') }}</label>
+                    <input type="text" name="params[${updateParamIndex}][name]" value="${name}" placeholder="{{ __('backoffice.pages.tools.parameter_name') }}"
+                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                </div>
+                <div class="flex-1">
+                    <label class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.parameter_description') }}</label>
+                    <input type="text" name="params[${updateParamIndex}][description]" value="${desc}" placeholder="{{ __('backoffice.pages.tools.parameter_description') }}"
+                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                </div>
+                <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer">
                     <input type="checkbox" name="params[${updateParamIndex}][required]" value="1" ${required ? 'checked' : ''}
                         class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
-                    Wajib
+                    {{ __('backoffice.pages.tools.required') }}
                 </label>
-                <button type="button" onclick="this.parentElement.remove()"
-                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                <button type="button" onclick="this.closest('div').remove()"
+                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
             updateParamIndex++;
@@ -441,14 +461,20 @@
         function addBodyField(key = '', val = '') {
             const list = document.getElementById('body-list');
             const row = document.createElement('div');
-            row.className = 'endpoint-body-row flex items-center gap-2';
+            row.className = 'endpoint-body-row flex items-end gap-2';
             row.innerHTML = `
-                <input type="text" name="endpoint_body[${bodyIdx}][key]" value="${key}" placeholder="Key (e.g. username)"
-                    class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <input type="text" name="endpoint_body[${bodyIdx}][value]" value="${val}" placeholder="Value custom / kosong / $arg->field"
-                    class="body-value-input flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <button type="button" onclick="this.parentElement.remove()"
-                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                <div class="w-2/5">
+                    <label class="mb-1 block text-xs text-slate-300">Key</label>
+                    <input type="text" name="endpoint_body[${bodyIdx}][key]" value="${key}" placeholder="{{ __('backoffice.pages.tools.key_placeholder') }}"
+                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                </div>
+                <div class="flex-1">
+                    <label class="mb-1 block text-xs text-slate-300">Value</label>
+                    <input type="text" name="endpoint_body[${bodyIdx}][value]" value="${val}" placeholder="{{ __('backoffice.pages.tools.value_placeholder') }}"
+                        class="body-value-input w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                </div>
+                <button type="button" onclick="this.closest('.endpoint-body-row').remove()"
+                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
             bodyIdx++;
@@ -477,13 +503,19 @@
         function addExpectedDataField(key = '', val = '') {
             const list = document.getElementById('expected-data-list');
             const row = document.createElement('div');
-            row.className = 'flex items-center gap-2';
+            row.className = 'flex items-end gap-2';
             row.innerHTML = `
-                <input type="text" name="endpoint_expected_data[${expectedDataIdx}][key]" value="${key}" placeholder="Key (e.g. username)"
-                    class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400 expected-data-input" />
-                <input type="text" name="endpoint_expected_data[${expectedDataIdx}][value]" value="${val}" placeholder="Value (e.g. john_doe)"
-                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400 expected-data-input" />
-                <button type="button" class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20 remove-expected">&times;</button>
+                <div class="w-2/5">
+                    <label class="mb-1 block text-xs text-slate-300">Key</label>
+                    <input type="text" name="endpoint_expected_data[${expectedDataIdx}][key]" value="${key}" placeholder="{{ __('backoffice.pages.tools.key_placeholder') }}"
+                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400 expected-data-input" />
+                </div>
+                <div class="flex-1">
+                    <label class="mb-1 block text-xs text-slate-300">Value</label>
+                    <input type="text" name="endpoint_expected_data[${expectedDataIdx}][value]" value="${val}" placeholder="{{ __('backoffice.pages.tools.value_data_placeholder') }}"
+                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400 expected-data-input" />
+                </div>
+                <button type="button" class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20 remove-expected">&times;</button>
             `;
             row.querySelectorAll('.expected-data-input').forEach(input => input.addEventListener('input',
                 updateExpectedResponsePreview));
@@ -521,13 +553,19 @@
         function addErrorResponse(status = '', message = '') {
             const list = document.getElementById('error-response-list');
             const row = document.createElement('div');
-            row.className = 'error-response-row flex items-center gap-2';
+            row.className = 'error-response-row flex items-end gap-2';
             row.innerHTML = `
-                <input type="number" name="error_responses[${errorResponseIdx}][status]" value="${status}" placeholder="Status (e.g. 500)"
-                    class="err-status w-24 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
-                <input type="text" name="error_responses[${errorResponseIdx}][message]" value="${message}" placeholder="Message (e.g. Player not found)"
-                    class="err-message flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
-                <button type="button" class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20 remove-error">&times;</button>
+                <div class="w-24">
+                    <label class="mb-1 block text-xs text-slate-300">Status</label>
+                    <input type="number" name="error_responses[${errorResponseIdx}][status]" value="${status}" placeholder="{{ __('backoffice.pages.tools.status_placeholder') }}"
+                        class="err-status w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
+                </div>
+                <div class="flex-1">
+                    <label class="mb-1 block text-xs text-slate-300">Message</label>
+                    <input type="text" name="error_responses[${errorResponseIdx}][message]" value="${message}" placeholder="{{ __('backoffice.pages.tools.message_placeholder') }}"
+                        class="err-message w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
+                </div>
+                <button type="button" class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20 remove-error">&times;</button>
             `;
             row.querySelectorAll('input').forEach(input => input.addEventListener('input', updateErrorResponsePreview));
             row.querySelector('.remove-error').addEventListener('click', function() {
@@ -586,7 +624,7 @@
                     const key = inputs[0]?.value.trim();
                     const value = inputs[1]?.value.trim();
                     if ((key && !value) || (!key && value)) {
-                        alert('Expected data fields must have both KEY and VALUE filled.');
+                        alert('{{ __('backoffice.pages.tools.form_validation_error') }}');
                         return false;
                     }
                 }
@@ -602,7 +640,7 @@
                 `<textarea name="information_texts[]" rows="3"
                 class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
                 style="background-color:rgba(15,23,42,0.7);color:#e2e8f0"
-                placeholder="Teks informasi..."></textarea>
+                placeholder="{{ __('backoffice.pages.tools.information_text_placeholder') }}"></textarea>
                 <button type="button" onclick="this.closest('.info-text-row').remove()"
                     class="shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20">✕</button>`;
             wrapper.appendChild(row);
@@ -612,7 +650,7 @@
             const routeInput = document.getElementById('endpoint_route');
             const route = routeInput ? routeInput.value.trim() : '';
             if (!route) {
-                alert('Route belum diisi.');
+                alert('{{ __('backoffice.pages.tools.route_not_filled') }}');
                 return;
             }
 

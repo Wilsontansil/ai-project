@@ -156,6 +156,7 @@ return [
             'data_models_label' => 'Data Models',
             'data_models_help' => 'Pilih satu atau lebih Data Model untuk lookup data.',
             'free_parameters' => 'Parameter bebas (tidak terikat ke field Data Model). Parameter akan digunakan untuk query semua Data Model terpilih.',
+            'parameters_api_help' => 'Parameter yang diperlukan untuk API endpoint.',
             'tool_rules' => 'Aturan Tool',
             'tool_rules_help' => 'Instruksi spesifik untuk AI saat menggunakan tool ini. Contoh: cara minta data, format jawaban, aturan validasi.',
             'tool_rules_placeholder' => '- Minta semua data sekaligus dalam satu pesan
@@ -190,6 +191,7 @@ return [
             'endpoint_result_success' => 'Success',
             'endpoint_result_error' => 'Error',
             'form_validation_error' => 'Field expected data harus memiliki KEY dan VALUE yang terisi.',
+            'route_not_filled' => 'Route belum diisi.',
         ],
         'data_models' => [
             'title' => 'Data Models',

@@ -156,6 +156,7 @@ return [
             'data_models_label' => 'Data Models',
             'data_models_help' => 'Select one or more Data Models for data lookup.',
             'free_parameters' => 'Free Parameters (not tied to Data Model fields). Parameters will be used to query all selected Data Models.',
+            'parameters_api_help' => 'Parameters required for the API endpoint.',
             'tool_rules' => 'Tool Rules',
             'tool_rules_help' => 'Specific instructions for AI when using this tool. Example: how to request data, answer format, validation rules.',
             'tool_rules_placeholder' => '- Request all data at once in one message
@@ -190,6 +191,7 @@ return [
             'endpoint_result_success' => 'Success',
             'endpoint_result_error' => 'Error',
             'form_validation_error' => 'Expected data fields must have both KEY and VALUE filled.',
+            'route_not_filled' => 'Route has not been filled in.',
         ],
         'data_models' => [
             'title' => 'Data Models',

@@ -375,7 +375,7 @@
                     {{ __('backoffice.pages.tools.required') }}
                 </label>
                 <button type="button" onclick="this.closest('div').remove()"
-                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                    class="shrink-0 self-center rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
             paramIndex++;
@@ -405,7 +405,7 @@
                     {{ __('backoffice.pages.tools.required') }}
                 </label>
                 <button type="button" onclick="this.closest('div').remove()"
-                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                    class="shrink-0 self-center rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
             getMultiParamIndex++;
@@ -432,7 +432,7 @@
                     {{ __('backoffice.pages.tools.required') }}
                 </label>
                 <button type="button" onclick="this.closest('div').remove()"
-                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                    class="shrink-0 self-center rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
             updateParamIndex++;
@@ -475,7 +475,7 @@
                         class="body-value-input w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
                 </div>
                 <button type="button" onclick="this.closest('.endpoint-body-row').remove()"
-                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                    class="shrink-0 self-center rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
             bodyIdx++;
@@ -516,7 +516,7 @@
                     <input type="text" name="endpoint_expected_data[${expectedDataIdx}][value]" value="${val}" placeholder="{{ __('backoffice.pages.tools.value_data_placeholder') }}"
                         class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400 expected-data-input" />
                 </div>
-                <button type="button" class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20 remove-expected">&times;</button>
+                <button type="button" class="shrink-0 self-center rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20 remove-expected">&times;</button>
             `;
             row.querySelectorAll('.expected-data-input').forEach(input => input.addEventListener('input',
                 updateExpectedResponsePreview));
@@ -566,7 +566,7 @@
                     <input type="text" name="error_responses[${errorResponseIdx}][message]" value="${message}" placeholder="{{ __('backoffice.pages.tools.message_placeholder') }}"
                         class="err-message w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
                 </div>
-                <button type="button" class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20 remove-error">&times;</button>
+                <button type="button" class="shrink-0 self-center rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20 remove-error">&times;</button>
             `;
             row.querySelectorAll('input').forEach(input => input.addEventListener('input', updateErrorResponsePreview));
             row.querySelector('.remove-error').addEventListener('click', function() {

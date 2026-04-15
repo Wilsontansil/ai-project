@@ -45,6 +45,8 @@
                             information</option>
                         <option value="get" {{ old('type', $tool->type) === 'get' ? 'selected' : '' }}>Get — DataModel
                             lookup</option>
+                        <option value="get_multiple" {{ old('type', $tool->type) === 'get_multiple' ? 'selected' : '' }}>Get
+                            Multiple — Multi DataModel lookup</option>
                         <option value="update" {{ old('type', $tool->type) === 'update' ? 'selected' : '' }}>Update — API
                             endpoint</option>
                     </select>
@@ -90,6 +92,40 @@
                         dipilih.</p>
                     <div id="param-list" class="space-y-3"></div>
                     <button type="button" onclick="addParamRow()"
+                        class="mt-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300 transition hover:bg-white/10">
+                        + Tambah Parameter
+                    </button>
+                </div>
+            </div>
+
+            {{-- ─── GET MULTIPLE type: Multiple Data Models + Custom Parameters ─── --}}
+            <div id="section-get-multiple" class="space-y-4" style="display:none">
+                <div>
+                    <p class="mb-2 block text-sm text-slate-200">Data Models</p>
+                    <p class="mb-2 text-xs text-slate-400">Pilih satu atau lebih Data Model untuk lookup data.</p>
+                    @php
+                        $savedModelIds = old('data_model_ids', data_get($tool->meta, 'data_model_ids', [])) ?: [];
+                        $savedModelIds = array_map('strval', (array) $savedModelIds);
+                    @endphp
+                    <div class="space-y-2">
+                        @foreach ($dataModels as $dm)
+                            <label
+                                class="flex items-center gap-2 rounded-xl border border-white/10 bg-slate-900/50 px-4 py-2 text-sm text-slate-200 cursor-pointer hover:bg-slate-900/70 transition">
+                                <input type="checkbox" name="data_model_ids[]" value="{{ $dm->id }}"
+                                    {{ in_array((string) $dm->id, $savedModelIds) ? 'checked' : '' }}
+                                    class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
+                                {{ $dm->model_name }} <span class="text-xs text-slate-400">({{ $dm->table_name }})</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div>
+                    <p class="mb-2 block text-sm text-slate-200">Parameters</p>
+                    <p class="mb-2 text-xs text-slate-400">Parameter bebas (tidak terikat ke field Data Model). Parameter
+                        akan digunakan untuk query semua Data Model terpilih.</p>
+                    <div id="getmulti-param-list" class="space-y-3"></div>
+                    <button type="button" onclick="addGetMultiParamRow()"
                         class="mt-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300 transition hover:bg-white/10">
                         + Tambah Parameter
                     </button>
@@ -276,6 +312,7 @@
             const type = document.getElementById('type').value;
             document.getElementById('section-info').style.display = type === 'info' ? '' : 'none';
             document.getElementById('section-get').style.display = type === 'get' ? '' : 'none';
+            document.getElementById('section-get-multiple').style.display = type === 'get_multiple' ? '' : 'none';
             document.getElementById('section-update').style.display = type === 'update' ? '' : 'none';
         }
 
@@ -333,6 +370,29 @@
         }
 
         /* ── UPDATE type: parameter rows (free-text name) ── */
+        let getMultiParamIndex = 0;
+
+        function addGetMultiParamRow(name = '', desc = '', required = false) {
+            const list = document.getElementById('getmulti-param-list');
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
+            row.innerHTML = `
+                <input type="text" name="params[${getMultiParamIndex}][name]" value="${name}" placeholder="Parameter name"
+                    class="w-1/3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <input type="text" name="params[${getMultiParamIndex}][description]" value="${desc}" placeholder="Deskripsi (e.g. Username akun)"
+                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                <label class="flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap">
+                    <input type="checkbox" name="params[${getMultiParamIndex}][required]" value="1" ${required ? 'checked' : ''}
+                        class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
+                    Wajib
+                </label>
+                <button type="button" onclick="this.parentElement.remove()"
+                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+            `;
+            list.appendChild(row);
+            getMultiParamIndex++;
+        }
+
         function addUpdateParamRow(name = '', desc = '', required = false) {
             const list = document.getElementById('update-param-list');
             const row = document.createElement('div');
@@ -488,6 +548,8 @@
             for (const [name, prop] of Object.entries(properties)) {
                 if (type === 'update') {
                     addUpdateParamRow(name, prop.description || '', required.includes(name));
+                } else if (type === 'get_multiple') {
+                    addGetMultiParamRow(name, prop.description || '', required.includes(name));
                 } else {
                     addParamRow(name, prop.description || '', required.includes(name));
                 }

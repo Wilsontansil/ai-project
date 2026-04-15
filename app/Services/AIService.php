@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Agent;
+use App\Models\DataModel;
 use App\Models\ForbiddenBehaviour;
 use App\Models\ProjectSetting;
 use App\Models\Tool;
@@ -392,6 +393,7 @@ class AIService
         return match ($tool->type) {
             'info' => $this->executeInfoTool($tool),
             'get' => $this->executeDataModelLookup($tool, $arguments),
+            'get_multiple' => $this->executeMultiDataModelLookup($tool, $arguments),
             'update' => $this->executeHttpEndpoint($tool, $arguments),
             default => [
                 'mode' => 'direct',
@@ -875,6 +877,132 @@ class AIService
                 'reply' => 'Terjadi kesalahan saat mengambil data.',
             ];
         }
+    }
+
+    /**
+     * Execute a get_multiple tool — lookup across multiple DataModels.
+     * Parameters are custom (not tied to any DataModel fields).
+     * Each DataModel is queried independently with the same arguments,
+     * applying only fields that exist in each model.
+     */
+    private function executeMultiDataModelLookup(Tool $tool, array $arguments): array
+    {
+        $dataModelIds = (array) data_get($tool->meta, 'data_model_ids', []);
+
+        if ($dataModelIds === []) {
+            return [
+                'mode' => 'direct',
+                'reply' => 'Data model belum dikonfigurasi untuk tool ini.',
+            ];
+        }
+
+        $dataModels = DataModel::query()->whereIn('id', $dataModelIds)->get();
+
+        if ($dataModels->isEmpty()) {
+            return [
+                'mode' => 'direct',
+                'reply' => 'Data model tidak ditemukan.',
+            ];
+        }
+
+        // Validate tool-level required parameters
+        $toolRequiredFields = (array) data_get($tool->parameters, 'required', []);
+        foreach ($toolRequiredFields as $requiredField) {
+            $value = trim((string) ($arguments[$requiredField] ?? ''));
+            if ($value === '') {
+                return [
+                    'mode' => 'direct',
+                    'reply' => $this->buildMissingDataMessage($tool),
+                ];
+            }
+        }
+
+        $allResults = [];
+
+        foreach ($dataModels as $dataModel) {
+            $tableName = trim((string) ($dataModel->table_name ?? ''));
+            $connectionName = trim((string) ($dataModel->connection_name ?? 'mysqlgame'));
+            $connectionName = $connectionName === '' ? 'mysqlgame' : $connectionName;
+            $fieldsRaw = (array) ($dataModel->fields ?? []);
+            $allowedFields = array_keys($fieldsRaw);
+
+            if ($tableName === '' || $allowedFields === []) {
+                continue;
+            }
+
+            // Collect fixed values from this DataModel
+            $localArguments = $arguments;
+            foreach ($fieldsRaw as $fieldName => $meta) {
+                if (is_array($meta) && !empty($meta['required'])) {
+                    if (isset($meta['value']) && trim((string) $meta['value']) !== '') {
+                        $localArguments[$fieldName] = trim((string) $meta['value']);
+                    }
+                }
+            }
+
+            try {
+                $query = DB::connection($connectionName)->table($tableName)->select($allowedFields);
+                $lookupFilters = [];
+
+                foreach ($localArguments as $field => $value) {
+                    if (!in_array($field, $allowedFields, true)) {
+                        continue;
+                    }
+
+                    $normalizedValue = is_string($value) ? trim($value) : $value;
+                    if ($normalizedValue === '' || $normalizedValue === null) {
+                        continue;
+                    }
+
+                    $query->where($field, $normalizedValue);
+                    $lookupFilters[$field] = $normalizedValue;
+                }
+
+                $row = $query->first();
+
+                $allResults[] = [
+                    'model_name' => $dataModel->model_name,
+                    'table_name' => $tableName,
+                    'filters' => $lookupFilters,
+                    'data' => $row !== null ? $this->normalizeToolData((array) $row) : null,
+                ];
+            } catch (\Throwable $e) {
+                Log::error('AI multi-model lookup failed for model', [
+                    'tool_name' => $tool->tool_name,
+                    'model_name' => $dataModel->model_name,
+                    'table_name' => $tableName,
+                    'error' => $e->getMessage(),
+                ]);
+
+                $allResults[] = [
+                    'model_name' => $dataModel->model_name,
+                    'table_name' => $tableName,
+                    'filters' => [],
+                    'data' => null,
+                    'error' => 'Gagal mengambil data.',
+                ];
+            }
+        }
+
+        // Check if all results are null
+        $hasData = collect($allResults)->contains(fn ($r) => $r['data'] !== null);
+        if (!$hasData) {
+            return [
+                'mode' => 'direct',
+                'reply' => 'Data tidak ditemukan di semua data model.',
+            ];
+        }
+
+        return [
+            'mode' => 'model',
+            'tool_context' => [
+                'tool_name' => $tool->tool_name,
+                'tool_display_name' => $tool->display_name,
+                'tool_description' => $tool->description,
+                'lookup_type' => 'multi_model',
+                'results' => $allResults,
+            ],
+        ];
     }
 
     private function forceToolArgumentsFromMessage($client, Tool $tool, string $systemPrompt, ?string $contextPrompt, array $history, string $userMessage): ?array

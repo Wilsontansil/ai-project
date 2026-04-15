@@ -171,5 +171,48 @@ class DataModelSeeder extends Seeder
                 ],
             ]
         );
+
+        DataModel::updateOrCreate(
+            ['slug' => 'withdraw'],
+            [
+                'model_name' => 'Withdraw',
+                'description' => 'Withdraw data model schema.',
+                'table_name' => 'withdraws',
+                'connection_name' => 'mysqlgame',
+                'fields' => [
+                    'id' => ['type' => 'bigint(20) UNSIGNED', 'required' => false],
+                    'invoice' => ['type' => 'varchar(125)', 'required' => false],
+                    'order_id' => ['type' => 'varchar(125)', 'required' => false],
+                    'username' => ['type' => 'varchar(125)', 'required' => false],
+                    'player_id' => ['type' => 'bigint(20) UNSIGNED', 'required' => false],
+                    'provider' => ['type' => 'varchar(125)', 'required' => false],
+                    'date' => ['type' => 'datetime', 'required' => false],
+                    'saldoawal' => ['type' => 'decimal(14,3)', 'required' => false],
+                    'amount' => ['type' => 'decimal(14,3)', 'required' => false],
+                    'average_deposit' => ['type' => 'decimal(14,3)', 'required' => false],
+                    'ratecharge' => ['type' => 'double(8,2)', 'required' => false],
+                    'givenamount' => ['type' => 'decimal(14,3)', 'required' => false],
+                    'bank' => ['type' => 'varchar(125)', 'required' => false],
+                    'nama' => ['type' => 'varchar(125)', 'required' => false],
+                    'norek' => ['type' => 'varchar(125)', 'required' => false],
+                    'bankuser' => ['type' => 'varchar(125)', 'required' => false],
+                    'norekuser' => ['type' => 'varchar(125)', 'required' => false],
+                    'namarekuser' => ['type' => 'varchar(125)', 'required' => false],
+                    'isfirstwd' => ['type' => 'tinyint(1)', 'required' => false],
+                    'agent' => ['type' => 'varchar(125)', 'required' => true, 'value' => 'PG'],
+                    'ip' => ['type' => 'varchar(125)', 'required' => false],
+                    'operatorby' => ['type' => 'varchar(125)', 'required' => false],
+                    'operatortime' => ['type' => 'datetime', 'required' => false],
+                    'operatorbymanual' => ['type' => 'varchar(125)', 'required' => false],
+                    'status' => ['type' => "enum('new','accept','reject')", 'required' => false],
+                    'remark' => ['type' => 'text', 'required' => false],
+                    'sn' => ['type' => 'varchar(125)', 'required' => false],
+                    'is_sync' => ['type' => 'int(11)', 'required' => false],
+                    'request_id' => ['type' => 'varchar(125)', 'required' => false],
+                    'created_at' => ['type' => 'timestamp', 'required' => false],
+                    'updated_at' => ['type' => 'timestamp', 'required' => false],
+                ],
+            ]
+        );
     }
 }

@@ -80,7 +80,7 @@ class ToolController extends Controller
     private function toolValidationRules(bool $isCreate = false): array
     {
         $rules = [
-            'type' => ['required', 'string', 'in:info,get,update'],
+            'type' => ['required', 'string', 'in:info,get,update,get_multiple'],
             'display_name' => ['required', 'string', 'max:120'],
             'description' => ['nullable', 'string', 'max:500'],
             'params' => ['nullable', 'array'],
@@ -91,6 +91,8 @@ class ToolController extends Controller
             'information_texts' => ['nullable', 'array'],
             'information_texts.*' => ['nullable', 'string', 'max:2000'],
             'data_model_id' => ['nullable', 'integer', 'exists:data_models,id'],
+            'data_model_ids' => ['nullable', 'array'],
+            'data_model_ids.*' => ['integer', 'exists:data_models,id'],
             'endpoint_route' => ['nullable', 'string', 'max:255'],
             'endpoint_expected_status' => ['nullable', 'integer'],
             'endpoint_expected_message' => ['nullable', 'string', 'max:255'],
@@ -127,7 +129,7 @@ class ToolController extends Controller
             'keywords' => $this->normalizeKeywords($request, $data, $tool),
             'tool_rules' => trim($data['tool_rules'] ?? '') ?: null,
             'information_text' => $this->buildInformationTexts($request),
-            'meta' => $this->buildToolMeta($request, $tool),
+            'meta' => $this->buildToolMeta($request, $tool, $type),
         ];
 
         if ($tool === null) {
@@ -155,9 +157,18 @@ class ToolController extends Controller
         return array_values(array_filter($keywords, fn ($keyword) => $keyword !== ''));
     }
 
-    private function buildToolMeta(Request $request, ?Tool $tool = null): array
+    private function buildToolMeta(Request $request, ?Tool $tool = null, ?string $type = null): array
     {
-        return $tool ? ($tool->meta ?? []) : [];
+        $meta = $tool ? ($tool->meta ?? []) : [];
+
+        if ($type === 'get_multiple') {
+            $ids = array_filter(array_map('intval', (array) $request->input('data_model_ids', [])));
+            $meta['data_model_ids'] = array_values($ids);
+        } else {
+            unset($meta['data_model_ids']);
+        }
+
+        return $meta;
     }
 
     private function buildInformationTexts(Request $request): ?array
@@ -373,6 +384,16 @@ class ToolController extends Controller
             if ($route === '') {
                 throw ValidationException::withMessages([
                     'endpoint_route' => 'Tool bertipe Update harus memiliki endpoint route.',
+                ]);
+            }
+            return;
+        }
+
+        if ($type === 'get_multiple') {
+            $ids = array_filter(array_map('intval', (array) ($data['data_model_ids'] ?? [])));
+            if (count($ids) === 0) {
+                throw ValidationException::withMessages([
+                    'data_model_ids' => 'Tool bertipe Get Multiple harus memilih minimal satu Data Model.',
                 ]);
             }
         }

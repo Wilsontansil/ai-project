@@ -27,9 +27,9 @@
             class="group flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-600/60 bg-slate-900/50 p-6 transition hover:border-cyan-400/50 hover:bg-slate-900/70"
             style="min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center">
             <div
-                class="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-400/10 text-cyan-400 transition group-hover:bg-cyan-400/20">
-                <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"
-                    width="28" height="28">
+                style="display:flex;width:56px;height:56px;align-items:center;justify-content:center;border-radius:16px;background:rgba(6,182,212,0.1);color:#22d3ee;margin-bottom:0.75rem">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="28"
+                    height="28">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
             </div>
@@ -88,7 +88,14 @@
                 <div
                     style="margin-top:1rem;display:flex;align-items:center;gap:0.5rem;border-top:1px solid rgba(51,65,85,0.5);padding-top:0.75rem">
                     <a href="{{ route('backoffice.chat-agents.edit', $agent) }}"
-                        class="rounded-lg bg-white/10 px-3.5 py-1.5 text-xs font-medium text-slate-200 transition hover:bg-white/20">
+                        class="rounded-lg bg-white/10 px-3.5 py-1.5 text-xs font-medium text-slate-200 transition hover:bg-white/20"
+                        style="display:inline-flex;align-items:center;gap:0.375rem">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="14"
+                            height="14">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.212-1.281c-.063-.374-.313-.686-.645-.87a6.47 6.47 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0Z" />
+                        </svg>
                         Settings
                     </a>
                     <form method="POST" action="{{ route('backoffice.chat-agents.duplicate', $agent) }}">

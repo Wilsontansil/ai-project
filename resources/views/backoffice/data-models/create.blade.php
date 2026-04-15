@@ -1,10 +1,11 @@
 @extends('backoffice.partials.layout')
 
-@section('title', 'New Data Model')
+@section('title', __('backoffice.pages.data_models.new_data_model'))
+@section('page-title', __('backoffice.pages.data_models.page_title'))
 
 @section('content')
     <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-        <h1 class="text-3xl font-semibold">Add New Data Model</h1>
+        <h1 class="text-3xl font-semibold">{{ __('backoffice.pages.data_models.new_data_model') }}</h1>
         <p class="mt-2 text-sm text-slate-300">Buat model referensi field (JSON) yang terhubung ke tabel DB game.</p>
     </div>
 
@@ -83,11 +84,11 @@
             <div class="flex items-center gap-4 pt-2">
                 <button type="submit"
                     class="rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
-                    Add Data Model
+                    {{ __('backoffice.pages.data_models.add_data_model') }}
                 </button>
                 <a href="{{ route('backoffice.data-models.index') }}"
                     class="rounded-2xl border border-white/10 px-6 py-3 text-sm text-slate-300 transition hover:bg-white/5">
-                    Cancel
+                    {{ __('backoffice.common.cancel') }}
                 </a>
             </div>
         </form>

@@ -1,13 +1,14 @@
 @extends('backoffice.partials.layout')
 
-@section('title', 'Global Settings')
+@section('title', __('backoffice.pages.settings.title'))
+@section('page-title', __('backoffice.pages.settings.page_title'))
 
 @section('content')
     {{-- Header --}}
     <div class="flex items-center justify-between rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
         <div>
-            <h1 class="text-lg font-semibold sm:text-2xl">Global Settings</h1>
-            <p class="text-xs text-slate-400">Konfigurasi environment dan endpoint untuk project ini.</p>
+            <h1 class="text-lg font-semibold sm:text-2xl">{{ __('backoffice.pages.settings.title') }}</h1>
+            <p class="text-xs text-slate-400">{{ __('backoffice.pages.settings.subtitle') }}</p>
         </div>
     </div>
 
@@ -128,7 +129,7 @@
                                         style="padding:0.5rem 2.25rem 0.5rem 0.75rem" />
                                     <button type="button" onclick="toggleSecret(this)"
                                         style="position:absolute;right:0.625rem;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;color:#64748b;cursor:pointer;background:none;border:none;padding:0"
-                                        title="Show/hide">
+                                        title="{{ __('backoffice.pages.settings.show_hide_secret') }}">
                                         <svg class="eye-closed" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                             stroke-width="1.5" width="14" height="14">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -150,7 +151,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    Kosongkan jika tidak ingin mengubah.
+                                    {{ __('backoffice.pages.settings.secret_keep_hint') }}
                                 </p>
                             @elseif ($setting->type === 'url')
                                 <div style="position:relative">
@@ -195,24 +196,25 @@
                         d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <p class="text-sm text-slate-400">Belum ada settings.</p>
+                <p class="text-sm text-slate-400">{{ __('backoffice.pages.settings.empty') }}</p>
                 <p class="mt-1 text-xs text-slate-500">Jalankan <code
                         class="rounded bg-slate-800 px-1.5 py-0.5 text-[11px] text-cyan-400">php artisan db:seed
-                        --class=ProjectSettingSeeder</code></p>
+                        --class=ProjectSettingSeeder</code> ({{ __('backoffice.pages.settings.seed_hint') }})</p>
             </div>
         @endforelse
 
         @if ($grouped->isNotEmpty())
             <div
                 class="flex items-center justify-between rounded-2xl border border-slate-700/70 bg-slate-900/85 px-5 py-3.5">
-                <p class="text-[11px] text-slate-500">{{ $grouped->flatten()->count() }} settings across
-                    {{ $grouped->count() }} groups</p>
+                <p class="text-[11px] text-slate-500">
+                    {{ __('backoffice.pages.settings.settings_summary', ['settings' => $grouped->flatten()->count(), 'groups' => $grouped->count()]) }}
+                </p>
                 <button type="submit"
                     class="inline-flex items-center gap-2 rounded-lg bg-cyan-400 px-5 py-2 text-xs font-semibold text-slate-950 transition hover:bg-cyan-300 active:scale-[0.98]">
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
-                    Save All Settings
+                    {{ __('backoffice.pages.settings.save_all') }}
                 </button>
             </div>
         @endif

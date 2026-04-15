@@ -1,6 +1,7 @@
 @extends('backoffice.partials.layout')
 
-@section('title', 'AI Agent Settings')
+@section('title', __('backoffice.pages.chat_agents.title'))
+@section('page-title', __('backoffice.pages.chat_agents.page_title'))
 
 @php($boActive = 'ai-agent')
 
@@ -8,7 +9,7 @@
     {{-- Header --}}
     <div class="flex items-center justify-between rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
         <div>
-            <h1 class="text-lg font-semibold sm:text-2xl">AI Agent Settings</h1>
+            <h1 class="text-lg font-semibold sm:text-2xl">{{ __('backoffice.pages.chat_agents.title') }}</h1>
             <p class="text-xs text-slate-400">Informasi dan konfigurasi AI agent.</p>
         </div>
     </div>

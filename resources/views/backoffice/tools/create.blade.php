@@ -1,10 +1,11 @@
 @extends('backoffice.partials.layout')
 
-@section('title', 'New Tool')
+@section('title', __('backoffice.pages.tools.new_tool'))
+@section('page-title', __('backoffice.pages.tools.page_title'))
 
 @section('content')
     <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-        <h1 class="text-3xl font-semibold">Add New Tool</h1>
+        <h1 class="text-3xl font-semibold">{{ __('backoffice.pages.tools.new_tool') }}</h1>
         <p class="mt-2 text-sm text-slate-300">Tambahkan tool baru untuk AI agent.</p>
     </div>
 
@@ -247,7 +248,7 @@
             {{-- ─── INFO type: Information Texts ─── --}}
             <div id="section-info" class="space-y-4" style="display:none">
                 <div>
-                    <label class="mb-2 block text-sm text-slate-200">Information Texts</label>
+                    <p class="mb-2 block text-sm text-slate-200">Information Texts</p>
                     <p class="mb-2 text-xs text-slate-400">Teks informasi yang langsung dikirim sebagai jawaban. Tambahkan
                         beberapa variasi agar bot tidak monoton. Bot akan memilih salah satu secara acak.</p>
                     <div id="info-texts-wrapper" class="space-y-2">
@@ -291,11 +292,11 @@
             <div class="flex items-center gap-4 pt-2">
                 <button type="submit" onclick="return validateForm()"
                     class="rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
-                    Add Tool
+                    {{ __('backoffice.pages.tools.add_tool') }}
                 </button>
                 <a href="{{ route('backoffice.tools.index') }}"
                     class="rounded-2xl border border-white/10 px-6 py-3 text-sm text-slate-300 transition hover:bg-white/5">
-                    Cancel
+                    {{ __('backoffice.common.cancel') }}
                 </a>
             </div>
         </form>

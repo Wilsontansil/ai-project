@@ -1,6 +1,7 @@
 @extends('backoffice.partials.layout')
 
-@section('title', 'AI Agents')
+@section('title', __('backoffice.pages.chat_agents.title'))
+@section('page-title', __('backoffice.pages.chat_agents.page_title'))
 
 @php($boActive = 'chat-agents')
 
@@ -8,8 +9,8 @@
     {{-- Header --}}
     <div class="flex items-center justify-between rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
         <div>
-            <h1 class="text-lg font-semibold sm:text-2xl">AI Agents</h1>
-            <p class="text-xs text-slate-400">Kelola AI agent untuk chatbot Anda.</p>
+            <h1 class="text-lg font-semibold sm:text-2xl">{{ __('backoffice.pages.chat_agents.title') }}</h1>
+            <p class="text-xs text-slate-400">{{ __('backoffice.pages.chat_agents.subtitle') }}</p>
         </div>
     </div>
 
@@ -33,8 +34,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
             </div>
-            <p class="text-sm font-semibold text-slate-300 group-hover:text-white">Create New Agent</p>
-            <p class="mt-1 text-xs text-slate-500">Buat agent baru dengan prompt kustom</p>
+            <p class="text-sm font-semibold text-slate-300 group-hover:text-white">
+                {{ __('backoffice.pages.chat_agents.create_new') }}</p>
+            <p class="mt-1 text-xs text-slate-500">{{ __('backoffice.pages.chat_agents.create_hint') }}</p>
         </a>
 
         {{-- Agent Cards --}}
@@ -46,14 +48,14 @@
                     @if ($agent->is_default)
                         <span
                             class="inline-flex items-center rounded-full bg-cyan-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-300 ring-1 ring-cyan-400/30"
-                            style="display:inline-flex;align-items:center;font-size:11px">DEFAULT</span>
+                            style="display:inline-flex;align-items:center;font-size:11px">{{ __('backoffice.pages.chat_agents.default') }}</span>
                     @endif
                     @if ($agent->is_enabled)
                         <span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#34d399"
-                            title="Enabled"></span>
+                            title="{{ __('backoffice.pages.chat_agents.enabled') }}"></span>
                     @else
                         <span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#f87171"
-                            title="Disabled"></span>
+                            title="{{ __('backoffice.pages.chat_agents.disabled') }}"></span>
                     @endif
                 </div>
 
@@ -74,14 +76,15 @@
                 {{-- Description --}}
                 <p
                     style="margin-top:0.75rem;flex:1;font-size:12px;color:#94a3b8;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">
-                    {{ $agent->description ?: 'No description' }}
+                    {{ $agent->description ?: __('backoffice.pages.chat_agents.no_description') }}
                 </p>
 
                 {{-- Meta info --}}
                 <div style="margin-top:0.75rem;display:flex;flex-wrap:wrap;gap:1rem;font-size:11px;color:#64748b">
-                    <span>Max tokens: {{ $agent->max_tokens }}</span>
-                    <span>Temp: {{ $agent->temperature }}</span>
-                    <span>Forbidden: {{ $agent->forbiddenBehaviours()->where('is_active', true)->count() }}</span>
+                    <span>{{ __('backoffice.pages.chat_agents.max_tokens') }}: {{ $agent->max_tokens }}</span>
+                    <span>{{ __('backoffice.pages.chat_agents.temp') }}: {{ $agent->temperature }}</span>
+                    <span>{{ __('backoffice.pages.chat_agents.forbidden') }}:
+                        {{ $agent->forbiddenBehaviours()->where('is_active', true)->count() }}</span>
                 </div>
 
                 {{-- Actions --}}
@@ -89,30 +92,31 @@
                     style="margin-top:1rem;display:flex;align-items:center;gap:0.5rem;border-top:1px solid rgba(51,65,85,0.5);padding-top:0.75rem">
                     <a href="{{ route('backoffice.chat-agents.edit', $agent) }}"
                         class="rounded-lg bg-white/5 px-3 py-1.5 text-xs text-slate-400 transition hover:bg-white/10 hover:text-slate-200"
-                        title="Settings">
+                        title="{{ __('backoffice.pages.chat_agents.settings') }}">
                         <svg class="inline h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             stroke-width="1.5" width="14" height="14">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.212-1.281c-.063-.374-.313-.686-.645-.87a6.47 6.47 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0Z" />
                         </svg>
-                        Settings
+                        {{ __('backoffice.pages.chat_agents.settings') }}
                     </a>
                     <form method="POST" action="{{ route('backoffice.chat-agents.duplicate', $agent) }}">
                         @csrf
                         <button type="submit"
                             class="rounded-lg bg-white/5 px-3 py-1.5 text-xs text-slate-400 transition hover:bg-white/10 hover:text-slate-200"
-                            title="Duplicate">
+                            title="{{ __('backoffice.pages.chat_agents.clone') }}">
                             <svg class="inline h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                 stroke-width="1.5" width="14" height="14">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
                             </svg>
-                            Clone
+                            {{ __('backoffice.pages.chat_agents.clone') }}
                         </button>
                     </form>
                     <form method="POST" action="{{ route('backoffice.chat-agents.destroy', $agent) }}"
-                        onsubmit="return confirm('Hapus agent {{ $agent->name }}?')" style="margin-left:auto">
+                        onsubmit="return confirm('{{ __('backoffice.pages.chat_agents.delete_confirm_agent', ['name' => $agent->name]) }}')"
+                        style="margin-left:auto">
                         @csrf
                         @method('DELETE')
                         <button type="submit"

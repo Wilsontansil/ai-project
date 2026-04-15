@@ -1,17 +1,18 @@
 @extends('backoffice.partials.layout')
 
-@section('title', 'Forbidden Behaviours')
+@section('title', __('backoffice.pages.forbidden.title'))
+@section('page-title', __('backoffice.pages.forbidden.page_title'))
 
 @section('content')
     {{-- Header --}}
     <div class="flex items-center justify-between rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
         <div>
-            <h1 class="text-lg font-semibold sm:text-2xl">Forbidden Behaviours</h1>
-            <p class="text-xs text-slate-400">Kelola aturan perilaku yang dilarang untuk AI agent.</p>
+            <h1 class="text-lg font-semibold sm:text-2xl">{{ __('backoffice.pages.forbidden.title') }}</h1>
+            <p class="text-xs text-slate-400">{{ __('backoffice.pages.forbidden.subtitle') }}</p>
         </div>
         <a href="{{ route('backoffice.forbidden.create') }}"
             class="rounded-lg bg-cyan-400 px-4 py-2 text-xs font-semibold text-slate-950 transition hover:bg-cyan-300 sm:text-sm">
-            + New Rule
+            + {{ __('backoffice.pages.forbidden.new_rule') }}
         </a>
     </div>
 
@@ -23,21 +24,22 @@
 
     @if ($rules->isEmpty())
         <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-8 text-center">
-            <p class="text-sm text-slate-400">Belum ada rule. Tambahkan rule pertama untuk membatasi perilaku AI agent.</p>
+            <p class="text-sm text-slate-400">{{ __('backoffice.pages.forbidden.no_rules') }}</p>
         </div>
     @else
         <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-4 sm:p-5">
-            <h2 class="mb-4 text-sm font-semibold">Rule List</h2>
+            <h2 class="mb-4 text-sm font-semibold">{{ __('backoffice.pages.forbidden.rule_list') }}</h2>
             <div class="overflow-hidden rounded-xl border border-white/10">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-xs">
                         <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
                             <tr>
-                                <th class="px-3 py-2 font-medium">Title</th>
-                                <th class="px-3 py-2 font-medium">Instruction</th>
-                                <th class="px-3 py-2 font-medium text-center">Level</th>
-                                <th class="px-3 py-2 font-medium text-center">Status</th>
-                                <th class="px-3 py-2 font-medium text-right">Actions</th>
+                                <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.forbidden.rule_title') }}</th>
+                                <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.forbidden.instruction') }}</th>
+                                <th class="px-3 py-2 font-medium text-center">{{ __('backoffice.pages.forbidden.level') }}
+                                </th>
+                                <th class="px-3 py-2 font-medium text-center">{{ __('backoffice.common.status') }}</th>
+                                <th class="px-3 py-2 font-medium text-right">{{ __('backoffice.common.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
@@ -55,17 +57,17 @@
                                         @if ($rule->level === 'danger')
                                             <span
                                                 class="inline-flex items-center rounded-full bg-red-500/20 px-2.5 py-0.5 text-xs font-semibold text-red-300 ring-1 ring-red-400/30">
-                                                DANGER
+                                                {{ __('backoffice.pages.forbidden.danger') }}
                                             </span>
                                         @elseif ($rule->level === 'warning')
                                             <span
                                                 class="inline-flex items-center rounded-full bg-amber-500/20 px-2.5 py-0.5 text-xs font-semibold text-amber-300 ring-1 ring-amber-400/30">
-                                                WARNING
+                                                {{ __('backoffice.pages.forbidden.warning') }}
                                             </span>
                                         @else
                                             <span
                                                 class="inline-flex items-center rounded-full bg-blue-500/20 px-2.5 py-0.5 text-xs font-semibold text-blue-300 ring-1 ring-blue-400/30">
-                                                INFO
+                                                {{ __('backoffice.pages.forbidden.info') }}
                                             </span>
                                         @endif
                                     </td>
@@ -73,12 +75,12 @@
                                         @if ($rule->is_active)
                                             <span
                                                 class="inline-flex items-center rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-400/30">
-                                                ON
+                                                {{ __('backoffice.common.on') }}
                                             </span>
                                         @else
                                             <span
                                                 class="inline-flex items-center rounded-full bg-red-500/20 px-2.5 py-0.5 text-xs font-semibold text-red-300 ring-1 ring-red-400/30">
-                                                OFF
+                                                {{ __('backoffice.common.off') }}
                                             </span>
                                         @endif
                                     </td>
@@ -86,15 +88,16 @@
                                         <div class="flex items-center justify-end gap-2">
                                             <a href="{{ route('backoffice.forbidden.edit', $rule) }}"
                                                 class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
-                                                Edit
+                                                {{ __('backoffice.common.edit') }}
                                             </a>
-                                            <form method="POST" action="{{ route('backoffice.forbidden.destroy', $rule) }}"
-                                                onsubmit="return confirm('Hapus rule {{ $rule->title }}?')">
+                                            <form method="POST"
+                                                action="{{ route('backoffice.forbidden.destroy', $rule) }}"
+                                                onsubmit="return confirm('{{ __('backoffice.pages.forbidden.delete_confirm', ['title' => $rule->title]) }}')">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
                                                     class="rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-1.5 text-xs text-red-300 transition hover:bg-red-500/20">
-                                                    Delete
+                                                    {{ __('backoffice.common.delete') }}
                                                 </button>
                                             </form>
                                         </div>

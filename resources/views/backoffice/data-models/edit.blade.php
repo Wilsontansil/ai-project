@@ -1,10 +1,11 @@
 @extends('backoffice.partials.layout')
 
-@section('title', 'Edit Data Model — ' . $dataModel->model_name)
+@section('title', __('backoffice.pages.data_models.edit_data_model') . ' — ' . $dataModel->model_name)
+@section('page-title', __('backoffice.pages.data_models.page_title'))
 
 @section('content')
     <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-        <h1 class="text-3xl font-semibold">Edit Data Model</h1>
+        <h1 class="text-3xl font-semibold">{{ __('backoffice.pages.data_models.edit_data_model') }}</h1>
         <p class="mt-2 text-sm text-slate-300">{{ $dataModel->model_name }} — <span
                 class="font-mono text-cyan-300">{{ $dataModel->slug }}</span></p>
     </div>
@@ -80,11 +81,11 @@
             <div class="flex items-center gap-4 pt-2">
                 <button type="submit"
                     class="rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
-                    Save Changes
+                    {{ __('backoffice.pages.data_models.save_changes') }}
                 </button>
                 <a href="{{ route('backoffice.data-models.index') }}"
                     class="rounded-2xl border border-white/10 px-6 py-3 text-sm text-slate-300 transition hover:bg-white/5">
-                    Cancel
+                    {{ __('backoffice.common.cancel') }}
                 </a>
             </div>
         </form>

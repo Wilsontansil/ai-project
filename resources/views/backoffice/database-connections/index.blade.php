@@ -1,6 +1,7 @@
 @extends('backoffice.partials.layout')
 
-@section('title', 'Database Connections')
+@section('title', __('backoffice.pages.db_connections.title'))
+@section('page-title', __('backoffice.pages.db_connections.page_title'))
 
 @php($boActive = 'database-connections')
 
@@ -8,15 +9,15 @@
     {{-- Header --}}
     <div class="flex items-center justify-between rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
         <div>
-            <h1 class="text-lg font-semibold sm:text-2xl">Database Connections</h1>
-            <p class="text-xs text-slate-400">Kelola koneksi database eksternal untuk data model.</p>
+            <h1 class="text-lg font-semibold sm:text-2xl">{{ __('backoffice.pages.db_connections.title') }}</h1>
+            <p class="text-xs text-slate-400">{{ __('backoffice.pages.db_connections.subtitle') }}</p>
         </div>
         <a href="{{ route('backoffice.database-connections.create') }}" class="bo-btn-primary"
             style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;font-size:13px">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" width="16" height="16">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
-            Add Connection
+            {{ __('backoffice.pages.db_connections.add_connection') }}
         </a>
     </div>
 
@@ -39,8 +40,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round"
                     d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 3.75c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
             </svg>
-            <p class="text-sm text-slate-400">Belum ada database connection.</p>
-            <p class="mt-1 text-xs text-slate-500">Klik tombol "Add Connection" untuk menambahkan.</p>
+            <p class="text-sm text-slate-400">{{ __('backoffice.pages.db_connections.no_connections') }}</p>
+            <p class="mt-1 text-xs text-slate-500">{{ __('backoffice.pages.db_connections.click_add_connection') }}</p>
         </div>
     @else
         <div class="overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-900/85">
@@ -49,29 +50,31 @@
                     <tr style="border-bottom:1px solid rgba(51,65,85,0.5)">
                         <th
                             style="padding:0.75rem 1rem;text-align:left;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">
-                            Name</th>
+                            {{ __('backoffice.pages.db_connections.name') }}</th>
                         <th
                             style="padding:0.75rem 1rem;text-align:left;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">
-                            Driver</th>
+                            {{ __('backoffice.pages.db_connections.driver') }}</th>
                         <th
                             style="padding:0.75rem 1rem;text-align:left;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">
-                            Host</th>
+                            {{ __('backoffice.pages.db_connections.host') }}</th>
                         <th
                             style="padding:0.75rem 1rem;text-align:left;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">
-                            Database</th>
+                            {{ __('backoffice.pages.db_connections.database') }}</th>
                         <th
                             style="padding:0.75rem 1rem;text-align:center;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">
-                            Status</th>
+                            {{ __('backoffice.common.status') }}</th>
                         <th
                             style="padding:0.75rem 1rem;text-align:right;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">
-                            Actions</th>
+                            {{ __('backoffice.common.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($connections as $conn)
                         <tr style="border-bottom:1px solid rgba(51,65,85,0.3);transition:background 0.15s"
                             onmouseover="this.style.background='rgba(51,65,85,0.2)'"
-                            onmouseout="this.style.background='transparent'">
+                            onmouseout="this.style.background='transparent'"
+                            onfocus="this.style.background='rgba(51,65,85,0.2)'"
+                            onblur="this.style.background='transparent'">
                             <td style="padding:0.75rem 1rem">
                                 <span style="font-size:13px;font-weight:600;color:#fff">{{ $conn->name }}</span>
                             </td>
@@ -90,11 +93,11 @@
                                 @if ($conn->is_active)
                                     <span
                                         style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#34d399"
-                                        title="Active"></span>
+                                        title="{{ __('backoffice.common.active') }}"></span>
                                 @else
                                     <span
                                         style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#f87171"
-                                        title="Inactive"></span>
+                                        title="{{ __('backoffice.common.inactive') }}"></span>
                                 @endif
                             </td>
                             <td style="padding:0.75rem 1rem;text-align:right">
@@ -110,7 +113,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z" />
                                             </svg>
-                                            Test
+                                            {{ __('backoffice.pages.db_connections.test') }}
                                         </button>
                                     </form>
                                     <a href="{{ route('backoffice.database-connections.edit', $conn) }}"
@@ -121,16 +124,16 @@
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
                                         </svg>
-                                        Edit
+                                        {{ __('backoffice.common.edit') }}
                                     </a>
                                     <form method="POST"
                                         action="{{ route('backoffice.database-connections.destroy', $conn) }}"
-                                        onsubmit="return confirm('Hapus koneksi {{ $conn->name }}?')">
+                                        onsubmit="return confirm('{{ __('backoffice.pages.db_connections.delete_confirm', ['name' => $conn->name]) }}')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
                                             class="rounded-lg bg-red-500/10 px-3 py-1.5 text-xs text-red-400 transition hover:bg-red-500/20"
-                                            title="Delete">
+                                            title="{{ __('backoffice.common.delete') }}">
                                             <svg class="inline h-3.5 w-3.5" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24" stroke-width="1.5" width="14" height="14">
                                                 <path stroke-linecap="round" stroke-linejoin="round"

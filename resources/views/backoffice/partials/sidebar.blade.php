@@ -75,26 +75,6 @@
         padding: 0.75rem !important;
     }
 
-    /* Toggle button: when collapsed, show as centered expand button */
-    #bo-shell.bo-collapsed #bo-sidebar-toggle {
-        position: absolute;
-        top: 0.75rem;
-        right: 0.75rem;
-    }
-
-    #bo-shell.bo-collapsed .bo-brand-area {
-        position: relative;
-    }
-
-    /* Toggle icon rotation */
-    #bo-sidebar-toggle .bo-toggle-icon {
-        transition: transform 0.25s ease;
-    }
-
-    #bo-shell.bo-collapsed #bo-sidebar-toggle .bo-toggle-icon {
-        transform: rotate(180deg);
-    }
-
     /* Sidebar overflow hidden to prevent text bleed */
     #bo-shell.bo-collapsed #bo-sidebar {
         overflow: hidden;

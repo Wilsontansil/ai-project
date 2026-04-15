@@ -645,11 +645,12 @@
             wrapper.appendChild(row);
         }
         placeholder = "Teks informasi..." > < /textarea> <
-            button type = "button"
+        button type = "button"
         onclick = "this.closest('.info-text-row').remove()"
         class =
         "shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20" > ✕
-        < /button>`;
+        <
+        /button>`;
     wrapper.appendChild(row);
     }
 

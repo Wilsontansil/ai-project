@@ -112,9 +112,24 @@ class DatabaseConnectionController extends Controller
                 'database' => $databaseConnection->database,
                 'username' => $databaseConnection->username,
                 'password' => $databaseConnection->decrypted_password ?? '',
-                'charset' => 'utf8mb4',
-                'collation' => 'utf8mb4_unicode_ci',
             ];
+
+            if ($databaseConnection->driver === 'pgsql') {
+                $config['charset'] = 'utf8';
+                $config['prefix'] = '';
+                $config['prefix_indexes'] = true;
+                $config['search_path'] = 'public';
+                $config['sslmode'] = 'prefer';
+                $config['options'] = [
+                    \PDO::ATTR_TIMEOUT => 5,
+                ];
+            } else {
+                $config['charset'] = 'utf8mb4';
+                $config['collation'] = 'utf8mb4_unicode_ci';
+                $config['options'] = [
+                    \PDO::ATTR_TIMEOUT => 5,
+                ];
+            }
 
             config(["database.connections._test_conn" => $config]);
             DB::connection('_test_conn')->getPdo();

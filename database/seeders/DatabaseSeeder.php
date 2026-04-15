@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             ProjectSettingSeeder::class,
             ChatAgentSeeder::class,
             ForbiddenBehaviourSeeder::class,
+            DatabaseConnectionSeeder::class,
         ]);
     }
 }

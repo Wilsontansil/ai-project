@@ -179,6 +179,148 @@
             min-width: 72px;
         }
 
+        /* Top bar */
+        #bo-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+            padding: 0 1.5rem;
+            background: rgba(2, 6, 23, 0.85);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            flex-shrink: 0;
+        }
+
+        .bo-topbar-left {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .bo-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .bo-user-menu {
+            position: relative;
+        }
+
+        .bo-user-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            color: #e2e8f0;
+            font-size: 0.8125rem;
+        }
+
+        .bo-user-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .bo-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22d3ee, #06b6d4);
+            color: #0f172a;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .bo-user-name {
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .bo-chevron-down {
+            opacity: 0.5;
+            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+
+        .bo-user-menu.open .bo-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .bo-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            min-width: 200px;
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            z-index: 50;
+        }
+
+        .bo-user-menu.open .bo-dropdown {
+            display: block;
+        }
+
+        .bo-dropdown-header {
+            padding: 0.75rem 1rem;
+        }
+
+        .bo-dropdown-email {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .bo-dropdown-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .bo-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.625rem 1rem;
+            font-size: 0.8125rem;
+            color: #e2e8f0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: background 0.15s;
+            text-align: left;
+        }
+
+        .bo-dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .bo-dropdown-logout {
+            color: #fca5a5;
+        }
+
+        .bo-dropdown-logout:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
         @media (max-width: 1023px) {
             #bo-shell {
                 flex-direction: column;
@@ -210,12 +352,83 @@
             'active' => $boActive ?? '',
         ])
 
-        <div id="bo-content" class="p-4 sm:p-5 md:p-6">
-            <div class="mx-auto max-w-6xl space-y-5">
-                @yield('content')
+        <div id="bo-content">
+            {{-- Top bar --}}
+            <header id="bo-topbar">
+                <div class="bo-topbar-left">
+                    @yield('page-title')
+                </div>
+                <div class="bo-topbar-right">
+                    @auth
+                        <div class="bo-user-menu" id="bo-user-menu">
+                            <button type="button" class="bo-user-btn" id="bo-user-btn" aria-haspopup="true"
+                                aria-expanded="false">
+                                <span
+                                    class="bo-avatar">{{ strtoupper(substr(Auth::user()->name ?? Auth::user()->email, 0, 1)) }}</span>
+                                <span class="bo-user-name">{{ Auth::user()->name ?? Auth::user()->email }}</span>
+                                <svg class="bo-chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    width="14" height="14">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div class="bo-dropdown" id="bo-user-dropdown">
+                                <div class="bo-dropdown-header">
+                                    <span class="bo-dropdown-email">{{ Auth::user()->email }}</span>
+                                </div>
+                                <div class="bo-dropdown-divider"></div>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="bo-dropdown-item bo-dropdown-logout">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                            stroke-width="1.5" width="16" height="16">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                                        </svg>
+                                        Logout
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @endauth
+                </div>
+            </header>
+
+            <div class="p-4 sm:p-5 md:p-6">
+                <div class="mx-auto max-w-6xl space-y-5">
+                    @yield('content')
+                </div>
             </div>
         </div>
     </div>
+
+    <script>
+        (() => {
+            const menu = document.getElementById('bo-user-menu');
+            const btn = document.getElementById('bo-user-btn');
+            if (!menu || !btn) return;
+
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menu.classList.toggle('open');
+                btn.setAttribute('aria-expanded', menu.classList.contains('open'));
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!menu.contains(e.target)) {
+                    menu.classList.remove('open');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    menu.classList.remove('open');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        })();
+    </script>
 
     @yield('scripts')
 </body>

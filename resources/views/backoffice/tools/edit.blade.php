@@ -27,27 +27,24 @@
 
             <div class="grid gap-4 md:grid-cols-3">
                 <div>
-                    <p class="mb-2 block text-sm text-slate-200">Tool Name (key)</p>
+                    <p class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.tool_name_key') }}</p>
                     <p
                         class="rounded-2xl border border-white/10 bg-slate-900/30 px-4 py-3 text-sm font-mono text-slate-400">
                         {{ $tool->tool_name }}</p>
                 </div>
                 <div>
-                    <label for="display_name" class="mb-2 block text-sm text-slate-200">Display Name</label>
+                    <label for="display_name" class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.display_name') }}</label>
                     <input id="display_name" type="text" name="display_name"
                         value="{{ old('display_name', $tool->display_name) }}"
                         class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
                 </div>
                 <div>
-                    <label for="type" class="mb-2 block text-sm text-slate-200">Type</label>
+                    <label for="type" class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.type') }}</label>
                     <select id="type" name="type"
                         class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
-                        <option value="info" {{ old('type', $tool->type) === 'info' ? 'selected' : '' }}>Info — Static
-                            information</option>
-                        <option value="get" {{ old('type', $tool->type) === 'get' ? 'selected' : '' }}>Get — DataModel
-                            lookup</option>
-                        <option value="get_multiple" {{ old('type', $tool->type) === 'get_multiple' ? 'selected' : '' }}>Get
-                            Multiple — Multi DataModel lookup</option>
+                        <option value="info" {{ old('type', $tool->type) === 'info' ? 'selected' : '' }}>{{ __('backoffice.pages.tools.type_info') }}</option>
+                        <option value="get" {{ old('type', $tool->type) === 'get' ? 'selected' : '' }}>{{ __('backoffice.pages.tools.type_get') }}</option>
+                        <option value="get_multiple" {{ old('type', $tool->type) === 'get_multiple' ? 'selected' : '' }}>{{ __('backoffice.pages.tools.type_get_multiple') }}</option>
                         <option value="update" {{ old('type', $tool->type) === 'update' ? 'selected' : '' }}>Update — API
                             endpoint</option>
                     </select>

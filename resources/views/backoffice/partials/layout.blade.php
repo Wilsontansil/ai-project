@@ -173,12 +173,6 @@
             color: #e2e8f0;
         }
 
-        /* Collapsed state */
-        #bo-shell.bo-collapsed #bo-sidebar {
-            width: 72px;
-            min-width: 72px;
-        }
-
         /* Top bar */
         #bo-topbar {
             display: flex;

@@ -12,13 +12,19 @@
 
     /* Hide text labels & section headers when collapsed */
     #bo-shell.bo-collapsed .bo-label,
+    #bo-shell.bo-collapsed .bo-section-label,
+    #bo-shell.bo-collapsed .bo-section-chevron {
+        display: none !important;
+    }
+
     #bo-shell.bo-collapsed .bo-section-header {
-        display: none;
+        display: none !important;
     }
 
     /* Child items visible as icon-only when collapsed */
     #bo-shell.bo-collapsed .bo-section-items {
         padding-left: 0 !important;
+        margin-left: 0 !important;
         margin-top: 0 !important;
         border-left: none !important;
         max-height: 500px !important;
@@ -29,10 +35,11 @@
     }
 
     #bo-shell.bo-collapsed .bo-nav-item {
-        justify-content: center;
-        padding: 0.625rem 0;
+        justify-content: center !important;
+        padding: 0.625rem 0 !important;
         border-radius: 0.5rem;
         position: relative;
+        gap: 0 !important;
     }
 
     /* Tooltip on hover when collapsed */
@@ -60,13 +67,23 @@
 
     /* Brand area collapsed */
     #bo-shell.bo-collapsed .bo-brand-text {
-        display: none;
+        display: none !important;
     }
 
     #bo-shell.bo-collapsed .bo-brand-area {
-        justify-content: center;
-        padding-left: 0;
-        padding-right: 0;
+        justify-content: center !important;
+        padding: 0.75rem !important;
+    }
+
+    /* Toggle button: when collapsed, show as centered expand button */
+    #bo-shell.bo-collapsed #bo-sidebar-toggle {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+    }
+
+    #bo-shell.bo-collapsed .bo-brand-area {
+        position: relative;
     }
 
     /* Toggle icon rotation */
@@ -76,6 +93,17 @@
 
     #bo-shell.bo-collapsed #bo-sidebar-toggle .bo-toggle-icon {
         transform: rotate(180deg);
+    }
+
+    /* Sidebar overflow hidden to prevent text bleed */
+    #bo-shell.bo-collapsed #bo-sidebar {
+        overflow: hidden;
+    }
+
+    /* Separator lines hidden when collapsed */
+    #bo-shell.bo-collapsed .bo-section+.bo-section {
+        margin-top: 0.25rem;
+        padding-top: 0.25rem;
     }
 
     /* ── Section items (expanded) ── */
@@ -111,11 +139,17 @@
         #bo-shell.bo-collapsed #bo-sidebar {
             width: 100% !important;
             min-width: 100% !important;
+            overflow: visible !important;
         }
 
         #bo-shell.bo-collapsed .bo-label,
         #bo-shell.bo-collapsed .bo-section-header {
-            display: flex;
+            display: flex !important;
+        }
+
+        #bo-shell.bo-collapsed .bo-section-label,
+        #bo-shell.bo-collapsed .bo-section-chevron {
+            display: flex !important;
         }
 
         #bo-shell.bo-collapsed .bo-section-items {
@@ -125,18 +159,22 @@
         }
 
         #bo-shell.bo-collapsed .bo-nav-item {
-            justify-content: flex-start;
-            padding: 0.5rem 0.75rem;
+            justify-content: flex-start !important;
+            padding: 0.5rem 0.75rem !important;
+            gap: 0.625rem !important;
         }
 
         #bo-shell.bo-collapsed .bo-brand-text {
-            display: flex;
+            display: flex !important;
         }
 
         #bo-shell.bo-collapsed .bo-brand-area {
-            justify-content: space-between;
-            padding-left: 1.25rem;
-            padding-right: 1.25rem;
+            justify-content: space-between !important;
+            padding: 1rem 1.25rem !important;
+        }
+
+        #bo-shell.bo-collapsed #bo-sidebar-toggle {
+            position: static;
         }
     }
 </style>

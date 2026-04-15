@@ -21,9 +21,9 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             DataModelSeeder::class,
             ToolSeeder::class,
-            ForbiddenBehaviourSeeder::class,
             ProjectSettingSeeder::class,
             ChatAgentSeeder::class,
+            ForbiddenBehaviourSeeder::class,
         ]);
     }
 }

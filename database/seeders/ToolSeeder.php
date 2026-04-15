@@ -13,6 +13,9 @@ class ToolSeeder extends Seeder
         $playersModel = DataModel::query()->where('slug', 'players')->first();
         $playersDataModelId = $playersModel?->id;
 
+        $depositModel = DataModel::query()->where('slug', 'deposit')->first();
+        $withdrawModel = DataModel::query()->where('slug', 'withdraw')->first();
+
         $tools = [
             // ─── Internal config (no type) ───
             [
@@ -241,6 +244,34 @@ class ToolSeeder extends Seeder
                 'tool_rules' => "- Berikan link APK dari information text\n- Jangan buat atau tebak link sendiri, gunakan HANYA link yang tersedia\n- Ajak user untuk mendaftar atau bermain dengan nada ramah dan semangat",
                 'information_text' => ["silahkan akses link apk untuk daftar ataupun bermain di bigmsg ya kak\n\nhttps://apk.hi11office.com/BIGMSG(2.0.6).apk\n\nselamat bermain dan semoga beruntung"],
                 'meta' => null,
+            ],
+
+            // ─── GET MULTIPLE type tools ───
+            [
+                'tool_name' => 'BonusCashback',
+                'display_name' => 'Bonus Cashback',
+                'description' => 'Provide information about bonus cashback. Compare total "amount" on Deposit and Withdraw model in LAST WEEK where status is "accept". If total Withdraw amount > total Deposit amount, the player has no cashback.',
+                'slug' => 'bonus-cashback',
+                'type' => 'get_multiple',
+                'is_enabled' => true,
+                'data_model_id' => null,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'username' => ['type' => 'string', 'description' => 'Username pemain'],
+                    ],
+                    'required' => ['username'],
+                ],
+                'endpoints' => null,
+                'keywords' => ['cashback', 'bonus cashback', 'cek cashback'],
+                'tool_rules' => "- Minta username terlebih dahulu jika belum diberikan\n- Bandingkan total amount dari Deposit dan Withdraw dalam 1 minggu terakhir (last week) dengan status \"accept\"\n- Jika total Withdraw > total Deposit, berarti pemain TIDAK mendapatkan cashback (sudah profit/menang)\n- Jika total Deposit > total Withdraw, pemain BERHAK mendapatkan cashback dari selisihnya\n- Jika tidak ada data deposit atau withdraw, sampaikan bahwa tidak ada transaksi dalam seminggu terakhir\n- Tampilkan: total deposit, total withdraw, selisih, dan status kelayakan cashback\n- Format angka dalam mata uang (gunakan separator ribuan)\n- Jangan simpulkan rate/persentase cashback, hanya sampaikan data perbandingan dan kelayakan",
+                'information_text' => null,
+                'meta' => [
+                    'data_model_ids' => array_filter([
+                        $depositModel?->id,
+                        $withdrawModel?->id,
+                    ]),
+                ],
             ],
         ];
 

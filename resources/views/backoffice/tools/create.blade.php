@@ -25,34 +25,42 @@
 
             <div class="grid gap-4 md:grid-cols-3">
                 <div>
-                    <label for="tool_name" class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.tool_name_key') }}</label>
+                    <label for="tool_name"
+                        class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.tool_name_key') }}</label>
                     <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.tool_name_help') }}</p>
                     <input id="tool_name" type="text" name="tool_name" value="{{ old('tool_name') }}"
                         placeholder="e.g. resetPassword"
                         class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
                 </div>
                 <div>
-                    <label for="display_name" class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.display_name') }}</label>
+                    <label for="display_name"
+                        class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.display_name') }}</label>
                     <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.display_name_help') }}</p>
                     <input id="display_name" type="text" name="display_name" value="{{ old('display_name') }}"
                         placeholder="e.g. Reset Password"
                         class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
                 </div>
                 <div>
-                    <label for="type" class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.type') }}</label>
+                    <label for="type"
+                        class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.type') }}</label>
                     <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.type_help') }}</p>
                     <select id="type" name="type"
                         class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
-                        <option value="info" {{ old('type', 'info') === 'info' ? 'selected' : '' }}>{{ __('backoffice.pages.tools.type_info') }}</option>
-                        <option value="get" {{ old('type') === 'get' ? 'selected' : '' }}>{{ __('backoffice.pages.tools.type_get') }}</option>
-                        <option value="get_multiple" {{ old('type') === 'get_multiple' ? 'selected' : '' }}>{{ __('backoffice.pages.tools.type_get_multiple') }}</option>
-                        <option value="update" {{ old('type') === 'update' ? 'selected' : '' }}>{{ __('backoffice.pages.tools.type_update') }}</option>
+                        <option value="info" {{ old('type', 'info') === 'info' ? 'selected' : '' }}>
+                            {{ __('backoffice.pages.tools.type_info') }}</option>
+                        <option value="get" {{ old('type') === 'get' ? 'selected' : '' }}>
+                            {{ __('backoffice.pages.tools.type_get') }}</option>
+                        <option value="get_multiple" {{ old('type') === 'get_multiple' ? 'selected' : '' }}>
+                            {{ __('backoffice.pages.tools.type_get_multiple') }}</option>
+                        <option value="update" {{ old('type') === 'update' ? 'selected' : '' }}>
+                            {{ __('backoffice.pages.tools.type_update') }}</option>
                     </select>
                 </div>
             </div>
 
             <div>
-                <label for="keywords" class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.keywords') }}</label>
+                <label for="keywords"
+                    class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.keywords') }}</label>
                 <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.keywords_help') }}</p>
                 <input id="keywords" type="text" name="keywords" value="{{ old('keywords') }}"
                     placeholder="e.g. reset password, resetpass, kata sandi"
@@ -60,7 +68,8 @@
             </div>
 
             <div>
-                <label for="description" class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.description') }}</label>
+                <label for="description"
+                    class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.description') }}</label>
                 <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.description_help') }}</p>
                 <input id="description" type="text" name="description" value="{{ old('description') }}"
                     placeholder="e.g. Reset user password after account data verification"
@@ -70,7 +79,8 @@
             {{-- ─── GET type: Data Model + Parameters ─── --}}
             <div id="section-get" class="space-y-4" style="display:none">
                 <div>
-                    <label for="data_model_id" class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.data_model_connection') }}</label>
+                    <label for="data_model_id"
+                        class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.data_model_connection') }}</label>
                     <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.choose_data_model') }}</p>
                     <select id="data_model_id" name="data_model_id"
                         class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
@@ -144,9 +154,11 @@
 
                     <div class="rounded-xl border border-white/10 bg-slate-900/40 p-3 space-y-3">
                         <div>
-                            <label for="endpoint_route" class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.route') }}</label>
+                            <label for="endpoint_route"
+                                class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.route') }}</label>
                             <input id="endpoint_route" type="text" name="endpoint_route"
-                                value="{{ old('endpoint_route') }}" placeholder="{{ __('backoffice.pages.tools.route_example') }}"
+                                value="{{ old('endpoint_route') }}"
+                                placeholder="{{ __('backoffice.pages.tools.route_example') }}"
                                 class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400" />
                         </div>
 
@@ -181,7 +193,8 @@
                         </div>
 
                         <div>
-                            <p class="mb-2 text-xs text-slate-300">{{ __('backoffice.pages.tools.expected_response') }}</p>
+                            <p class="mb-2 text-xs text-slate-300">{{ __('backoffice.pages.tools.expected_response') }}
+                            </p>
                             <div class="rounded-lg border border-white/10 bg-slate-950/60 p-3 mb-3">
                                 <pre id="expected-response-preview"
                                     class="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-auto max-h-64">{
@@ -190,7 +203,8 @@
   "data": {}
 }</pre>
                             </div>
-                            <p class="mb-2 text-xs text-slate-300">{{ __('backoffice.pages.tools.expected_data_help') }}</p>
+                            <p class="mb-2 text-xs text-slate-300">{{ __('backoffice.pages.tools.expected_data_help') }}
+                            </p>
                             <div id="expected-data-list" class="space-y-2 mb-2"></div>
                             <button type="button" onclick="addExpectedDataField()"
                                 class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
@@ -207,7 +221,8 @@
                         {{-- Expected Error Responses --}}
                         <div>
                             <p class="mb-2 text-xs text-slate-300">{{ __('backoffice.pages.tools.error_responses') }}</p>
-                            <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.error_responses_help') }}</p>
+                            <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.error_responses_help') }}
+                            </p>
                             <div class="rounded-lg border border-white/10 bg-slate-950/60 p-3 mb-3">
                                 <pre id="error-response-preview" class="text-xs text-slate-300 whitespace-pre-wrap font-mono overflow-auto max-h-64">[
   {
@@ -228,7 +243,8 @@
             </div>
 
             <div>
-                <label for="tool_rules" class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.tool_rules') }}</label>
+                <label for="tool_rules"
+                    class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.tool_rules') }}</label>
                 <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.tool_rules_help') }}</p>
                 <textarea id="tool_rules" name="tool_rules" rows="4"
                     placeholder="{{ __('backoffice.pages.tools.tool_rules_placeholder') }}"
@@ -317,7 +333,7 @@
 
         function buildFieldOptions(selected = '') {
             const fields = getSelectedDataModelFields();
-            let html = '<option value="">{{ __("backoffice.pages.tools.select_field") }}</option>';
+            let html = '<option value="">{{ __('backoffice.pages.tools.select_field') }}</option>';
             fields.forEach(field => {
                 const isSelected = String(field) === String(selected) ? 'selected' : '';
                 html += `<option value="${field}" ${isSelected}>${field}</option>`;
@@ -607,7 +623,7 @@
                     const key = inputs[0]?.value.trim();
                     const value = inputs[1]?.value.trim();
                     if ((key && !value) || (!key && value)) {
-                        alert('{{ __("backoffice.pages.tools.form_validation_error") }}');
+                        alert('{{ __('backoffice.pages.tools.form_validation_error') }}');
                         return false;
                     }
                 }
@@ -628,59 +644,62 @@
             `;
             wrapper.appendChild(row);
         }
-                placeholder="Teks informasi..."></textarea>
-                <button type="button" onclick="this.closest('.info-text-row').remove()"
-                    class="shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20">✕</button>`;
-            wrapper.appendChild(row);
+        placeholder = "Teks informasi..." > < /textarea> <
+            button type = "button"
+        onclick = "this.closest('.info-text-row').remove()"
+        class =
+        "shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20" > ✕
+        < /button>`;
+    wrapper.appendChild(row);
+    }
+
+    async function testEndpoint() {
+        const routeInput = document.getElementById('endpoint_route');
+        const route = routeInput ? routeInput.value.trim() : '';
+        if (!route) {
+            alert('Route belum diisi.');
+            return;
         }
 
-        async function testEndpoint() {
-            const routeInput = document.getElementById('endpoint_route');
-            const route = routeInput ? routeInput.value.trim() : '';
-            if (!route) {
-                alert('Route belum diisi.');
-                return;
-            }
+        const bodyList = document.getElementById('body-list');
+        const rows = bodyList.querySelectorAll(':scope > div');
+        const body = {};
+        rows.forEach(row => {
+            const inputs = row.querySelectorAll('input[type=text]');
+            const k = inputs[0]?.value.trim();
+            const v = inputs[1]?.value.trim();
+            if (k) body[k] = v;
+        });
 
-            const bodyList = document.getElementById('body-list');
-            const rows = bodyList.querySelectorAll(':scope > div');
-            const body = {};
-            rows.forEach(row => {
-                const inputs = row.querySelectorAll('input[type=text]');
-                const k = inputs[0]?.value.trim();
-                const v = inputs[1]?.value.trim();
-                if (k) body[k] = v;
+        const resultEl = document.getElementById('endpoint-test-result');
+        const statusEl = document.getElementById('endpoint-test-status');
+        const bodyEl = document.getElementById('endpoint-test-body');
+
+        resultEl.classList.remove('hidden');
+        statusEl.textContent = 'Loading...';
+        statusEl.className = 'text-xs font-mono text-slate-400';
+        bodyEl.textContent = '';
+
+        try {
+            const basePath = window.location.pathname.substring(0, window.location.pathname.indexOf(
+                '/backoffice/'));
+            const res = await fetch(`${basePath}/backoffice/tools/test-endpoint`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    route,
+                    body
+                }),
             });
-
-            const resultEl = document.getElementById('endpoint-test-result');
-            const statusEl = document.getElementById('endpoint-test-status');
-            const bodyEl = document.getElementById('endpoint-test-body');
-
-            resultEl.classList.remove('hidden');
-            statusEl.textContent = 'Loading...';
-            statusEl.className = 'text-xs font-mono text-slate-400';
-            bodyEl.textContent = '';
-
-            try {
-                const basePath = window.location.pathname.substring(0, window.location.pathname.indexOf(
-                    '/backoffice/'));
-                const res = await fetch(`${basePath}/backoffice/tools/test-endpoint`, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        route,
-                        body
-                    }),
-                });
-                const data = await res.json();
-                statusEl.textContent = data.success ? `✓ HTTP ${data.status}` :
-                    `✗ ${data.error || 'HTTP ' + data.status}`;
-                statusEl.className = `text-xs font-mono ${data.success ? 'text-emerald-400' : 'text-red-400'}`;
+            const data = await res.json();
+            statusEl.textContent = data.success ? `✓ HTTP ${data.status}` :
+                `✗ ${data.error || 'HTTP ' + data.status}`;
+            statusEl.className = `text-xs font-mono ${data.success ? 'text-emerald-400' : 'text-red-400'}`;
                 bodyEl.textContent = typeof data.response === 'object' ? JSON.stringify(data.response, null, 2) : (data
                     .response || data.error || '');
             } catch (e) {

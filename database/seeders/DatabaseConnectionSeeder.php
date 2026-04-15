@@ -18,7 +18,7 @@ class DatabaseConnectionSeeder extends Seeder
                 'port'      => 3306,
                 'database'  => 'pilar',
                 'username'  => 'gamegg',
-                'password'  => Crypt::encryptString('ZqRcN6FGWaT3dPyE'),
+                'password'  => 'ZqRcN6FGWaT3dPyE',
                 'is_active' => true,
             ]
         );

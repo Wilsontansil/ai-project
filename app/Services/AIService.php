@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Agent;
+use App\Models\ChatAgent;
 use App\Models\DataModel;
 use App\Models\ForbiddenBehaviour;
 use App\Models\ProjectSetting;
@@ -36,7 +37,8 @@ class AIService
         }
 
         $client = OpenAI::client($apiKey);
-        $systemPrompt = $this->getSystemPrompt();
+        $chatAgent = ChatAgent::getDefault();
+        $systemPrompt = $this->getSystemPrompt($chatAgent);
         $tools = $this->getTools();
 
         $history = $this->loadConversationHistory($chatId);
@@ -52,11 +54,15 @@ class AIService
         // Send to OpenAI
         try {
             $payload = [
-                'model' => $this->model,
+                'model' => $chatAgent->model ?? $this->model,
                 'messages' => $messages,
                 // Allow fuller answers to avoid confusing, cut-off responses.
-                'max_tokens' => 420,
+                'max_tokens' => $chatAgent->max_tokens ?? 420,
             ];
+
+            if ($chatAgent && $chatAgent->temperature !== null) {
+                $payload['temperature'] = $chatAgent->temperature;
+            }
 
             if ($tools !== []) {
                 $payload['tools'] = $tools;
@@ -144,15 +150,23 @@ class AIService
     }
 
     /**
-     * Get the system prompt for xoneBot.
+     * Get the system prompt for the AI agent.
      */
-    private function getSystemPrompt(): string
+    private function getSystemPrompt(?ChatAgent $chatAgent = null): string
     {
-        $botName = $this->getBotName();
+        $botName = $chatAgent->name ?? $this->getBotName();
         $serverTime = now()->format('Y-m-d H:i:s (l)');
         $serverTimezone = now()->getTimezone()->getName();
 
-        $basePrompt = "You are {$botName}, a friendly customer support assistant for a gaming platform.
+        // Use the chat agent's custom prompt if available
+        if ($chatAgent && !empty($chatAgent->system_prompt)) {
+            $basePrompt = str_replace(
+                ['{bot_name}', '{server_time}', '{server_timezone}'],
+                [$botName, $serverTime, $serverTimezone],
+                $chatAgent->system_prompt
+            );
+        } else {
+            $basePrompt = "You are {$botName}, a friendly customer support assistant for a gaming platform.
 
         CURRENT SERVER TIME: {$serverTime} ({$serverTimezone})
         Use this as the authoritative current datetime for all time-based calculations (e.g. today, yesterday, last week Monday-Sunday, this month, etc.).
@@ -175,6 +189,8 @@ class AIService
         - 'bank': BCA, Mandiri, BRI, BNI, Danamon, CIMB Niaga, Permata, Maybank, Panin, BSI, Bank Jago, Bank Mega, Bank Bukopin, OCBC NISP, Mayapada, Sinarmas, Commonwealth, UOB Indonesia, BTN, Bank DKI, BTPN, Artha Graha, Mayora, JTrust Indonesia, Mestika, Victoria, Ina Perdana, Woori Saudara, Artos Indonesia, Harda Internasional, Ganesha, Maspion, QNB Indonesia, Royal Indonesia, Bumi Arta, Nusantara Parahyangan, and their Syariah variants.
         - 'norek': Numeric only.
         ";
+        }
+
         // Append active case instructions from database
         $caseInstructions = $this->getCaseInstructions();
         if ($caseInstructions !== '') {

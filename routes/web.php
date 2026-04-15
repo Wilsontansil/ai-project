@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Backoffice\AIAgentController;
 use App\Http\Controllers\Backoffice\AuthController;
+use App\Http\Controllers\Backoffice\ChatAgentController;
 use App\Http\Controllers\Backoffice\DataModelController;
 use App\Http\Controllers\Backoffice\ForbiddenBehaviourController;
 use App\Http\Controllers\Backoffice\DashboardController;
@@ -24,6 +25,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/backoffice/customer/{customer}/chat', [DashboardController::class, 'chat'])->name('backoffice.customer.chat');
     Route::get('/backoffice/ai-agent', [AIAgentController::class, 'index'])->name('backoffice.ai-agent');
     Route::post('/backoffice/ai-agent', [AIAgentController::class, 'update'])->name('backoffice.ai-agent.update');
+
+    Route::get('/backoffice/chat-agents', [ChatAgentController::class, 'index'])->name('backoffice.chat-agents.index');
+    Route::get('/backoffice/chat-agents/create', [ChatAgentController::class, 'create'])->name('backoffice.chat-agents.create');
+    Route::post('/backoffice/chat-agents', [ChatAgentController::class, 'store'])->name('backoffice.chat-agents.store');
+    Route::get('/backoffice/chat-agents/{chatAgent}/edit', [ChatAgentController::class, 'edit'])->name('backoffice.chat-agents.edit');
+    Route::put('/backoffice/chat-agents/{chatAgent}', [ChatAgentController::class, 'update'])->name('backoffice.chat-agents.update');
+    Route::delete('/backoffice/chat-agents/{chatAgent}', [ChatAgentController::class, 'destroy'])->name('backoffice.chat-agents.destroy');
+    Route::post('/backoffice/chat-agents/{chatAgent}/duplicate', [ChatAgentController::class, 'duplicate'])->name('backoffice.chat-agents.duplicate');
 
     Route::get('/backoffice/tools', [ToolController::class, 'index'])->name('backoffice.tools.index');
     Route::get('/backoffice/tools/create', [ToolController::class, 'create'])->name('backoffice.tools.create');

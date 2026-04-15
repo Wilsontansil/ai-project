@@ -354,7 +354,7 @@
         function addParamRow(name = '', desc = '', required = false) {
             const list = document.getElementById('param-list');
             const row = document.createElement('div');
-            row.className = 'flex items-end gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
+            row.className = 'flex items-start gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
                 <div class="w-2/5">
                     <label class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.parameter_name') }}</label>
@@ -368,13 +368,13 @@
                     <input type="text" name="params[${paramIndex}][description]" value="${desc}" placeholder="{{ __('backoffice.pages.tools.parameter_description') }}"
                         class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
                 </div>
-                <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer self-end mb-2">
+                <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer mt-5">
                     <input type="checkbox" name="params[${paramIndex}][required]" value="1" ${required ? 'checked' : ''}
                         class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
                     {{ __('backoffice.pages.tools.required') }}
                 </label>
                 <button type="button" onclick="this.closest('div').remove()"
-                    class="shrink-0 self-end mb-1 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                    class="shrink-0 mt-5 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
             paramIndex++;
@@ -386,7 +386,7 @@
         function addGetMultiParamRow(name = '', desc = '', required = false) {
             const list = document.getElementById('getmulti-param-list');
             const row = document.createElement('div');
-            row.className = 'flex items-end gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
+            row.className = 'flex items-start gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
                 <div class="w-2/5">
                     <label class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.parameter_name') }}</label>
@@ -398,13 +398,13 @@
                     <input type="text" name="params[${getMultiParamIndex}][description]" value="${desc}" placeholder="{{ __('backoffice.pages.tools.parameter_description') }}"
                         class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
                 </div>
-                <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer self-end mb-2">
+                <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer mt-5">
                     <input type="checkbox" name="params[${getMultiParamIndex}][required]" value="1" ${required ? 'checked' : ''}
                         class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
                     {{ __('backoffice.pages.tools.required') }}
                 </label>
                 <button type="button" onclick="this.closest('div').remove()"
-                    class="shrink-0 self-end mb-1 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                    class="shrink-0 mt-5 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
             getMultiParamIndex++;
@@ -413,7 +413,7 @@
         function addUpdateParamRow(name = '', desc = '', required = false) {
             const list = document.getElementById('update-param-list');
             const row = document.createElement('div');
-            row.className = 'flex items-end gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
+            row.className = 'flex items-start gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
                 <div class="w-2/5">
                     <label class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.parameter_name') }}</label>
@@ -425,13 +425,13 @@
                     <input type="text" name="params[${updateParamIndex}][description]" value="${desc}" placeholder="{{ __('backoffice.pages.tools.parameter_description') }}"
                         class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
                 </div>
-                <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer self-end mb-2">
+                <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer mt-5">
                     <input type="checkbox" name="params[${updateParamIndex}][required]" value="1" ${required ? 'checked' : ''}
                         class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
                     {{ __('backoffice.pages.tools.required') }}
                 </label>
                 <button type="button" onclick="this.closest('div').remove()"
-                    class="shrink-0 self-end mb-1 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                    class="shrink-0 mt-5 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
             updateParamIndex++;
@@ -461,7 +461,7 @@
         function addBodyField(key = '', val = '') {
             const list = document.getElementById('body-list');
             const row = document.createElement('div');
-            row.className = 'endpoint-body-row flex items-end gap-2';
+            row.className = 'endpoint-body-row flex items-start gap-2';
             row.innerHTML = `
                 <div class="w-2/5">
                     <label class="mb-1 block text-xs text-slate-300">Key</label>
@@ -474,7 +474,7 @@
                         class="body-value-input w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
                 </div>
                 <button type="button" onclick="this.closest('.endpoint-body-row').remove()"
-                    class="shrink-0 self-end mb-1 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                    class="shrink-0 mt-5 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
             bodyIdx++;
@@ -503,7 +503,7 @@
         function addExpectedDataField(key = '', val = '') {
             const list = document.getElementById('expected-data-list');
             const row = document.createElement('div');
-            row.className = 'flex items-end gap-2';
+            row.className = 'flex items-start gap-2';
             row.innerHTML = `
                 <div class="w-2/5">
                     <label class="mb-1 block text-xs text-slate-300">Key</label>
@@ -515,7 +515,7 @@
                     <input type="text" name="endpoint_expected_data[${expectedDataIdx}][value]" value="${val}" placeholder="{{ __('backoffice.pages.tools.value_data_placeholder') }}"
                         class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400 expected-data-input" />
                 </div>
-                <button type="button" class="shrink-0 self-end mb-1 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20 remove-expected">&times;</button>
+                <button type="button" class="shrink-0 mt-5 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20 remove-expected">&times;</button>
             `;
             row.querySelectorAll('.expected-data-input').forEach(input => input.addEventListener('input',
                 updateExpectedResponsePreview));
@@ -553,7 +553,7 @@
         function addErrorResponse(status = '', message = '') {
             const list = document.getElementById('error-response-list');
             const row = document.createElement('div');
-            row.className = 'error-response-row flex items-end gap-2';
+            row.className = 'error-response-row flex items-start gap-2';
             row.innerHTML = `
                 <div class="w-24">
                     <label class="mb-1 block text-xs text-slate-300">Status</label>
@@ -565,7 +565,7 @@
                     <input type="text" name="error_responses[${errorResponseIdx}][message]" value="${message}" placeholder="{{ __('backoffice.pages.tools.message_placeholder') }}"
                         class="err-message w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
                 </div>
-                <button type="button" class="shrink-0 self-end mb-1 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20 remove-error">&times;</button>
+                <button type="button" class="shrink-0 mt-5 rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-xs text-red-300 hover:bg-red-500/20 remove-error">&times;</button>
             `;
             row.querySelectorAll('input').forEach(input => input.addEventListener('input', updateErrorResponsePreview));
             row.querySelector('.remove-error').addEventListener('click', function() {

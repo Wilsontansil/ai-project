@@ -594,6 +594,23 @@ class ToolSeeder extends Seeder
                 ],
                 'meta' => null,
             ],
+            [
+                'tool_name' => 'search_game_guide',
+                'display_name' => 'Search Game Guide',
+                'description' => 'Provide guidance when a member cannot find a specific game, directing them to use the search feature.',
+                'slug' => 'search-game-guide',
+                'type' => 'info',
+                'is_enabled' => true,
+                'data_model_id' => null,
+                'parameters' => null,
+                'endpoints' => null,
+                'keywords' => ['game tidak ada', 'game hilang', 'cari game', 'game tidak ditemukan', 'spaceman', 'game kok tidak ada', 'tidak bisa cari game', 'menu pencarian', 'search game', 'game kemana'],
+                'tool_rules' => "- Arahkan member untuk menggunakan fitur pencarian (ikon kaca pembesar) di website\n- Gunakan tone ramah dan membantu\n- Jangan menyebutkan bahwa game tidak tersedia, arahkan untuk mencari terlebih dahulu",
+                'information_text' => [
+                    "Halo Kak! Untuk menemukan permainannya dengan cepat, Kakak bisa langsung menuju ke menu pencarian (ikon kaca pembesar) dan mengetikkan nama game yang ingin dimainkan ya 😊",
+                ],
+                'meta' => null,
+            ],
         ];
 
         foreach ($tools as $tool) {

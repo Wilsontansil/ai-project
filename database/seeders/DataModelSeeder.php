@@ -214,5 +214,35 @@ class DataModelSeeder extends Seeder
                 ],
             ]
         );
+
+        DataModel::updateOrCreate(
+            ['slug' => 'promo'],
+            [
+                'model_name' => 'Promo',
+                'description' => 'Promo data model schema.',
+                'table_name' => 'promos',
+                'connection_name' => 'mysqlgame',
+                'fields' => [
+                    'id' => ['type' => 'bigint(20) UNSIGNED', 'required' => false],
+                    'title' => ['type' => 'varchar(125)', 'required' => false],
+                    'body' => ['type' => 'text', 'required' => false],
+                    'image' => ['type' => 'varchar(125)', 'required' => false],
+                    'start_date' => ['type' => 'datetime', 'required' => false],
+                    'end_date' => ['type' => 'datetime', 'required' => false],
+                    'slug' => ['type' => 'varchar(125)', 'required' => false],
+                    'status' => ['type' => 'varchar(125)', 'required' => false],
+                    'buttonlink' => ['type' => 'varchar(125)', 'required' => false],
+                    'category' => ['type' => "enum('casino','sports')", 'required' => false],
+                    'isbanner' => ['type' => 'tinyint(1)', 'required' => false],
+                    'ispromotion' => ['type' => 'tinyint(1)', 'required' => false],
+                    'urutan' => ['type' => 'int(11)', 'required' => false],
+                    'agent' => ['type' => 'varchar(125)', 'required' => true, 'value' => 'PG'],
+                    'language' => ['type' => 'varchar(125)', 'required' => false],
+                    'created_at' => ['type' => 'timestamp', 'required' => false],
+                    'updated_at' => ['type' => 'timestamp', 'required' => false],
+                    'deleted_at' => ['type' => 'timestamp', 'required' => false],
+                ],
+            ]
+        );
     }
 }

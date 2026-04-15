@@ -130,117 +130,6 @@
                         + Tambah Parameter
                     </button>
                 </div>
-
-                {{-- ─── Query Configuration ─── --}}
-                <div class="rounded-2xl border border-white/10 bg-slate-900/30 p-4 space-y-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-white">Query Configuration</h3>
-                        <p class="text-xs text-slate-400">Konfigurasi query untuk DataModel lookup. Filter, aggregate, date
-                            range, order, dan limit.</p>
-                    </div>
-
-                    {{-- Filters --}}
-                    <div>
-                        <p class="mb-2 text-xs text-slate-300">Filters</p>
-                        <p class="mb-2 text-xs text-slate-400">WHERE conditions yang selalu diterapkan pada query.</p>
-                        <div id="query-filter-list" class="space-y-2"></div>
-                        <button type="button" onclick="addQueryFilterRow()"
-                            class="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
-                            + Tambah Filter
-                        </button>
-                    </div>
-
-                    {{-- Date Range --}}
-                    <div class="grid gap-3 md:grid-cols-2">
-                        <div>
-                            <label for="query_date_field" class="mb-1 block text-xs text-slate-300">Date Range —
-                                Field</label>
-                            <input id="query_date_field" type="text" name="query_date_field"
-                                value="{{ old('query_date_field', data_get($tool->meta, 'query.date_range.field', '')) }}"
-                                placeholder="e.g. date, created_at"
-                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                        </div>
-                        <div>
-                            <label for="query_date_range" class="mb-1 block text-xs text-slate-300">Date Range —
-                                Range</label>
-                            <select id="query_date_range" name="query_date_range"
-                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
-                                @php $savedRange = old('query_date_range', data_get($tool->meta, 'query.date_range.range', '')); @endphp
-                                <option value="">-- Tidak ada --</option>
-                                <option value="today" {{ $savedRange === 'today' ? 'selected' : '' }}>Today</option>
-                                <option value="yesterday" {{ $savedRange === 'yesterday' ? 'selected' : '' }}>Yesterday
-                                </option>
-                                <option value="this_week" {{ $savedRange === 'this_week' ? 'selected' : '' }}>This Week
-                                </option>
-                                <option value="last_week" {{ $savedRange === 'last_week' ? 'selected' : '' }}>Last Week
-                                    (Mon-Sun)</option>
-                                <option value="this_month" {{ $savedRange === 'this_month' ? 'selected' : '' }}>This Month
-                                </option>
-                                <option value="last_month" {{ $savedRange === 'last_month' ? 'selected' : '' }}>Last Month
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-
-                    {{-- Aggregate --}}
-                    <div class="grid gap-3 md:grid-cols-2">
-                        <div>
-                            <label for="query_agg_function" class="mb-1 block text-xs text-slate-300">Aggregate —
-                                Function</label>
-                            <select id="query_agg_function" name="query_agg_function"
-                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
-                                @php $savedAggFunc = old('query_agg_function', data_get($tool->meta, 'query.aggregate.function', '')); @endphp
-                                <option value="">-- Tidak ada --</option>
-                                <option value="sum" {{ $savedAggFunc === 'sum' ? 'selected' : '' }}>SUM</option>
-                                <option value="count" {{ $savedAggFunc === 'count' ? 'selected' : '' }}>COUNT</option>
-                                <option value="avg" {{ $savedAggFunc === 'avg' ? 'selected' : '' }}>AVG</option>
-                                <option value="min" {{ $savedAggFunc === 'min' ? 'selected' : '' }}>MIN</option>
-                                <option value="max" {{ $savedAggFunc === 'max' ? 'selected' : '' }}>MAX</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="query_agg_field" class="mb-1 block text-xs text-slate-300">Aggregate —
-                                Field</label>
-                            <input id="query_agg_field" type="text" name="query_agg_field"
-                                value="{{ old('query_agg_field', data_get($tool->meta, 'query.aggregate.field', '')) }}"
-                                placeholder="e.g. amount"
-                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                        </div>
-                    </div>
-
-                    {{-- Order By --}}
-                    <div class="grid gap-3 md:grid-cols-2">
-                        <div>
-                            <label for="query_order_field" class="mb-1 block text-xs text-slate-300">Order By —
-                                Field</label>
-                            <input id="query_order_field" type="text" name="query_order_field"
-                                value="{{ old('query_order_field', data_get($tool->meta, 'query.order_by.field', '')) }}"
-                                placeholder="e.g. id, created_at"
-                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                        </div>
-                        <div>
-                            <label for="query_order_dir" class="mb-1 block text-xs text-slate-300">Order By —
-                                Direction</label>
-                            <select id="query_order_dir" name="query_order_dir"
-                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
-                                @php $savedOrderDir = old('query_order_dir', data_get($tool->meta, 'query.order_by.direction', '')); @endphp
-                                <option value="">-- Default --</option>
-                                <option value="asc" {{ $savedOrderDir === 'asc' ? 'selected' : '' }}>ASC</option>
-                                <option value="desc" {{ $savedOrderDir === 'desc' ? 'selected' : '' }}>DESC</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    {{-- Limit --}}
-                    <div class="md:w-1/2">
-                        <label for="query_limit" class="mb-1 block text-xs text-slate-300">Limit</label>
-                        <p class="mb-1 text-xs text-slate-400">Kosongkan atau 0 = ambil 1 row (default). Isi angka untuk
-                            multi-row.</p>
-                        <input id="query_limit" type="number" name="query_limit" min="0"
-                            value="{{ old('query_limit', data_get($tool->meta, 'query.limit', '')) }}" placeholder="0"
-                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                    </div>
-                </div>
             </div>
 
             {{-- ─── UPDATE type: Parameters + API Endpoint ─── --}}
@@ -258,8 +147,7 @@
                 <div class="rounded-2xl border border-white/10 bg-slate-900/30 p-4 space-y-4">
                     <div>
                         <h3 class="text-sm font-semibold text-white">API Endpoint</h3>
-                        <p class="text-xs text-slate-400">Route yang dipanggil ke webhook base URL saat tool dieksekusi.
-                        </p>
+                        <p class="text-xs text-slate-400">Route yang dipanggil ke webhook base URL saat tool dieksekusi.</p>
                     </div>
 
                     <div class="rounded-xl border border-white/10 bg-slate-900/40 p-3 space-y-3">
@@ -484,32 +372,6 @@
         /* ── UPDATE type: parameter rows (free-text name) ── */
         let getMultiParamIndex = 0;
 
-        /* ── Query filter rows (GET MULTIPLE) ── */
-        let queryFilterIndex = 0;
-
-        function addQueryFilterRow(field = '', operator = '=', value = '') {
-            const list = document.getElementById('query-filter-list');
-            const row = document.createElement('div');
-            row.className = 'flex items-center gap-2';
-            const ops = ['=', '!=', '>', '<', '>=', '<=', 'like', 'not like', 'in', 'not in'];
-            const opOptions = ops.map(op =>
-                `<option value="${op}" ${op === operator ? 'selected' : ''}>${op.toUpperCase()}</option>`).join('');
-            row.innerHTML = `
-                <input type="text" name="query_filters[${queryFilterIndex}][field]" value="${field}" placeholder="Field (e.g. status)"
-                    class="w-1/3 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <select name="query_filters[${queryFilterIndex}][operator]"
-                    class="w-24 rounded-xl border border-white/10 bg-slate-900/70 px-2 py-2 text-sm text-white outline-none focus:border-cyan-400">
-                    ${opOptions}
-                </select>
-                <input type="text" name="query_filters[${queryFilterIndex}][value]" value="${value}" placeholder="Value (e.g. accept)"
-                    class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                <button type="button" onclick="this.parentElement.remove()"
-                    class="shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
-            `;
-            list.appendChild(row);
-            queryFilterIndex++;
-        }
-
         function addGetMultiParamRow(name = '', desc = '', required = false) {
             const list = document.getElementById('getmulti-param-list');
             const row = document.createElement('div');
@@ -709,13 +571,6 @@
             }
 
             refreshParameterFieldOptions();
-
-            // Pre-populate query filters
-            @php $savedQueryFilters = old('query_filters', data_get($tool->meta, 'query.filters', [])) ?: []; @endphp
-            const queryFilters = @json($savedQueryFilters);
-            if (Array.isArray(queryFilters)) {
-                queryFilters.forEach(f => addQueryFilterRow(f.field || '', f.operator || '=', f.value || ''));
-            }
         });
 
         /* ── Validation ── */

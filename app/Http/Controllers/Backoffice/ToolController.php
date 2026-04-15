@@ -165,56 +165,8 @@ class ToolController extends Controller
             $ids = array_filter(array_map('intval', (array) $request->input('data_model_ids', [])));
             $meta['data_model_ids'] = array_values($ids);
 
-            // Build meta.query from form inputs
-            $query = [];
-
-            // Filters
-            $rawFilters = (array) $request->input('query_filters', []);
-            $filters = [];
-            foreach ($rawFilters as $f) {
-                $field = trim((string) ($f['field'] ?? ''));
-                $operator = trim((string) ($f['operator'] ?? '='));
-                $value = trim((string) ($f['value'] ?? ''));
-                if ($field !== '' && $value !== '') {
-                    $filters[] = ['field' => $field, 'operator' => $operator, 'value' => $value];
-                }
-            }
-            if ($filters !== []) {
-                $query['filters'] = $filters;
-            }
-
-            // Date Range
-            $dateField = trim((string) $request->input('query_date_field', ''));
-            $dateRange = trim((string) $request->input('query_date_range', ''));
-            if ($dateField !== '' && $dateRange !== '') {
-                $query['date_range'] = ['field' => $dateField, 'range' => $dateRange];
-            }
-
-            // Aggregate
-            $aggFunc = trim((string) $request->input('query_agg_function', ''));
-            $aggField = trim((string) $request->input('query_agg_field', ''));
-            if ($aggFunc !== '' && $aggField !== '') {
-                $query['aggregate'] = ['function' => $aggFunc, 'field' => $aggField];
-            }
-
-            // Order By
-            $orderField = trim((string) $request->input('query_order_field', ''));
-            $orderDir = trim((string) $request->input('query_order_dir', ''));
-            if ($orderField !== '') {
-                $query['order_by'] = ['field' => $orderField, 'direction' => $orderDir ?: 'desc'];
-            }
-
-            // Limit
-            $limit = (int) $request->input('query_limit', 0);
-            if ($limit > 0) {
-                $query['limit'] = $limit;
-            }
-
-            if ($query !== []) {
-                $meta['query'] = $query;
-            } else {
-                unset($meta['query']);
-            }
+            // Preserve meta.query config (filters, date_range, aggregate, order_by, etc.)
+            // Query config is managed via seeder / direct DB; the form does not overwrite it.
         } else {
             unset($meta['data_model_ids'], $meta['query']);
         }

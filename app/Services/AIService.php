@@ -823,10 +823,38 @@ class AIService
             }
         }
 
+        // Read meta.query config
+        $queryConfig = (array) data_get($tool->meta, 'query', []);
+        $cfgSelect = (array) ($queryConfig['select'] ?? []);
+        $cfgFilters = (array) ($queryConfig['filters'] ?? []);
+        $cfgDateRange = (array) ($queryConfig['date_range'] ?? []);
+        $cfgAggregate = (array) ($queryConfig['aggregate'] ?? []);
+        $cfgOrderBy = (array) ($queryConfig['order_by'] ?? []);
+        $cfgLimit = (int) ($queryConfig['limit'] ?? 0);
+
+        $dateRange = $this->resolveDateRange($cfgDateRange['range'] ?? '');
+
         try {
-            $query = DB::connection($connectionName)->table($tableName)->select($allowedFields);
+            // Determine aggregate mode
+            $aggFunc = strtolower(trim($cfgAggregate['function'] ?? ''));
+            $aggField = trim($cfgAggregate['field'] ?? '');
+            $isAggregate = in_array($aggFunc, ['sum', 'count', 'avg', 'min', 'max'], true)
+                && $aggField !== ''
+                && in_array($aggField, $allowedFields, true);
+
+            // Build SELECT
+            if ($isAggregate) {
+                $query = DB::connection($connectionName)->table($tableName);
+            } else {
+                $selectFields = !empty($cfgSelect)
+                    ? array_values(array_intersect($cfgSelect, $allowedFields))
+                    : $allowedFields;
+                $query = DB::connection($connectionName)->table($tableName)->select($selectFields);
+            }
+
             $lookupFilters = [];
 
+            // Apply argument-based WHERE (only matching DataModel fields)
             foreach ($arguments as $field => $value) {
                 if (!in_array($field, $allowedFields, true)) {
                     continue;
@@ -841,16 +869,129 @@ class AIService
                 $lookupFilters[$field] = $normalizedValue;
             }
 
-            $row = $query->first();
+            // Apply meta.query.filters (with operator support)
+            $safeOperators = ['=', '!=', '<>', '>', '<', '>=', '<=', 'like', 'not like'];
+            foreach ($cfgFilters as $filter) {
+                $fField = trim((string) ($filter['field'] ?? ''));
+                $fOp = strtolower(trim((string) ($filter['operator'] ?? '=')));
+                $fValue = $filter['value'] ?? null;
 
-            if ($row === null) {
+                if ($fField === '' || !in_array($fField, $allowedFields, true)) {
+                    continue;
+                }
+
+                if (in_array($fOp, ['in', 'not in'], true) && is_array($fValue)) {
+                    $fOp === 'in'
+                        ? $query->whereIn($fField, $fValue)
+                        : $query->whereNotIn($fField, $fValue);
+                } elseif (in_array($fOp, $safeOperators, true)) {
+                    $query->where($fField, $fOp, $fValue);
+                } else {
+                    $query->where($fField, '=', $fValue);
+                }
+
+                $lookupFilters[$fField] = ($fOp === '=') ? $fValue : "{$fOp} {$fValue}";
+            }
+
+            // Apply meta.query.date_range
+            $dateField = trim($cfgDateRange['field'] ?? '');
+            if ($dateField !== '' && $dateRange !== null && in_array($dateField, $allowedFields, true)) {
+                $query->whereBetween($dateField, [$dateRange['from'], $dateRange['to']]);
+                $lookupFilters[$dateField . '_from'] = $dateRange['from'];
+                $lookupFilters[$dateField . '_to'] = $dateRange['to'];
+            }
+
+            // Apply meta.query.date_range with mode "between_now" (NOW is between two fields)
+            $dateMode = trim($cfgDateRange['mode'] ?? '');
+            if ($dateMode === 'between_now') {
+                $startField = trim($cfgDateRange['start_field'] ?? '');
+                $endField = trim($cfgDateRange['end_field'] ?? '');
+                if ($startField !== '' && $endField !== ''
+                    && in_array($startField, $allowedFields, true)
+                    && in_array($endField, $allowedFields, true)) {
+                    $now = now()->format('Y-m-d H:i:s');
+                    $query->where($startField, '<=', $now)->where($endField, '>=', $now);
+                    $lookupFilters['now_between'] = "{$startField} <= {$now} AND {$endField} >= {$now}";
+                }
+            }
+
+            // Apply meta.query.order_by
+            $orderByList = isset($cfgOrderBy['field']) ? [$cfgOrderBy] : $cfgOrderBy;
+            foreach ($orderByList as $orderItem) {
+                $orderField = trim((string) ($orderItem['field'] ?? ''));
+                $orderDir = strtolower(trim((string) ($orderItem['direction'] ?? 'desc')));
+                if ($orderField !== '' && in_array($orderField, $allowedFields, true)) {
+                    $query->orderBy($orderField, $orderDir === 'asc' ? 'asc' : 'desc');
+                }
+            }
+
+            // Execute
+            if ($isAggregate) {
+                $aggResult = $query->{$aggFunc}($aggField);
+
+                return [
+                    'mode' => 'model',
+                    'tool_context' => [
+                        'tool_name' => $tool->tool_name,
+                        'tool_display_name' => $tool->display_name,
+                        'tool_description' => $tool->description,
+                        'data_model' => [
+                            'model_name' => $dataModel->model_name,
+                            'table_name' => $tableName,
+                        ],
+                        'lookup_filters' => $lookupFilters,
+                        'aggregate' => [
+                            'function' => $aggFunc,
+                            'field' => $aggField,
+                            'value' => $aggResult,
+                        ],
+                    ],
+                ];
+            }
+
+            if ($cfgLimit > 0) {
+                $rows = $query->limit($cfgLimit)->get();
+            } elseif (!empty($queryConfig)) {
+                // If meta.query is set, return all matching rows (not just first)
+                $rows = $query->get();
+            } else {
+                // Default legacy behaviour: single row
+                $row = $query->first();
+
+                if ($row === null) {
+                    return [
+                        'mode' => 'direct',
+                        'reply' => 'Data tidak ditemukan.',
+                    ];
+                }
+
+                return [
+                    'mode' => 'model',
+                    'tool_context' => [
+                        'tool_name' => $tool->tool_name,
+                        'tool_display_name' => $tool->display_name,
+                        'tool_description' => $tool->description,
+                        'data_model' => [
+                            'model_name' => $dataModel->model_name,
+                            'table_name' => $tableName,
+                            'connection_name' => $connectionName,
+                            'allowed_fields' => $allowedFields,
+                        ],
+                        'lookup_filters' => $lookupFilters,
+                        'resolved_data' => $this->normalizeToolData((array) $row),
+                    ],
+                ];
+            }
+
+            // Multi-row result
+            if ($rows->isEmpty()) {
                 return [
                     'mode' => 'direct',
                     'reply' => 'Data tidak ditemukan.',
                 ];
             }
 
-            $resolvedData = $this->normalizeToolData((array) $row);
+            $resolvedRows = $rows->map(fn ($r) => $this->normalizeToolData((array) $r))->toArray();
 
             return [
                 'mode' => 'model',
@@ -861,11 +1002,9 @@ class AIService
                     'data_model' => [
                         'model_name' => $dataModel->model_name,
                         'table_name' => $tableName,
-                        'connection_name' => $connectionName,
-                        'allowed_fields' => $allowedFields,
                     ],
                     'lookup_filters' => $lookupFilters,
-                    'resolved_data' => $resolvedData,
+                    'resolved_data' => $resolvedRows,
                 ],
             ];
         } catch (\Throwable $e) {
@@ -1032,6 +1171,20 @@ class AIService
                     $query->whereBetween($dateField, [$dateRange['from'], $dateRange['to']]);
                     $lookupFilters[$dateField . '_from'] = $dateRange['from'];
                     $lookupFilters[$dateField . '_to'] = $dateRange['to'];
+                }
+
+                // Apply meta.query.date_range with mode "between_now" (NOW is between two fields)
+                $dateMode = trim($cfgDateRange['mode'] ?? '');
+                if ($dateMode === 'between_now') {
+                    $startField = trim($cfgDateRange['start_field'] ?? '');
+                    $endField = trim($cfgDateRange['end_field'] ?? '');
+                    if ($startField !== '' && $endField !== ''
+                        && in_array($startField, $allowedFields, true)
+                        && in_array($endField, $allowedFields, true)) {
+                        $now = now()->format('Y-m-d H:i:s');
+                        $query->where($startField, '<=', $now)->where($endField, '>=', $now);
+                        $lookupFilters['now_between'] = "{$startField} <= {$now} AND {$endField} >= {$now}";
+                    }
                 }
 
                 // Apply meta.query.group_by

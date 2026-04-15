@@ -15,6 +15,7 @@ class ToolSeeder extends Seeder
 
         $depositModel = DataModel::query()->where('slug', 'deposit')->first();
         $withdrawModel = DataModel::query()->where('slug', 'withdraw')->first();
+        $promoModel = DataModel::query()->where('slug', 'promo')->first();
 
         $tools = [
             // ─── Internal config (no type) ───
@@ -160,6 +161,37 @@ class ToolSeeder extends Seeder
                 'tool_rules' => "- Minta username terlebih dahulu jika belum diberikan\n- Hanya tampilkan informasi field 'to' (jumlah TO saat ini) dan 'targetTo' (target TO yang harus dicapai)\n- Jangan tampilkan field lain dari data player\n- Hitung sisa TO yang harus dicapai: targetTo - to\n- Jika TO sudah mencapai atau melebihi target, infokan bahwa TO sudah terpenuhi dan player bisa melakukan withdraw\n- Jika TO belum tercapai, infokan sisa TO yang harus dipenuhi sebelum bisa withdraw\n- Sarankan player untuk terus bermain agar target TO cepat terpenuhi",
                 'information_text' => null,
                 'meta' => null,
+            ],
+            [
+                'tool_name' => 'promo',
+                'display_name' => 'Promo',
+                'description' => 'Provide Promo Information. Retrieves active promotions that are currently running.',
+                'slug' => 'promo',
+                'type' => 'get',
+                'is_enabled' => true,
+                'data_model_id' => $promoModel?->id,
+                'parameters' => null,
+                'endpoints' => null,
+                'keywords' => ['promo', 'list promo', 'daftar promo'],
+                'tool_rules' => "- Tampilkan daftar promo yang sedang aktif saat ini\n- Hanya tampilkan field: title, body, category, start_date, end_date, dan buttonlink\n- Jangan tampilkan field internal seperti id, slug, urutan, agent, image, isbanner, ispromotion\n- Presentasikan setiap promo dalam format yang rapi dan menarik\n- Jika ada buttonlink, sertakan link tersebut agar player bisa langsung mengakses promo\n- Jika ada kategori (casino/sports), kelompokkan atau sebutkan kategorinya\n- Jika tidak ada promo aktif, sampaikan bahwa saat ini belum ada promo yang tersedia dan sarankan untuk cek kembali nanti\n- Jangan buat atau karang promo sendiri, hanya tampilkan data yang ada",
+                'information_text' => null,
+                'meta' => [
+                    'query' => [
+                        'select' => ['title', 'body', 'category', 'start_date', 'end_date', 'buttonlink'],
+                        'filters' => [
+                            ['field' => 'status', 'operator' => '=', 'value' => 'active'],
+                        ],
+                        'date_range' => [
+                            'mode' => 'between_now',
+                            'start_field' => 'start_date',
+                            'end_field' => 'end_date',
+                        ],
+                        'order_by' => [
+                            'field' => 'urutan',
+                            'direction' => 'asc',
+                        ],
+                    ],
+                ],
             ],
 
             // ─── INFO type tools (static information) ───

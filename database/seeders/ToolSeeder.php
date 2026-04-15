@@ -577,6 +577,23 @@ class ToolSeeder extends Seeder
                     ],
                 ],
             ],
+            [
+                'tool_name' => 'referral_bonus_issue',
+                'display_name' => 'Referral Bonus Issue',
+                'description' => 'Provide information when a member asks about referral bonus not appearing after inviting a friend.',
+                'slug' => 'referral-bonus-issue',
+                'type' => 'info',
+                'is_enabled' => true,
+                'data_model_id' => null,
+                'parameters' => null,
+                'endpoints' => null,
+                'keywords' => ['bonus referral', 'ajak teman', 'bonus tidak ada', 'referral tidak masuk', 'undang teman', 'bonus ajak teman', 'referral bonus', 'link referral'],
+                'tool_rules' => "- Jelaskan bahwa bonus referral memerlukan teman yang diundang sudah melakukan deposit\n- Pastikan teman mendaftar menggunakan link referral milik member\n- Gunakan tone ramah dan membantu",
+                'information_text' => [
+                    "Halo Kak! Terkait kendala tersebut, biasanya hal ini terjadi karena teman yang Kakak undang belum melakukan deposit, atau mungkin saat mendaftar tidak menggunakan link referral milik Kakak. Boleh tolong dipastikan kembali ke temannya ya, Kak 😊",
+                ],
+                'meta' => null,
+            ],
         ];
 
         foreach ($tools as $tool) {

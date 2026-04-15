@@ -49,9 +49,17 @@
                 </div>
                 <div>
                     <label for="connection_name" class="mb-2 block text-sm text-slate-200">Connection</label>
-                    <p class="mb-2 text-xs text-slate-400">Semua data model menggunakan koneksi game.</p>
-                    <input id="connection_name" type="text" value="mysqlgame" readonly
-                        class="w-full rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-3 text-sm text-slate-300 outline-none" />
+                    <p class="mb-2 text-xs text-slate-400">Pilih koneksi database untuk model ini.</p>
+                    <select id="connection_name" name="connection_name"
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
+                        <option value="">-- Pilih Connection --</option>
+                        @foreach ($connections as $conn)
+                            <option value="{{ $conn->name }}"
+                                {{ old('connection_name') === $conn->name ? 'selected' : '' }}>
+                                {{ $conn->name }} ({{ $conn->driver }} — {{ $conn->host }}:{{ $conn->port }})
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 
@@ -172,7 +180,7 @@
             const oldRows = @json(old('fields', []));
             if (Array.isArray(oldRows) && oldRows.length > 0) {
                 oldRows.forEach(row => addFieldRow(row.name || '', row.type || '', !!row.required, row.value ||
-                ''));
+                    ''));
             } else {
                 addFieldRow();
             }

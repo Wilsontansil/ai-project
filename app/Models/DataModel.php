@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DataModel extends Model
 {
@@ -21,4 +22,9 @@ class DataModel extends Model
     protected $casts = [
         'fields' => 'array',
     ];
+
+    public function databaseConnection(): BelongsTo
+    {
+        return $this->belongsTo(DatabaseConnection::class, 'connection_name', 'name');
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Models\DatabaseConnection;
 use App\Models\DataModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ class DataModelController extends Controller
     {
         return view('backoffice.data-models.create', [
             'boActive' => 'data-models',
+            'connections' => DatabaseConnection::where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 
@@ -39,6 +41,7 @@ class DataModelController extends Controller
             'fields.*.type' => ['required_with:fields', 'string', 'max:120'],
             'fields.*.required' => ['nullable'],
             'fields.*.value' => ['nullable', 'string', 'max:500'],
+            'connection_name' => ['required', 'string', 'exists:database_connections,name'],
         ]);
 
         DataModel::create([
@@ -46,7 +49,7 @@ class DataModelController extends Controller
             'slug' => Str::slug($data['model_name']),
             'description' => trim((string) ($data['description'] ?? '')) ?: null,
             'table_name' => trim($data['table_name']),
-            'connection_name' => 'mysqlgame',
+            'connection_name' => $data['connection_name'],
             'fields' => $this->buildFieldMap((array) ($data['fields'] ?? [])),
         ]);
 
@@ -58,6 +61,7 @@ class DataModelController extends Controller
         return view('backoffice.data-models.edit', [
             'dataModel' => $dataModel,
             'boActive' => 'data-models',
+            'connections' => DatabaseConnection::where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 
@@ -72,6 +76,7 @@ class DataModelController extends Controller
             'fields.*.type' => ['required_with:fields', 'string', 'max:120'],
             'fields.*.required' => ['nullable'],
             'fields.*.value' => ['nullable', 'string', 'max:500'],
+            'connection_name' => ['required', 'string', 'exists:database_connections,name'],
         ]);
 
         $dataModel->update([
@@ -79,7 +84,7 @@ class DataModelController extends Controller
             'slug' => Str::slug($data['model_name']),
             'description' => trim((string) ($data['description'] ?? '')) ?: null,
             'table_name' => trim($data['table_name']),
-            'connection_name' => 'mysqlgame',
+            'connection_name' => $data['connection_name'],
             'fields' => $this->buildFieldMap((array) ($data['fields'] ?? [])),
         ]);
 

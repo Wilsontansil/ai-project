@@ -105,10 +105,14 @@
             const escapedValue = value.replace(/"/g, '&quot;');
             row.innerHTML = `
                 <div class="flex items-center gap-3">
-                    <input type="text" name="fields[${fieldIndex}][name]" value="${name}" placeholder="Field name"
-                        class="w-2/5 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                    <input type="text" name="fields[${fieldIndex}][type]" value="${type}" placeholder="Format"
-                        class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    <div class="w-2/5">
+                        <input type="text" name="fields[${fieldIndex}][name]" value="${name}" placeholder="Field name"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    </div>
+                    <div class="flex-1">
+                        <input type="text" name="fields[${fieldIndex}][type]" value="${type}" placeholder="Format"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    </div>
                     <label class="flex shrink-0 items-center gap-1.5 text-xs text-slate-300 cursor-pointer select-none">
                         <input type="checkbox" name="fields[${fieldIndex}][required]" value="1" ${checkedAttr}
                             class="field-required-cb h-4 w-4 rounded border-white/20 bg-slate-900/70 text-cyan-400 focus:ring-cyan-400" />
@@ -119,8 +123,10 @@
                 </div>
                 <div class="field-value-row flex items-center gap-3 pl-0" style="${valueDisplay}">
                     <span class="w-2/5 text-xs text-slate-400 pl-1">↳ Fixed value</span>
-                    <input type="text" name="fields[${fieldIndex}][value]" value="${escapedValue}" placeholder="Value (kosongkan jika diisi oleh AI)"
-                        class="flex-1 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    <div class="flex-1">
+                        <input type="text" name="fields[${fieldIndex}][value]" value="${escapedValue}" placeholder="Value (kosongkan jika diisi oleh AI)"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    </div>
                 </div>
             `;
             list.appendChild(row);

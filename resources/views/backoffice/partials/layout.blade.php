@@ -191,9 +191,62 @@
         }
 
         .bo-topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
             font-size: 0.9375rem;
             font-weight: 600;
             color: #e2e8f0;
+        }
+
+        .bo-toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 0.5rem;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #94a3b8;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            flex-shrink: 0;
+        }
+
+        .bo-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #e2e8f0;
+        }
+
+        .bo-toggle-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .bo-toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 0.5rem;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #94a3b8;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            flex-shrink: 0;
+        }
+
+        .bo-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #e2e8f0;
+        }
+
+        .bo-toggle-icon {
+            width: 18px;
+            height: 18px;
         }
 
         .bo-topbar-right {
@@ -350,7 +403,15 @@
             {{-- Top bar --}}
             <header id="bo-topbar">
                 <div class="bo-topbar-left">
-                    @yield('page-title')
+                    <button id="bo-sidebar-toggle" type="button" class="bo-toggle-btn" title="Toggle sidebar"
+                        aria-label="Toggle sidebar">
+                        <svg class="bo-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            width="18" height="18">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <span class="bo-topbar-title">@yield('page-title')</span>
                 </div>
                 <div class="bo-topbar-right">
                     @auth
@@ -398,29 +459,46 @@
 
     <script>
         (() => {
+            // Sidebar toggle
+            const shell = document.getElementById('bo-shell');
+            const toggleButton = document.getElementById('bo-sidebar-toggle');
+            if (shell && toggleButton) {
+                const storageKey = 'backoffice_sidebar_collapsed';
+                const applyCollapsed = (collapsed) => {
+                    shell.classList.toggle('bo-collapsed', collapsed);
+                    toggleButton.title = collapsed ? 'Expand sidebar' : 'Minimize sidebar';
+                    toggleButton.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Minimize sidebar');
+                };
+                applyCollapsed(localStorage.getItem(storageKey) === '1');
+                toggleButton.addEventListener('click', () => {
+                    const next = !shell.classList.contains('bo-collapsed');
+                    applyCollapsed(next);
+                    localStorage.setItem(storageKey, next ? '1' : '0');
+                });
+            }
+
+            // User dropdown
             const menu = document.getElementById('bo-user-menu');
             const btn = document.getElementById('bo-user-btn');
-            if (!menu || !btn) return;
-
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                menu.classList.toggle('open');
-                btn.setAttribute('aria-expanded', menu.classList.contains('open'));
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!menu.contains(e.target)) {
-                    menu.classList.remove('open');
-                    btn.setAttribute('aria-expanded', 'false');
-                }
-            });
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    menu.classList.remove('open');
-                    btn.setAttribute('aria-expanded', 'false');
-                }
-            });
+            if (menu && btn) {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    menu.classList.toggle('open');
+                    btn.setAttribute('aria-expanded', menu.classList.contains('open'));
+                });
+                document.addEventListener('click', (e) => {
+                    if (!menu.contains(e.target)) {
+                        menu.classList.remove('open');
+                        btn.setAttribute('aria-expanded', 'false');
+                    }
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        menu.classList.remove('open');
+                        btn.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
         })();
     </script>
 

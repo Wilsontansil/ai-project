@@ -173,9 +173,6 @@
             padding: 1rem 1.25rem !important;
         }
 
-        #bo-shell.bo-collapsed #bo-sidebar-toggle {
-            position: static;
-        }
     }
 </style>
 
@@ -194,15 +191,6 @@
                     {{ \App\Models\ProjectSetting::getValue('agent_kode', config('services.agent.kode', 'PG')) }}</span>
             </div>
         </div>
-        <button id="bo-sidebar-toggle" type="button"
-            style="display:flex;height:28px;width:28px;align-items:center;justify-content:center;border-radius:0.375rem;background:rgba(255,255,255,0.1);border:none;color:rgba(255,255,255,0.8);cursor:pointer;transition:background 0.15s;"
-            title="Minimize navigation" aria-label="Toggle sidebar">
-            <svg class="bo-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16"
-                height="16" style="width:16px;height:16px;">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-            </svg>
-        </button>
     </div>
 
     {{-- Navigation sections --}}
@@ -353,31 +341,8 @@
 
 <script>
     (() => {
-        const shell = document.getElementById('bo-shell');
-        const toggleButton = document.getElementById('bo-sidebar-toggle');
-
-        if (!shell || !toggleButton || shell.dataset.sidebarReady === '1') return;
-        shell.dataset.sidebarReady = '1';
-
-        const storageKey = 'backoffice_sidebar_collapsed';
-        const sectionKey = 'backoffice_sections';
-
-        // Sidebar collapse / expand
-        const applyCollapsed = (collapsed) => {
-            shell.classList.toggle('bo-collapsed', collapsed);
-            toggleButton.title = collapsed ? 'Expand navigation' : 'Minimize navigation';
-            toggleButton.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Minimize sidebar');
-        };
-
-        applyCollapsed(localStorage.getItem(storageKey) === '1');
-
-        toggleButton.addEventListener('click', () => {
-            const next = !shell.classList.contains('bo-collapsed');
-            applyCollapsed(next);
-            localStorage.setItem(storageKey, next ? '1' : '0');
-        });
-
         // Section collapse / expand
+        const sectionKey = 'backoffice_sections';
         const savedSections = JSON.parse(localStorage.getItem(sectionKey) || '{}');
 
         document.querySelectorAll('.bo-section').forEach(section => {
@@ -393,7 +358,6 @@
                 chevron.classList.toggle('rotated', expanded);
             };
 
-            // Default open unless explicitly saved as closed
             const isExpanded = savedSections[name] !== false;
             applySection(isExpanded);
 

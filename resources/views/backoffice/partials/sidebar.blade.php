@@ -183,7 +183,7 @@
                 onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='none'">
                 <span class="bo-section-label"
                     style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">
-                    Customer Data
+                    {{ __('backoffice.section.customer_data') }}
                 </span>
                 <svg class="bo-section-chevron rotated" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     width="12" height="12" style="width:12px;height:12px;">
@@ -201,8 +201,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                     </svg>
-                    <span class="bo-label">Customer</span>
-                    <span class="bo-tooltip">Customer</span>
+                    <span class="bo-label">{{ __('backoffice.menu.customer') }}</span>
+                    <span class="bo-tooltip">{{ __('backoffice.menu.customer') }}</span>
                 </a>
             </div>
         </div>
@@ -214,7 +214,7 @@
                 onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='none'">
                 <span class="bo-section-label"
                     style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">
-                    AI Agent
+                    {{ __('backoffice.section.ai_agent') }}
                 </span>
                 <svg class="bo-section-chevron rotated" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     width="12" height="12" style="width:12px;height:12px;">
@@ -233,8 +233,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
                     </svg>
-                    <span class="bo-label">Agents</span>
-                    <span class="bo-tooltip">Agents</span>
+                    <span class="bo-label">{{ __('backoffice.menu.agents') }}</span>
+                    <span class="bo-tooltip">{{ __('backoffice.menu.agents') }}</span>
                 </a>
 
                 {{-- Tools --}}
@@ -248,8 +248,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M11.42 15.17l-5.1 5.1a2.121 2.121 0 01-3-3l5.1-5.1m0 0L4.16 7.91a2.13 2.13 0 010-3l1.26-1.26a2.13 2.13 0 013 0l4.26 4.26m-1.26 1.26l6.97-6.97a2.121 2.121 0 013 3l-6.97 6.97" />
                     </svg>
-                    <span class="bo-label">Tools</span>
-                    <span class="bo-tooltip">Tools</span>
+                    <span class="bo-label">{{ __('backoffice.menu.tools') }}</span>
+                    <span class="bo-tooltip">{{ __('backoffice.menu.tools') }}</span>
                 </a>
 
                 {{-- Data Models --}}
@@ -263,8 +263,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 3.75c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125m16.5 3.75c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
                     </svg>
-                    <span class="bo-label">Data Models</span>
-                    <span class="bo-tooltip">Data Models</span>
+                    <span class="bo-label">{{ __('backoffice.menu.data_models') }}</span>
+                    <span class="bo-tooltip">{{ __('backoffice.menu.data_models') }}</span>
                 </a>
             </div>
         </div>
@@ -277,7 +277,7 @@
                 onmouseout="this.style.background='none'">
                 <span class="bo-section-label"
                     style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">
-                    System
+                    {{ __('backoffice.section.system') }}
                 </span>
                 <svg class="bo-section-chevron rotated" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     width="12" height="12" style="width:12px;height:12px;">
@@ -295,8 +295,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
                     </svg>
-                    <span class="bo-label">Settings</span>
-                    <span class="bo-tooltip">Settings</span>
+                    <span class="bo-label">{{ __('backoffice.menu.settings') }}</span>
+                    <span class="bo-tooltip">{{ __('backoffice.menu.settings') }}</span>
                 </a>
 
                 {{-- DB Connections --}}
@@ -310,8 +310,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 3.75c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125m16.5 3.75c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
                     </svg>
-                    <span class="bo-label">DB Connections</span>
-                    <span class="bo-tooltip">DB Connections</span>
+                    <span class="bo-label">{{ __('backoffice.menu.database_connections') }}</span>
+                    <span class="bo-tooltip">{{ __('backoffice.menu.database_connections') }}</span>
                 </a>
             </div>
         </div>

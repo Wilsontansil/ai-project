@@ -6,6 +6,7 @@ use App\Http\Controllers\Backoffice\DataModelController;
 use App\Http\Controllers\Backoffice\ForbiddenBehaviourController;
 use App\Http\Controllers\Backoffice\DashboardController;
 use App\Http\Controllers\Backoffice\DatabaseConnectionController;
+use App\Http\Controllers\Backoffice\LocaleController;
 use App\Http\Controllers\Backoffice\SettingController;
 use App\Http\Controllers\Backoffice\ToolController;
 use Illuminate\Support\Facades\Route;
@@ -14,13 +15,14 @@ $entryRedirect = fn () => redirect()->route('login');
 
 Route::get('/', $entryRedirect);
 Route::get('/aiproject', $entryRedirect);
+Route::middleware('set.locale')->post('/backoffice/locale', [LocaleController::class, 'update'])->name('backoffice.locale.update');
 
-Route::middleware('guest')->group(function () {
+Route::middleware(['set.locale', 'guest'])->group(function () {
     Route::get('/backoffice/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/backoffice/login', [AuthController::class, 'login'])->name('backoffice.login.submit');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['set.locale', 'auth'])->group(function () {
     Route::get('/backoffice', [DashboardController::class, 'index'])->name('backoffice.dashboard');
     Route::get('/backoffice/customer/{customer}/chat', [DashboardController::class, 'chat'])->name('backoffice.customer.chat');
     Route::get('/backoffice/chat-agents', [ChatAgentController::class, 'index'])->name('backoffice.chat-agents.index');

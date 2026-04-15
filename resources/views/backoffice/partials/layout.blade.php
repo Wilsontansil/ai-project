@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Backoffice')</title>
+    <title>@yield('title', __('backoffice.title'))</title>
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @else
@@ -255,6 +255,38 @@
             gap: 0.75rem;
         }
 
+        .bo-locale-form {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin: 0;
+        }
+
+        .bo-locale-btn {
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.03);
+            color: #94a3b8;
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .bo-locale-btn:hover {
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, 0.24);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .bo-locale-btn.active {
+            color: #082f49;
+            border-color: rgba(34, 211, 238, 0.5);
+            background: #67e8f9;
+        }
+
         .bo-user-menu {
             position: relative;
         }
@@ -403,8 +435,9 @@
             {{-- Top bar --}}
             <header id="bo-topbar">
                 <div class="bo-topbar-left">
-                    <button id="bo-sidebar-toggle" type="button" class="bo-toggle-btn" title="Toggle sidebar"
-                        aria-label="Toggle sidebar">
+                    <button id="bo-sidebar-toggle" type="button" class="bo-toggle-btn"
+                        title="{{ __('backoffice.ui.toggle_sidebar') }}"
+                        aria-label="{{ __('backoffice.ui.toggle_sidebar') }}">
                         <svg class="bo-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             width="18" height="18">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -414,6 +447,14 @@
                     <span class="bo-topbar-title">@yield('page-title')</span>
                 </div>
                 <div class="bo-topbar-right">
+                    <form method="POST" action="{{ route('backoffice.locale.update') }}" class="bo-locale-form"
+                        aria-label="{{ __('backoffice.ui.language') }}">
+                        @csrf
+                        <button type="submit" name="locale" value="id"
+                            class="bo-locale-btn {{ app()->getLocale() === 'id' ? 'active' : '' }}">ID</button>
+                        <button type="submit" name="locale" value="en"
+                            class="bo-locale-btn {{ app()->getLocale() === 'en' ? 'active' : '' }}">EN</button>
+                    </form>
                     @auth
                         <div class="bo-user-menu" id="bo-user-menu">
                             <button type="button" class="bo-user-btn" id="bo-user-btn" aria-haspopup="true"
@@ -440,7 +481,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                                         </svg>
-                                        Logout
+                                        {{ __('backoffice.ui.logout') }}
                                     </button>
                                 </form>
                             </div>
@@ -466,8 +507,10 @@
                 const storageKey = 'backoffice_sidebar_collapsed';
                 const applyCollapsed = (collapsed) => {
                     shell.classList.toggle('bo-collapsed', collapsed);
-                    toggleButton.title = collapsed ? 'Expand sidebar' : 'Minimize sidebar';
-                    toggleButton.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Minimize sidebar');
+                    toggleButton.title = collapsed ?
+                        @json(__('backoffice.ui.expand_sidebar')) :
+                        @json(__('backoffice.ui.minimize_sidebar'));
+                    toggleButton.setAttribute('aria-label', toggleButton.title);
                 };
                 applyCollapsed(localStorage.getItem(storageKey) === '1');
                 toggleButton.addEventListener('click', () => {

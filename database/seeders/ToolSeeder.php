@@ -277,6 +277,21 @@ class ToolSeeder extends Seeder
                 'information_text' => ["silahkan akses link apk untuk daftar ataupun bermain di bigmsg ya kak\n\nhttps://apk.hi11office.com/BIGMSG(2.0.6).apk\n\nselamat bermain dan semoga beruntung"],
                 'meta' => null,
             ],
+            [
+                'tool_name' => 'depositPulsa',
+                'display_name' => 'Deposit Pulsa',
+                'description' => 'Provide step-by-step instructions on how to make a deposit via mobile phone credit (pulsa). Covers XL and Telkomsel top-up process through the website deposit form.',
+                'slug' => 'deposit-pulsa',
+                'type' => 'info',
+                'is_enabled' => true,
+                'data_model_id' => null,
+                'parameters' => null,
+                'endpoints' => null,
+                'keywords' => ['deposit pulsa', 'pulsa'],
+                'tool_rules' => "- Jawab HANYA dari information text yang tersedia, jangan buat panduan sendiri\n- Jelaskan langkah-langkah dengan format yang rapi dan mudah dipahami\n- Tekankan bahwa player harus mencantumkan SN atau nomor pengirim di kolom keterangan\n- Jika ditanya metode deposit lain selain pulsa, arahkan untuk menghubungi CS atau cek menu deposit di website",
+                'information_text' => ["Cara depo melalui pulsa:\nKakak buka website kami, lalu ke menu form deposit. Setelah itu kakak pilih tujuan pulsa XL atau Telkomsel. Setelah itu kakak isi pulsa ke nomor tersebut, dan setelah sukses, kakak isi form deposit nya sesuai dengan nominal pulsa yang kakak isi. Jangan lupa di kolom keterangan kakak isi/cantumkan SN nya atau nomor pengirim (jika transfer pulsa), lalu ajukan form deposit nya."],
+                'meta' => null,
+            ],
 
             // ─── GET MULTIPLE type tools ───
             [

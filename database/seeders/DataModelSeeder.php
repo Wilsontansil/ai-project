@@ -237,7 +237,7 @@ class DataModelSeeder extends Seeder
                     'ispromotion' => ['type' => 'tinyint(1)', 'required' => false],
                     'urutan' => ['type' => 'int(11)', 'required' => false],
                     'agent' => ['type' => 'varchar(125)', 'required' => true, 'value' => 'PG'],
-                    'language' => ['type' => 'varchar(125)', 'required' => false],
+                    'language' => ['type' => 'varchar(125)', 'required' => true, 'value' => 'id'],
                     'created_at' => ['type' => 'timestamp', 'required' => false],
                     'updated_at' => ['type' => 'timestamp', 'required' => false],
                     'deleted_at' => ['type' => 'timestamp', 'required' => false],

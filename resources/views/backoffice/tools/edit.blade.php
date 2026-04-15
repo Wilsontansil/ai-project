@@ -176,20 +176,6 @@
                                     class="rounded-lg border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-300 transition hover:bg-cyan-500/20">
                                     {{ __('backoffice.pages.tools.copy_from_parameters') }}
                                 </button>
-                                <button type="button" onclick="testEndpoint()"
-                                    class="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-300 transition hover:bg-emerald-500/20">
-                                    ▶ {{ __('backoffice.pages.tools.test_request') }}
-                                </button>
-                            </div>
-                            <div id="endpoint-test-result"
-                                class="mt-2 hidden rounded-lg border border-white/10 bg-slate-950/60 p-3">
-                                <div class="flex items-center justify-between mb-1">
-                                    <span id="endpoint-test-status" class="text-xs font-mono"></span>
-                                    <button type="button"
-                                        onclick="document.getElementById('endpoint-test-result').classList.add('hidden')"
-                                        class="text-xs text-slate-500 hover:text-slate-300">&times;</button>
-                                </div>
-                                <pre id="endpoint-test-body" class="text-xs text-slate-300 whitespace-pre-wrap max-h-48 overflow-auto"></pre>
                             </div>
                         </div>
 
@@ -632,62 +618,6 @@
                 <button type="button" onclick="this.closest('.info-text-row').remove()"
                     class="shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20">✕</button>`;
             wrapper.appendChild(row);
-        }
-
-        async function testEndpoint() {
-            const routeInput = document.getElementById('endpoint_route');
-            const route = routeInput ? routeInput.value.trim() : '';
-            if (!route) {
-                alert('{{ __('backoffice.pages.tools.route_not_filled') }}');
-                return;
-            }
-
-            const bodyList = document.getElementById('body-list');
-            const rows = bodyList.querySelectorAll(':scope > div');
-            const body = {};
-            rows.forEach(row => {
-                const inputs = row.querySelectorAll('input[type=text]');
-                const k = inputs[0]?.value.trim();
-                const v = inputs[1]?.value.trim();
-                if (k) body[k] = v;
-            });
-
-            const resultEl = document.getElementById('endpoint-test-result');
-            const statusEl = document.getElementById('endpoint-test-status');
-            const bodyEl = document.getElementById('endpoint-test-body');
-
-            resultEl.classList.remove('hidden');
-            statusEl.textContent = 'Loading...';
-            statusEl.className = 'text-xs font-mono text-slate-400';
-            bodyEl.textContent = '';
-
-            try {
-                const basePath = window.location.pathname.substring(0, window.location.pathname.indexOf(
-                    '/backoffice/'));
-                const res = await fetch(`${basePath}/backoffice/tools/test-endpoint`, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        route,
-                        body
-                    }),
-                });
-                const data = await res.json();
-                statusEl.textContent = data.success ? `✓ HTTP ${data.status}` :
-                    `✗ ${data.error || 'HTTP ' + data.status}`;
-                statusEl.className = `text-xs font-mono ${data.success ? 'text-emerald-400' : 'text-red-400'}`;
-                bodyEl.textContent = typeof data.response === 'object' ? JSON.stringify(data.response, null, 2) : (data
-                    .response || data.error || '');
-            } catch (e) {
-                statusEl.textContent = '✗ Network error';
-                statusEl.className = 'text-xs font-mono text-red-400';
-                bodyEl.textContent = e.message;
-            }
         }
     </script>
 @endsection

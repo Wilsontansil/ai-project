@@ -711,7 +711,8 @@
             refreshParameterFieldOptions();
 
             // Pre-populate query filters
-            const queryFilters = @json(old('query_filters', data_get($tool->meta, 'query.filters', [])) ?: []);
+            @php $savedQueryFilters = old('query_filters', data_get($tool->meta, 'query.filters', [])) ?: []; @endphp
+            const queryFilters = @json($savedQueryFilters);
             if (Array.isArray(queryFilters)) {
                 queryFilters.forEach(f => addQueryFilterRow(f.field || '', f.operator || '=', f.value || ''));
             }

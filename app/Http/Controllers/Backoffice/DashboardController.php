@@ -34,6 +34,7 @@ class DashboardController extends Controller
                 'total_customers' => Customer::query()->count(),
                 'telegram_customers' => Customer::query()->where('platform', 'telegram')->count(),
                 'whatsapp_customers' => Customer::query()->where('platform', 'whatsapp')->count(),
+                'livechat_customers' => Customer::query()->where('platform', 'livechat')->count(),
             ],
         ]);
     }

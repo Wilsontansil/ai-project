@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
+    <div class="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div class="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 sm:px-5 sm:py-4"
             style="background-color:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.25);border-radius:12px">
             <p class="text-[11px] text-cyan-200/70" style="color:rgba(34,211,238,0.7);font-size:11px">
@@ -32,6 +32,12 @@
             <p class="text-[11px] text-amber-200/70" style="color:rgba(251,191,36,0.7);font-size:11px">WhatsApp</p>
             <p class="text-lg font-bold text-white" style="color:#fff;font-size:18px;font-weight:700">
                 {{ number_format($stats['whatsapp_customers']) }}</p>
+        </div>
+        <div class="rounded-xl border border-violet-400/20 bg-violet-400/10 px-4 py-3 sm:px-5 sm:py-4"
+            style="background-color:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.25);border-radius:12px">
+            <p class="text-[11px] text-violet-200/70" style="color:rgba(196,181,253,0.7);font-size:11px">Livechat</p>
+            <p class="text-lg font-bold text-white" style="color:#fff;font-size:18px;font-weight:700">
+                {{ number_format($stats['livechat_customers']) }}</p>
         </div>
     </div>
 

@@ -710,7 +710,6 @@ class AIService
         array $requestBody
     ): array {
         $expectedStatus = (int) ($expectedResponse['status'] ?? 200);
-        $expectedMessage = trim((string) ($expectedResponse['message'] ?? 'Success'));
         $expectedData = (array) ($expectedResponse['data'] ?? []);
 
         // Check HTTP status code
@@ -728,8 +727,8 @@ class AIService
             ];
         }
 
-        // Check response structure has required fields
-        if (!isset($responseBody['status']) || !isset($responseBody['message'])) {
+        // Check response structure has required status field
+        if (!isset($responseBody['status'])) {
             Log::warning('HTTP endpoint response structure invalid', [
                 'tool_name' => $tool->tool_name,
                 'expected_format' => '{ "status": int, "message": string, "data": object }',
@@ -738,22 +737,22 @@ class AIService
 
             return [
                 'valid' => false,
-                'error_message' => 'Endpoint response format tidak sesuai (missing status/message field).',
+                'error_message' => 'Endpoint response format tidak sesuai (missing status field).',
             ];
         }
 
-        // Check message field matches
-        $actualMessage = trim((string) ($responseBody['message'] ?? ''));
-        if ($expectedMessage !== '' && $actualMessage !== $expectedMessage) {
-            Log::warning('HTTP endpoint message mismatch', [
+        // Check response body status matches expected status
+        $bodyStatus = (int) $responseBody['status'];
+        if ($bodyStatus !== $expectedStatus) {
+            Log::warning('HTTP endpoint body status mismatch', [
                 'tool_name' => $tool->tool_name,
-                'expected_message' => $expectedMessage,
-                'actual_message' => $actualMessage,
+                'expected_status' => $expectedStatus,
+                'actual_body_status' => $bodyStatus,
             ]);
 
             return [
                 'valid' => false,
-                'error_message' => "Endpoint message '{$actualMessage}' tidak sesuai harapan.",
+                'error_message' => "Response body status {$bodyStatus}, expected {$expectedStatus}.",
             ];
         }
 

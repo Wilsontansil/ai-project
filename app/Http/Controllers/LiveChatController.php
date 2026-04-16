@@ -153,7 +153,12 @@ class LiveChatController extends Controller
 
     private function extractChatId(array $payload, Request $request): ?string
     {
-        $chatId = data_get($payload, 'chat_id')
+        $chatId = data_get($payload, 'chatId')
+            ?? data_get($payload, 'userId')
+            ?? data_get($payload, 'externalId')
+            ?? data_get($payload, 'attributes.default_chat_id')
+            ?? data_get($payload, 'attributes.default_conversation_id')
+            ?? data_get($payload, 'chat_id')
             ?? data_get($payload, 'conversation_id')
             ?? data_get($payload, 'customer_id')
             ?? data_get($payload, 'user_id')
@@ -171,6 +176,9 @@ class LiveChatController extends Controller
             ?? $request->input('conversation_id')
             ?? $request->input('customer_id')
             ?? $request->input('user_id')
+            ?? $request->input('chatId')
+            ?? $request->input('userId')
+            ?? $request->input('externalId')
             ?? $request->input('payload.chatId')
             ?? $request->input('payload.userId')
             ?? $request->input('payload.externalId');

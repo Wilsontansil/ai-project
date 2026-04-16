@@ -70,7 +70,12 @@ class CustomerIdentityService
 
         if ($platform === 'livechat') {
             $platformUserId = (string) (
-                data_get($payload, 'payload.chatId')
+                data_get($payload, 'chatId')
+                ?? data_get($payload, 'userId')
+                ?? data_get($payload, 'externalId')
+                ?? data_get($payload, 'attributes.default_chat_id')
+                ?? data_get($payload, 'attributes.default_conversation_id')
+                ?? data_get($payload, 'payload.chatId')
                 ?? data_get($payload, 'payload.userId')
                 ?? data_get($payload, 'payload.externalId')
                 ?? data_get($payload, 'payload.attributes.default_chat_id')
@@ -99,6 +104,8 @@ class CustomerIdentityService
 
     private function extractPhoneNumber(string $platform, array $payload): ?string
     {
+        $phoneNumber = null;
+
         if ($platform === 'whatsapp') {
             $raw = (string) (
                 data_get($payload, 'payload.SenderAlt')
@@ -108,18 +115,30 @@ class CustomerIdentityService
                 ?? ''
             );
 
-            if ($raw === '') {
-                return null;
+            if ($raw !== '') {
+                // Strip @s.whatsapp.net / @c.us suffixes, keep only digits
+                $clean = preg_replace('/@.*$/', '', $raw);
+                $clean = preg_replace('/\D/', '', $clean);
+
+                $phoneNumber = $clean !== '' ? ('+' . $clean) : null;
             }
-
-            // Strip @s.whatsapp.net / @c.us suffixes, keep only digits
-            $clean = preg_replace('/@.*$/', '', $raw);
-            $clean = preg_replace('/\D/', '', $clean);
-
-            return $clean !== '' ? ('+' . $clean) : null;
         }
 
-        return null;
+        if ($platform === 'livechat' && $phoneNumber === null) {
+            $raw = (string) (
+                data_get($payload, 'userAttributes.default_phone_number')
+                ?? data_get($payload, 'attributes.default_phone_number')
+                ?? data_get($payload, 'payload.userAttributes.default_phone_number')
+                ?? data_get($payload, 'payload.attributes.default_phone_number')
+                ?? ''
+            );
+
+            $clean = preg_replace('/\D/', '', $raw) ?? '';
+
+            $phoneNumber = $clean !== '' ? ('+' . $clean) : null;
+        }
+
+        return $phoneNumber;
     }
 
     private function extractName(string $platform, array $payload): ?string
@@ -144,7 +163,10 @@ class CustomerIdentityService
 
         if ($platform === 'livechat') {
             $name = (string) (
-                data_get($payload, 'payload.userAttributes.default_name')
+                data_get($payload, 'userAttributes.default_name')
+                ?? data_get($payload, 'attributes.default_name')
+                ?? data_get($payload, 'attributes.default_Name')
+                ?? data_get($payload, 'payload.userAttributes.default_name')
                 ?? data_get($payload, 'payload.attributes.default_name')
                 ?? data_get($payload, 'payload.attributes.default_Name')
                 ?? data_get($payload, 'payload.name')

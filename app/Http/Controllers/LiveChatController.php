@@ -12,6 +12,36 @@ class LiveChatController extends Controller
         Log::info('Received LiveChat webhook', ['payload' => $request->all()]);
         $challenge = $request->input('challenge');
 
+        if(!$challenge) {
+    //             {
+    //     "responses": [
+    //         {
+    //             "type": "text",
+    //             "delay": 1000,
+    //             "message": "Have a great day!"
+    //         }
+    //     ],
+    //     "attributes": {
+    //         "foo": "bar",
+    //         "baz": ""
+    //     }
+    // }
+
+            return response()->json([
+                'responses' => [
+                    [
+                        'type' => 'text',
+                        'delay' => 1000,
+                        'message' => 'Have a great day!',
+                    ],
+                ],
+                'attributes' => [
+                    'foo' => 'bar',
+                    'baz' => '',
+                ],
+            ]);
+        }
+
         return $challenge ? response($challenge, 200) : response()->json(['status' => 'ok']);
     }
 }

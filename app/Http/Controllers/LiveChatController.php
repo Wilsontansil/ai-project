@@ -157,6 +157,11 @@ class LiveChatController extends Controller
             ?? data_get($payload, 'conversation_id')
             ?? data_get($payload, 'customer_id')
             ?? data_get($payload, 'user_id')
+            ?? data_get($payload, 'payload.chatId')
+            ?? data_get($payload, 'payload.userId')
+            ?? data_get($payload, 'payload.externalId')
+            ?? data_get($payload, 'payload.attributes.default_chat_id')
+            ?? data_get($payload, 'payload.attributes.default_conversation_id')
             ?? data_get($payload, 'visitor.id')
             ?? data_get($payload, 'customer.id')
             ?? data_get($payload, 'chat.id')
@@ -165,7 +170,10 @@ class LiveChatController extends Controller
             ?? $request->input('chat_id')
             ?? $request->input('conversation_id')
             ?? $request->input('customer_id')
-            ?? $request->input('user_id');
+            ?? $request->input('user_id')
+            ?? $request->input('payload.chatId')
+            ?? $request->input('payload.userId')
+            ?? $request->input('payload.externalId');
 
         $chatId = is_scalar($chatId) ? trim((string) $chatId) : '';
 

@@ -70,7 +70,12 @@ class CustomerIdentityService
 
         if ($platform === 'livechat') {
             $platformUserId = (string) (
-                data_get($payload, 'chat_id')
+                data_get($payload, 'payload.chatId')
+                ?? data_get($payload, 'payload.userId')
+                ?? data_get($payload, 'payload.externalId')
+                ?? data_get($payload, 'payload.attributes.default_chat_id')
+                ?? data_get($payload, 'payload.attributes.default_conversation_id')
+                ?? data_get($payload, 'chat_id')
                 ?? data_get($payload, 'conversation_id')
                 ?? data_get($payload, 'customer_id')
                 ?? data_get($payload, 'user_id')
@@ -139,7 +144,11 @@ class CustomerIdentityService
 
         if ($platform === 'livechat') {
             $name = (string) (
-                data_get($payload, 'name')
+                data_get($payload, 'payload.userAttributes.default_name')
+                ?? data_get($payload, 'payload.attributes.default_name')
+                ?? data_get($payload, 'payload.attributes.default_Name')
+                ?? data_get($payload, 'payload.name')
+                ?? data_get($payload, 'name')
                 ?? data_get($payload, 'customer.name')
                 ?? data_get($payload, 'visitor.name')
                 ?? data_get($payload, 'chat.name')

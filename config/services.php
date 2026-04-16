@@ -49,6 +49,10 @@ return [
         'api_key' => env('WAHA_API_KEY'),
     ],
 
+    'livechat' => [
+        'verify_token' => env('LIVECHAT_VERIFY_TOKEN'),
+    ],
+
     'agent' => [
         'id' => env('AGENT_ID', 1),
         'kode' => env('AGENT_KODE', 'PG'),

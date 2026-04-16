@@ -3,29 +3,26 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class LiveChatController extends Controller
 {
     public function handleWebhook(Request $request)
     {
-        // Log the incoming request for debugging
-        \Log::info('Received LiveChat webhook', ['payload' => $request->all()]);
+        if ($request->isMethod('get')) {
+            $expectedToken = (string) config('services.livechat.verify_token', '');
+            $providedToken = (string) $request->query('token', '');
+            $challenge = (string) $request->query('challenge', '');
 
-        // Extract message and chat ID from the request
-        $message = $request->input('message');
-        $chatId = $request->input('chatId');
+            if ($expectedToken === '' || $providedToken !== $expectedToken) {
+                return response('', 401);
+            }
 
-        if (!$message || !$chatId) {
-            \Log::warning('Invalid LiveChat webhook payload', ['payload' => $request->all()]);
-            return response()->json(['status' => 'ignored']);
+            return response($challenge, 200)
+                ->header('Content-Type', 'text/plain');
         }
 
-        // Here you would typically send the message to your AI service and get a reply
-        // For demonstration, we'll just echo back the message
-        $reply = "You said: " . $message;
-
-        // Send the reply back to LiveChat (this is a placeholder - implement actual API call)
-        \Log::info('Sending reply to LiveChat', ['chatId' => $chatId, 'reply' => $reply]);
+        Log::info('Received LiveChat webhook', ['payload' => $request->all()]);
 
         return response()->json(['status' => 'ok']);
     }

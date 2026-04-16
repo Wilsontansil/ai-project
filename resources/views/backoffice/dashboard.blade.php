@@ -6,6 +6,21 @@
 @php($boActive = 'customer')
 
 @section('content')
+    <style>
+        .bo-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .bo-stats-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 1rem;
+            }
+        }
+    </style>
+
     <div class="flex items-center justify-between rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
         <div>
             <h1 class="text-lg font-semibold sm:text-2xl">{{ __('backoffice.pages.dashboard.title') }}</h1>
@@ -13,7 +28,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-4">
+    <div class="bo-stats-grid">
         <div class="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 sm:px-5 sm:py-4"
             style="background-color:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.25);border-radius:12px">
             <p class="text-[11px] text-cyan-200/70" style="color:rgba(34,211,238,0.7);font-size:11px">

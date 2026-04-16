@@ -1,10 +1,12 @@
 @extends('backoffice.partials.layout')
 
-@section('title', __('backoffice.pages.customer_chat.history') . ' — ' . ($customer->name ?:
-    $customer->platform_user_id))
-@section('page-title', __('backoffice.pages.customer_chat.page_title'))
+@php
+    $pageTitle = __('backoffice.pages.customer_chat.history') . ' — ' . ($customer->name ?: $customer->platform_user_id);
+    $boActive = 'customer';
+@endphp
 
-@php($boActive = 'customer')
+@section('title', $pageTitle)
+@section('page-title', __('backoffice.pages.customer_chat.page_title'))
 
 @section('content')
     <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 sm:p-6">

@@ -1,7 +1,8 @@
 @extends('backoffice.partials.layout')
 
 @php
-    $pageTitle = __('backoffice.pages.customer_chat.history') . ' — ' . ($customer->name ?: $customer->platform_user_id);
+    $pageTitle =
+        __('backoffice.pages.customer_chat.history') . ' — ' . ($customer->name ?: $customer->platform_user_id);
     $boActive = 'customer';
 @endphp
 

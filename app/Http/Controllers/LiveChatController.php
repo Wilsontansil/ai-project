@@ -9,25 +9,9 @@ class LiveChatController extends Controller
 {
     public function handleWebhook(Request $request)
     {
-        if ($request->isMethod('get')) {
-            $expectedToken = (string) config('services.livechat.verify_token', '');
-            $providedToken = (string) $request->query('token', '');
-            $challenge = (string) $request->query('challenge', '');
-            Log::info('Received LiveChat webhook verification request', [
-                'provided_token' => $providedToken,
-                'expected_token' => $expectedToken,
-            ]);
-
-            if ($expectedToken === '' || $providedToken !== $expectedToken) {
-                return response('', 401);
-            }
-
-            return response($challenge, 200)
-                ->header('Content-Type', 'text/plain');
-        }
-
         Log::info('Received LiveChat webhook', ['payload' => $request->all()]);
+        $challenge = $request->input('challenge');
 
-        return response()->json(['status' => 'ok']);
+        return $challenge ? response($challenge, 200) : $this->processWebhook($request);
     }
 }

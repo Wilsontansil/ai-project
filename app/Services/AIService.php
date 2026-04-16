@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Agent;
 use App\Models\ChatAgent;
 use App\Models\DataModel;
 use App\Models\ForbiddenBehaviour;
@@ -28,7 +27,7 @@ class AIService
      * Main AI entrypoint.
      * Builds context, executes model call, runs tool logic, and returns formatted reply.
      */
-    public function reply($message, $chatId = null, ?Agent $agent = null, string $channel = 'telegram', array $agentContext = [])
+    public function reply($message, $chatId = null, string $channel = 'telegram', array $agentContext = [])
     {
         $apiKey = (string) ProjectSetting::getValue('openai_api_key', config('services.openai.api_key', ''));
 

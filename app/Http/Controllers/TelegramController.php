@@ -9,18 +9,15 @@ use App\Services\Agent\AgentContextService;
 use App\Services\Agent\ConversationMemoryService;
 use App\Services\Agent\CustomerIdentityService;
 use App\Services\AIService;
-use App\Models\Agent;
 use App\Models\ProjectSetting;
 
 class TelegramController extends Controller
 {
     private string $telegramToken = '';
-    private ?Agent $agent = null;
 
     public function __construct()
     {
         $this->telegramToken = (string) ProjectSetting::getValue('telegram_bot_token', config('services.telegram.bot_token', ''));
-        $this->agent = Agent::getActive();
     }
 
     public function handleWebhook(Request $request)
@@ -67,7 +64,7 @@ class TelegramController extends Controller
         $this->sendTyping($chatId);
 
         $aiService = app(AIService::class);
-        $reply = $aiService->reply($combinedText, $chatId, $this->agent, 'telegram', $agentContext);
+        $reply = $aiService->reply($combinedText, $chatId, 'telegram', $agentContext);
 
         if ($customer !== null) {
             try {

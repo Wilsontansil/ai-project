@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Agent;
 use App\Models\ProjectSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -13,12 +12,6 @@ use App\Services\AIService;
 
 class LiveChatController extends Controller
 {
-    private ?Agent $agent = null;
-
-    public function __construct()
-    {
-        $this->agent = Agent::getActive();
-    }
 
     public function handleWebhook(Request $request)
     {
@@ -112,7 +105,7 @@ class LiveChatController extends Controller
             ]);
         }
 
-        $reply = app(AIService::class)->reply($combinedText, $chatId, $this->agent, 'livechat', $agentContext);
+        $reply = app(AIService::class)->reply($combinedText, $chatId, 'livechat', $agentContext);
 
         if ($customer !== null) {
             try {

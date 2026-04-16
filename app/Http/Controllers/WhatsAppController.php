@@ -10,7 +10,6 @@ use App\Services\Agent\AgentContextService;
 use App\Services\Agent\ConversationMemoryService;
 use App\Services\Agent\CustomerIdentityService;
 use App\Services\AIService;
-use App\Models\Agent;
 use App\Models\ProjectSetting;
 
 class WhatsAppController extends Controller
@@ -21,14 +20,11 @@ class WhatsAppController extends Controller
 
     private string $apiKey = '';
 
-    private ?Agent $agent = null;
-
     public function __construct()
     {
         $this->baseUrl = rtrim((string) ProjectSetting::getValue('whatsapp_base_url', config('services.whatsapp.base_url', '')), '/');
         $this->session = (string) ProjectSetting::getValue('whatsapp_session', config('services.whatsapp.session', 'default'));
         $this->apiKey = (string) ProjectSetting::getValue('whatsapp_api_key', config('services.whatsapp.api_key', ''));
-        $this->agent = Agent::getActive();
     }
 
     public function handleWebhook(Request $request)
@@ -107,7 +103,7 @@ class WhatsAppController extends Controller
 
         try {
             $aiService = app(AIService::class);
-            $reply = $aiService->reply($combinedText, $chatId, $this->agent, 'whatsapp', $agentContext);
+            $reply = $aiService->reply($combinedText, $chatId, 'whatsapp', $agentContext);
         } finally {
             $this->stopTyping($chatId);
         }

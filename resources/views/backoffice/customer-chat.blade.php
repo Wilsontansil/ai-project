@@ -82,11 +82,12 @@
                     @else
                         <div class="flex justify-end">
                             <div
-                                class="max-w-[85%] break-words rounded-2xl rounded-br-sm border border-cyan-500/20 bg-cyan-600/25 px-4 py-3 shadow-lg shadow-cyan-900/20 sm:max-w-[70%] lg:max-w-[50%]">
+                                class="w-fit max-w-[85%] break-words rounded-2xl rounded-br-sm border border-cyan-500/20 bg-cyan-600/25 px-4 py-3 shadow-lg shadow-cyan-900/20 sm:max-w-[68%] lg:max-w-[36rem] xl:max-w-[40rem]">
                                 <p class="mb-1 text-[10px] font-semibold text-cyan-400">
                                     {{ $msg['role'] ?? __('backoffice.pages.customer_chat.assistant') }}
                                 </p>
-                                <p class="whitespace-pre-wrap break-words text-sm text-white">{{ $msg['message'] }}</p>
+                                <p class="whitespace-pre-wrap break-words text-sm leading-6 text-white">
+                                    {{ $msg['message'] }}</p>
                                 <p class="mt-1.5 text-right text-[10px] text-cyan-300/60">{{ $msg['time'] ?? '' }}</p>
                             </div>
                         </div>

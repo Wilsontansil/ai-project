@@ -61,12 +61,20 @@ class LiveChatController extends Controller
                 'reason' => 'invalid_payload',
             ]);
         } elseif ($text === null) {
-            // No message text found — treat as conversation start (greeting)
-            $text = 'Halo';
-            Log::info('LiveChat webhook has no message text, treating as greeting', ['chat_id' => $chatId]);
+            // No message text (e.g. testing / webhook ping) — return default response
+            Log::info('LiveChat webhook has no message text, returning default response', ['chat_id' => $chatId]);
+            $response = response()->json([
+                'responses' => [
+                    [
+                        'type' => 'text',
+                        'delay' => 1000,
+                        'message' => 'Halo! Ada yang bisa saya bantu?',
+                    ],
+                ],
+            ]);
         }
 
-        if ($chatId !== null) {
+        if ($chatId !== null && $text !== null) {
             $combinedText = app(AIService::class)->collectDebouncedMessage($chatId, $text);
 
             if ($combinedText === null) {

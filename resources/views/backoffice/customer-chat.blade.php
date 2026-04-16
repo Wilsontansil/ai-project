@@ -72,7 +72,7 @@
                     @if (($msg['role'] ?? '') === 'user')
                         <div class="flex justify-start">
                             <div
-                                class="max-w-[85%] break-words rounded-2xl rounded-bl-sm border border-white/10 bg-slate-800 px-4 py-3 shadow-lg shadow-black/20 sm:max-w-[70%] lg:max-w-[50%]">
+                                class="max-w-[50%] break-words rounded-2xl rounded-bl-sm border border-white/10 bg-slate-800 px-4 py-3 shadow-lg shadow-black/20">
                                 <p class="mb-1 text-[10px] font-semibold text-amber-400">
                                     {{ __('backoffice.pages.customer_chat.customer') }}</p>
                                 <p class="whitespace-pre-wrap break-words text-sm text-slate-100">{{ $msg['message'] }}</p>
@@ -82,7 +82,7 @@
                     @else
                         <div class="flex justify-end">
                             <div
-                                class="w-fit max-w-[85%] break-words rounded-2xl rounded-br-sm border border-cyan-500/20 bg-cyan-600/25 px-4 py-3 shadow-lg shadow-cyan-900/20 sm:max-w-[68%] lg:max-w-[36rem] xl:max-w-[40rem]">
+                                class="max-w-[50%] break-words rounded-2xl rounded-br-sm border border-cyan-500/20 bg-cyan-600/25 px-4 py-3 shadow-lg shadow-cyan-900/20">
                                 <p class="mb-1 text-[10px] font-semibold text-cyan-400">
                                     {{ $msg['role'] ?? __('backoffice.pages.customer_chat.assistant') }}
                                 </p>

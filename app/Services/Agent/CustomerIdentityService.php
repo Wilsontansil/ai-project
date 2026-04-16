@@ -47,8 +47,10 @@ class CustomerIdentityService
 
     private function extractPlatformUserId(string $platform, array $payload): string
     {
+        $platformUserId = null;
+
         if ($platform === 'telegram') {
-            return (string) (
+            $platformUserId = (string) (
                 data_get($payload, 'message.from.id')
                 ?? data_get($payload, 'from.id')
                 ?? data_get($payload, 'chat.id')
@@ -57,7 +59,7 @@ class CustomerIdentityService
         }
 
         if ($platform === 'whatsapp') {
-            return (string) (
+            $platformUserId = (string) (
                 data_get($payload, 'payload.from')
                 ?? data_get($payload, 'from')
                 ?? data_get($payload, 'payload.chatId')
@@ -66,11 +68,28 @@ class CustomerIdentityService
             );
         }
 
-        return (string) (
-            data_get($payload, 'user_id')
-            ?? data_get($payload, 'customer_id')
-            ?? 'unknown_customer'
-        );
+        if ($platform === 'livechat') {
+            $platformUserId = (string) (
+                data_get($payload, 'chat_id')
+                ?? data_get($payload, 'conversation_id')
+                ?? data_get($payload, 'customer_id')
+                ?? data_get($payload, 'user_id')
+                ?? data_get($payload, 'visitor.id')
+                ?? data_get($payload, 'customer.id')
+                ?? data_get($payload, 'chat.id')
+                ?? 'unknown_livechat_user'
+            );
+        }
+
+        if ($platformUserId === null) {
+            $platformUserId = (string) (
+                data_get($payload, 'user_id')
+                ?? data_get($payload, 'customer_id')
+                ?? 'unknown_customer'
+            );
+        }
+
+        return $platformUserId;
     }
 
     private function extractPhoneNumber(string $platform, array $payload): ?string
@@ -90,7 +109,7 @@ class CustomerIdentityService
 
             // Strip @s.whatsapp.net / @c.us suffixes, keep only digits
             $clean = preg_replace('/@.*$/', '', $raw);
-            $clean = preg_replace('/[^0-9]/', '', $clean);
+            $clean = preg_replace('/\D/', '', $clean);
 
             return $clean !== '' ? ('+' . $clean) : null;
         }
@@ -100,8 +119,10 @@ class CustomerIdentityService
 
     private function extractName(string $platform, array $payload): ?string
     {
+        $name = null;
+
         if ($platform === 'telegram') {
-            return (string) (
+            $name = (string) (
                 data_get($payload, 'message.from.first_name')
                 ?? data_get($payload, 'message.from.username')
                 ?? ''
@@ -109,17 +130,31 @@ class CustomerIdentityService
         }
 
         if ($platform === 'whatsapp') {
-            return (string) (
+            $name = (string) (
                 data_get($payload, 'payload.pushName')
                 ?? data_get($payload, 'pushName')
                 ?? ''
             ) ?: null;
         }
 
-        return (string) (
-            data_get($payload, 'name')
-            ?? ''
-        ) ?: null;
+        if ($platform === 'livechat') {
+            $name = (string) (
+                data_get($payload, 'name')
+                ?? data_get($payload, 'customer.name')
+                ?? data_get($payload, 'visitor.name')
+                ?? data_get($payload, 'chat.name')
+                ?? ''
+            ) ?: null;
+        }
+
+        if ($name === null) {
+            $name = (string) (
+                data_get($payload, 'name')
+                ?? ''
+            ) ?: null;
+        }
+
+        return $name;
     }
 
     /**

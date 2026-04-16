@@ -80,7 +80,8 @@ class AIService
                 $message,
                 $systemPrompt,
                 $contextPrompt,
-                $history
+                $history,
+                $chatId
             );
 
             if ($assistantReply !== null) {
@@ -330,9 +331,39 @@ class AIService
      * Handle tool call or fallback to local intent parsing.
      * Returns null if tool/intent not matched.
      */
-    private function handleToolCallOrIntent($client, $msg, string $userMessage, string $systemPrompt, ?string $contextPrompt, array $history): ?string
+    private function handleToolCallOrIntent($client, $msg, string $userMessage, string $systemPrompt, ?string $contextPrompt, array $history, $chatId = null): ?string
     {
         $tools = $this->getEnabledTools();
+
+        $intentResolution = $this->resolveToolIntent($tools, $userMessage, $chatId);
+
+        if (($intentResolution['status'] ?? null) === 'prompt') {
+            return (string) ($intentResolution['reply'] ?? '');
+        }
+
+        if (($intentResolution['status'] ?? null) === 'selected' && ($intentResolution['tool'] ?? null) instanceof Tool) {
+            /** @var Tool $selectedTool */
+            $selectedTool = $intentResolution['tool'];
+            $messageForExtraction = trim((string) ($intentResolution['message_for_extraction'] ?? $userMessage));
+
+            $arguments = $selectedTool->getDefinition() !== null
+                ? $this->forceToolArgumentsFromMessage($client, $selectedTool, $systemPrompt, $contextPrompt, $history, $messageForExtraction)
+                : [];
+
+            if ($selectedTool->getDefinition() !== null && $arguments === null) {
+                return $this->buildMissingDataMessage($selectedTool);
+            }
+
+            return $this->resolveToolExecutionReply(
+                $client,
+                $selectedTool,
+                $arguments ?? [],
+                $systemPrompt,
+                $contextPrompt,
+                $history,
+                $messageForExtraction
+            );
+        }
 
         // 1. Check if OpenAI explicitly called a tool (highest priority).
         foreach ($tools as $tool) {
@@ -351,38 +382,331 @@ class AIService
             }
         }
 
-        $bestTool = null;
-        $bestScore = 0;
+        return null;
+    }
 
-        foreach ($tools as $tool) {
-            $score = $tool->matchScore($userMessage);
-            if ($score > $bestScore) {
-                $bestScore = $score;
-                $bestTool = $tool;
+    /**
+     * Resolve tool intent safely. If multiple tools match, ask for confirmation first.
+     */
+    private function resolveToolIntent(
+        \Illuminate\Support\Collection $tools,
+        string $userMessage,
+        $chatId = null
+    ): array {
+        $normalizedMessage = $this->normalizeIntentText($userMessage);
+
+        // If waiting for user clarification, process that first.
+        if ($chatId) {
+            $pending = Cache::get($this->ambiguousIntentKey((string) $chatId));
+
+            if (is_array($pending) && !empty($pending['tool_ids'])) {
+                $candidateTools = $tools->whereIn('id', (array) $pending['tool_ids'])->values();
+
+                if ($candidateTools->isEmpty()) {
+                    Cache::forget($this->ambiguousIntentKey((string) $chatId));
+                } else {
+                    $selection = $this->resolveAmbiguousSelectionFromReply($userMessage, $candidateTools);
+
+                    if (($selection['status'] ?? '') === 'selected' && ($selection['tool'] ?? null) instanceof Tool) {
+                        Cache::forget($this->ambiguousIntentKey((string) $chatId));
+
+                        $originalMessage = trim((string) ($pending['original_message'] ?? ''));
+                        $messageForExtraction = trim($originalMessage . "\n" . $userMessage);
+
+                        return [
+                            'status' => 'selected',
+                            'tool' => $selection['tool'],
+                            'message_for_extraction' => $messageForExtraction !== '' ? $messageForExtraction : $userMessage,
+                        ];
+                    }
+
+                    if (($selection['status'] ?? '') === 'cancelled') {
+                        Cache::forget($this->ambiguousIntentKey((string) $chatId));
+
+                        return [
+                            'status' => 'prompt',
+                            'reply' => 'Siap, saya batalkan dulu ya. Kalau mau lanjut, tulis perintah yang lebih spesifik.',
+                        ];
+                    }
+
+                    return [
+                        'status' => 'prompt',
+                        'reply' => $this->buildAmbiguousIntentPrompt($candidateTools, true),
+                    ];
+                }
             }
         }
 
-        if ($bestTool !== null && $bestScore > 0) {
-            $arguments = $bestTool->getDefinition() !== null
-                ? $this->forceToolArgumentsFromMessage($client, $bestTool, $systemPrompt, $contextPrompt, $history, $userMessage)
-                : [];
+        $candidates = $this->findToolIntentCandidates($tools, $normalizedMessage);
 
-            if ($bestTool->getDefinition() !== null && $arguments === null) {
-                return $this->buildMissingDataMessage($bestTool);
-            }
+        if ($candidates === []) {
+            return ['status' => 'none'];
+        }
 
-            return $this->resolveToolExecutionReply(
-                $client,
-                $bestTool,
-                $arguments ?? [],
-                $systemPrompt,
-                $contextPrompt,
-                $history,
-                $userMessage
+        $exactTool = $this->resolveExactIntentTool($candidates, $normalizedMessage);
+        if ($exactTool !== null) {
+            return [
+                'status' => 'selected',
+                'tool' => $exactTool,
+                'message_for_extraction' => $userMessage,
+            ];
+        }
+
+        if (count($candidates) === 1) {
+            return [
+                'status' => 'selected',
+                'tool' => $candidates[0]['tool'],
+                'message_for_extraction' => $userMessage,
+            ];
+        }
+
+        $candidateTools = collect($candidates)
+            ->map(fn (array $candidate) => $candidate['tool'])
+            ->filter(fn ($tool) => $tool instanceof Tool)
+            ->values();
+
+        if ($chatId && $candidateTools->isNotEmpty()) {
+            Cache::put(
+                $this->ambiguousIntentKey((string) $chatId),
+                [
+                    'tool_ids' => $candidateTools->pluck('id')->all(),
+                    'original_message' => $userMessage,
+                ],
+                now()->addMinutes(10)
             );
         }
 
+        return [
+            'status' => 'prompt',
+            'reply' => $this->buildAmbiguousIntentPrompt($candidateTools),
+        ];
+    }
+
+    /**
+     * Find relevant tool candidates and keep only near-top matches to reduce noise.
+     */
+    private function findToolIntentCandidates(\Illuminate\Support\Collection $tools, string $normalizedMessage): array
+    {
+        $scored = [];
+
+        foreach ($tools as $tool) {
+            $score = $this->scoreToolIntentMatch($tool, $normalizedMessage);
+            if ($score <= 0) {
+                continue;
+            }
+
+            $scored[] = [
+                'tool' => $tool,
+                'score' => $score,
+            ];
+        }
+
+        if ($scored === []) {
+            return [];
+        }
+
+        usort($scored, fn (array $a, array $b) => $b['score'] <=> $a['score']);
+
+        $bestScore = (int) ($scored[0]['score'] ?? 0);
+        $threshold = max(1, $bestScore - 4);
+
+        return array_values(array_filter(
+            $scored,
+            fn (array $item) => (int) $item['score'] >= $threshold
+        ));
+    }
+
+    /**
+     * Intent score combines keyword and display name overlap for shorthand/combined input.
+     */
+    private function scoreToolIntentMatch(Tool $tool, string $normalizedMessage): int
+    {
+        if ($normalizedMessage === '') {
+            return 0;
+        }
+
+        $score = 0;
+        $keywords = array_values(array_filter(array_map(
+            fn ($kw) => $this->normalizeIntentText((string) $kw),
+            (array) ($tool->keywords ?? [])
+        )));
+
+        foreach ($keywords as $keyword) {
+            if ($keyword === '') {
+                continue;
+            }
+
+            if (str_contains($normalizedMessage, $keyword)) {
+                $score += 6 + min(12, mb_strlen($keyword));
+            }
+
+            $keywordTokens = $this->extractIntentTokens($keyword);
+            foreach ($keywordTokens as $token) {
+                if ($token !== '' && str_contains($normalizedMessage, $token)) {
+                    $score += 2;
+                }
+            }
+        }
+
+        $displayName = $this->normalizeIntentText((string) $tool->display_name);
+        if ($displayName !== '') {
+            if (str_contains($normalizedMessage, $displayName)) {
+                $score += 16;
+            }
+
+            $displayTokens = $this->extractIntentTokens($displayName);
+            foreach ($displayTokens as $token) {
+                if ($token !== '' && str_contains($normalizedMessage, $token)) {
+                    $score += 3;
+                }
+            }
+        }
+
+        return $score;
+    }
+
+    /**
+     * If one tool matches exactly and uniquely, execute directly without prompt.
+     */
+    private function resolveExactIntentTool(array $candidates, string $normalizedMessage): ?Tool
+    {
+        if ($normalizedMessage === '') {
+            return null;
+        }
+
+        $exactMatches = [];
+
+        foreach ($candidates as $candidate) {
+            $tool = $candidate['tool'] ?? null;
+            if (!$tool instanceof Tool) {
+                continue;
+            }
+
+            $names = [
+                $this->normalizeIntentText((string) $tool->display_name),
+                $this->normalizeIntentText((string) $tool->tool_name),
+            ];
+
+            foreach ((array) ($tool->keywords ?? []) as $keyword) {
+                $names[] = $this->normalizeIntentText((string) $keyword);
+            }
+
+            $names = array_values(array_filter(array_unique($names), fn ($value) => $value !== ''));
+
+            foreach ($names as $name) {
+                if ($name === $normalizedMessage) {
+                    $exactMatches[] = $tool;
+                    break;
+                }
+            }
+        }
+
+        if (count($exactMatches) === 1) {
+            return $exactMatches[0];
+        }
+
         return null;
+    }
+
+    private function resolveAmbiguousSelectionFromReply(string $reply, \Illuminate\Support\Collection $candidateTools): array
+    {
+        $normalizedReply = $this->normalizeIntentText($reply);
+        if ($normalizedReply === '') {
+            return ['status' => 'unknown'];
+        }
+
+        if (preg_match('/\b(batal|cancel|stop|ga jadi|gajadi|engga jadi|nggak jadi)\b/i', $normalizedReply) === 1) {
+            return ['status' => 'cancelled'];
+        }
+
+        if (preg_match('/\b(opsi\s*)?(\d{1,2})\b/i', $normalizedReply, $matches) === 1) {
+            $index = ((int) ($matches[2] ?? 0)) - 1;
+            $tool = $candidateTools->values()->get($index);
+
+            if ($tool instanceof Tool) {
+                return ['status' => 'selected', 'tool' => $tool];
+            }
+        }
+
+        foreach ($candidateTools as $tool) {
+            if (!$tool instanceof Tool) {
+                continue;
+            }
+
+            $aliases = [
+                $this->normalizeIntentText((string) $tool->display_name),
+                $this->normalizeIntentText((string) $tool->tool_name),
+            ];
+
+            foreach ((array) ($tool->keywords ?? []) as $keyword) {
+                $aliases[] = $this->normalizeIntentText((string) $keyword);
+            }
+
+            foreach (array_values(array_filter(array_unique($aliases), fn ($v) => $v !== '')) as $alias) {
+                if ($alias !== '' && str_contains($normalizedReply, $alias)) {
+                    return ['status' => 'selected', 'tool' => $tool];
+                }
+            }
+        }
+
+        return ['status' => 'unknown'];
+    }
+
+    private function buildAmbiguousIntentPrompt(\Illuminate\Support\Collection $candidateTools, bool $isFollowUp = false): string
+    {
+        $intro = $isFollowUp
+            ? 'Maaf, saya belum yakin pilihan kamu yang mana.'
+            : 'Biar tidak salah proses, maksud kamu yang mana ya?';
+
+        $lines = [$intro];
+
+        foreach ($candidateTools->values() as $index => $tool) {
+            if (!$tool instanceof Tool) {
+                continue;
+            }
+
+            $number = $index + 1;
+            $desc = trim((string) ($tool->description ?? ''));
+            $suffix = $desc !== '' ? " - {$desc}" : '';
+            $lines[] = "{$number}. {$tool->display_name}{$suffix}";
+        }
+
+        $lines[] = "Balas angka pilihannya (contoh: 1) atau ketik nama fiturnya. Bisa juga ketik 'batal'.";
+
+        return implode("\n", $lines);
+    }
+
+    private function normalizeIntentText(string $text): string
+    {
+        $text = mb_strtolower(trim($text));
+        if ($text === '') {
+            return '';
+        }
+
+        $text = preg_replace('/[^\pL\pN\s]/u', ' ', $text) ?? $text;
+        $text = preg_replace('/\s+/u', ' ', $text) ?? $text;
+
+        return trim($text);
+    }
+
+    private function extractIntentTokens(string $text): array
+    {
+        $tokens = preg_split('/\s+/u', $this->normalizeIntentText($text)) ?: [];
+        $tokens = array_values(array_filter($tokens, function ($token) {
+            $token = (string) $token;
+            if (mb_strlen($token) < 3) {
+                return false;
+            }
+
+            return !in_array($token, ['dan', 'atau', 'yang', 'untuk', 'dari', 'the', 'and'], true);
+        }));
+
+        return array_values(array_unique($tokens));
+    }
+
+    private function ambiguousIntentKey(string $chatId): string
+    {
+        return 'chat:ambiguous_intent:' . $chatId;
     }
 
     private function resolveToolExecutionReply($client, Tool $tool, array $arguments, string $systemPrompt, ?string $contextPrompt, array $history, string $userMessage): ?string

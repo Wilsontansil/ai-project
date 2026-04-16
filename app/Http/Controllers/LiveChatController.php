@@ -54,13 +54,19 @@ class LiveChatController extends Controller
 
         $response = null;
 
-        if ($text === null || $chatId === null) {
-            Log::warning('Invalid LiveChat webhook payload', ['payload' => $payload]);
+        if ($chatId === null) {
+            Log::warning('Invalid LiveChat webhook payload: missing chatId', ['payload' => $payload]);
             $response = response()->json([
                 'status' => 'ignored',
                 'reason' => 'invalid_payload',
             ]);
-        } else {
+        } elseif ($text === null) {
+            // No message text found — treat as conversation start (greeting)
+            $text = 'Halo';
+            Log::info('LiveChat webhook has no message text, treating as greeting', ['chat_id' => $chatId]);
+        }
+
+        if ($chatId !== null) {
             $combinedText = app(AIService::class)->collectDebouncedMessage($chatId, $text);
 
             if ($combinedText === null) {
@@ -137,7 +143,13 @@ class LiveChatController extends Controller
             ?? $request->input('data.message')
             ?? $request->input('data.text')
             ?? $request->input('chat.message')
-            ?? $request->input('chat.text');
+            ?? $request->input('chat.text')
+            ?? $request->input('attributes.message')
+            ?? $request->input('attributes.user_message')
+            ?? $request->input('attributes.visitor_message')
+            ?? $request->input('userAttributes.message')
+            ?? $request->input('userAttributes.user_message')
+            ?? $request->input('userAttributes.visitor_message');
 
         $text = is_string($text) ? trim($text) : '';
 

@@ -53,6 +53,7 @@ return [
 
     'livechat' => [
         'verify_token' => env('LIVECHAT_VERIFY_TOKEN'),
+        'webhook_secret' => env('LIVECHAT_WEBHOOK_SECRET'),
     ],
 
     'agent' => [

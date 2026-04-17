@@ -10,4 +10,4 @@ Route::get('/test', function () {
 });
 Route::post('/telegram/webhook', [TelegramController::class, 'handleWebhook'])->middleware('verify.telegram');
 Route::match(['get', 'post'], '/whatsapp/webhook', [WhatsAppController::class, 'handleWebhook'])->middleware('verify.whatsapp');
-Route::match(['get', 'post'], '/livechat/webhook', [LiveChatController::class, 'handleWebhook']);
+Route::match(['get', 'post'], '/livechat/webhook', [LiveChatController::class, 'handleWebhook'])->middleware('verify.livechat');

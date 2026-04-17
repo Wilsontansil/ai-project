@@ -165,11 +165,12 @@
                 ];
                 $bucketCount = count($timeline);
             @endphp
-            <div style="display:flex;align-items:flex-end;gap:{{ $bucketCount > 12 ? '2' : '4' }}px;height:160px;overflow-x:auto;padding-bottom:28px;position:relative;">
+            <div
+                style="display:flex;align-items:flex-end;gap:{{ $bucketCount > 12 ? '2' : '4' }}px;height:160px;overflow-x:auto;padding-bottom:28px;position:relative;">
                 @foreach ($timeline as $bucket => $channelCounts)
                     @php
                         $total = array_sum($channelCounts);
-                        $label = \Illuminate\Support\Str::substr($bucket, 11, 5); {{-- Extract HH:MM --}}
+                        $label = \Illuminate\Support\Str::substr($bucket, 11, 5); // Extract HH:MM
                     @endphp
                     <div style="display:flex;flex-direction:column-reverse;align-items:stretch;flex:1;min-width:28px;max-width:80px;position:relative;"
                         title="{{ $bucket }}: {{ $total }} requests">
@@ -181,7 +182,8 @@
                                 </div>
                             @endif
                         @endforeach
-                        <span style="position:absolute;bottom:-24px;left:0;right:0;text-align:center;font-size:10px;color:rgba(148,163,184,0.7);white-space:nowrap;">{{ $label }}</span>
+                        <span
+                            style="position:absolute;bottom:-24px;left:0;right:0;text-align:center;font-size:10px;color:rgba(148,163,184,0.7);white-space:nowrap;">{{ $label }}</span>
                     </div>
                 @endforeach
             </div>

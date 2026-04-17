@@ -356,7 +356,7 @@ Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_
 
         $messages[] = [
             'role' => 'system',
-            'content' => "Choose the matched tool and extract arguments from the user's latest message. If the message does not contain enough data for a required field, still call the tool with whatever arguments are available so the application can return the configured missing-data message.",
+            'content' => "Choose the matched tool and extract arguments from the conversation. Be flexible: users may provide data in natural language, mixed order, shorthand, abbreviations, or without labels. Use the latest message first, but also use recent chat history when it clearly contains the missing values. Do not require a rigid format or numbered template. If the conversation does not contain enough data for a required field, still call the tool with whatever arguments are available so the application can return the configured missing-data message.",
         ];
 
         foreach (array_slice($history, -6) as $item) {

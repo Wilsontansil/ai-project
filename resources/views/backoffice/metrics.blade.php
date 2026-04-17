@@ -7,19 +7,6 @@
 
 @section('content')
     <style>
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.75rem;
-        }
-
-        @@media(min-width:768px) {
-            .metrics-grid {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-                gap: 1rem;
-            }
-        }
-
         .metrics-card {
             border-radius: 12px;
             padding: 16px 20px;
@@ -129,7 +116,7 @@
     </div>
 
     {{-- KPI Cards --}}
-    <div class="metrics-grid">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4">
         <div class="metrics-card" style="background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.25)">
             <p style="color:rgba(34,211,238,0.7);font-size:11px;margin:0">Total Requests</p>
             <p style="color:#fff;font-size:22px;font-weight:700;margin:4px 0 0">{{ number_format($throughputTotal) }}</p>

@@ -156,26 +156,32 @@
     @if (count($timeline) > 0)
         <div style="border-radius:12px;border:1px solid rgba(51,65,85,0.5);background:rgba(15,23,42,0.85);padding:20px">
             <p class="section-title">Throughput Timeline (Hourly)</p>
-            <div style="display:flex;align-items:flex-end;gap:3px;height:120px;overflow-x:auto;">
-                @php
-                    $maxVal = max(array_map(fn($b) => array_sum($b), $timeline));
-                    $channels = [
-                        'telegram' => 'rgba(34,211,238,0.8)',
-                        'whatsapp' => 'rgba(52,211,153,0.8)',
-                        'livechat' => 'rgba(168,85,247,0.8)',
-                    ];
-                @endphp
+            @php
+                $maxVal = max(1, max(array_map(fn($b) => array_sum($b), $timeline)));
+                $channels = [
+                    'telegram' => 'rgba(34,211,238,0.8)',
+                    'whatsapp' => 'rgba(52,211,153,0.8)',
+                    'livechat' => 'rgba(168,85,247,0.8)',
+                ];
+                $bucketCount = count($timeline);
+            @endphp
+            <div style="display:flex;align-items:flex-end;gap:{{ $bucketCount > 12 ? '2' : '4' }}px;height:160px;overflow-x:auto;padding-bottom:28px;position:relative;">
                 @foreach ($timeline as $bucket => $channelCounts)
-                    <div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:18px;"
-                        title="{{ $bucket }}: {{ array_sum($channelCounts) }} requests">
+                    @php
+                        $total = array_sum($channelCounts);
+                        $label = \Illuminate\Support\Str::substr($bucket, 11, 5); {{-- Extract HH:MM --}}
+                    @endphp
+                    <div style="display:flex;flex-direction:column-reverse;align-items:stretch;flex:1;min-width:28px;max-width:80px;position:relative;"
+                        title="{{ $bucket }}: {{ $total }} requests">
                         @foreach ($channels as $ch => $color)
                             @php($count = $channelCounts[$ch] ?? 0)
                             @if ($count > 0)
                                 <div class="timeline-bar"
-                                    style="width:100%;background:{{ $color }};height:{{ $maxVal > 0 ? max(2, ($count / $maxVal) * 100) : 0 }}px;">
+                                    style="width:100%;background:{{ $color }};height:{{ max(3, round(($count / $maxVal) * 120)) }}px;">
                                 </div>
                             @endif
                         @endforeach
+                        <span style="position:absolute;bottom:-24px;left:0;right:0;text-align:center;font-size:10px;color:rgba(148,163,184,0.7);white-space:nowrap;">{{ $label }}</span>
                     </div>
                 @endforeach
             </div>

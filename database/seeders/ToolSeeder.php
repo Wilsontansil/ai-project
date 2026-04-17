@@ -71,7 +71,7 @@ class ToolSeeder extends Seeder
                     ],
                 ],
                 'keywords' => ['reset password', 'resetpass', 'kata sandi', 'password'],
-                'tool_rules' => "- Minta semua data sekaligus dalam satu pesan yang rapi: username, nama rekening, nomor rekening, nama bank\n- Format permintaan data harus dalam list\n- Jangan eksekusi tool sebelum SEMUA data terkumpul lengkap\n- Setelah berhasil, infokan bahwa password sudah direset dan minta player login ulang\n- Jika data tidak ditemukan, minta user periksa kembali semua data yang diinput",
+                'tool_rules' => "- Minta semua data sekaligus dalam satu pesan yang rapi: username, nama rekening, nomor rekening, nama bank\n- Format permintaan data harus dalam list\n- Jangan eksekusi tool sebelum SEMUA data terkumpul lengkap\n- Setelah berhasil, infokan bahwa password sudah direset ke 1234567\n- Jika data tidak ditemukan, minta user periksa kembali semua data yang diinput",
                 'information_text' => null,
                 'meta' => null,
             ],

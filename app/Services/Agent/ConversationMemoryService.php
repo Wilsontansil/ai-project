@@ -31,6 +31,10 @@ class ConversationMemoryService
             'time' => now()->toTimeString(),
         ];
 
+        // Cap stored messages to prevent unbounded JSON growth on long chats.
+        $maxStoredMessages = 50;
+        $messages = array_slice($messages, -$maxStoredMessages);
+
         $conversation->update(['messages' => $messages, 'channel' => $channel]);
 
         return $conversation;

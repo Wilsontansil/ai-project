@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\VerifyTelegramWebhook;
+use App\Http\Middleware\VerifyWhatsAppWebhook;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'set.locale' => SetLocale::class,
             'verify.telegram' => VerifyTelegramWebhook::class,
+            'verify.whatsapp' => VerifyWhatsAppWebhook::class,
         ]);
     })
     ->withExceptions(function (): void {

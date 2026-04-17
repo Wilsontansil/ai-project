@@ -48,6 +48,7 @@ return [
         'base_url' => env('WAHA_BASE_URL'),
         'session' => env('WAHA_SESSION', 'default'),
         'api_key' => env('WAHA_API_KEY'),
+        'webhook_secret' => env('WAHA_WEBHOOK_SECRET'),
     ],
 
     'livechat' => [

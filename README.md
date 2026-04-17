@@ -1,58 +1,142 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# xoneBot — AI Chatbot Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 13 / PHP 8.3 API that connects **Telegram**, **WhatsApp (WAHA)**, and **LiveChat** to an OpenAI-powered assistant. Includes a backoffice for managing tools, data models, forbidden behaviours, and project settings.
 
-## About Laravel
+## Architecture
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```
+Telegram / WhatsApp / LiveChat
+        ↓ webhook
+   Webhook Controller  →  AIService  →  OpenAI (gpt-4.1-mini)
+        ↓                      ↓
+   ResilientHttp          Tool Execution (info / get / update)
+        ↓                      ↓
+   Reply → Platform API   ConversationHistory (20 msgs, 12h TTL)
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Requirements
 
-## Contributing
+- PHP 8.3+
+- Composer 2
+- SQLite (default) or MySQL/PostgreSQL
+- Node.js 20+ & npm (for Vite assets)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Quick Start
 
-## Code of Conduct
+```bash
+# 1. Clone & install
+git clone <repo-url> && cd ai-project
+composer install
+npm install && npm run build
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 2. Environment
+cp .env.example .env
+php artisan key:generate
 
-## Security Vulnerabilities
+# 3. Configure .env — set at minimum:
+#    OPENAI_API_KEY, TELEGRAM_BOT_TOKEN, WAHA_BASE_URL,
+#    and the three WEBHOOK_SECRET values
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 4. Database
+php artisan migrate --seed
 
-## License
+# 5. Run
+php artisan serve
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Environment Variables
+
+| Variable                         | Purpose                                                  |
+| -------------------------------- | -------------------------------------------------------- |
+| `OPENAI_API_KEY`                 | OpenAI API key                                           |
+| `TELEGRAM_BOT_TOKEN`             | Telegram Bot API token                                   |
+| `TELEGRAM_WEBHOOK_SECRET`        | Telegram webhook auth secret                             |
+| `WAHA_BASE_URL`                  | WAHA instance URL                                        |
+| `WAHA_SESSION`                   | WAHA session name (default: `default`)                   |
+| `WAHA_API_KEY`                   | WAHA API key                                             |
+| `WAHA_WEBHOOK_SECRET`            | WhatsApp webhook auth secret                             |
+| `LIVECHAT_VERIFY_TOKEN`          | LiveChat challenge verification token                    |
+| `LIVECHAT_WEBHOOK_SECRET`        | LiveChat webhook auth secret                             |
+| `CONVERSATION_RETENTION_DAYS`    | Auto-prune conversations older than N days (default: 90) |
+| `CUSTOMER_MEMORY_RETENTION_DAYS` | Auto-prune stale customer memory (default: 90)           |
+
+All settings can also be managed from the backoffice Settings page (stored in `project_settings`, takes priority over `.env`).
+
+## API Endpoints
+
+| Method   | Path                    | Purpose                                                    |
+| -------- | ----------------------- | ---------------------------------------------------------- |
+| GET      | `/api/test`             | Health check                                               |
+| POST     | `/api/telegram/webhook` | Telegram webhook (auth: `X-Telegram-Bot-Api-Secret-Token`) |
+| GET/POST | `/api/whatsapp/webhook` | WAHA webhook (auth: `X-Secret-Token`)                      |
+| GET/POST | `/api/livechat/webhook` | LiveChat webhook (auth: `X-livechat-Token`)                |
+
+## Backoffice
+
+All routes under `/backoffice` require authentication.
+
+| Path                               | Purpose                                             |
+| ---------------------------------- | --------------------------------------------------- |
+| `/backoffice/login`                | Admin login                                         |
+| `/backoffice`                      | Customer dashboard & stats                          |
+| `/backoffice/ai-agent`             | Agent persona settings                              |
+| `/backoffice/tools`                | CRUD for AI tools                                   |
+| `/backoffice/data-models`          | CRUD for data model schemas                         |
+| `/backoffice/forbidden-behaviours` | CRUD for banned behaviour rules                     |
+| `/backoffice/settings`             | Global project settings                             |
+| `/backoffice/metrics`              | Observability dashboard (throughput, latency, cost) |
+
+## Testing
+
+```bash
+# Run all tests
+php artisan test
+
+# Run specific suites
+php artisan test tests/Feature/Webhooks
+php artisan test tests/Feature/Backoffice
+php artisan test tests/Feature/Console
+```
+
+## Static Analysis
+
+```bash
+composer analyse
+# or directly:
+vendor/bin/phpstan analyse --memory-limit=512M
+```
+
+PHPStan is configured at **level 5** with Larastan.
+
+## Data Retention
+
+The `retention:prune` command runs daily at 03:00 via the scheduler. Ensure the server cron calls:
+
+```bash
+* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Manual run: `php artisan retention:prune` (add `--dry-run` to preview).
+
+## Deployment
+
+```bash
+composer install --no-dev --optimize-autoloader
+php artisan optimize:clear
+php artisan migrate --force
+php artisan db:seed --force
+```
+
+Ensure `APP_DEBUG=false` and `LOG_LEVEL=warning` (or `error`) in production.
+
+## Security
+
+- **Webhook authentication** — Each channel has dedicated middleware verifying a shared secret header with `hash_equals()`.
+- **Login rate limiting** — 5 attempts / 15-minute lockout with dual-key throttle (email + IP).
+- **Safe logging** — `LogSanitizer` redacts PII before any payload is logged.
+- **Error handling** — API routes return sanitised JSON errors; debug details only in non-production.
+- **Outbound resilience** — `ResilientHttp` with retry, exponential backoff, and circuit breaker.
+
+## Further Reading
+
+See [PROJECT_GUIDE.md](PROJECT_GUIDE.md) for detailed architecture, model schemas, tool types, field definitions, and coding conventions.

@@ -6,7 +6,10 @@ use App\Http\Middleware\VerifyWhatsAppWebhook;
 use App\Http\Middleware\VerifyLiveChatWebhook;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -30,6 +33,31 @@ return Application::configure(basePath: dirname(__DIR__))
             'verify.livechat' => VerifyLiveChatWebhook::class,
         ]);
     })
-    ->withExceptions(function (): void {
-        //
+    ->withExceptions(function (Exceptions $exceptions): void {
+        // API routes: always return JSON, never expose internals.
+        $exceptions->render(function (\Throwable $e, Request $request) {
+            if (!$request->is('api/*') && !$request->expectsJson()) {
+                return null; // Let Laravel handle web routes with default views.
+            }
+
+            $status = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
+
+            $payload = ['error' => match (true) {
+                $status === 404 => 'Not found.',
+                $status === 403 => 'Forbidden.',
+                $status === 429 => 'Too many requests.',
+                $status >= 500   => 'Internal server error.',
+                default          => 'An error occurred.',
+            }];
+
+            // Only expose the real message in debug mode.
+            if (config('app.debug')) {
+                $payload['debug'] = [
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ];
+            }
+
+            return response()->json($payload, $status);
+        });
     })->create();

@@ -6,6 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property string|null $model_name
+ * @property string|null $slug
+ * @property string|null $description
+ * @property string|null $table_name
+ * @property string|null $connection_name
+ * @property array<string, mixed>|null $fields
+ */
 class DataModel extends Model
 {
     use HasFactory;

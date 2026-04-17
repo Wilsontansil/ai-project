@@ -1,0 +1,15 @@
+includes:
+    - vendor/nunomaduro/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+
+    level: 5
+
+    treatPhpDocTypesAsCertain: false
+
+    ignoreErrors:
+        # Pre-existing: redundant nullCoalesce in CustomerIdentityService
+        - message: '#on left side of .* always exists and is not nullable#'
+          path: app/Services/Agent/CustomerIdentityService.php

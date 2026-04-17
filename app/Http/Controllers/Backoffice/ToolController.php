@@ -368,6 +368,7 @@ class ToolController extends Controller
             }
 
             $dataModel = DataModel::query()->find($data['data_model_id']);
+            // @phpstan-ignore nullsafe.neverNull
             $allowedFields = array_keys((array) ($dataModel?->fields ?? []));
 
             foreach ((array) ($data['params'] ?? []) as $row) {

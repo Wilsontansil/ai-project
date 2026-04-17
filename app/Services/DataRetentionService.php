@@ -70,7 +70,7 @@ class DataRetentionService
         return $this->resolveRetentionDays(
             $override,
             'conversation_retention_days',
-            env('CONVERSATION_RETENTION_DAYS', (string) self::DEFAULT_CONVERSATION_RETENTION_DAYS),
+            config('services.retention.conversation_days', (string) self::DEFAULT_CONVERSATION_RETENTION_DAYS),
             self::DEFAULT_CONVERSATION_RETENTION_DAYS,
         );
     }
@@ -80,7 +80,7 @@ class DataRetentionService
         return $this->resolveRetentionDays(
             $override,
             'customer_memory_retention_days',
-            env('CUSTOMER_MEMORY_RETENTION_DAYS', (string) self::DEFAULT_MEMORY_RETENTION_DAYS),
+            config('services.retention.memory_days', (string) self::DEFAULT_MEMORY_RETENTION_DAYS),
             self::DEFAULT_MEMORY_RETENTION_DAYS,
         );
     }

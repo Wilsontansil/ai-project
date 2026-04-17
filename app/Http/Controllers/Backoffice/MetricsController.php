@@ -136,7 +136,9 @@ class MetricsController extends Controller
 
         $timeline = [];
         foreach ($timelineRows as $row) {
-            $bucket = \Illuminate\Support\Carbon::parse($row->created_at)->format('Y-m-d H:00');
+            $bucket = \Illuminate\Support\Carbon::parse($row->created_at)
+                ->setTimezone(config('app.timezone'))
+                ->format('Y-m-d H:00');
             $ch = $row->channel;
             $timeline[$bucket][$ch] = ($timeline[$bucket][$ch] ?? 0) + 1;
         }

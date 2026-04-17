@@ -235,3 +235,22 @@ php artisan db:seed --force
 ### Documentation
 
 - Update `PROJECT_GUIDE.md` when behavior, structure, or rules change.
+
+## Test Coverage
+
+Real coverage has been added beyond Laravel example tests:
+
+- Webhook feature tests: - `tests/Feature/Webhooks/TelegramWebhookTest.php` - `tests/Feature/Webhooks/WhatsAppWebhookTest.php` - `tests/Feature/Webhooks/LiveChatWebhookTest.php`
+- Tool contract tests: - `tests/Feature/Backoffice/ToolEndpointContractTest.php`
+- Backoffice auth/access tests: - `tests/Feature/Backoffice/BackofficeAccessTest.php`
+
+Run targeted real coverage:
+
+```bash
+php artisan test tests/Feature/Webhooks tests/Feature/Backoffice/ToolEndpointContractTest.php tests/Feature/Backoffice/BackofficeAccessTest.php
+```
+
+Notes:
+
+- These tests isolate `project_settings` and cache state to avoid cross-test leakage.
+- Backoffice access is currently auth-based (guest redirected to login). Role-based admin authorization is not yet implemented.

@@ -5,6 +5,7 @@ namespace Tests\Feature\Backoffice;
 use App\Models\ProjectSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -19,6 +20,14 @@ class ToolEndpointContractTest extends TestCase
     private const FULL_URL = 'https://endpoint.test/game-gacor';
 
     private const USERNAME = 'player1';
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Cache::flush();
+        ProjectSetting::clearCache();
+    }
 
     public function test_test_endpoint_returns_validation_error_when_base_url_not_configured(): void
     {

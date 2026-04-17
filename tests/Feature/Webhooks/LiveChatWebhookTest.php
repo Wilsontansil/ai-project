@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Webhooks;
 
+use App\Models\ProjectSetting;
 use App\Services\AIService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Mockery;
 use Tests\TestCase;
 
@@ -17,9 +19,25 @@ class LiveChatWebhookTest extends TestCase
 
     private const AI_REPLY = 'halo dari ai';
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Cache::flush();
+        ProjectSetting::clearCache();
+    }
+
     public function test_livechat_challenge_requires_valid_token_when_configured(): void
     {
-        config(['services.livechat.verify_token' => 'verify-token-123']);
+        ProjectSetting::query()->create([
+            'key' => 'livechat_verify_token',
+            'value' => 'verify-token-123',
+            'label' => 'Verify Token',
+            'group' => 'livechat',
+            'type' => 'secret',
+        ]);
+
+        ProjectSetting::clearCache();
 
         $this->get('/api/livechat/webhook?challenge=abc123&token=wrong-token')
             ->assertStatus(401);

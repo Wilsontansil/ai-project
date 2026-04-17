@@ -21,7 +21,7 @@ class BackofficeAccessTest extends TestCase
         $this->postJson(route('backoffice.tools.testEndpoint'), [
             'route' => '/any-route',
             'body' => ['k' => 'v'],
-        ])->assertStatus(401);
+        ])->assertRedirect(route('login'));
     }
 
     public function test_authenticated_user_can_access_dashboard(): void

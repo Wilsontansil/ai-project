@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Webhooks;
 
+use App\Models\ProjectSetting;
 use App\Services\AIService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Mockery;
 use Tests\TestCase;
@@ -18,12 +20,46 @@ class WhatsAppWebhookTest extends TestCase
 
     private const AI_REPLY = 'bonus tersedia';
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Cache::flush();
+        ProjectSetting::clearCache();
+    }
+
     public function test_whatsapp_webhook_processes_message_and_calls_waha_endpoints(): void
     {
+        ProjectSetting::query()->create([
+            'key' => 'whatsapp_base_url',
+            'value' => 'https://waha.test',
+            'label' => 'Base URL',
+            'group' => 'whatsapp',
+            'type' => 'url',
+        ]);
+
+        ProjectSetting::query()->create([
+            'key' => 'whatsapp_session',
+            'value' => 'default',
+            'label' => 'Session',
+            'group' => 'whatsapp',
+            'type' => 'text',
+        ]);
+
+        ProjectSetting::query()->create([
+            'key' => 'whatsapp_api_key',
+            'value' => 'test-api-key',
+            'label' => 'API Key',
+            'group' => 'whatsapp',
+            'type' => 'secret',
+        ]);
+
+        ProjectSetting::clearCache();
+
         config([
-            'services.whatsapp.base_url' => 'https://waha.test',
+            'services.whatsapp.base_url' => '',
             'services.whatsapp.session' => 'default',
-            'services.whatsapp.api_key' => 'test-api-key',
+            'services.whatsapp.api_key' => '',
         ]);
 
         Http::fake([

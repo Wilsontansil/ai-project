@@ -3,7 +3,7 @@
 @section('title', 'Metrics')
 @section('page-title', 'Metrics')
 
-@php($boActive = 'metrics')
+@php $boActive = 'metrics'; @endphp
 
 @section('content')
     <style>

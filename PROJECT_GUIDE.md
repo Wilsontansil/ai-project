@@ -78,6 +78,7 @@ Core AI orchestration service.
 - **ConversationMemoryService** — Stores/fetches short-term conversation memory.
 - **BehaviorProfilerService** — Updates intent/sentiment/frequency behavior profile per customer.
 - **AgentContextService** — Builds unified AI context combining profile, behavior, and memory.
+- **DataRetentionService** — Applies retention policy for stored conversations and stale customer behavior memory.
 
 ## Models
 
@@ -183,6 +184,15 @@ SUPPORT_WHATSAPP_URL=
 ```
 
 All settings can also be overridden from the backoffice Settings page (stored in `project_settings` table, takes priority over `.env`).
+
+## Data Retention
+
+- `retention:prune` runs daily at `03:00` through the Laravel scheduler.
+- Conversation history older than `CONVERSATION_RETENTION_DAYS` / `conversation_retention_days` is deleted.
+- Stale customer memory in `customer_behaviors` older than `CUSTOMER_MEMORY_RETENTION_DAYS` / `customer_memory_retention_days` is deleted.
+- Manual run: `php artisan retention:prune`
+- Dry run: `php artisan retention:prune --dry-run`
+- Server cron still needs to call `php artisan schedule:run` every minute.
 
 ## Project Rules
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\LogSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -61,7 +62,7 @@ class WhatsAppController extends Controller
             ?? $request->input('chatId');
 
         if (!$text || !$chatId) {
-            Log::warning('Invalid WAHA webhook payload', ['payload' => $requestPayload]);
+            Log::warning('Invalid WAHA webhook payload', LogSanitizer::summarize($requestPayload));
             return response()->json(['status' => 'ignored', 'reason' => 'invalid_payload']);
         }
 

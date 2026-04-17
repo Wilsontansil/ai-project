@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProjectSetting;
+use App\Support\LogSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Services\Agent\AgentContextService;
@@ -16,7 +17,6 @@ class LiveChatController extends Controller
     public function handleWebhook(Request $request)
     {
         $payload = $request->all();
-        Log::info('Received LiveChat webhook', ['payload' => $payload]);
 
         $response = null;
 
@@ -55,7 +55,7 @@ class LiveChatController extends Controller
         $response = null;
 
         if ($chatId === null) {
-            Log::warning('Invalid LiveChat webhook payload: missing chatId', ['payload' => $payload]);
+            Log::warning('Invalid LiveChat webhook payload: missing chatId', LogSanitizer::summarize($payload));
             $response = response()->json([
                 'status' => 'ignored',
                 'reason' => 'invalid_payload',

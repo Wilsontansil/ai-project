@@ -76,6 +76,14 @@
                     'icon' =>
                         '<path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>',
                 ],
+                'retention' => [
+                    'label' => 'Data Retention',
+                    'desc' => 'Kebijakan penyimpanan riwayat chat dan memory customer untuk proses cleanup terjadwal.',
+                    'color' => '#60a5fa',
+                    'bg' => 'rgba(96,165,250,0.1)',
+                    'icon' =>
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/>',
+                ],
                 'support' => [
                     'label' => 'Support',
                     'desc' => 'Kontak dan link support untuk customer.',

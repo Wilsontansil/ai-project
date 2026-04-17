@@ -506,8 +506,6 @@ class AIService
             Log::warning('HTTP endpoint body template unresolved', [
                 'tool_name' => $tool->tool_name,
                 'error' => $builtBody['error'] ?? 'unknown',
-                'arguments' => $arguments,
-                'body_template' => $bodyTemplate,
             ]);
 
             return [
@@ -539,7 +537,7 @@ class AIService
             Log::info('Executing HTTP endpoint', [
                 'tool_name' => $tool->tool_name,
                 'url' => $fullUrl,
-                'request_body' => $requestBody,
+                'request_keys' => array_keys($requestBody),
             ]);
 
             // Send HTTP request

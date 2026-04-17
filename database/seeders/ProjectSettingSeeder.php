@@ -85,6 +85,22 @@ class ProjectSettingSeeder extends Seeder
                 'type' => 'text',
             ],
 
+            // Retention
+            [
+                'key' => 'conversation_retention_days',
+                'value' => env('CONVERSATION_RETENTION_DAYS', '90'),
+                'label' => 'Conversation Retention (days)',
+                'group' => 'retention',
+                'type' => 'number',
+            ],
+            [
+                'key' => 'customer_memory_retention_days',
+                'value' => env('CUSTOMER_MEMORY_RETENTION_DAYS', '90'),
+                'label' => 'Customer Memory Retention (days)',
+                'group' => 'retention',
+                'type' => 'number',
+            ],
+
             // Support
             [
                 'key' => 'support_phone',

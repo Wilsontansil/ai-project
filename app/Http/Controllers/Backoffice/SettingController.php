@@ -14,7 +14,7 @@ class SettingController extends Controller
     public function index(): View
     {
         $settings = Schema::hasTable('project_settings')
-            ? ProjectSetting::query()->orderByRaw("FIELD(`group`, 'webhook', 'openai', 'telegram', 'livechat', 'whatsapp', 'agent', 'support')")->get()
+            ? ProjectSetting::query()->orderByRaw("FIELD(`group`, 'webhook', 'openai', 'telegram', 'livechat', 'whatsapp', 'agent', 'retention', 'support')")->get()
             : collect();
 
         $grouped = $settings->groupBy('group');
@@ -29,6 +29,20 @@ class SettingController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $settings = ProjectSetting::all();
+
+        $rules = [];
+
+        foreach ($settings as $setting) {
+            $inputKey = 'setting_' . $setting->id;
+
+            if (in_array($setting->key, ['conversation_retention_days', 'customer_memory_retention_days'], true)) {
+                $rules[$inputKey] = ['nullable', 'integer', 'min:1', 'max:3650'];
+            }
+        }
+
+        if ($rules !== []) {
+            $request->validate($rules);
+        }
 
         foreach ($settings as $setting) {
             $inputKey = 'setting_' . $setting->id;

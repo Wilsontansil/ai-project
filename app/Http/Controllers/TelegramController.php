@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\LogSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +29,7 @@ class TelegramController extends Controller
         $chatId = $request->input('message.chat.id');
 
         if (!$text || !$chatId) {
-            Log::warning('Invalid Telegram webhook payload', ['payload' => $request->all()]);
+            Log::warning('Invalid Telegram webhook payload', LogSanitizer::summarize($request->all()));
             return response()->json(['status' => 'ignored']);
         }
 

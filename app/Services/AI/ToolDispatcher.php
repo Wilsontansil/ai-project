@@ -222,14 +222,34 @@ class ToolDispatcher
             $messages[] = ['role' => 'system', 'content' => $contextPrompt];
         }
 
+        $executionType = (string) ($toolContext['execution_type'] ?? '');
+        $toolName = (string) ($toolContext['tool_display_name'] ?? $toolContext['tool_name'] ?? 'tool');
+        $responseMessage = trim((string) ($toolContext['response_message'] ?? ''));
+        $success = (bool) ($toolContext['success'] ?? true);
         $toolRulesInstruction = '';
         if (!empty($toolContext['tool_rules'])) {
             $toolRulesInstruction = "\n\nIMPORTANT — Follow these tool-specific rules strictly:\n" . $toolContext['tool_rules'];
         }
 
+        $resultInstruction = 'Use the tool context as the only source of truth. Do not mention internal tools, SQL, database query details, or raw JSON.';
+
+        if ($executionType === 'http_endpoint') {
+            $resultInstruction .= ' This tool has already finished running. Do not ask to retry automatically and do not suggest that you are checking again.';
+
+            if ($success) {
+                $resultInstruction .= ' If response_message exists, use it as the main outcome and explain any useful response_data briefly.';
+            } else {
+                $resultInstruction .= ' The request failed. Explain the failure using response_message and status fields, tell the user what was rejected or why it failed, and only ask for corrected input if the tool result clearly indicates missing or invalid data.';
+            }
+        } else {
+            $resultInstruction .= ' If the resolved result is empty, say the data was not found and ask the user to re-check their input.';
+        }
+
         $messages[] = [
             'role' => 'system',
-            'content' => "Internal tool result already fetched. Use it to answer naturally like a human customer service agent. Do not mention internal tools, SQL, database query details, or raw response structure. Do not copy data literally as JSON. Use the resolved_data and tool_description as the source of truth. If resolved_data is empty, say the data was not found and ask the user to re-check their input.{$toolRulesInstruction}
+            'content' => "Internal tool result already fetched. Write the final reply to the user now. {$resultInstruction} Do not copy data literally as JSON.{$toolRulesInstruction}
+
+Original user request:\n{$userMessage}
 
 Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
         ];
@@ -249,7 +269,11 @@ Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_
             $messages[] = ['role' => $role, 'content' => $content];
         }
 
-        $messages[] = ['role' => 'user', 'content' => $userMessage];
+        $messages[] = [
+            'role' => 'user',
+            'content' => "Buat jawaban final untuk user berdasarkan tool context di atas. Jangan memanggil tool lagi. Jangan retry otomatis."
+                . ($responseMessage !== '' ? " Utamakan penjelasan dari pesan ini: {$responseMessage}" : ''),
+        ];
 
         try {
             $response = $client->chat()->create([
@@ -268,6 +292,35 @@ Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_
                 'tool_name' => $toolContext['tool_name'] ?? null,
                 'error' => $e->getMessage(),
             ]);
+        }
+
+        return $this->buildToolReplyFallback($toolContext, $toolName, $responseMessage, $success);
+    }
+
+    /**
+     * Build a deterministic fallback so HTTP tools still return a useful answer
+     * when the model reply is empty or unavailable.
+     *
+     * @param array<string, mixed> $toolContext
+     */
+    private function buildToolReplyFallback(
+        array $toolContext,
+        string $toolName,
+        string $responseMessage,
+        bool $success
+    ): string {
+        $executionType = (string) ($toolContext['execution_type'] ?? '');
+
+        if ($executionType === 'http_endpoint') {
+            if ($responseMessage !== '') {
+                return $success
+                    ? $responseMessage
+                    : "Permintaan {$toolName} belum berhasil diproses. {$responseMessage}";
+            }
+
+            return $success
+                ? "Permintaan {$toolName} berhasil diproses."
+                : "Permintaan {$toolName} belum berhasil diproses. Silakan cek kembali data yang dikirim.";
         }
 
         return 'Data berhasil dicek. Saya bantu jelaskan hasilnya ya.';

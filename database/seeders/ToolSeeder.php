@@ -114,7 +114,7 @@ class ToolSeeder extends Seeder
                     ],
                 ],
                 'keywords' => ['register', 'daftar', 'registrasi', 'buat akun', 'sign up', 'signup', 'mendaftar'],
-                'tool_rules' => "- Terima data registrasi dalam format chat bebas, tidak harus list atau urutan tertentu\n- Jika sebagian data sudah ada, cukup minta data yang masih kurang: username, email, telepon/hp, bank, nama rekening, atau nomor rekening\n- Validasi format inti: email harus mengandung @, hp harus numerik, norek harus numerik\n- Jangan eksekusi sebelum semua 6 data lengkap\n- Setelah berhasil registrasi, ucapkan selamat dan berikan panduan login",
+                'tool_rules' => "- Terima data registrasi dalam format chat bebas, tidak harus list atau urutan tertentu\n- Jika sebagian data sudah ada, cukup minta data yang masih kurang: username, email, telepon/hp, bank, nama rekening, atau nomor rekening\n- Validasi format inti: email harus mengandung @, hp harus numerik, norek harus numerik\n- Jangan eksekusi sebelum semua 6 data lengkap\n- Setelah berhasil registrasi, ucapkan selamat dan berikan panduan login dengan password 1234567",
                 'information_text' => null,
                 'meta' => null,
             ],

@@ -136,7 +136,9 @@ class MetricsController extends Controller
 
         $timeline = [];
         foreach ($timelineRows as $row) {
+            // SQLite's CURRENT_TIMESTAMP stores UTC; shift to app timezone for display.
             $bucket = \Illuminate\Support\Carbon::parse($row->created_at)
+                ->shiftTimezone('UTC')
                 ->setTimezone(config('app.timezone'))
                 ->format('Y-m-d H:00');
             $ch = $row->channel;

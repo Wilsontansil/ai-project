@@ -7,9 +7,17 @@
 
 @section('content')
     <style>
-        .metrics-card {
-            border-radius: 12px;
-            padding: 16px 20px;
+        .bo-metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .bo-metrics-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 1rem;
+            }
         }
 
         .metrics-table {
@@ -116,22 +124,31 @@
     </div>
 
     {{-- KPI Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4">
-        <div class="metrics-card" style="background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.25)">
-            <p style="color:rgba(34,211,238,0.7);font-size:11px;margin:0">Total Requests</p>
-            <p style="color:#fff;font-size:22px;font-weight:700;margin:4px 0 0">{{ number_format($throughputTotal) }}</p>
+    <div class="bo-metrics-grid">
+        <div class="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 sm:px-5 sm:py-4"
+            style="background-color:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.25);border-radius:12px">
+            <p class="text-[11px] text-cyan-200/70" style="color:rgba(34,211,238,0.7);font-size:11px">Total Requests</p>
+            <p class="text-lg font-bold text-white" style="color:#fff;font-size:18px;font-weight:700">
+                {{ number_format($throughputTotal) }}</p>
         </div>
-        <div class="metrics-card" style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25)">
-            <p style="color:rgba(168,85,247,0.7);font-size:11px;margin:0">OpenAI Calls</p>
-            <p style="color:#fff;font-size:22px;font-weight:700;margin:4px 0 0">{{ number_format($openaiCalls) }}</p>
+        <div class="rounded-xl border border-violet-400/20 bg-violet-400/10 px-4 py-3 sm:px-5 sm:py-4"
+            style="background-color:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:12px">
+            <p class="text-[11px] text-violet-200/70" style="color:rgba(168,85,247,0.7);font-size:11px">OpenAI Calls</p>
+            <p class="text-lg font-bold text-white" style="color:#fff;font-size:18px;font-weight:700">
+                {{ number_format($openaiCalls) }}</p>
         </div>
-        <div class="metrics-card" style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25)">
-            <p style="color:rgba(251,191,36,0.7);font-size:11px;margin:0">Total Tokens</p>
-            <p style="color:#fff;font-size:22px;font-weight:700;margin:4px 0 0">{{ number_format($totalTokens) }}</p>
+        <div class="rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 sm:px-5 sm:py-4"
+            style="background-color:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:12px">
+            <p class="text-[11px] text-amber-200/70" style="color:rgba(251,191,36,0.7);font-size:11px">Total Tokens</p>
+            <p class="text-lg font-bold text-white" style="color:#fff;font-size:18px;font-weight:700">
+                {{ number_format($totalTokens) }}</p>
         </div>
-        <div class="metrics-card" style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25)">
-            <p style="color:rgba(248,113,113,0.7);font-size:11px;margin:0">Estimated Cost (USD)</p>
-            <p style="color:#fff;font-size:22px;font-weight:700;margin:4px 0 0">${{ number_format($totalCost, 4) }}</p>
+        <div class="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 sm:px-5 sm:py-4"
+            style="background-color:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);border-radius:12px">
+            <p class="text-[11px] text-red-200/70" style="color:rgba(248,113,113,0.7);font-size:11px">Estimated Cost (USD)
+            </p>
+            <p class="text-lg font-bold text-white" style="color:#fff;font-size:18px;font-weight:700">
+                ${{ number_format($totalCost, 4) }}</p>
         </div>
     </div>
 

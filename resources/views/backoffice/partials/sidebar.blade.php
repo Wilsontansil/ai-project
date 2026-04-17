@@ -114,45 +114,46 @@
         padding-top: 0.5rem;
     }
 
-    /* ── Responsive ── */
+    /* ── Responsive (mobile drawer) ── */
     @media (max-width: 1023px) {
-        #bo-shell.bo-collapsed #bo-sidebar {
-            width: 100% !important;
-            min-width: 100% !important;
+
+        /* When sidebar is open as mobile drawer, always show full labels */
+        #bo-shell.bo-collapsed #bo-sidebar.bo-mobile-open {
+            width: 280px !important;
+            min-width: 280px !important;
             overflow: visible !important;
         }
 
-        #bo-shell.bo-collapsed .bo-label,
-        #bo-shell.bo-collapsed .bo-section-header {
+        #bo-shell.bo-collapsed #bo-sidebar.bo-mobile-open .bo-label,
+        #bo-shell.bo-collapsed #bo-sidebar.bo-mobile-open .bo-section-header {
             display: flex !important;
         }
 
-        #bo-shell.bo-collapsed .bo-section-label,
-        #bo-shell.bo-collapsed .bo-section-chevron {
+        #bo-shell.bo-collapsed #bo-sidebar.bo-mobile-open .bo-section-label,
+        #bo-shell.bo-collapsed #bo-sidebar.bo-mobile-open .bo-section-chevron {
             display: flex !important;
         }
 
-        #bo-shell.bo-collapsed .bo-section-items {
+        #bo-shell.bo-collapsed #bo-sidebar.bo-mobile-open .bo-section-items {
             padding-left: 0.75rem !important;
             margin-left: 0.75rem !important;
             border-left: 2px solid rgba(255, 255, 255, 0.1) !important;
         }
 
-        #bo-shell.bo-collapsed .bo-nav-item {
+        #bo-shell.bo-collapsed #bo-sidebar.bo-mobile-open .bo-nav-item {
             justify-content: flex-start !important;
             padding: 0.5rem 0.75rem !important;
             gap: 0.625rem !important;
         }
 
-        #bo-shell.bo-collapsed .bo-brand-text {
+        #bo-shell.bo-collapsed #bo-sidebar.bo-mobile-open .bo-brand-text {
             display: flex !important;
         }
 
-        #bo-shell.bo-collapsed .bo-brand-area {
+        #bo-shell.bo-collapsed #bo-sidebar.bo-mobile-open .bo-brand-area {
             justify-content: space-between !important;
             padding: 1rem 1.25rem !important;
         }
-
     }
 </style>
 

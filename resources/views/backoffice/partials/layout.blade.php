@@ -405,27 +405,66 @@
                 flex-direction: column;
             }
 
+            /* Sidebar becomes off-canvas drawer on mobile */
             #bo-sidebar {
-                width: 100% !important;
-                min-width: 100% !important;
-                height: auto;
-                overflow-y: visible;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 280px !important;
+                min-width: 280px !important;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.25s ease;
+                z-index: 100;
+                overflow-y: auto;
+            }
+
+            #bo-sidebar.bo-mobile-open {
+                transform: translateX(0);
+            }
+
+            /* Backdrop overlay */
+            #bo-backdrop {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 90;
+            }
+
+            #bo-backdrop.active {
+                display: block;
             }
 
             #bo-content {
                 height: auto;
-                overflow-y: visible;
+                min-height: 100vh;
+                overflow-y: auto;
             }
 
             html,
             body {
                 overflow: auto;
             }
+
+            /* Topbar adjustments */
+            #bo-topbar {
+                padding: 0 0.75rem;
+            }
+
+            .bo-user-name {
+                display: none;
+            }
+
+            .bo-topbar-title {
+                font-size: 0.8125rem;
+            }
         }
     </style>
 </head>
 
 <body class="bg-slate-950 text-slate-100">
+    <div id="bo-backdrop"></div>
     <div id="bo-shell">
         @include('backoffice.partials.sidebar', [
             'active' => $boActive ?? '',
@@ -500,9 +539,42 @@
 
     <script>
         (() => {
-            // Sidebar toggle
             const shell = document.getElementById('bo-shell');
             const toggleButton = document.getElementById('bo-sidebar-toggle');
+            const sidebar = document.getElementById('bo-sidebar');
+            const backdrop = document.getElementById('bo-backdrop');
+            const isMobile = () => window.innerWidth < 1024;
+
+            // ── Mobile drawer helpers ──
+            const openMobileDrawer = () => {
+                if (!sidebar || !backdrop) return;
+                sidebar.classList.add('bo-mobile-open');
+                backdrop.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            };
+
+            const closeMobileDrawer = () => {
+                if (!sidebar || !backdrop) return;
+                sidebar.classList.remove('bo-mobile-open');
+                backdrop.classList.remove('active');
+                document.body.style.overflow = '';
+            };
+
+            // Close drawer when clicking backdrop
+            if (backdrop) {
+                backdrop.addEventListener('click', closeMobileDrawer);
+            }
+
+            // Close drawer when clicking a nav link (mobile)
+            if (sidebar) {
+                sidebar.querySelectorAll('a.bo-nav-item').forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (isMobile()) closeMobileDrawer();
+                    });
+                });
+            }
+
+            // ── Sidebar toggle (desktop: collapse, mobile: drawer) ──
             if (shell && toggleButton) {
                 const storageKey = 'backoffice_sidebar_collapsed';
                 const applyCollapsed = (collapsed) => {
@@ -512,13 +584,36 @@
                         @json(__('backoffice.ui.minimize_sidebar'));
                     toggleButton.setAttribute('aria-label', toggleButton.title);
                 };
+
+                // Restore desktop collapsed state
                 applyCollapsed(localStorage.getItem(storageKey) === '1');
+
                 toggleButton.addEventListener('click', () => {
-                    const next = !shell.classList.contains('bo-collapsed');
-                    applyCollapsed(next);
-                    localStorage.setItem(storageKey, next ? '1' : '0');
+                    if (isMobile()) {
+                        // Mobile: toggle drawer
+                        if (sidebar.classList.contains('bo-mobile-open')) {
+                            closeMobileDrawer();
+                        } else {
+                            openMobileDrawer();
+                        }
+                    } else {
+                        // Desktop: toggle collapsed
+                        const next = !shell.classList.contains('bo-collapsed');
+                        applyCollapsed(next);
+                        localStorage.setItem(storageKey, next ? '1' : '0');
+                    }
                 });
             }
+
+            // Close mobile drawer on resize to desktop
+            window.addEventListener('resize', () => {
+                if (!isMobile()) closeMobileDrawer();
+            });
+
+            // Close drawer on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && isMobile()) closeMobileDrawer();
+            });
 
             // User dropdown
             const menu = document.getElementById('bo-user-menu');

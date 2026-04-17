@@ -13,7 +13,7 @@
             gap: 0.75rem;
         }
 
-        @media(min-width:768px) {
+        @@media(min-width:768px) {
             .metrics-grid {
                 grid-template-columns: repeat(4, minmax(0, 1fr));
                 gap: 1rem;

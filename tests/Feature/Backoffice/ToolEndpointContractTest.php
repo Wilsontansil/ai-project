@@ -4,6 +4,7 @@ namespace Tests\Feature\Backoffice;
 
 use App\Models\ProjectSetting;
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -25,6 +26,7 @@ class ToolEndpointContractTest extends TestCase
     {
         parent::setUp();
 
+        $this->withoutMiddleware(VerifyCsrfToken::class);
         Cache::flush();
         ProjectSetting::clearCache();
     }

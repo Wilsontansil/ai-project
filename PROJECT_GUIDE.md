@@ -253,4 +253,5 @@ php artisan test tests/Feature/Webhooks tests/Feature/Backoffice/ToolEndpointCon
 Notes:
 
 - These tests isolate `project_settings` and cache state to avoid cross-test leakage.
+- Backoffice POST feature tests disable CSRF middleware so they can validate auth and controller behavior independently of browser token handling.
 - Backoffice access is currently auth-based (guest redirected to login). Role-based admin authorization is not yet implemented.

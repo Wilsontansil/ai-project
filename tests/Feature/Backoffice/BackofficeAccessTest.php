@@ -3,6 +3,7 @@
 namespace Tests\Feature\Backoffice;
 
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,18 +11,25 @@ class BackofficeAccessTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+    }
+
     public function test_guest_cannot_access_backoffice_dashboard(): void
     {
-        $this->get(route('backoffice.dashboard'))
-            ->assertRedirect(route('login'));
+        $this->get('/backoffice')
+            ->assertRedirect('/backoffice/login');
     }
 
     public function test_guest_cannot_execute_tool_endpoint_test_route(): void
     {
-        $this->postJson(route('backoffice.tools.testEndpoint'), [
+        $this->post('/backoffice/tools/test-endpoint', [
             'route' => '/any-route',
             'body' => ['k' => 'v'],
-        ])->assertRedirect(route('login'));
+        ])->assertRedirect('/backoffice/login');
     }
 
     public function test_authenticated_user_can_access_dashboard(): void

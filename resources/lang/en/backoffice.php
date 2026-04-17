@@ -74,6 +74,7 @@ return [
             'remember' => 'Remember login',
             'sign_in' => 'Sign In',
             'assets_note' => 'Frontend assets are not built. Run npm run build on the server for full UI.',
+            'locked' => 'Too many login attempts. Please try again in :minutes minutes.',
         ],
         'chat_agents' => [
             'title' => 'AI Agents',

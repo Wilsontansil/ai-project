@@ -74,6 +74,7 @@ return [
             'remember' => 'Ingat login',
             'sign_in' => 'Masuk',
             'assets_note' => 'Frontend assets belum di-build. Jalankan npm run build di server untuk tampilan penuh.',
+            'locked' => 'Terlalu banyak percobaan login. Coba lagi dalam :minutes menit.',
         ],
         'chat_agents' => [
             'title' => 'AI Agents',

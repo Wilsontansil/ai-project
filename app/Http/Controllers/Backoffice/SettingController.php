@@ -14,7 +14,7 @@ class SettingController extends Controller
     public function index(): View
     {
         $settings = Schema::hasTable('project_settings')
-            ? ProjectSetting::query()->orderByRaw("FIELD(`group`, 'webhook', 'openai', 'telegram', 'whatsapp', 'agent', 'support')")->get()
+            ? ProjectSetting::query()->orderByRaw("FIELD(`group`, 'webhook', 'openai', 'telegram', 'livechat', 'whatsapp', 'agent', 'support')")->get()
             : collect();
 
         $grouped = $settings->groupBy('group');

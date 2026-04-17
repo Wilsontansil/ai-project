@@ -37,6 +37,15 @@ class ProjectSettingSeeder extends Seeder
                 'type' => 'secret',
             ],
 
+            // LiveChat
+            [
+                'key' => 'livechat_verify_token',
+                'value' => env('LIVECHAT_VERIFY_TOKEN'),
+                'label' => 'Verify Token',
+                'group' => 'livechat',
+                'type' => 'secret',
+            ],
+
             // WhatsApp (WAHA)
             [
                 'key' => 'whatsapp_base_url',

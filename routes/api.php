@@ -8,6 +8,6 @@ use App\Http\Controllers\LiveChatController;
 Route::get('/test', function () {
     return response()->json(['message' => 'API is working']);
 });
-Route::post('/telegram/webhook', [TelegramController::class, 'handleWebhook']);
+Route::post('/telegram/webhook', [TelegramController::class, 'handleWebhook'])->middleware('verify.telegram');
 Route::match(['get', 'post'], '/whatsapp/webhook', [WhatsAppController::class, 'handleWebhook']);
 Route::match(['get', 'post'], '/livechat/webhook', [LiveChatController::class, 'handleWebhook']);

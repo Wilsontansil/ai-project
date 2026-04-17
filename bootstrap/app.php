@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\VerifyTelegramWebhook;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo('/backoffice');
         $middleware->alias([
             'set.locale' => SetLocale::class,
+            'verify.telegram' => VerifyTelegramWebhook::class,
         ]);
     })
     ->withExceptions(function (): void {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ProjectSetting;
 use App\Support\LogSanitizer;
+use App\Support\MetricsCollector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Services\Agent\AgentContextService;
@@ -98,6 +99,7 @@ class LiveChatController extends Controller
 
     private function generateAiReply(array $payload, string $chatId, string $combinedText): string
     {
+        $requestStart = MetricsCollector::startTimer();
         $customer = null;
         $agentContext = [];
 
@@ -120,6 +122,8 @@ class LiveChatController extends Controller
         }
 
         $reply = app(AIService::class)->reply($combinedText, $chatId, 'livechat', $agentContext);
+
+        MetricsCollector::recordRequest('livechat', MetricsCollector::elapsed($requestStart));
 
         if ($customer !== null) {
             try {

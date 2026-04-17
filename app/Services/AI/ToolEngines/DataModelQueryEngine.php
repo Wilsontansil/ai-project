@@ -4,6 +4,7 @@ namespace App\Services\AI\ToolEngines;
 
 use App\Models\DataModel;
 use App\Models\Tool;
+use App\Support\LogSanitizer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -233,7 +234,7 @@ class DataModelQueryEngine
                 'tool_name' => $tool->tool_name,
                 'table_name' => $tableName,
                 'connection_name' => $connectionName,
-                'filters' => $arguments,
+                'filters' => LogSanitizer::redactArguments($arguments),
                 'error' => $e->getMessage(),
             ]);
 

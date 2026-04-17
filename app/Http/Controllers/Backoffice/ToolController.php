@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\DataModel;
 use App\Models\ProjectSetting;
 use App\Models\Tool;
+use App\Support\LogSanitizer;
+use App\Support\ResilientHttp;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -430,12 +431,25 @@ class ToolController extends Controller
             'base_url' => $baseUrl,
             'route' => $route,
             'url' => $url,
-            'body' => $body,
+            'body' => LogSanitizer::redactArguments($body),
             'timestamp' => now()->toIso8601String(),
         ]);
 
         try {
-            $response = Http::timeout(15)->post($url, $body);
+            $response = ResilientHttp::post(
+                service: 'tool-test-endpoint',
+                url: $url,
+                payload: $body,
+                timeoutSeconds: 15
+            );
+
+            if ($response === null) {
+                return response()->json([
+                    'success' => false,
+                    'url' => $url,
+                    'error' => 'Request blocked or failed after retries. Please try again shortly.',
+                ], 503);
+            }
 
             Log::info('Webhook test response', [
                 'channel' => 'tool.test_endpoint',
@@ -445,7 +459,9 @@ class ToolController extends Controller
                 'url' => $url,
                 'status' => $response->status(),
                 'successful' => $response->successful(),
-                'response_preview' => mb_substr($response->body(), 0, 1000),
+                'response_summary' => is_array($response->json())
+                    ? LogSanitizer::summarize($response->json())
+                    : ['size_bytes' => mb_strlen($response->body())],
                 'timestamp' => now()->toIso8601String(),
             ]);
 
@@ -463,7 +479,7 @@ class ToolController extends Controller
                 'base_url' => $baseUrl,
                 'route' => $route,
                 'url' => $url,
-                'body' => $body,
+                'body' => LogSanitizer::redactArguments($body),
                 'error' => $e->getMessage(),
                 'timestamp' => now()->toIso8601String(),
             ]);

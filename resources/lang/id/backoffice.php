@@ -36,6 +36,7 @@ return [
         'data_models' => 'Model Data',
         'settings' => 'Pengaturan',
         'database_connections' => 'Koneksi DB',
+        'metrics' => 'Metrik',
     ],
     'pages' => [
         'dashboard' => [

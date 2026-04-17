@@ -4,7 +4,8 @@ namespace App\Services\AI\ToolEngines;
 
 use App\Models\ProjectSetting;
 use App\Models\Tool;
-use Illuminate\Support\Facades\Http;
+use App\Support\LogSanitizer;
+use App\Support\ResilientHttp;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -53,12 +54,13 @@ class HttpToolEngine
         }
 
         $bodyTemplate = (array) ($endpointConfig['body'] ?? []);
-        $builtBody = $this->buildRequestBody($tool, $arguments, $bodyTemplate);
+        $builtBody = $this->buildRequestBody($arguments, $bodyTemplate);
 
         if ($builtBody['ok'] !== true) {
             Log::warning('HTTP endpoint body template unresolved', [
                 'tool_name' => $tool->tool_name,
                 'error' => $builtBody['error'] ?? 'unknown',
+                'arguments' => LogSanitizer::redactArguments($arguments),
             ]);
 
             return ['mode' => 'direct', 'reply' => self::USER_FACING_ERROR];
@@ -87,7 +89,17 @@ class HttpToolEngine
         ]);
 
         try {
-            $response = Http::timeout(10)->post($fullUrl, $requestBody);
+            $response = ResilientHttp::post(
+                service: 'tool-endpoint:' . $tool->tool_name,
+                url: $fullUrl,
+                payload: $requestBody,
+                timeoutSeconds: 10
+            );
+
+            if ($response === null) {
+                return ['mode' => 'direct', 'reply' => self::USER_FACING_ERROR];
+            }
+
             $statusCode = $response->status();
             $responseBody = $response->json() ?? [];
 
@@ -145,6 +157,7 @@ class HttpToolEngine
             Log::error('HTTP endpoint connection failed', [
                 'tool_name' => $tool->tool_name,
                 'url' => $fullUrl,
+                'request' => LogSanitizer::redactArguments($requestBody),
                 'error' => $e->getMessage(),
             ]);
 
@@ -153,6 +166,7 @@ class HttpToolEngine
             Log::error('HTTP endpoint execution failed', [
                 'tool_name' => $tool->tool_name,
                 'url' => $fullUrl,
+                'request' => LogSanitizer::redactArguments($requestBody),
                 'error' => $e->getMessage(),
             ]);
 
@@ -169,7 +183,7 @@ class HttpToolEngine
      * @param array<string, mixed> $bodyTemplate
      * @return array{ok: bool, body?: array<string, mixed>, error?: string}
      */
-    private function buildRequestBody(Tool $tool, array $arguments, array $bodyTemplate): array
+    private function buildRequestBody(array $arguments, array $bodyTemplate): array
     {
         $body = [];
 
@@ -243,7 +257,7 @@ class HttpToolEngine
                 'tool_name' => $tool->tool_name,
                 'expected_status' => $expectedStatus,
                 'actual_status' => $statusCode,
-                'response_body' => $responseBody,
+                'response_summary' => LogSanitizer::summarize($responseBody),
             ]);
 
             return ['valid' => false, 'error_message' => "Endpoint returned status {$statusCode}, expected {$expectedStatus}."];
@@ -253,7 +267,7 @@ class HttpToolEngine
             Log::warning('HTTP endpoint response structure invalid', [
                 'tool_name' => $tool->tool_name,
                 'expected_format' => '{ "status": int, "message": string, "data": object }',
-                'actual_response' => $responseBody,
+                'response_summary' => LogSanitizer::summarize($responseBody),
             ]);
 
             return ['valid' => false, 'error_message' => 'Endpoint response format tidak sesuai (missing status field).'];
@@ -278,7 +292,7 @@ class HttpToolEngine
                     Log::warning('HTTP endpoint data field missing', [
                         'tool_name' => $tool->tool_name,
                         'expected_field' => $expectedKey,
-                        'response_data' => $responseData,
+                        'response_data_keys' => array_keys($responseData),
                     ]);
 
                     return ['valid' => false, 'error_message' => "Response data field '{$expectedKey}' tidak ditemukan."];

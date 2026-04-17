@@ -313,6 +313,21 @@
                     <span class="bo-label">{{ __('backoffice.menu.database_connections') }}</span>
                     <span class="bo-tooltip">{{ __('backoffice.menu.database_connections') }}</span>
                 </a>
+
+                {{-- Metrics --}}
+                <a href="{{ route('backoffice.metrics.index') }}" class="bo-nav-item group"
+                    style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'metrics' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
+                    onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
+                    onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'metrics' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'metrics' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
+                    <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'metrics' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
+                        height="18">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                    </svg>
+                    <span class="bo-label">{{ __('backoffice.menu.metrics') }}</span>
+                    <span class="bo-tooltip">{{ __('backoffice.menu.metrics') }}</span>
+                </a>
             </div>
         </div>
 

@@ -6,6 +6,7 @@ use App\Models\Tool;
 use App\Services\AI\ToolEngines\DataModelQueryEngine;
 use App\Services\AI\ToolEngines\HttpToolEngine;
 use App\Services\AI\ToolEngines\InfoToolEngine;
+use App\Support\MetricsCollector;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -161,7 +162,26 @@ class ToolDispatcher
         string $userMessage,
         string $model
     ): ?string {
-        $execution = $this->runEngine($tool, $arguments);
+        $engineStart = MetricsCollector::startTimer();
+        $engineError = null;
+
+        try {
+            $execution = $this->runEngine($tool, $arguments);
+        } catch (\Throwable $e) {
+            $engineError = $e->getMessage();
+            MetricsCollector::recordToolExecution(
+                'system', $tool->tool_name, $tool->type, MetricsCollector::elapsed($engineStart), false, $engineError
+            );
+            throw $e;
+        }
+
+        MetricsCollector::recordToolExecution(
+            'system',
+            $tool->tool_name,
+            $tool->type,
+            MetricsCollector::elapsed($engineStart),
+            ($execution['mode'] === 'direct' ? ($execution['reply'] !== null) : true)
+        );
 
         if ($execution['mode'] === 'model') {
             $toolContext = $execution['tool_context'] ?? [];
@@ -276,11 +296,20 @@ Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_
         ];
 
         try {
+            $openaiStart = MetricsCollector::startTimer();
             $response = $client->chat()->create([
                 'model' => $model,
                 'messages' => $messages,
                 'max_tokens' => 220,
             ]);
+            $openaiLatency = MetricsCollector::elapsed($openaiStart);
+
+            $usage = [
+                'prompt_tokens' => $response->usage->promptTokens ?? 0,
+                'completion_tokens' => $response->usage->completionTokens ?? 0,
+                'total_tokens' => $response->usage->totalTokens ?? 0,
+            ];
+            MetricsCollector::recordOpenAiCall('system', $model, 'tool_reply', $openaiLatency, $usage);
 
             $reply = trim((string) ($response->choices[0]->message->content ?? ''));
 
@@ -288,6 +317,7 @@ Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_
                 return $reply;
             }
         } catch (\Throwable $e) {
+            MetricsCollector::recordOpenAiCall('system', $model, 'tool_reply', 0, null, false);
             Log::warning('AI tool reply generation failed', [
                 'tool_name' => $toolContext['tool_name'] ?? null,
                 'error' => $e->getMessage(),
@@ -377,6 +407,7 @@ Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_
         $messages[] = ['role' => 'user', 'content' => $userMessage];
 
         try {
+            $openaiStart = MetricsCollector::startTimer();
             $response = $client->chat()->create([
                 'model' => $model,
                 'messages' => $messages,
@@ -387,6 +418,14 @@ Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_
                 ],
                 'max_tokens' => 120,
             ]);
+            $openaiLatency = MetricsCollector::elapsed($openaiStart);
+
+            $usage = [
+                'prompt_tokens' => $response->usage->promptTokens ?? 0,
+                'completion_tokens' => $response->usage->completionTokens ?? 0,
+                'total_tokens' => $response->usage->totalTokens ?? 0,
+            ];
+            MetricsCollector::recordOpenAiCall('system', $model, 'force_extract', $openaiLatency, $usage);
 
             $message = $response->choices[0]->message ?? null;
 
@@ -394,6 +433,7 @@ Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_
                 ? $this->extractArguments($message, $tool->tool_name)
                 : null;
         } catch (\Throwable $e) {
+            MetricsCollector::recordOpenAiCall('system', $model, 'force_extract', 0, null, false);
             Log::warning('AI forced tool argument extraction failed', [
                 'tool_name' => $tool->tool_name,
                 'error' => $e->getMessage(),

@@ -7,6 +7,7 @@ use App\Http\Controllers\Backoffice\ForbiddenBehaviourController;
 use App\Http\Controllers\Backoffice\DashboardController;
 use App\Http\Controllers\Backoffice\DatabaseConnectionController;
 use App\Http\Controllers\Backoffice\LocaleController;
+use App\Http\Controllers\Backoffice\MetricsController;
 use App\Http\Controllers\Backoffice\SettingController;
 use App\Http\Controllers\Backoffice\ToolController;
 use Illuminate\Support\Facades\Route;
@@ -65,6 +66,8 @@ Route::middleware(['set.locale', 'auth'])->group(function () {
     Route::put('/backoffice/database-connections/{databaseConnection}', [DatabaseConnectionController::class, 'update'])->name('backoffice.database-connections.update');
     Route::delete('/backoffice/database-connections/{databaseConnection}', [DatabaseConnectionController::class, 'destroy'])->name('backoffice.database-connections.destroy');
     Route::post('/backoffice/database-connections/{databaseConnection}/test', [DatabaseConnectionController::class, 'testConnection'])->name('backoffice.database-connections.test');
+
+    Route::get('/backoffice/metrics', [MetricsController::class, 'index'])->name('backoffice.metrics.index');
 
     Route::post('/backoffice/logout', [AuthController::class, 'logout'])->name('logout');
 });

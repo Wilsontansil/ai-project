@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Support\LogSanitizer;
+use App\Support\MetricsCollector;
+use App\Support\ResilientHttp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Services\Agent\AgentContextService;
 use App\Services\Agent\ConversationMemoryService;
@@ -30,6 +31,7 @@ class WhatsAppController extends Controller
 
     public function handleWebhook(Request $request)
     {
+        $requestStart = MetricsCollector::startTimer();
         $requestPayload = $request->all();
 
         if ($request->isMethod('get')) {
@@ -128,6 +130,8 @@ class WhatsAppController extends Controller
 
         $this->sendMessage($chatId, $reply);
 
+        MetricsCollector::recordRequest('whatsapp', MetricsCollector::elapsed($requestStart));
+
         return response()->json(['status' => 'ok']);
     }
 
@@ -152,7 +156,7 @@ class WhatsAppController extends Controller
             Log::error('Failed to send WAHA message', [
                 'chat_id' => $chatId,
                 'status' => $response->status(),
-                'body' => $response->body(),
+                'response_size_bytes' => mb_strlen($response->body()),
             ]);
         }
     }
@@ -168,7 +172,7 @@ class WhatsAppController extends Controller
             Log::warning('Failed to start WAHA typing indicator', [
                 'chat_id' => $chatId,
                 'status' => $response->status(),
-                'body' => $response->body(),
+                'response_size_bytes' => mb_strlen($response->body()),
             ]);
         }
     }
@@ -184,7 +188,7 @@ class WhatsAppController extends Controller
             Log::warning('Failed to stop WAHA typing indicator', [
                 'chat_id' => $chatId,
                 'status' => $response->status(),
-                'body' => $response->body(),
+                'response_size_bytes' => mb_strlen($response->body()),
             ]);
         }
     }
@@ -202,7 +206,13 @@ class WhatsAppController extends Controller
             $headers['X-Api-Key'] = $this->apiKey;
         }
 
-        return Http::withHeaders($headers)->post($this->baseUrl . $endpoint, $payload);
+        return ResilientHttp::post(
+            service: 'waha',
+            url: $this->baseUrl . $endpoint,
+            payload: $payload,
+            headers: $headers,
+            timeoutSeconds: 10
+        );
     }
 
     private function isDuplicateMessage(Request $request, array $payload, string $chatId, string $text): bool

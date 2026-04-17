@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Support\LogSanitizer;
+use App\Support\MetricsCollector;
+use App\Support\ResilientHttp;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Services\Agent\AgentContextService;
 use App\Services\Agent\ConversationMemoryService;
@@ -23,6 +24,7 @@ class TelegramController extends Controller
 
     public function handleWebhook(Request $request)
     {
+        $requestStart = MetricsCollector::startTimer();
         $payload = $request->all();
 
         $text = $request->input('message.text');
@@ -86,6 +88,8 @@ class TelegramController extends Controller
 
         $this->sendMessage($chatId, $reply);
 
+        MetricsCollector::recordRequest('telegram', MetricsCollector::elapsed($requestStart));
+
         return response()->json(['status' => 'ok']);
     }
 
@@ -96,10 +100,10 @@ class TelegramController extends Controller
             return;
         }
 
-        Http::post("https://api.telegram.org/bot" . $this->telegramToken . "/sendMessage", [
+        ResilientHttp::post('telegram', "https://api.telegram.org/bot" . $this->telegramToken . "/sendMessage", [
             'chat_id' => $chatId,
             'text' => $text
-        ]);
+        ], timeoutSeconds: 10);
     }
 
     private function sendTyping($chatId)
@@ -108,10 +112,10 @@ class TelegramController extends Controller
             return;
         }
 
-        Http::post("https://api.telegram.org/bot" . $this->telegramToken . "/sendChatAction", [
+        ResilientHttp::post('telegram', "https://api.telegram.org/bot" . $this->telegramToken . "/sendChatAction", [
             'chat_id' => $chatId,
             'action' => 'typing'
-        ]);
+        ], timeoutSeconds: 10);
     }
 
 }

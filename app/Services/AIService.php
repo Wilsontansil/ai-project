@@ -8,6 +8,7 @@ use App\Services\AI\ConversationHistory;
 use App\Services\AI\PromptBuilder;
 use App\Services\AI\ReplyFormatter;
 use App\Services\AI\ToolDispatcher;
+use App\Support\MetricsCollector;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use OpenAI;
@@ -78,7 +79,16 @@ class AIService
                 $payload['tool_choice'] = 'auto';
             }
 
+            $openaiStart = MetricsCollector::startTimer();
             $response = $client->chat()->create($payload);
+            $openaiLatency = MetricsCollector::elapsed($openaiStart);
+
+            $usage = [
+                'prompt_tokens' => $response->usage->promptTokens ?? 0,
+                'completion_tokens' => $response->usage->completionTokens ?? 0,
+                'total_tokens' => $response->usage->totalTokens ?? 0,
+            ];
+            MetricsCollector::recordOpenAiCall($channel, $model, 'chat', $openaiLatency, $usage);
 
             $msg = $response->choices[0]->message;
             $finishReason = (string) ($response->choices[0]->finishReason ?? '');
@@ -107,8 +117,11 @@ class AIService
 
             return $assistantReply;
         } catch (\OpenAI\Exceptions\RateLimitException $e) {
+            MetricsCollector::recordOpenAiCall($channel, $model, 'chat', 0, null, false);
+
             return $this->replyFormatter->format('⚠️ Sistem sedang sibuk, silakan coba beberapa saat lagi.');
         } catch (\Exception $e) {
+            MetricsCollector::recordOpenAiCall($channel, $model, 'chat', 0, null, false);
             Log::error('AIService reply failed', ['channel' => $channel, 'error' => $e->getMessage()]);
 
             return $this->replyFormatter->format('⚠️ Terjadi error. Silakan coba beberapa saat lagi.');

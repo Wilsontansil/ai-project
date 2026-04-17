@@ -36,6 +36,7 @@ return [
         'data_models' => 'Data Models',
         'settings' => 'Settings',
         'database_connections' => 'DB Connections',
+        'metrics' => 'Metrics',
     ],
     'pages' => [
         'dashboard' => [

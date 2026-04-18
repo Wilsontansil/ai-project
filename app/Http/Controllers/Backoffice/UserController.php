@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
@@ -35,6 +36,7 @@ class UserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
+            'username' => ['required', 'string', 'max:255', 'unique:users,username', 'regex:/^[a-zA-Z0-9_]+$/'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', Password::min(8), 'confirmed'],
@@ -42,6 +44,7 @@ class UserController extends Controller
         ]);
 
         $user = User::create([
+            'username' => Str::lower(trim($data['username'])),
             'name' => trim($data['name']),
             'email' => trim($data['email']),
             'password' => Hash::make($data['password']),
@@ -65,6 +68,7 @@ class UserController extends Controller
     public function update(Request $request, User $user): RedirectResponse
     {
         $data = $request->validate([
+            'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')->ignore($user->id), 'regex:/^[a-zA-Z0-9_]+$/'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'string', Password::min(8), 'confirmed'],
@@ -72,6 +76,7 @@ class UserController extends Controller
         ]);
 
         $user->update([
+            'username' => Str::lower(trim($data['username'])),
             'name' => trim($data['name']),
             'email' => trim($data['email']),
         ]);

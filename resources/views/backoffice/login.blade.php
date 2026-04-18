@@ -29,7 +29,7 @@
         </style>
     @endif
     <style>
-        input[type="email"],
+        input[type="text"],
         input[type="password"] {
             background-color: rgba(15, 23, 42, 0.7);
             color: #e2e8f0;
@@ -71,9 +71,10 @@
             <form method="POST" action="{{ route('backoffice.login.submit') }}" class="space-y-5">
                 @csrf
                 <div>
-                    <label for="email"
-                        class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.login.email') }}</label>
-                    <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus
+                    <label for="username"
+                        class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.login.username') }}</label>
+                    <input id="username" name="username" type="text" value="{{ old('username') }}" required
+                        autofocus
                         class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-white outline-none transition focus:border-cyan-400" />
                 </div>
 

@@ -42,7 +42,8 @@
                     <table class="min-w-full text-xs">
                         <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
                             <tr>
-                                <th class="py-2 pl-4 pr-3 font-medium">{{ __('backoffice.pages.users.name') }}</th>
+                                <th class="py-2 pl-4 pr-3 font-medium">{{ __('backoffice.pages.users.username') }}</th>
+                                <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.users.name') }}</th>
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.users.email') }}</th>
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.users.role') }}</th>
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.users.created_at') }}</th>
@@ -54,13 +55,14 @@
                                 <tr class="transition hover:bg-white/5">
                                     <td class="py-2 pl-4 pr-3">
                                         <div class="flex items-center gap-2">
-                                            <span class="font-semibold text-white">{{ $user->name }}</span>
+                                            <span class="font-mono text-xs text-cyan-300">{{ $user->username }}</span>
                                             @if ($user->id === auth()->id())
                                                 <span
                                                     class="rounded bg-cyan-400/20 px-1.5 py-0.5 text-[10px] font-bold text-cyan-300">YOU</span>
                                             @endif
                                         </div>
                                     </td>
+                                    <td class="px-3 py-2 font-semibold text-white">{{ $user->name }}</td>
                                     <td class="px-3 py-2 font-mono text-xs text-slate-300">{{ $user->email }}</td>
                                     <td class="px-3 py-2">
                                         @foreach ($user->roles as $role)

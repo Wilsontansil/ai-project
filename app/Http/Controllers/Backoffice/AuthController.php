@@ -24,23 +24,23 @@ class AuthController extends Controller
     public function login(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'username' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
-        $email = Str::lower($credentials['email']);
+        $username = Str::lower($credentials['username']);
 
-        $lockoutResponse = $this->checkForActiveLockout($request, $email);
+        $lockoutResponse = $this->checkForActiveLockout($request, $username);
 
         if ($lockoutResponse !== null) {
             return $lockoutResponse;
         }
 
-        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
-            return $this->handleFailedLogin($request, $email);
+        if (!Auth::attempt(['username' => $username, 'password' => $credentials['password']], $request->boolean('remember'))) {
+            return $this->handleFailedLogin($request, $username);
         }
 
-        $this->clearLoginAttempts($request, $email);
+        $this->clearLoginAttempts($request, $username);
         $request->session()->regenerate();
 
         // Single-session: store active session so other sessions are invalidated
@@ -76,45 +76,45 @@ class AuthController extends Controller
         return $this->sendLockoutResponse($request, $email);
     }
 
-    private function handleFailedLogin(Request $request, string $email): RedirectResponse
+    private function handleFailedLogin(Request $request, string $username): RedirectResponse
     {
-        $this->incrementLoginAttempts($request, $email);
+        $this->incrementLoginAttempts($request, $username);
 
         Log::warning('Backoffice login failed.', [
-            'email' => $email,
+            'username' => $username,
             'ip' => $request->ip(),
             'user_agent' => (string) $request->userAgent(),
-            'email_attempts' => RateLimiter::attempts($this->emailThrottleKey($email)),
+            'email_attempts' => RateLimiter::attempts($this->emailThrottleKey($username)),
             'ip_attempts' => RateLimiter::attempts($this->ipThrottleKey($request)),
         ]);
 
-        return $this->checkForActiveLockout($request, $email)
+        return $this->checkForActiveLockout($request, $username)
             ?? back()
-                ->withErrors(['email' => 'Email atau password tidak valid.'])
-                ->onlyInput('email');
+                ->withErrors(['username' => 'Username atau password tidak valid.'])
+                ->onlyInput('username');
     }
 
-    private function incrementLoginAttempts(Request $request, string $email): void
+    private function incrementLoginAttempts(Request $request, string $username): void
     {
-        RateLimiter::hit($this->emailThrottleKey($email), self::LOCKOUT_SECONDS);
+        RateLimiter::hit($this->emailThrottleKey($username), self::LOCKOUT_SECONDS);
         RateLimiter::hit($this->ipThrottleKey($request), self::LOCKOUT_SECONDS);
     }
 
-    private function clearLoginAttempts(Request $request, string $email): void
+    private function clearLoginAttempts(Request $request, string $username): void
     {
-        RateLimiter::clear($this->emailThrottleKey($email));
+        RateLimiter::clear($this->emailThrottleKey($username));
         RateLimiter::clear($this->ipThrottleKey($request));
     }
 
-    private function sendLockoutResponse(Request $request, string $email): RedirectResponse
+    private function sendLockoutResponse(Request $request, string $username): RedirectResponse
     {
         $seconds = max(
-            RateLimiter::availableIn($this->emailThrottleKey($email)),
+            RateLimiter::availableIn($this->emailThrottleKey($username)),
             RateLimiter::availableIn($this->ipThrottleKey($request))
         );
 
         Log::warning('Backoffice login temporarily locked.', [
-            'email' => $email,
+            'username' => $username,
             'ip' => $request->ip(),
             'user_agent' => (string) $request->userAgent(),
             'retry_after_seconds' => $seconds,
@@ -122,16 +122,16 @@ class AuthController extends Controller
 
         return back()
             ->withErrors([
-                'email' => __('backoffice.pages.login.locked', [
+                'username' => __('backoffice.pages.login.locked', [
                     'minutes' => max(1, (int) ceil($seconds / 60)),
                 ]),
             ])
-            ->onlyInput('email');
+            ->onlyInput('username');
     }
 
-    private function emailThrottleKey(string $email): string
+    private function emailThrottleKey(string $username): string
     {
-        return 'backoffice-login:email:' . $email;
+        return 'backoffice-login:username:' . $username;
     }
 
     private function ipThrottleKey(Request $request): string

@@ -25,18 +25,26 @@
 
             <div class="grid gap-4 md:grid-cols-2">
                 <div>
+                    <label for="username"
+                        class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.users.username') }}</label>
+                    <input id="username" type="text" name="username" value="{{ old('username') }}" placeholder="johndoe"
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                    <p class="mt-1 text-xs text-slate-400">{{ __('backoffice.pages.users.username_help') }}</p>
+                </div>
+                <div>
                     <label for="name"
                         class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.users.name') }}</label>
                     <input id="name" type="text" name="name" value="{{ old('name') }}" placeholder="John Doe"
                         class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
                 </div>
-                <div>
-                    <label for="email"
-                        class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.users.email') }}</label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}"
-                        placeholder="user@example.com"
-                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
-                </div>
+            </div>
+
+            <div>
+                <label for="email"
+                    class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.users.email') }}</label>
+                <input id="email" type="email" name="email" value="{{ old('email') }}"
+                    placeholder="user@example.com"
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
             </div>
 
             <div class="grid gap-4 md:grid-cols-2">

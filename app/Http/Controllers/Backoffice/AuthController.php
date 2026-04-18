@@ -43,6 +43,11 @@ class AuthController extends Controller
         $this->clearLoginAttempts($request, $email);
         $request->session()->regenerate();
 
+        // Single-session: store active session so other sessions are invalidated
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $user->update(['active_session_id' => $request->session()->getId()]);
+
         return redirect()->route('backoffice.dashboard');
     }
 

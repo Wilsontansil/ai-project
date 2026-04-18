@@ -55,6 +55,13 @@
                 <p class="mt-2 text-sm text-slate-300">{{ __('backoffice.pages.login.subtitle') }}</p>
             </div>
 
+            @if (session('error'))
+                <div
+                    class="mb-6 rounded-2xl border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                    {{ session('error') }}
+                </div>
+            @endif
+
             @if ($errors->any())
                 <div class="mb-6 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
                     {{ $errors->first() }}

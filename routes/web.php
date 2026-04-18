@@ -24,7 +24,7 @@ Route::middleware(['set.locale', 'guest'])->group(function () {
     Route::post('/backoffice/login', [AuthController::class, 'login'])->name('backoffice.login.submit');
 });
 
-Route::middleware(['set.locale', 'auth'])->group(function () {
+Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
     Route::get('/backoffice', [DashboardController::class, 'index'])->name('backoffice.dashboard');
     Route::get('/backoffice/customer/{customer}/chat', [DashboardController::class, 'chat'])->name('backoffice.customer.chat');
     Route::get('/backoffice/chat-agents', [ChatAgentController::class, 'index'])->name('backoffice.chat-agents.index');

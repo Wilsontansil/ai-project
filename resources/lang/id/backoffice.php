@@ -2,6 +2,9 @@
 
 return [
     'title' => 'Backoffice',
+    'auth' => [
+        'session_expired' => 'Anda telah dikeluarkan karena akun Anda masuk dari lokasi lain.',
+    ],
     'common' => [
         'back' => 'Kembali',
         'cancel' => 'Batal',

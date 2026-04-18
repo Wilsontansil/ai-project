@@ -2,6 +2,9 @@
 
 return [
     'title' => 'Backoffice',
+    'auth' => [
+        'session_expired' => 'You have been logged out because your account was logged in from another location.',
+    ],
     'common' => [
         'back' => 'Back',
         'cancel' => 'Cancel',

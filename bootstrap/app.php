@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\SingleSession;
 use App\Http\Middleware\VerifyTelegramWebhook;
 use App\Http\Middleware\VerifyWhatsAppWebhook;
 use App\Http\Middleware\VerifyLiveChatWebhook;
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo('/backoffice');
         $middleware->alias([
             'set.locale' => SetLocale::class,
+            'single.session' => SingleSession::class,
             'verify.telegram' => VerifyTelegramWebhook::class,
             'verify.whatsapp' => VerifyWhatsAppWebhook::class,
             'verify.livechat' => VerifyLiveChatWebhook::class,

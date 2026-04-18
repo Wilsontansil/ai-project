@@ -37,7 +37,7 @@
             <h2 class="mb-4 text-sm font-semibold">{{ __('backoffice.pages.users.user_list') }}
                 <span class="ml-1 text-slate-400">({{ $users->count() }})</span>
             </h2>
-            <div class="overflow-hidden rounded-xl border border-white/10">
+            <div class="rounded-xl border border-white/10">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-xs">
                         <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">

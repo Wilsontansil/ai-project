@@ -21,8 +21,7 @@
     @endif
 
     {{-- Agent Card Grid --}}
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {{-- Create New Card --}}
         <a href="{{ route('backoffice.chat-agents.create') }}"
             class="group flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-600/60 bg-slate-900/50 p-6 transition hover:border-cyan-400/50 hover:bg-slate-900/70"

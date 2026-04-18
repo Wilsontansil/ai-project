@@ -40,8 +40,16 @@ php artisan key:generate
 # 4. Database
 php artisan migrate --seed
 
-# 5. Run
-php artisan serve
+# 5. Run (starts server + queue worker + log viewer + vite)
+composer dev
+```
+
+Or run individually:
+
+```bash
+php artisan serve              # HTTP server
+php artisan queue:listen       # Queue worker (required for Telegram & WhatsApp replies)
+npm run dev                    # Vite assets
 ```
 
 ## Environment Variables
@@ -55,8 +63,10 @@ php artisan serve
 | `WAHA_SESSION`                   | WAHA session name (default: `default`)                   |
 | `WAHA_API_KEY`                   | WAHA API key                                             |
 | `WAHA_WEBHOOK_SECRET`            | WhatsApp webhook auth secret                             |
+| `WHATSAPP_AGENT`                 | WhatsApp agent code (default: `PG`)                      |
 | `LIVECHAT_VERIFY_TOKEN`          | LiveChat challenge verification token                    |
 | `LIVECHAT_WEBHOOK_SECRET`        | LiveChat webhook auth secret                             |
+| `QUEUE_CONNECTION`               | Queue driver (default: `database`)                       |
 | `CONVERSATION_RETENTION_DAYS`    | Auto-prune conversations older than N days (default: 90) |
 | `CUSTOMER_MEMORY_RETENTION_DAYS` | Auto-prune stale customer memory (default: 90)           |
 
@@ -73,18 +83,21 @@ All settings can also be managed from the backoffice Settings page (stored in `p
 
 ## Backoffice
 
-All routes under `/backoffice` require authentication.
+All routes under `/backoffice` require authentication. The UI is mobile-responsive (off-canvas sidebar on < 1024px).
 
 | Path                               | Purpose                                             |
 | ---------------------------------- | --------------------------------------------------- |
-| `/backoffice/login`                | Admin login                                         |
+| `/backoffice/login`                | Admin login (rate-limited: 5 attempts / 15 min)     |
 | `/backoffice`                      | Customer dashboard & stats                          |
 | `/backoffice/ai-agent`             | Agent persona settings                              |
+| `/backoffice/chat-agents`          | Chat agent CRUD with duplication                    |
 | `/backoffice/tools`                | CRUD for AI tools                                   |
 | `/backoffice/data-models`          | CRUD for data model schemas                         |
+| `/backoffice/database-connections` | CRUD for database connections                       |
 | `/backoffice/forbidden-behaviours` | CRUD for banned behaviour rules                     |
 | `/backoffice/settings`             | Global project settings                             |
 | `/backoffice/metrics`              | Observability dashboard (throughput, latency, cost) |
+| `/backoffice/locale/{locale}`      | Language toggle (id/en)                             |
 
 ## Testing
 
@@ -127,15 +140,30 @@ php artisan migrate --force
 php artisan db:seed --force
 ```
 
+Post-deploy — start the queue worker (required for Telegram & WhatsApp replies):
+
+```bash
+php artisan queue:work --tries=3
+```
+
+Ensure the server cron calls the scheduler every minute (required for data retention):
+
+```bash
+* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
+```
+
 Ensure `APP_DEBUG=false` and `LOG_LEVEL=warning` (or `error`) in production.
 
 ## Security
 
-- **Webhook authentication** — Each channel has dedicated middleware verifying a shared secret header with `hash_equals()`.
+- **Webhook authentication** — Each channel has dedicated middleware verifying a shared secret header with `hash_equals()`. Telegram also validates request timestamp (300s tolerance) to prevent replay attacks.
 - **Login rate limiting** — 5 attempts / 15-minute lockout with dual-key throttle (email + IP).
-- **Safe logging** — `LogSanitizer` redacts PII before any payload is logged.
+- **Safe logging** — `LogSanitizer` redacts PII (names, emails, phones, tokens, message content) before any payload is logged.
 - **Error handling** — API routes return sanitised JSON errors; debug details only in non-production.
-- **Outbound resilience** — `ResilientHttp` with retry, exponential backoff, and circuit breaker.
+- **Outbound resilience** — `ResilientHttp` with retry (3 attempts), exponential backoff, and circuit breaker (opens after 5 failures for 60s).
+- **Async processing** — Telegram & WhatsApp webhooks dispatch a `ProcessAiReply` queue job (3 tries, 10/30s backoff) instead of blocking the webhook response. LiveChat stays synchronous (reply is in HTTP response body).
+- **Conversation cap** — 50 messages per conversation per day to limit storage growth.
+- **Data retention** — `retention:prune` auto-deletes old conversations and stale customer memory (configurable, default 90 days).
 
 ## Further Reading
 

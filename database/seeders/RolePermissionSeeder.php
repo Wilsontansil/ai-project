@@ -29,6 +29,9 @@ class RolePermissionSeeder extends Seeder
             Permission::findOrCreate($permission, 'web');
         }
 
+        // Reset cache after creating permissions so syncPermissions can find them
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
         // Admin: full access
         $admin = Role::findOrCreate('admin', 'web');
         $admin->syncPermissions($permissions);

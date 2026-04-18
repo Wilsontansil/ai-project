@@ -42,7 +42,7 @@
                     <table class="min-w-full text-xs">
                         <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
                             <tr>
-                                <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.users.name') }}</th>
+                                <th class="py-2 pl-4 pr-3 font-medium">{{ __('backoffice.pages.users.name') }}</th>
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.users.email') }}</th>
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.users.role') }}</th>
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.users.created_at') }}</th>
@@ -52,9 +52,10 @@
                         <tbody class="divide-y divide-white/5">
                             @foreach ($users as $user)
                                 <tr class="transition hover:bg-white/5">
-                                    <td class="px-3 py-2">
+                                    <td class="py-2 pl-4 pr-3">
                                         <div class="flex items-center gap-2">
-                                            <div class="flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold"
+                                            <div style="flex-shrink:0"
+                                                class="flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold"
                                                 style="background: linear-gradient(135deg, #22d3ee, #06b6d4); color: #0f172a;">
                                                 {{ strtoupper(substr($user->name, 0, 1)) }}
                                             </div>

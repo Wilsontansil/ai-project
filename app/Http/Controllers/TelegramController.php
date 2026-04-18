@@ -2,31 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessAiReply;
 use App\Support\LogSanitizer;
-use App\Support\MetricsCollector;
-use App\Support\ResilientHttp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Services\Agent\AgentContextService;
-use App\Services\Agent\ConversationMemoryService;
-use App\Services\Agent\CustomerIdentityService;
 use App\Services\AIService;
 use App\Models\ProjectSetting;
 
 class TelegramController extends Controller
 {
-    private string $telegramToken = '';
-
-    public function __construct()
-    {
-        $this->telegramToken = (string) ProjectSetting::getValue('telegram_bot_token', config('services.telegram.bot_token', ''));
-    }
-
     public function handleWebhook(Request $request)
     {
-        $requestStart = MetricsCollector::startTimer();
-        $payload = $request->all();
-
         $text = $request->input('message.text');
         $chatId = $request->input('message.chat.id');
 
@@ -42,80 +28,8 @@ class TelegramController extends Controller
             return response()->json(['status' => 'queued']);
         }
 
-        $customer = null;
-        $agentContext = [];
-
-        try {
-            $customer = app(CustomerIdentityService::class)->resolve('telegram', $payload, $combinedText);
-            $agentContext = app(AgentContextService::class)->buildContext($customer, $combinedText);
-
-            app(ConversationMemoryService::class)->addMessage(
-                $customer,
-                'telegram',
-                'user',
-                $combinedText,
-                ['chat_id' => $chatId]
-            );
-        } catch (\Throwable $e) {
-            // Keep chat flow alive if DB/migration is temporarily unavailable.
-            Log::warning('Telegram customer context persistence failed', [
-                'chat_id' => $chatId,
-                'error' => $e->getMessage(),
-            ]);
-        }
-
-        $this->sendTyping($chatId);
-
-        $aiService = app(AIService::class);
-        $reply = $aiService->reply($combinedText, $chatId, 'telegram', $agentContext);
-
-        if ($customer !== null) {
-            try {
-                app(ConversationMemoryService::class)->addMessage(
-                    $customer,
-                    'telegram',
-                    'assistant',
-                    $reply,
-                    ['chat_id' => $chatId]
-                );
-            } catch (\Throwable $e) {
-                Log::warning('Telegram assistant message persistence failed', [
-                    'chat_id' => $chatId,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-
-        $this->sendMessage($chatId, $reply);
-
-        MetricsCollector::recordRequest('telegram', MetricsCollector::elapsed($requestStart));
+        ProcessAiReply::dispatch('telegram', $chatId, $combinedText, $request->all());
 
         return response()->json(['status' => 'ok']);
     }
-
-    private function sendMessage($chatId, $text)
-    {
-        if ($this->telegramToken === '') {
-            Log::error('TELEGRAM_BOT_TOKEN is not configured.');
-            return;
-        }
-
-        ResilientHttp::post('telegram', "https://api.telegram.org/bot" . $this->telegramToken . "/sendMessage", [
-            'chat_id' => $chatId,
-            'text' => $text
-        ], timeoutSeconds: 10);
-    }
-
-    private function sendTyping($chatId)
-    {
-        if ($this->telegramToken === '') {
-            return;
-        }
-
-        ResilientHttp::post('telegram', "https://api.telegram.org/bot" . $this->telegramToken . "/sendChatAction", [
-            'chat_id' => $chatId,
-            'action' => 'typing'
-        ], timeoutSeconds: 10);
-    }
-
 }

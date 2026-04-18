@@ -21,7 +21,7 @@ class SingleSession
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
-                return redirect()->route('backoffice.login')
+                return redirect()->route('login')
                     ->with('error', __('backoffice.auth.session_expired'));
             }
         }

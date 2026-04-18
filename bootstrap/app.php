@@ -6,6 +6,7 @@ use App\Http\Middleware\VerifyTelegramWebhook;
 use App\Http\Middleware\VerifyWhatsAppWebhook;
 use App\Http\Middleware\VerifyLiveChatWebhook;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -38,6 +39,24 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Web routes: redirect 401 to login page
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if (!$request->expectsJson()) {
+                return redirect()->guest(route('login'));
+            }
+
+            return null;
+        });
+
+        // Web routes: redirect 401 HTTP exceptions to login page
+        $exceptions->render(function (HttpExceptionInterface $e, Request $request) {
+            if ($e->getStatusCode() === 401 && !$request->expectsJson()) {
+                return redirect()->guest(route('login'));
+            }
+
+            return null;
+        });
+
         // API routes: always return JSON, never expose internals.
         $exceptions->render(function (\Throwable $e, Request $request) {
             if (!$request->is('api/*') && !$request->expectsJson()) {

@@ -54,11 +54,6 @@
                                 <tr class="transition hover:bg-white/5">
                                     <td class="py-2 pl-4 pr-3">
                                         <div class="flex items-center gap-2">
-                                            <div style="flex-shrink:0"
-                                                class="flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold"
-                                                style="background: linear-gradient(135deg, #22d3ee, #06b6d4); color: #0f172a;">
-                                                {{ strtoupper(substr($user->name, 0, 1)) }}
-                                            </div>
                                             <span class="font-semibold text-white">{{ $user->name }}</span>
                                             @if ($user->id === auth()->id())
                                                 <span

@@ -26,10 +26,6 @@
 
             {{-- User info badge --}}
             <div class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-                <div class="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold"
-                    style="background: linear-gradient(135deg, #22d3ee, #06b6d4); color: #0f172a;">
-                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                </div>
                 <div>
                     <p class="text-sm font-semibold text-white">{{ $user->name }}</p>
                     <p class="text-xs text-slate-400">{{ __('backoffice.pages.users.member_since') }}

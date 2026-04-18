@@ -13,7 +13,7 @@ class SingleSession
     {
         if (Auth::check()) {
             /** @var \App\Models\User $user */
-            $user = Auth::user();
+            $user = Auth::user()->fresh();
             $currentSessionId = $request->session()->getId();
 
             if ($user->active_session_id && $user->active_session_id !== $currentSessionId) {

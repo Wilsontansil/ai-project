@@ -10,6 +10,7 @@ use App\Http\Controllers\Backoffice\LocaleController;
 use App\Http\Controllers\Backoffice\MetricsController;
 use App\Http\Controllers\Backoffice\SettingController;
 use App\Http\Controllers\Backoffice\ToolController;
+use App\Http\Controllers\Backoffice\UserController;
 use Illuminate\Support\Facades\Route;
 
 $entryRedirect = fn () => redirect()->route('login');
@@ -68,6 +69,16 @@ Route::middleware(['set.locale', 'auth'])->group(function () {
     Route::post('/backoffice/database-connections/{databaseConnection}/test', [DatabaseConnectionController::class, 'testConnection'])->name('backoffice.database-connections.test');
 
     Route::get('/backoffice/metrics', [MetricsController::class, 'index'])->name('backoffice.metrics.index');
+
+    // User management (admin only)
+    Route::middleware('permission:manage users')->group(function () {
+        Route::get('/backoffice/users', [UserController::class, 'index'])->name('backoffice.users.index');
+        Route::get('/backoffice/users/create', [UserController::class, 'create'])->name('backoffice.users.create');
+        Route::post('/backoffice/users', [UserController::class, 'store'])->name('backoffice.users.store');
+        Route::get('/backoffice/users/{user}/edit', [UserController::class, 'edit'])->name('backoffice.users.edit');
+        Route::put('/backoffice/users/{user}', [UserController::class, 'update'])->name('backoffice.users.update');
+        Route::delete('/backoffice/users/{user}', [UserController::class, 'destroy'])->name('backoffice.users.destroy');
+    });
 
     Route::post('/backoffice/logout', [AuthController::class, 'logout'])->name('logout');
 });

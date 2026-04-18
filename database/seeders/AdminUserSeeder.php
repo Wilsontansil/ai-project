@@ -10,12 +10,16 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::query()->updateOrCreate(
+        $user = User::query()->updateOrCreate(
             ['email' => 'admin@xonebot.local'],
             [
                 'name' => 'Backoffice Admin',
                 'password' => Hash::make('admin12345'),
             ]
         );
+
+        if (! $user->hasRole('admin')) {
+            $user->assignRole('admin');
+        }
     }
 }

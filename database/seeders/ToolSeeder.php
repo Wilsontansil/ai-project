@@ -630,9 +630,17 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => null,
                 'keywords' => ['cek deposit', 'check deposit', 'status deposit', 'deposit status', 'deposit saya', 'deposit belum masuk', 'deposit pending'],
-                'tool_rules' => "- Jika username belum ada, minta username secara natural tanpa memaksa format tertentu\n- Tampilkan status deposit terbaru: status, nominal, tanggal\n- Jika deposit masih pending, infokan bahwa deposit sedang diproses dan minta member menunggu\n- Jika deposit sudah accepted, infokan bahwa deposit sudah berhasil diproses\n- Jika deposit ditolak (rejected), infokan alasannya jika tersedia dan sarankan member untuk menghubungi CS\n- Jangan menampilkan field internal yang tidak relevan untuk member",
+                'tool_rules' => "- Jika username belum ada, minta username secara natural tanpa memaksa format tertentu\n- Tampilkan data dari deposit TERBARU berdasarkan operatortime\n- Tampilkan status deposit terbaru: status, nominal, tanggal (operatortime)\n- Jika deposit masih pending, infokan bahwa deposit sedang diproses dan minta member menunggu\n- Jika deposit sudah accepted, infokan bahwa deposit sudah berhasil diproses\n- Jika deposit ditolak (rejected), infokan alasannya jika tersedia dan sarankan member untuk menghubungi CS\n- Jangan menampilkan field internal yang tidak relevan untuk member",
                 'information_text' => null,
-                'meta' => null,
+                'meta' => [
+                    'query' => [
+                        'order_by' => [
+                            'field' => 'operatortime',
+                            'direction' => 'desc',
+                        ],
+                        'limit' => 1,
+                    ],
+                ],
             ],
             [
                 'tool_name' => 'rejectDeposit',

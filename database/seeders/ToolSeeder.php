@@ -611,6 +611,63 @@ class ToolSeeder extends Seeder
                 ],
                 'meta' => null,
             ],
+
+            // ─── Deposit tools ───
+            [
+                'tool_name' => 'checkDeposit',
+                'display_name' => 'Check Deposit',
+                'description' => 'Check deposit status for a player by username. Returns the latest deposit information from the deposit data model.',
+                'slug' => 'check-deposit',
+                'type' => 'get',
+                'is_enabled' => true,
+                'data_model_id' => $depositModel?->id,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'username' => ['type' => 'string', 'description' => 'Username pemain'],
+                    ],
+                    'required' => ['username'],
+                ],
+                'endpoints' => null,
+                'keywords' => ['cek deposit', 'check deposit', 'status deposit', 'deposit status', 'deposit saya', 'deposit belum masuk', 'deposit pending'],
+                'tool_rules' => "- Jika username belum ada, minta username secara natural tanpa memaksa format tertentu\n- Tampilkan status deposit terbaru: status, nominal, tanggal\n- Jika deposit masih pending, infokan bahwa deposit sedang diproses dan minta member menunggu\n- Jika deposit sudah accepted, infokan bahwa deposit sudah berhasil diproses\n- Jika deposit ditolak (rejected), infokan alasannya jika tersedia dan sarankan member untuk menghubungi CS\n- Jangan menampilkan field internal yang tidak relevan untuk member",
+                'information_text' => null,
+                'meta' => null,
+            ],
+            [
+                'tool_name' => 'rejectDeposit',
+                'display_name' => 'Reject Deposit',
+                'description' => 'Reject a pending deposit for a player. Requires username. Sends request to API endpoint to reject the deposit.',
+                'slug' => 'reject-deposit',
+                'type' => 'update',
+                'is_enabled' => true,
+                'data_model_id' => null,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'username' => ['type' => 'string', 'description' => 'Username pemain yang depositnya akan ditolak'],
+                    ],
+                    'required' => ['username'],
+                ],
+                'endpoints' => [
+                    'endpoint' => [
+                        'route' => '/rejectdeposit',
+                        'body' => [
+                            'username' => '',
+                            'agent' => 'PG',
+                        ],
+                        'expected_response' => [
+                            'status' => 200,
+                            'message' => 'Success',
+                            'data' => (object) [],
+                        ],
+                    ],
+                ],
+                'keywords' => ['reject deposit', 'tolak deposit', 'batalkan deposit', 'cancel deposit', 'deposit reject'],
+                'tool_rules' => "- Jika username belum ada, minta username terlebih dahulu\n- WAJIB konfirmasi ulang ke user sebelum menjalankan reject deposit — ini adalah aksi sensitif\n- Setelah user mengonfirmasi, baru jalankan tool\n- Jika berhasil, infokan bahwa deposit telah berhasil ditolak dan tampilkan status dari response\n- Jika gagal, infokan error dari response dan sarankan untuk mencoba lagi atau menghubungi CS",
+                'information_text' => null,
+                'meta' => null,
+            ],
         ];
 
         foreach ($tools as $tool) {

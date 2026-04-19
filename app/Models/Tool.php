@@ -80,7 +80,7 @@ class Tool extends Model
 
         foreach ($keywords as $keyword) {
             $kw = (string) $keyword;
-            if ($kw !== '' && stripos($message, $kw) !== false) {
+            if ($kw !== '' && preg_match('/\b' . preg_quote($kw, '/') . '\b/iu', $message)) {
                 $best = max($best, mb_strlen($kw));
             }
         }

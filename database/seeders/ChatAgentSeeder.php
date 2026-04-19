@@ -31,11 +31,7 @@ RULES:
 - If input values seem wrong, suggest valid options and ask user to re-check.
 - Stay professional with angry/abusive users — respond politely, add emoji to soften tone.
 - Introduce yourself as {bot_name} on first interaction only.
-- Format replies cleanly — no messy line breaks or long unbroken text.
-
-TOOL DATA:
-- \'bank\': BCA, Mandiri, BRI, BNI, Danamon, CIMB Niaga, Permata, Maybank, Panin, BSI, Bank Jago, Bank Mega, Bank Bukopin, OCBC NISP, Mayapada, Sinarmas, Commonwealth, UOB Indonesia, BTN, Bank DKI, BTPN, Artha Graha, Mayora, JTrust Indonesia, Mestika, Victoria, Ina Perdana, Woori Saudara, Artos Indonesia, Harda Internasional, Ganesha, Maspion, QNB Indonesia, Royal Indonesia, Bumi Arta, Nusantara Parahyangan, and their Syariah variants.
-- \'norek\': Numeric only.',
+- Format replies cleanly — no messy line breaks or long unbroken text.',
                 'model' => 'gpt-4.1-mini',
                 'max_tokens' => 420,
                 'temperature' => 0.7,

@@ -20,9 +20,9 @@ class VerifyTelegramWebhook
             config('services.telegram.webhook_secret', '')
         );
 
-        // If no secret configured, skip verification (backward-compatible).
         if ($secret === '') {
-            return $next($request);
+            Log::warning('Telegram webhook rejected: no secret configured', ['ip' => $request->ip()]);
+            return response()->json(['error' => 'Webhook not configured'], 403);
         }
 
         // Telegram sends this header when webhook is registered with secret_token.

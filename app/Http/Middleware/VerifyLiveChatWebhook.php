@@ -23,9 +23,9 @@ class VerifyLiveChatWebhook
             config('services.livechat.webhook_secret', '')
         );
 
-        // If no secret configured, skip verification (backward-compatible).
         if ($secret === '') {
-            return $next($request);
+            Log::warning('LiveChat webhook rejected: no secret configured', ['ip' => $request->ip()]);
+            return response()->json(['error' => 'Webhook not configured'], 403);
         }
 
         $header = (string) $request->header('X-livechat-Token', '');

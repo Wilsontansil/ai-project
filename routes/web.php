@@ -27,48 +27,69 @@ Route::middleware(['set.locale', 'guest'])->group(function () {
 Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
     Route::get('/backoffice', [DashboardController::class, 'index'])->name('backoffice.dashboard');
     Route::get('/backoffice/customer/{customer}/chat', [DashboardController::class, 'chat'])->name('backoffice.customer.chat');
-    Route::get('/backoffice/chat-agents', [ChatAgentController::class, 'index'])->name('backoffice.chat-agents.index');
-    Route::get('/backoffice/chat-agents/create', [ChatAgentController::class, 'create'])->name('backoffice.chat-agents.create');
-    Route::post('/backoffice/chat-agents', [ChatAgentController::class, 'store'])->name('backoffice.chat-agents.store');
-    Route::get('/backoffice/chat-agents/{chatAgent}/edit', [ChatAgentController::class, 'edit'])->name('backoffice.chat-agents.edit');
-    Route::put('/backoffice/chat-agents/{chatAgent}', [ChatAgentController::class, 'update'])->name('backoffice.chat-agents.update');
-    Route::delete('/backoffice/chat-agents/{chatAgent}', [ChatAgentController::class, 'destroy'])->name('backoffice.chat-agents.destroy');
-    Route::post('/backoffice/chat-agents/{chatAgent}/duplicate', [ChatAgentController::class, 'duplicate'])->name('backoffice.chat-agents.duplicate');
 
-    // Forbidden behaviours scoped per agent
-    Route::get('/backoffice/chat-agents/{chatAgent}/forbidden/create', [ForbiddenBehaviourController::class, 'create'])->name('backoffice.forbidden.create');
-    Route::post('/backoffice/chat-agents/{chatAgent}/forbidden', [ForbiddenBehaviourController::class, 'store'])->name('backoffice.forbidden.store');
-    Route::get('/backoffice/chat-agents/{chatAgent}/forbidden/{forbidden_behaviour}/edit', [ForbiddenBehaviourController::class, 'edit'])->name('backoffice.forbidden.edit');
-    Route::put('/backoffice/chat-agents/{chatAgent}/forbidden/{forbidden_behaviour}', [ForbiddenBehaviourController::class, 'update'])->name('backoffice.forbidden.update');
-    Route::delete('/backoffice/chat-agents/{chatAgent}/forbidden/{forbidden_behaviour}', [ForbiddenBehaviourController::class, 'destroy'])->name('backoffice.forbidden.destroy');
+    // Chat agents (admin only)
+    Route::middleware('permission:manage agents')->group(function () {
+        Route::get('/backoffice/chat-agents', [ChatAgentController::class, 'index'])->name('backoffice.chat-agents.index');
+        Route::get('/backoffice/chat-agents/create', [ChatAgentController::class, 'create'])->name('backoffice.chat-agents.create');
+        Route::post('/backoffice/chat-agents', [ChatAgentController::class, 'store'])->name('backoffice.chat-agents.store');
+        Route::get('/backoffice/chat-agents/{chatAgent}/edit', [ChatAgentController::class, 'edit'])->name('backoffice.chat-agents.edit');
+        Route::put('/backoffice/chat-agents/{chatAgent}', [ChatAgentController::class, 'update'])->name('backoffice.chat-agents.update');
+        Route::delete('/backoffice/chat-agents/{chatAgent}', [ChatAgentController::class, 'destroy'])->name('backoffice.chat-agents.destroy');
+        Route::post('/backoffice/chat-agents/{chatAgent}/duplicate', [ChatAgentController::class, 'duplicate'])->name('backoffice.chat-agents.duplicate');
+    });
 
-    Route::get('/backoffice/tools', [ToolController::class, 'index'])->name('backoffice.tools.index');
-    Route::get('/backoffice/tools/create', [ToolController::class, 'create'])->name('backoffice.tools.create');
-    Route::post('/backoffice/tools', [ToolController::class, 'store'])->name('backoffice.tools.store');
-    Route::get('/backoffice/tools/{tool}/edit', [ToolController::class, 'edit'])->name('backoffice.tools.edit');
-    Route::put('/backoffice/tools/{tool}', [ToolController::class, 'update'])->name('backoffice.tools.update');
-    Route::delete('/backoffice/tools/{tool}', [ToolController::class, 'destroy'])->name('backoffice.tools.destroy');
-    Route::post('/backoffice/tools/test-endpoint', [ToolController::class, 'testEndpoint'])->name('backoffice.tools.testEndpoint');
+    // Forbidden behaviours scoped per agent (admin only)
+    Route::middleware('permission:manage forbidden-behaviours')->group(function () {
+        Route::get('/backoffice/chat-agents/{chatAgent}/forbidden/create', [ForbiddenBehaviourController::class, 'create'])->name('backoffice.forbidden.create');
+        Route::post('/backoffice/chat-agents/{chatAgent}/forbidden', [ForbiddenBehaviourController::class, 'store'])->name('backoffice.forbidden.store');
+        Route::get('/backoffice/chat-agents/{chatAgent}/forbidden/{forbidden_behaviour}/edit', [ForbiddenBehaviourController::class, 'edit'])->name('backoffice.forbidden.edit');
+        Route::put('/backoffice/chat-agents/{chatAgent}/forbidden/{forbidden_behaviour}', [ForbiddenBehaviourController::class, 'update'])->name('backoffice.forbidden.update');
+        Route::delete('/backoffice/chat-agents/{chatAgent}/forbidden/{forbidden_behaviour}', [ForbiddenBehaviourController::class, 'destroy'])->name('backoffice.forbidden.destroy');
+    });
 
-    Route::get('/backoffice/data-models', [DataModelController::class, 'index'])->name('backoffice.data-models.index');
-    Route::get('/backoffice/data-models/create', [DataModelController::class, 'create'])->name('backoffice.data-models.create');
-    Route::post('/backoffice/data-models', [DataModelController::class, 'store'])->name('backoffice.data-models.store');
-    Route::get('/backoffice/data-models/{dataModel}/edit', [DataModelController::class, 'edit'])->name('backoffice.data-models.edit');
-    Route::put('/backoffice/data-models/{dataModel}', [DataModelController::class, 'update'])->name('backoffice.data-models.update');
-    Route::delete('/backoffice/data-models/{dataModel}', [DataModelController::class, 'destroy'])->name('backoffice.data-models.destroy');
+    // Tools (admin only)
+    Route::middleware('permission:manage tools')->group(function () {
+        Route::get('/backoffice/tools', [ToolController::class, 'index'])->name('backoffice.tools.index');
+        Route::get('/backoffice/tools/create', [ToolController::class, 'create'])->name('backoffice.tools.create');
+        Route::post('/backoffice/tools', [ToolController::class, 'store'])->name('backoffice.tools.store');
+        Route::get('/backoffice/tools/{tool}/edit', [ToolController::class, 'edit'])->name('backoffice.tools.edit');
+        Route::put('/backoffice/tools/{tool}', [ToolController::class, 'update'])->name('backoffice.tools.update');
+        Route::delete('/backoffice/tools/{tool}', [ToolController::class, 'destroy'])->name('backoffice.tools.destroy');
+        Route::post('/backoffice/tools/test-endpoint', [ToolController::class, 'testEndpoint'])->name('backoffice.tools.testEndpoint');
+    });
 
-    Route::get('/backoffice/settings', [SettingController::class, 'index'])->name('backoffice.settings.index');
-    Route::post('/backoffice/settings', [SettingController::class, 'update'])->name('backoffice.settings.update');
+    // Data models (admin only)
+    Route::middleware('permission:manage data-models')->group(function () {
+        Route::get('/backoffice/data-models', [DataModelController::class, 'index'])->name('backoffice.data-models.index');
+        Route::get('/backoffice/data-models/create', [DataModelController::class, 'create'])->name('backoffice.data-models.create');
+        Route::post('/backoffice/data-models', [DataModelController::class, 'store'])->name('backoffice.data-models.store');
+        Route::get('/backoffice/data-models/{dataModel}/edit', [DataModelController::class, 'edit'])->name('backoffice.data-models.edit');
+        Route::put('/backoffice/data-models/{dataModel}', [DataModelController::class, 'update'])->name('backoffice.data-models.update');
+        Route::delete('/backoffice/data-models/{dataModel}', [DataModelController::class, 'destroy'])->name('backoffice.data-models.destroy');
+    });
 
-    Route::get('/backoffice/database-connections', [DatabaseConnectionController::class, 'index'])->name('backoffice.database-connections.index');
-    Route::get('/backoffice/database-connections/create', [DatabaseConnectionController::class, 'create'])->name('backoffice.database-connections.create');
-    Route::post('/backoffice/database-connections', [DatabaseConnectionController::class, 'store'])->name('backoffice.database-connections.store');
-    Route::get('/backoffice/database-connections/{databaseConnection}/edit', [DatabaseConnectionController::class, 'edit'])->name('backoffice.database-connections.edit');
-    Route::put('/backoffice/database-connections/{databaseConnection}', [DatabaseConnectionController::class, 'update'])->name('backoffice.database-connections.update');
-    Route::delete('/backoffice/database-connections/{databaseConnection}', [DatabaseConnectionController::class, 'destroy'])->name('backoffice.database-connections.destroy');
-    Route::post('/backoffice/database-connections/{databaseConnection}/test', [DatabaseConnectionController::class, 'testConnection'])->name('backoffice.database-connections.test');
+    // Settings (admin only)
+    Route::middleware('permission:manage settings')->group(function () {
+        Route::get('/backoffice/settings', [SettingController::class, 'index'])->name('backoffice.settings.index');
+        Route::post('/backoffice/settings', [SettingController::class, 'update'])->name('backoffice.settings.update');
+    });
 
-    Route::get('/backoffice/metrics', [MetricsController::class, 'index'])->name('backoffice.metrics.index');
+    // Database connections (admin only)
+    Route::middleware('permission:manage database-connections')->group(function () {
+        Route::get('/backoffice/database-connections', [DatabaseConnectionController::class, 'index'])->name('backoffice.database-connections.index');
+        Route::get('/backoffice/database-connections/create', [DatabaseConnectionController::class, 'create'])->name('backoffice.database-connections.create');
+        Route::post('/backoffice/database-connections', [DatabaseConnectionController::class, 'store'])->name('backoffice.database-connections.store');
+        Route::get('/backoffice/database-connections/{databaseConnection}/edit', [DatabaseConnectionController::class, 'edit'])->name('backoffice.database-connections.edit');
+        Route::put('/backoffice/database-connections/{databaseConnection}', [DatabaseConnectionController::class, 'update'])->name('backoffice.database-connections.update');
+        Route::delete('/backoffice/database-connections/{databaseConnection}', [DatabaseConnectionController::class, 'destroy'])->name('backoffice.database-connections.destroy');
+        Route::post('/backoffice/database-connections/{databaseConnection}/test', [DatabaseConnectionController::class, 'testConnection'])->name('backoffice.database-connections.test');
+    });
+
+    // Metrics
+    Route::middleware('permission:view metrics')->group(function () {
+        Route::get('/backoffice/metrics', [MetricsController::class, 'index'])->name('backoffice.metrics.index');
+    });
 
     // User management (admin only)
     Route::middleware('permission:manage users')->group(function () {

@@ -224,49 +224,55 @@
             </button>
             <div class="bo-section-items" style="margin-top:0.25rem;">
                 {{-- Agents --}}
-                <a href="{{ route('backoffice.chat-agents.index') }}" class="bo-nav-item group"
-                    style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'chat-agents' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
-                    onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
-                    onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'chat-agents' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'chat-agents' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
-                    <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'chat-agents' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
-                        height="18">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-                    </svg>
-                    <span class="bo-label">{{ __('backoffice.menu.agents') }}</span>
-                    <span class="bo-tooltip">{{ __('backoffice.menu.agents') }}</span>
-                </a>
+                @can('manage agents')
+                    <a href="{{ route('backoffice.chat-agents.index') }}" class="bo-nav-item group"
+                        style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'chat-agents' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
+                        onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'chat-agents' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'chat-agents' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
+                        <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'chat-agents' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
+                            height="18">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                        </svg>
+                        <span class="bo-label">{{ __('backoffice.menu.agents') }}</span>
+                        <span class="bo-tooltip">{{ __('backoffice.menu.agents') }}</span>
+                    </a>
+                @endcan
 
                 {{-- Tools --}}
-                <a href="{{ route('backoffice.tools.index') }}" class="bo-nav-item group"
-                    style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'tools' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
-                    onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
-                    onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'tools' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'tools' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
-                    <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'tools' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
-                        height="18">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M11.42 15.17l-5.1 5.1a2.121 2.121 0 01-3-3l5.1-5.1m0 0L4.16 7.91a2.13 2.13 0 010-3l1.26-1.26a2.13 2.13 0 013 0l4.26 4.26m-1.26 1.26l6.97-6.97a2.121 2.121 0 013 3l-6.97 6.97" />
-                    </svg>
-                    <span class="bo-label">{{ __('backoffice.menu.tools') }}</span>
-                    <span class="bo-tooltip">{{ __('backoffice.menu.tools') }}</span>
-                </a>
+                @can('manage tools')
+                    <a href="{{ route('backoffice.tools.index') }}" class="bo-nav-item group"
+                        style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'tools' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
+                        onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'tools' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'tools' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
+                        <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'tools' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
+                            height="18">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M11.42 15.17l-5.1 5.1a2.121 2.121 0 01-3-3l5.1-5.1m0 0L4.16 7.91a2.13 2.13 0 010-3l1.26-1.26a2.13 2.13 0 013 0l4.26 4.26m-1.26 1.26l6.97-6.97a2.121 2.121 0 013 3l-6.97 6.97" />
+                        </svg>
+                        <span class="bo-label">{{ __('backoffice.menu.tools') }}</span>
+                        <span class="bo-tooltip">{{ __('backoffice.menu.tools') }}</span>
+                    </a>
+                @endcan
 
                 {{-- Data Models --}}
-                <a href="{{ route('backoffice.data-models.index') }}" class="bo-nav-item group"
-                    style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'data-models' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
-                    onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
-                    onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'data-models' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'data-models' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
-                    <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'data-models' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
-                        height="18">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 3.75c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125m16.5 3.75c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
-                    </svg>
-                    <span class="bo-label">{{ __('backoffice.menu.data_models') }}</span>
-                    <span class="bo-tooltip">{{ __('backoffice.menu.data_models') }}</span>
-                </a>
+                @can('manage data-models')
+                    <a href="{{ route('backoffice.data-models.index') }}" class="bo-nav-item group"
+                        style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'data-models' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
+                        onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'data-models' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'data-models' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
+                        <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'data-models' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
+                            height="18">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 3.75c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125m16.5 3.75c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+                        </svg>
+                        <span class="bo-label">{{ __('backoffice.menu.data_models') }}</span>
+                        <span class="bo-tooltip">{{ __('backoffice.menu.data_models') }}</span>
+                    </a>
+                @endcan
             </div>
         </div>
 
@@ -286,49 +292,55 @@
                 </svg>
             </button>
             <div class="bo-section-items" style="margin-top:0.25rem;">
-                <a href="{{ route('backoffice.settings.index') }}" class="bo-nav-item group"
-                    style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'settings' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
-                    onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
-                    onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'settings' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'settings' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
-                    <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'settings' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
-                        height="18">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
-                    </svg>
-                    <span class="bo-label">{{ __('backoffice.menu.settings') }}</span>
-                    <span class="bo-tooltip">{{ __('backoffice.menu.settings') }}</span>
-                </a>
+                @can('manage settings')
+                    <a href="{{ route('backoffice.settings.index') }}" class="bo-nav-item group"
+                        style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'settings' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
+                        onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'settings' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'settings' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
+                        <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'settings' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
+                            height="18">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+                        </svg>
+                        <span class="bo-label">{{ __('backoffice.menu.settings') }}</span>
+                        <span class="bo-tooltip">{{ __('backoffice.menu.settings') }}</span>
+                    </a>
+                @endcan
 
                 {{-- DB Connections --}}
-                <a href="{{ route('backoffice.database-connections.index') }}" class="bo-nav-item group"
-                    style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'database-connections' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
-                    onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
-                    onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'database-connections' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'database-connections' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
-                    <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'database-connections' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
-                        height="18">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 3.75c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125m16.5 3.75c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
-                    </svg>
-                    <span class="bo-label">{{ __('backoffice.menu.database_connections') }}</span>
-                    <span class="bo-tooltip">{{ __('backoffice.menu.database_connections') }}</span>
-                </a>
+                @can('manage database-connections')
+                    <a href="{{ route('backoffice.database-connections.index') }}" class="bo-nav-item group"
+                        style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'database-connections' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
+                        onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'database-connections' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'database-connections' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
+                        <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'database-connections' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
+                            height="18">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 3.75c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125m16.5 3.75c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+                        </svg>
+                        <span class="bo-label">{{ __('backoffice.menu.database_connections') }}</span>
+                        <span class="bo-tooltip">{{ __('backoffice.menu.database_connections') }}</span>
+                    </a>
+                @endcan
 
                 {{-- Metrics --}}
-                <a href="{{ route('backoffice.metrics.index') }}" class="bo-nav-item group"
-                    style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'metrics' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
-                    onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
-                    onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'metrics' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'metrics' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
-                    <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'metrics' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
-                        height="18">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                    </svg>
-                    <span class="bo-label">{{ __('backoffice.menu.metrics') }}</span>
-                    <span class="bo-tooltip">{{ __('backoffice.menu.metrics') }}</span>
-                </a>
+                @can('view metrics')
+                    <a href="{{ route('backoffice.metrics.index') }}" class="bo-nav-item group"
+                        style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'metrics' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
+                        onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'metrics' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'metrics' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
+                        <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'metrics' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
+                            height="18">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                        </svg>
+                        <span class="bo-label">{{ __('backoffice.menu.metrics') }}</span>
+                        <span class="bo-tooltip">{{ __('backoffice.menu.metrics') }}</span>
+                    </a>
+                @endcan
 
                 {{-- Users --}}
                 @can('manage users')

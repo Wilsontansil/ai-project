@@ -8,6 +8,7 @@ use App\Services\AI\ToolEngines\HttpToolEngine;
 use App\Services\AI\ToolEngines\InfoToolEngine;
 use App\Support\MetricsCollector;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
@@ -80,21 +81,58 @@ class ToolDispatcher
         string $systemPrompt,
         ?string $contextPrompt,
         array $history,
-        string $model
+        string $model,
+        string $chatId = '',
+        string $channel = ''
     ): ?string {
         $tools = $this->getEnabledTools();
+        $pendingKey = $this->pendingToolKey($chatId, $channel);
 
         // 1. OpenAI explicit tool call — highest priority.
         foreach ($tools as $tool) {
             $arguments = $this->extractArguments($msg, $tool->tool_name);
             if ($arguments !== null) {
+                if ($pendingKey !== null) {
+                    Cache::forget($pendingKey);
+                }
+
                 return $this->dispatch(
                     $client, $tool, $arguments, $systemPrompt, $contextPrompt, $history, $userMessage, $model
                 );
             }
         }
 
-        // 2. Keyword-score fallback.
+        // 2. Pending tool — resume a tool that previously asked for arguments.
+        if ($pendingKey !== null) {
+            $pendingToolName = Cache::get($pendingKey);
+
+            if ($pendingToolName !== null) {
+                $pendingTool = $tools->firstWhere('tool_name', $pendingToolName);
+
+                if ($pendingTool !== null) {
+                    Cache::forget($pendingKey);
+
+                    $arguments = $this->forceExtractArguments(
+                        $client, $pendingTool, $systemPrompt, $contextPrompt, $history, $userMessage, $model
+                    );
+
+                    if ($arguments !== null) {
+                        return $this->dispatch(
+                            $client, $pendingTool, $arguments, $systemPrompt, $contextPrompt, $history, $userMessage, $model
+                        );
+                    }
+
+                    // Extraction still failed — re-store pending and ask again.
+                    Cache::put($pendingKey, $pendingToolName, now()->addMinutes(5));
+
+                    return $this->buildMissingDataMessage($pendingTool);
+                }
+
+                Cache::forget($pendingKey);
+            }
+        }
+
+        // 3. Keyword-score fallback.
         $bestTool = null;
         $bestScore = 0;
 
@@ -114,6 +152,10 @@ class ToolDispatcher
                 : [];
 
             if ($bestTool->needsArguments() && $arguments === null) {
+                if ($pendingKey !== null) {
+                    Cache::put($pendingKey, $bestTool->tool_name, now()->addMinutes(5));
+                }
+
                 return $this->buildMissingDataMessage($bestTool);
             }
 
@@ -123,6 +165,20 @@ class ToolDispatcher
         }
 
         return null;
+    }
+
+    /**
+     * Build the cache key for a pending tool, or null when chat identity is unknown.
+     */
+    private function pendingToolKey(string $chatId, string $channel): ?string
+    {
+        if ($chatId === '') {
+            return null;
+        }
+
+        $prefix = $channel !== '' ? $channel . ':' : '';
+
+        return "pending_tool:{$prefix}{$chatId}";
     }
 
     /**

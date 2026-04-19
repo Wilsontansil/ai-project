@@ -95,7 +95,8 @@ class AIService
 
             // Let the dispatcher handle tool calls and intent matching.
             $assistantReply = $this->toolDispatcher->resolve(
-                $client, $msg, $message, $systemPrompt, $contextPrompt, $history, $model
+                $client, $msg, $message, $systemPrompt, $contextPrompt, $history, $model,
+                (string) $chatId, $channel
             );
 
             if ($assistantReply !== null) {

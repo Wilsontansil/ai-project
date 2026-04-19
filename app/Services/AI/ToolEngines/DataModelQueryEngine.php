@@ -386,7 +386,10 @@ class DataModelQueryEngine
                         'data' => null,
                     ];
                 } elseif ($isAggregate && $cfgGroupBy !== []) {
-                    $query->selectRaw("{$aggFunc}({$aggField}) as {$aggFunc}_{$aggField}");
+                    $grammar = $query->getGrammar();
+                    $wrappedField = $grammar->wrap($aggField);
+                    $wrappedAlias = $grammar->wrap("{$aggFunc}_{$aggField}");
+                    $query->selectRaw("{$aggFunc}({$wrappedField}) as {$wrappedAlias}");
                     $rows = ($cfgLimit > 0 ? $query->limit($cfgLimit) : $query)
                         ->get()
                         ->map(fn ($r) => (array) $r)

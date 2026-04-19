@@ -38,15 +38,15 @@ class Tool extends Model
 
     /**
      * Build the OpenAI tool definition from DB columns.
-     * Returns null if tool has no parameters (info-only tool).
+     * All enabled tools get a definition so OpenAI is aware of them.
      */
     public function getDefinition(): ?array
     {
         $params = $this->parameters;
 
-        // Info-only tools with no parameters don't need an OpenAI function definition.
+        // Use empty parameters for info-only tools so OpenAI still sees them.
         if (empty($params) || empty($params['properties'])) {
-            return null;
+            $params = ['type' => 'object', 'properties' => (object) []];
         }
 
         return [
@@ -57,6 +57,16 @@ class Tool extends Model
                 'parameters' => $params,
             ],
         ];
+    }
+
+    /**
+     * Whether this tool requires user-supplied arguments (has non-empty parameters).
+     */
+    public function needsArguments(): bool
+    {
+        $params = $this->parameters;
+
+        return !empty($params) && !empty($params['properties']);
     }
 
     /**

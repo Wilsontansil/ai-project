@@ -107,13 +107,13 @@ class ToolDispatcher
         }
 
         if ($bestTool !== null && $bestScore > 0) {
-            $arguments = $bestTool->getDefinition() !== null
+            $arguments = $bestTool->needsArguments()
                 ? $this->forceExtractArguments(
                     $client, $bestTool, $systemPrompt, $contextPrompt, $history, $userMessage, $model
                 )
                 : [];
 
-            if ($bestTool->getDefinition() !== null && $arguments === null) {
+            if ($bestTool->needsArguments() && $arguments === null) {
                 return $this->buildMissingDataMessage($bestTool);
             }
 

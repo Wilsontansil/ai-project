@@ -110,22 +110,37 @@ class ToolDispatcher
                 $pendingTool = $tools->firstWhere('tool_name', $pendingToolName);
 
                 if ($pendingTool !== null) {
-                    Cache::forget($pendingKey);
-
-                    $arguments = $this->forceExtractArguments(
-                        $client, $pendingTool, $systemPrompt, $contextPrompt, $history, $userMessage, $model
-                    );
-
-                    if ($arguments !== null) {
-                        return $this->dispatch(
-                            $client, $pendingTool, $arguments, $systemPrompt, $contextPrompt, $history, $userMessage, $model
-                        );
+                    // If the user negates ANY of the pending tool's keywords, abandon it.
+                    $rejected = false;
+                    foreach (($pendingTool->keywords ?? []) as $kw) {
+                        $kw = (string) $kw;
+                        if ($kw !== '' && \App\Models\Tool::isNegated($kw, $userMessage)) {
+                            $rejected = true;
+                            break;
+                        }
                     }
 
-                    // Extraction still failed — re-store pending and ask again.
-                    Cache::put($pendingKey, $pendingToolName, now()->addMinutes(5));
+                    if ($rejected) {
+                        Cache::forget($pendingKey);
+                        // Fall through to keyword fallback so the correct tool can match.
+                    } else {
+                        Cache::forget($pendingKey);
 
-                    return $this->buildMissingDataMessage($pendingTool);
+                        $arguments = $this->forceExtractArguments(
+                            $client, $pendingTool, $systemPrompt, $contextPrompt, $history, $userMessage, $model
+                        );
+
+                        if ($arguments !== null) {
+                            return $this->dispatch(
+                                $client, $pendingTool, $arguments, $systemPrompt, $contextPrompt, $history, $userMessage, $model
+                            );
+                        }
+
+                        // Extraction still failed — re-store pending and ask again.
+                        Cache::put($pendingKey, $pendingToolName, now()->addMinutes(5));
+
+                        return $this->buildMissingDataMessage($pendingTool);
+                    }
                 }
 
                 Cache::forget($pendingKey);

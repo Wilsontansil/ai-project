@@ -70,8 +70,33 @@ class Tool extends Model
     }
 
     /**
+     * Negation words (Indonesian + English) used to detect when a user
+     * explicitly rejects/negates a keyword. Shared across methods.
+     */
+    public const NEGATION_WORDS = [
+        // Indonesian
+        'bukan', 'tidak', 'tdk', 'gak', 'nggak', 'ngga', 'ga', 'enggak', 'jangan', 'belum', 'tak',
+        // English
+        'not', 'no', 'dont', "don't", 'cancel', 'batal',
+    ];
+
+    /**
+     * Check whether a keyword is preceded by a negation word in the message.
+     */
+    public static function isNegated(string $keyword, string $message): bool
+    {
+        $negations = implode('|', array_map(fn ($w) => preg_quote($w, '/'), self::NEGATION_WORDS));
+
+        // Match negation word followed by 0-3 filler words, then the keyword.
+        $pattern = '/\b(?:' . $negations . ')\b(?:\s+\S+){0,3}\s+' . preg_quote($keyword, '/') . '\b/iu';
+
+        return (bool) preg_match($pattern, $message);
+    }
+
+    /**
      * Return the best keyword match score for a user message.
      * Score = length of longest matched keyword. 0 = no match.
+     * Keywords preceded by negation words are skipped.
      */
     public function matchScore(string $message): int
     {
@@ -80,9 +105,21 @@ class Tool extends Model
 
         foreach ($keywords as $keyword) {
             $kw = (string) $keyword;
-            if ($kw !== '' && preg_match('/\b' . preg_quote($kw, '/') . '\b/iu', $message)) {
-                $best = max($best, mb_strlen($kw));
+            if ($kw === '') {
+                continue;
             }
+
+            // Keyword must appear in message.
+            if (!preg_match('/\b' . preg_quote($kw, '/') . '\b/iu', $message)) {
+                continue;
+            }
+
+            // Skip if the keyword is negated.
+            if (self::isNegated($kw, $message)) {
+                continue;
+            }
+
+            $best = max($best, mb_strlen($kw));
         }
 
         return $best;

@@ -37,7 +37,7 @@ class LiveChatController extends Controller
         $expectedToken = (string) ProjectSetting::getValue('livechat_verify_token', config('services.livechat.verify_token', ''));
         $providedToken = (string) $request->input('token', $request->query('token', ''));
 
-        $isAuthorized = $expectedToken === '' || $providedToken === $expectedToken;
+        $isAuthorized = $expectedToken !== '' && $providedToken === $expectedToken;
 
         $response = response('', 401);
 

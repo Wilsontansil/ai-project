@@ -7,6 +7,7 @@ use App\Models\DatabaseConnection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class DatabaseConnectionController extends Controller
@@ -139,7 +140,12 @@ class DatabaseConnectionController extends Controller
         } catch (\Throwable $e) {
             DB::purge('_test_conn');
 
-            return redirect()->back()->with('error', 'Koneksi gagal: ' . $e->getMessage());
+            Log::error('Database connection test failed', [
+                'connection' => $databaseConnection->name,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Koneksi gagal. Periksa konfigurasi dan coba lagi.');
         }
     }
 }

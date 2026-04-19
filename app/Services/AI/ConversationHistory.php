@@ -16,18 +16,18 @@ class ConversationHistory
 
     private int $ttlHours = 12;
 
-    public function load(?string $chatId): array
+    public function load(?string $chatId, string $channel = ''): array
     {
         if (!$chatId) {
             return [];
         }
 
-        $history = Cache::get($this->key($chatId), []);
+        $history = Cache::get($this->key($chatId, $channel), []);
 
         return is_array($history) ? $history : [];
     }
 
-    public function save(?string $chatId, array $history, string $userMessage, string $assistantReply): void
+    public function save(?string $chatId, array $history, string $userMessage, string $assistantReply, string $channel = ''): void
     {
         if (!$chatId) {
             return;
@@ -39,11 +39,13 @@ class ConversationHistory
         // Keep only recent messages to control token usage.
         $history = array_slice($history, -$this->maxMessages);
 
-        Cache::put($this->key($chatId), $history, now()->addHours($this->ttlHours));
+        Cache::put($this->key($chatId, $channel), $history, now()->addHours($this->ttlHours));
     }
 
-    public function key(string $chatId): string
+    public function key(string $chatId, string $channel = ''): string
     {
-        return 'chat_context:' . $chatId;
+        $prefix = $channel !== '' ? $channel . ':' : '';
+
+        return 'chat_context:' . $prefix . $chatId;
     }
 }

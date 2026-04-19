@@ -76,7 +76,7 @@ class LiveChatController extends Controller
         }
 
         if ($chatId !== null && $text !== null) {
-            $combinedText = app(AIService::class)->collectDebouncedMessage($chatId, $text);
+            $combinedText = app(AIService::class)->collectDebouncedMessage($chatId, $text, 'livechat');
 
             if ($combinedText === null) {
                 $response = response()->json(['status' => 'queued']);

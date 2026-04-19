@@ -55,7 +55,7 @@ class WhatsAppController extends Controller
             return response()->json(['status' => 'ignored', 'reason' => 'duplicate_message']);
         }
 
-        $combinedText = app(AIService::class)->collectDebouncedMessage($chatId, (string) $text);
+        $combinedText = app(AIService::class)->collectDebouncedMessage($chatId, (string) $text, 'whatsapp');
 
         if ($combinedText === null) {
             return response()->json(['status' => 'queued']);

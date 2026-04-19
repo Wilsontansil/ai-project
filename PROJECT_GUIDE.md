@@ -59,6 +59,7 @@ All backoffice routes require authentication (`auth` + `set.locale` middleware).
 | `/backoffice/forbidden-behaviours` | ForbiddenBehaviourController | CRUD for banned behavior rules |
 | `/backoffice/settings`             | SettingController            | Global project settings        |
 | `/backoffice/metrics`              | MetricsController            | Observability dashboard        |
+| `/backoffice/users`                | UserController               | User CRUD with role management |
 | `/backoffice/locale/{locale}`      | LocaleController             | Language toggle (id/en)        |
 
 ## Webhook Authentication Middleware
@@ -75,9 +76,10 @@ Middleware aliases registered in `bootstrap/app.php`: `verify.telegram`, `verify
 
 Additional middleware:
 
-| Middleware  | Alias        | Purpose                                     |
-| ----------- | ------------ | ------------------------------------------- |
-| `SetLocale` | `set.locale` | Sets app locale from session (`en` or `id`) |
+| Middleware      | Alias            | Purpose                                                        |
+| --------------- | ---------------- | -------------------------------------------------------------- |
+| `SetLocale`     | `set.locale`     | Sets app locale from session (`en` or `id`)                    |
+| `SingleSession` | `single.session` | Enforces one active session per user — logs out stale sessions |
 
 ## Controllers
 
@@ -89,7 +91,8 @@ Additional middleware:
 
 ### Backoffice Controllers
 
-- **AuthController** — Login/logout with session auth. Rate-limited: 5 failed attempts → 15-minute lockout (dual-key throttle on email + IP).
+- **AuthController** — Login/logout with session auth using **username** (not email). Rate-limited: 5 failed attempts → 15-minute lockout (dual-key throttle on username + IP). On login, stores `active_session_id` for single-session enforcement.
+- **UserController** — Full CRUD for backoffice users with Spatie Permission role assignment (admin, operator). Includes validation for unique username/email.
 - **DashboardController** — Customer list with search, summary stats, customer chat history viewer.
 - **AIAgentController** — View/update AI agent persona (name, system prompt, welcome message, etc.).
 - **ChatAgentController** — Chat agent CRUD with duplication support.
@@ -107,12 +110,12 @@ Additional middleware:
 
 Core AI orchestration service.
 
-- `reply($message, $chatId, ...)` — Main entry point. Builds system prompt, loads conversation history, calls OpenAI, handles tool calls, returns final reply.
-- `collectDebouncedMessage($chatId, $message)` — Debounces rapid messages from same chat before AI processing.
+- `reply($message, $chatId, $channel, ...)` — Main entry point. Builds system prompt, loads channel-isolated conversation history, calls OpenAI, handles tool calls, returns final reply.
+- `collectDebouncedMessage($chatId, $message, $channel)` — Debounces rapid messages from same chat before AI processing. Cache keys are prefixed with channel to prevent cross-platform interference.
 - Tool types: **info** (static text), **get** (DataModel DB lookup), **update** (HTTP endpoint call).
 - Model: `gpt-4.1-mini`
-- History: 20 messages, 12h TTL.
-- Debounce: 2 seconds.
+- History: 20 messages, 12h TTL, **channel-isolated** (cache key: `chat_context:{channel}:{chatId}`).
+- Debounce: 2 seconds, **channel-isolated** (cache key: `chat:debounce:{channel}:{chatId}`).
 
 ### Agent Services (`app/Services/Agent/`)
 
@@ -188,7 +191,7 @@ Cost estimation uses `gpt-4.1-mini` pricing: $0.0004/1K input tokens, $0.0016/1K
 
 | Model              | Table                | Key Fields                                                                        | Relationships            |
 | ------------------ | -------------------- | --------------------------------------------------------------------------------- | ------------------------ |
-| User               | users                | name, email, password                                                             | —                        |
+| User               | users                | username, name, email, password, active_session_id                                | roles (Spatie)           |
 | ChatAgent          | chat_agents          | name, system_prompt, is_active                                                    | forbiddenBehaviours      |
 | Customer           | customers            | platform, platform_user_id, phone, name, tags, first/last_seen_at, total_messages | conversations, behaviors |
 | Conversation       | conversations        | customer_id, channel, conversation_date, messages (JSON)                          | customer                 |
@@ -204,7 +207,7 @@ Cost estimation uses `gpt-4.1-mini` pricing: $0.0004/1K input tokens, $0.0016/1K
 
 ### info
 
-Static information tools. Returns pre-configured text from `information_text` field. No parameters needed.
+Static information tools. Returns pre-configured text from `information_text` field. No parameters needed. **Info tools are registered with OpenAI** (empty parameters schema) so the model can select them directly via `tool_choice: auto` — they are not limited to keyword fallback.
 
 ### get (DataModel Lookup)
 
@@ -262,7 +265,8 @@ Fields stored as JSON in `data_models.fields`:
 
 | Seeder                   | Purpose                                                                                                                         |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| AdminUserSeeder          | Default admin: `admin@xonebot.local` / `admin12345`                                                                             |
+| AdminUserSeeder          | Default admin: username `admin` / password `admin12345` (role: admin)                                                           |
+| RolePermissionSeeder     | Roles (admin, operator) and 9 permissions (manage users, manage tools, manage agents, etc.)                                     |
 | DataModelSeeder          | Players and Settings data model schemas                                                                                         |
 | ToolSeeder               | Default tools: \_bot_config, resetPassword, register, checkSuspend, toStatus, game_gacor, pola_gacor, bonus, link_rtp, link_apk |
 | ForbiddenBehaviourSeeder | Banned behavior rules                                                                                                           |
@@ -348,8 +352,11 @@ All metrics stored in `bot_metrics` table via `MetricsCollector`. Fire-and-forge
 - Never hardcode secrets. Use `.env` + `config(...)`.
 - Rotate leaked secrets immediately.
 - Webhook endpoints are protected by channel-specific middleware (`verify.telegram`, `verify.whatsapp`, `verify.livechat`).
-- Login is rate-limited: 5 failed attempts → 15-minute lockout.
+- Login via **username** (not email). Rate-limited: 5 failed attempts → 15-minute lockout.
+- **Single-session enforcement**: Only one active browser session per user. Logging in from a new browser invalidates the previous session. Enforced by `SingleSession` middleware comparing `active_session_id`.
+- **401 Unauthorized** requests are automatically redirected to the login page.
 - All logged payloads pass through `LogSanitizer` to redact PII.
+- **Role-based access control** via Spatie Permission: roles (admin, operator) with granular permissions.
 
 ### Configuration
 
@@ -361,7 +368,7 @@ All metrics stored in `bot_metrics` table via `MetricsCollector`. Fire-and-forge
 
 - Assistant identity: xoneBot. Default language: Bahasa Indonesia.
 - Keep replies short unless user requests detail.
-- Conversation context per chat ID (20 messages, 12h TTL).
+- Conversation context per channel + chat ID (20 messages, 12h TTL). Cache keys are channel-isolated to prevent cross-platform history leakage.
 - Rapid messages debounced (2s) before AI processing.
 - If uncertain, offer handover to human support.
 - Required DataModel fields with fixed values are always auto-injected into queries.

@@ -22,7 +22,7 @@ class TelegramController extends Controller
         }
 
         $chatId = (string) $chatId;
-        $combinedText = app(AIService::class)->collectDebouncedMessage($chatId, (string) $text);
+        $combinedText = app(AIService::class)->collectDebouncedMessage($chatId, (string) $text, 'telegram');
 
         if ($combinedText === null) {
             return response()->json(['status' => 'queued']);

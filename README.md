@@ -11,7 +11,7 @@ Telegram / WhatsApp / LiveChat
         ↓                      ↓
    ResilientHttp          Tool Execution (info / get / update)
         ↓                      ↓
-   Reply → Platform API   ConversationHistory (20 msgs, 12h TTL)
+   Reply → Platform API   ConversationHistory (20 msgs, 12h TTL, channel-isolated)
 ```
 
 ## Requirements
@@ -85,19 +85,20 @@ All settings can also be managed from the backoffice Settings page (stored in `p
 
 All routes under `/backoffice` require authentication. The UI is mobile-responsive (off-canvas sidebar on < 1024px).
 
-| Path                               | Purpose                                             |
-| ---------------------------------- | --------------------------------------------------- |
-| `/backoffice/login`                | Admin login (rate-limited: 5 attempts / 15 min)     |
-| `/backoffice`                      | Customer dashboard & stats                          |
-| `/backoffice/ai-agent`             | Agent persona settings                              |
-| `/backoffice/chat-agents`          | Chat agent CRUD with duplication                    |
-| `/backoffice/tools`                | CRUD for AI tools                                   |
-| `/backoffice/data-models`          | CRUD for data model schemas                         |
-| `/backoffice/database-connections` | CRUD for database connections                       |
-| `/backoffice/forbidden-behaviours` | CRUD for banned behaviour rules                     |
-| `/backoffice/settings`             | Global project settings                             |
-| `/backoffice/metrics`              | Observability dashboard (throughput, latency, cost) |
-| `/backoffice/locale/{locale}`      | Language toggle (id/en)                             |
+| Path                               | Purpose                                                   |
+| ---------------------------------- | --------------------------------------------------------- |
+| `/backoffice/login`                | Admin login (username, rate-limited: 5 attempts / 15 min) |
+| `/backoffice`                      | Customer dashboard & stats                                |
+| `/backoffice/users`                | User management with role assignment                      |
+| `/backoffice/ai-agent`             | Agent persona settings                                    |
+| `/backoffice/chat-agents`          | Chat agent CRUD with duplication                          |
+| `/backoffice/tools`                | CRUD for AI tools                                         |
+| `/backoffice/data-models`          | CRUD for data model schemas                               |
+| `/backoffice/database-connections` | CRUD for database connections                             |
+| `/backoffice/forbidden-behaviours` | CRUD for banned behaviour rules                           |
+| `/backoffice/settings`             | Global project settings                                   |
+| `/backoffice/metrics`              | Observability dashboard (throughput, latency, cost)       |
+| `/backoffice/locale/{locale}`      | Language toggle (id/en)                                   |
 
 ## Testing
 
@@ -157,11 +158,15 @@ Ensure `APP_DEBUG=false` and `LOG_LEVEL=warning` (or `error`) in production.
 ## Security
 
 - **Webhook authentication** — Each channel has dedicated middleware verifying a shared secret header with `hash_equals()`. Telegram also validates request timestamp (300s tolerance) to prevent replay attacks.
-- **Login rate limiting** — 5 attempts / 15-minute lockout with dual-key throttle (email + IP).
+- **Login via username** — Authentication uses username (not email). Rate-limited: 5 attempts / 15-minute lockout with dual-key throttle (username + IP).
+- **Single-session enforcement** — Only one active browser session per user. Logging in from a new device invalidates the previous session via `SingleSession` middleware.
+- **401 auto-redirect** — Unauthorized requests are automatically redirected to the login page.
+- **Role-based access control** — Spatie Permission with roles (admin, operator) and 9 granular permissions.
 - **Safe logging** — `LogSanitizer` redacts PII (names, emails, phones, tokens, message content) before any payload is logged.
 - **Error handling** — API routes return sanitised JSON errors; debug details only in non-production.
 - **Outbound resilience** — `ResilientHttp` with retry (3 attempts), exponential backoff, and circuit breaker (opens after 5 failures for 60s).
 - **Async processing** — Telegram & WhatsApp webhooks dispatch a `ProcessAiReply` queue job (3 tries, 10/30s backoff) instead of blocking the webhook response. LiveChat stays synchronous (reply is in HTTP response body).
+- **Channel-isolated conversations** — Chat history and debounce cache keys are prefixed with the channel name, preventing cross-platform history leakage between users with identical IDs on different platforms.
 - **Conversation cap** — 50 messages per conversation per day to limit storage growth.
 - **Data retention** — `retention:prune` auto-deletes old conversations and stale customer memory (configurable, default 90 days).
 

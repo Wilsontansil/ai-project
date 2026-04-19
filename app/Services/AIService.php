@@ -54,7 +54,7 @@ class AIService
 
         $systemPrompt = $this->promptBuilder->buildSystemPrompt($chatAgent);
         $toolDefinitions = $this->toolDispatcher->getToolDefinitions();
-        $history = $this->conversationHistory->load($chatId);
+        $history = $this->conversationHistory->load($chatId, $channel);
         $contextPrompt = $this->promptBuilder->buildAgentContextPrompt($agentContext);
 
         $messages = [['role' => 'system', 'content' => $systemPrompt]];
@@ -100,7 +100,7 @@ class AIService
 
             if ($assistantReply !== null) {
                 $assistantReply = $this->replyFormatter->prepare($history, $assistantReply);
-                $this->conversationHistory->save($chatId, $history, $message, $assistantReply);
+                $this->conversationHistory->save($chatId, $history, $message, $assistantReply, $channel);
 
                 return $assistantReply;
             }
@@ -113,7 +113,7 @@ class AIService
             }
 
             $assistantReply = $this->replyFormatter->prepare($history, $assistantReply);
-            $this->conversationHistory->save($chatId, $history, $message, $assistantReply);
+            $this->conversationHistory->save($chatId, $history, $message, $assistantReply, $channel);
 
             return $assistantReply;
         } catch (\OpenAI\Exceptions\RateLimitException $e) {
@@ -133,7 +133,7 @@ class AIService
      * Returns the merged message when the current process is elected leader,
      * or null when another process is already handling debounce for this chat.
      */
-    public function collectDebouncedMessage(string $chatId, string $message): ?string
+    public function collectDebouncedMessage(string $chatId, string $message, string $channel = ''): ?string
     {
         $chatId = trim($chatId);
 
@@ -146,8 +146,9 @@ class AIService
             return null;
         }
 
-        $bufferKey = 'chat:debounce:buffer:' . $chatId;
-        $leaderKey = 'chat:debounce:leader:' . $chatId;
+        $prefix = $channel !== '' ? $channel . ':' : '';
+        $bufferKey = 'chat:debounce:buffer:' . $prefix . $chatId;
+        $leaderKey = 'chat:debounce:leader:' . $prefix . $chatId;
 
         $buffer = Cache::get($bufferKey, []);
         $buffer[] = [

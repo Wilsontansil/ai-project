@@ -94,6 +94,28 @@ class ToolDispatcher
         foreach ($tools as $tool) {
             $arguments = $this->extractArguments($msg, $tool->tool_name);
             if ($arguments !== null) {
+                // Guard against hallucinated tool_calls: if OpenAI calls a tool
+                // but the user's CURRENT message doesn't match any of its keywords
+                // and clearly matches a different tool, skip this call and let
+                // keyword matching (step 3) route to the correct tool.
+                $toolKeywords = $tool->keywords ?? [];
+                if (!empty($toolKeywords) && $tool->matchScore($userMessage) === 0) {
+                    $otherToolMatches = false;
+                    foreach ($tools as $otherTool) {
+                        if ($otherTool->tool_name !== $tool->tool_name && $otherTool->matchScore($userMessage) > 0) {
+                            $otherToolMatches = true;
+                            break;
+                        }
+                    }
+                    if ($otherToolMatches) {
+                        Log::warning('Skipped hallucinated tool_call', [
+                            'called_tool' => $tool->tool_name,
+                            'user_message' => $userMessage,
+                        ]);
+                        continue;
+                    }
+                }
+
                 if ($pendingKey !== null) {
                     Cache::forget($pendingKey);
                 }

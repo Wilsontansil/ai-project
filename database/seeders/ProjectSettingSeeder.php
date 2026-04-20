@@ -103,13 +103,6 @@ class ProjectSettingSeeder extends Seeder
 
             // Support
             [
-                'key' => 'support_phone',
-                'value' => env('SUPPORT_PHONE', '08120000000'),
-                'label' => 'Phone Number',
-                'group' => 'support',
-                'type' => 'text',
-            ],
-            [
                 'key' => 'support_telegram_url',
                 'value' => env('SUPPORT_TELEGRAM_URL'),
                 'label' => 'Telegram URL',

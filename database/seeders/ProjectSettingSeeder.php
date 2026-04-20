@@ -103,15 +103,15 @@ class ProjectSettingSeeder extends Seeder
 
             // Support
             [
-                'key' => 'support_telegram_url',
-                'value' => env('SUPPORT_TELEGRAM_URL'),
+                'key' => 'support_telegram_tag',
+                'value' => env('SUPPORT_TELEGRAM_TAG'),
                 'label' => 'Telegram Bot Tag',
                 'group' => 'support',
                 'type' => 'text',
             ],
             [
-                'key' => 'support_whatsapp_url',
-                'value' => env('SUPPORT_WHATSAPP_URL'),
+                'key' => 'support_whatsapp_phone',
+                'value' => env('SUPPORT_WHATSAPP_PHONE'),
                 'label' => 'WhatsApp Phone Number',
                 'group' => 'support',
                 'type' => 'text',

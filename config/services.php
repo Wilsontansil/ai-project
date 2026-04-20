@@ -62,8 +62,8 @@ return [
     ],
 
     'support' => [
-        'telegram_url' => env('SUPPORT_TELEGRAM_URL'),
-        'whatsapp_url' => env('SUPPORT_WHATSAPP_URL'),
+        'telegram_tag' => env('SUPPORT_TELEGRAM_TAG'),
+        'whatsapp_phone' => env('SUPPORT_WHATSAPP_PHONE'),
     ],
 
 ];

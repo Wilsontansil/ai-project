@@ -301,8 +301,8 @@ CONVERSATION_RETENTION_DAYS=90
 CUSTOMER_MEMORY_RETENTION_DAYS=90
 
 # Support
-SUPPORT_TELEGRAM_URL=
-SUPPORT_WHATSAPP_URL=
+SUPPORT_TELEGRAM_TAG=
+SUPPORT_WHATSAPP_PHONE=
 ```
 
 All settings can also be overridden from the backoffice Settings page (stored in `project_settings` table, takes priority over `.env`).

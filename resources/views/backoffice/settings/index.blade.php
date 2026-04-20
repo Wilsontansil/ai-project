@@ -129,10 +129,8 @@
                 <div class="grid gap-px bg-slate-700/30 sm:grid-cols-2">
                     @foreach ($settings as $setting)
                         <div class="bg-slate-900/85 transition hover:bg-slate-800/50" style="padding:1.25rem 1.5rem">
-                            <label for="setting_{{ $setting->id }}" class="mb-1.5 flex items-center justify-between">
+                            <label for="setting_{{ $setting->id }}" class="mb-1.5 block">
                                 <span class="text-xs font-medium text-slate-300">{{ $setting->label }}</span>
-                                <span
-                                    class="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">{{ $setting->key }}</span>
                             </label>
 
                             @if ($setting->type === 'secret')
@@ -193,8 +191,8 @@
                             @else
                                 @php
                                     $placeholders = [
-                                        'support_telegram_url' => '@xoneassistant_bot',
-                                        'support_whatsapp_url' => '08120000000',
+                                        'support_telegram_tag' => '@xoneassistant_bot',
+                                        'support_whatsapp_phone' => '08120000000',
                                     ];
                                 @endphp
                                 <input id="setting_{{ $setting->id }}" type="text"

@@ -539,7 +539,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'BonusCashback',
                 'display_name' => 'Bonus Cashback',
-                'description' => 'Cek bonus cashback berdasarkan perbandingan deposit dan withdraw minggu lalu',
+                'description' => 'Menyediakan informasi tentang bonus cashback. Bonus Cashback dibagikan setiap hari Senin.',
                 'slug' => 'bonus-cashback',
                 'type' => 'get_multiple',
                 'is_enabled' => true,

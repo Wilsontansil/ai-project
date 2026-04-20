@@ -61,7 +61,32 @@ class AIService
         if ($contextPrompt !== null) {
             $messages[] = ['role' => 'system', 'content' => $contextPrompt];
         }
-        $messages = array_merge($messages, $history, [['role' => 'user', 'content' => $message]]);
+
+        // Estimate token usage and trim history if payload is too large.
+        // gpt-4.1-mini supports 128k context, but keep requests under ~30k to stay safe.
+        $maxChars = 80_000; // ~20k tokens rough estimate
+        $systemChars = mb_strlen($systemPrompt) + mb_strlen($contextPrompt ?? '') + mb_strlen($message);
+        $availableChars = max(0, $maxChars - $systemChars);
+
+        $trimmedHistory = $history;
+        $historyChars = array_sum(array_map(fn ($m) => mb_strlen($m['content'] ?? ''), $trimmedHistory));
+
+        while ($historyChars > $availableChars && count($trimmedHistory) >= 2) {
+            array_shift($trimmedHistory); // remove oldest user msg
+            array_shift($trimmedHistory); // remove oldest assistant reply
+            $historyChars = array_sum(array_map(fn ($m) => mb_strlen($m['content'] ?? ''), $trimmedHistory));
+        }
+
+        if (count($trimmedHistory) < count($history)) {
+            Log::info('Trimmed conversation history', [
+                'channel' => $channel,
+                'chat_id' => $chatId,
+                'from' => count($history),
+                'to' => count($trimmedHistory),
+            ]);
+        }
+
+        $messages = array_merge($messages, $trimmedHistory, [['role' => 'user', 'content' => $message]]);
 
         try {
             $payload = [
@@ -80,7 +105,7 @@ class AIService
             }
 
             $openaiStart = MetricsCollector::startTimer();
-            $response = $client->chat()->create($payload);
+            $response = $this->callOpenAiWithRetry($client, $payload);
             $openaiLatency = MetricsCollector::elapsed($openaiStart);
 
             $usage = [
@@ -123,7 +148,13 @@ class AIService
             return $this->replyFormatter->format('⚠️ Sistem sedang sibuk, silakan coba beberapa saat lagi.');
         } catch (\Exception $e) {
             MetricsCollector::recordOpenAiCall($channel, $model, 'chat', 0, null, false);
-            Log::error('AIService reply failed', ['channel' => $channel, 'error' => $e->getMessage()]);
+            Log::error('AIService reply failed', [
+                'channel' => $channel,
+                'error' => $e->getMessage(),
+                'payload_chars' => mb_strlen(json_encode($payload['messages'] ?? [])),
+                'history_count' => count($trimmedHistory ?? $history),
+                'tools_count' => count($payload['tools'] ?? []),
+            ]);
 
             return $this->replyFormatter->format('⚠️ Terjadi error. Silakan coba beberapa saat lagi.');
         }
@@ -228,5 +259,35 @@ class AIService
         usleep($this->debounceSeconds * 1000000);
 
         return $this->collectBufferedMessages($chatId, $channel) ?? trim($message);
+    }
+
+    /**
+     * Call OpenAI with retry on transient 500 errors.
+     */
+    private function callOpenAiWithRetry(mixed $client, array $payload, int $maxRetries = 2): mixed
+    {
+        $lastException = null;
+
+        for ($attempt = 0; $attempt <= $maxRetries; $attempt++) {
+            try {
+                return $client->chat()->create($payload);
+            } catch (\OpenAI\Exceptions\ErrorException $e) {
+                $lastException = $e;
+
+                // Only retry on server errors (500), not client errors (400/401/etc.)
+                if (str_contains($e->getMessage(), 'server had an error') && $attempt < $maxRetries) {
+                    Log::warning('OpenAI 500 error, retrying', [
+                        'attempt' => $attempt + 1,
+                        'error' => $e->getMessage(),
+                    ]);
+                    usleep(500_000 * ($attempt + 1)); // 0.5s, 1s backoff
+                    continue;
+                }
+
+                throw $e;
+            }
+        }
+
+        throw $lastException;
     }
 }

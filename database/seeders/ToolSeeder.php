@@ -616,6 +616,28 @@ class ToolSeeder extends Seeder
 
             // ─── Deposit tools ───
             [
+                'tool_name' => 'search_website_knowledge',
+                'display_name' => 'Cari Info Website',
+                'description' => 'Mencari informasi dari halaman website yang sudah di-scrape. Gunakan tool ini ketika customer bertanya tentang website, produk, layanan, fitur, cara daftar, atau informasi umum tentang platform.',
+                'slug' => 'search-website-knowledge',
+                'type' => 'web_scraper',
+                'is_enabled' => true,
+                'data_model_id' => null,
+                'parameters' => null,
+                'endpoints' => null,
+                'keywords' => [
+                    'website', 'web', 'situs', 'halaman',
+                    'fitur', 'layanan', 'produk', 'tentang',
+                    'cara daftar', 'daftar', 'registrasi', 'register',
+                    'link', 'url', 'alamat web',
+                    'apa itu', 'apa saja',
+                    'informasi', 'info',
+                ],
+                'tool_rules' => "- Jawab berdasarkan konten website yang ditemukan\n- Jika tidak ada halaman yang relevan, sampaikan bahwa informasi belum tersedia\n- Jangan mengarang informasi yang tidak ada di konten website",
+                'information_text' => null,
+                'meta' => null,
+            ],
+            [
                 'tool_name' => 'checkDeposit',
                 'display_name' => 'Check Deposit',
                 'description' => 'Cek status deposit player berdasarkan username. Menampilkan informasi deposit terbaru dari data model deposit.',

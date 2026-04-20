@@ -28,6 +28,9 @@ Route::middleware(['set.locale', 'guest'])->group(function () {
 Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
     Route::get('/backoffice', [DashboardController::class, 'index'])->name('backoffice.dashboard');
     Route::get('/backoffice/customer/{customer}/chat', [DashboardController::class, 'chat'])->name('backoffice.customer.chat');
+    Route::get('/backoffice/escalation-queue', [DashboardController::class, 'escalationQueue'])->name('backoffice.escalation-queue');
+    Route::post('/backoffice/customer/{customer}/takeover', [DashboardController::class, 'takeover'])->name('backoffice.customer.takeover');
+    Route::post('/backoffice/customer/{customer}/release', [DashboardController::class, 'releaseToBot'])->name('backoffice.customer.release');
 
     // Chat agents (admin only)
     Route::middleware('permission:manage agents')->group(function () {

@@ -78,6 +78,7 @@
                             <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.dashboard.name') }}</th>
                             <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.dashboard.platform') }}</th>
                             <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.dashboard.phone') }}</th>
+                            <th class="px-3 py-2 font-medium text-center">{{ __('backoffice.pages.dashboard.mode') }}</th>
                             <th class="px-3 py-2 font-medium text-center">{{ __('backoffice.pages.dashboard.msgs') }}</th>
                             <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.dashboard.last_seen') }}</th>
                             <th class="px-3 py-2 font-medium"></th>
@@ -91,6 +92,18 @@
                                 </td>
                                 <td class="px-3 py-2 text-slate-300">{{ ucfirst($customer->platform) }}</td>
                                 <td class="px-3 py-2 text-slate-400">{{ $customer->phone_number ?: '-' }}</td>
+                                <td class="px-3 py-2 text-center">
+                                    @if ($customer->mode === 'waiting')
+                                        <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                                            style="background:rgba(251,191,36,0.2);color:#fbbf24;">{{ __('backoffice.pages.dashboard.mode_waiting') }}</span>
+                                    @elseif ($customer->mode === 'human')
+                                        <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                                            style="background:rgba(34,211,238,0.2);color:#22d3ee;">{{ __('backoffice.pages.dashboard.mode_human') }}</span>
+                                    @else
+                                        <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                                            style="background:rgba(52,211,153,0.2);color:#34d399;">{{ __('backoffice.pages.dashboard.mode_bot') }}</span>
+                                    @endif
+                                </td>
                                 <td class="px-3 py-2 text-center text-slate-400">{{ $customer->total_messages }}</td>
                                 <td class="px-3 py-2 text-slate-400">{{ $customer->last_seen_at?->diffForHumans() ?: '-' }}
                                 </td>
@@ -101,7 +114,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-3 py-6 text-center text-slate-500">
+                                <td colspan="7" class="px-3 py-6 text-center text-slate-500">
                                     {{ __('backoffice.pages.dashboard.empty') }}</td>
                             </tr>
                         @endforelse

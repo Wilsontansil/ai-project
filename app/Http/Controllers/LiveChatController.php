@@ -121,6 +121,16 @@ class LiveChatController extends Controller
             ]);
         }
 
+        // If customer is escalated (waiting/human), save the message but return empty.
+        if ($customer !== null && $customer->mode !== 'bot') {
+            Log::info("Skipping AI reply — customer mode is '{$customer->mode}'", [
+                'customer_id' => $customer->id,
+                'channel' => 'livechat',
+                'chat_id' => $chatId,
+            ]);
+            return '';
+        }
+
         $reply = app(AIService::class)->reply($combinedText, $chatId, 'livechat', $agentContext);
 
         MetricsCollector::recordRequest('livechat', MetricsCollector::elapsed($requestStart));

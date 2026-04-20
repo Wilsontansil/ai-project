@@ -20,12 +20,50 @@
                     {{ ucfirst($customer->platform) }}
                     <span class="text-slate-400">•</span>
                     {{ $customer->platform_user_id }}
+                    <span class="text-slate-400">•</span>
+                    @if ($customer->mode === 'waiting')
+                        <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                            style="background:rgba(251,191,36,0.2);color:#fbbf24;">{{ __('backoffice.pages.dashboard.mode_waiting') }}</span>
+                    @elseif ($customer->mode === 'human')
+                        <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                            style="background:rgba(34,211,238,0.2);color:#22d3ee;">{{ __('backoffice.pages.dashboard.mode_human') }}</span>
+                    @else
+                        <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                            style="background:rgba(52,211,153,0.2);color:#34d399;">{{ __('backoffice.pages.dashboard.mode_bot') }}</span>
+                    @endif
                 </p>
             </div>
-            <a href="{{ route('backoffice.dashboard') }}"
-                class="rounded-2xl border border-white/10 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/5">
-                ← {{ __('backoffice.pages.customer_chat.back') }}
-            </a>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+                @if ($customer->mode === 'bot')
+                    <form method="POST" action="{{ route('backoffice.customer.takeover', $customer->id) }}">
+                        @csrf
+                        <button type="submit" class="rounded-2xl px-4 py-2 text-sm font-semibold transition"
+                            style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);"
+                            onmouseover="this.style.background='rgba(251,191,36,0.25)'"
+                            onmouseout="this.style.background='rgba(251,191,36,0.15)'">{{ __('backoffice.pages.escalation.takeover') }}</button>
+                    </form>
+                @elseif ($customer->mode === 'human')
+                    <form method="POST" action="{{ route('backoffice.customer.release', $customer->id) }}">
+                        @csrf
+                        <button type="submit" class="rounded-2xl px-4 py-2 text-sm font-semibold transition"
+                            style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);"
+                            onmouseover="this.style.background='rgba(52,211,153,0.25)'"
+                            onmouseout="this.style.background='rgba(52,211,153,0.15)'">{{ __('backoffice.pages.escalation.release') }}</button>
+                    </form>
+                @elseif ($customer->mode === 'waiting')
+                    <form method="POST" action="{{ route('backoffice.customer.takeover', $customer->id) }}">
+                        @csrf
+                        <button type="submit" class="rounded-2xl px-4 py-2 text-sm font-semibold transition"
+                            style="background:rgba(34,211,238,0.15);color:#22d3ee;border:1px solid rgba(34,211,238,0.3);"
+                            onmouseover="this.style.background='rgba(34,211,238,0.25)'"
+                            onmouseout="this.style.background='rgba(34,211,238,0.15)'">{{ __('backoffice.pages.escalation.takeover') }}</button>
+                    </form>
+                @endif
+                <a href="{{ route('backoffice.dashboard') }}"
+                    class="rounded-2xl border border-white/10 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/5">
+                    ← {{ __('backoffice.pages.customer_chat.back') }}
+                </a>
+            </div>
         </div>
     </div>
 

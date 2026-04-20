@@ -20,6 +20,7 @@ class Customer extends Model
         'last_seen_at',
         'total_messages',
         'tags',
+        'mode',
     ];
 
     protected $casts = [

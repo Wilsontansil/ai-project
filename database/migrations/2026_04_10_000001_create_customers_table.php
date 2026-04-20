@@ -21,6 +21,7 @@ return new class extends Migration
             $table->timestamp('last_seen_at')->nullable();
             $table->unsignedInteger('total_messages')->default(0);
             $table->json('tags')->nullable();
+            $table->string('mode', 20)->default('bot');
             $table->timestamps();
 
             $table->unique(['platform', 'platform_user_id']);

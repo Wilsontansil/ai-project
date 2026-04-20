@@ -77,6 +77,16 @@ class ProcessAiReply implements ShouldQueue
             ]);
         }
 
+        // If customer is escalated (waiting/human), save the message but don't reply.
+        if ($customer !== null && $customer->mode !== 'bot') {
+            Log::info("Skipping AI reply — customer mode is '{$customer->mode}'", [
+                'customer_id' => $customer->id,
+                'channel' => $this->channel,
+                'chat_id' => $this->chatId,
+            ]);
+            return;
+        }
+
         $this->sendTypingIndicator();
 
         $reply = app(AIService::class)->reply($text, $this->chatId, $this->channel, $agentContext);

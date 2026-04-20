@@ -205,6 +205,19 @@
                     <span class="bo-label">{{ __('backoffice.menu.customer') }}</span>
                     <span class="bo-tooltip">{{ __('backoffice.menu.customer') }}</span>
                 </a>
+                <a href="{{ route('backoffice.escalation-queue') }}" class="bo-nav-item group"
+                    style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ $active === 'escalation' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
+                    onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
+                    onmouseout="this.style.background='{{ $active === 'escalation' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ $active === 'escalation' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
+                    <svg style="width:18px;height:18px;flex-shrink:0;{{ $active === 'escalation' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
+                        height="18">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" />
+                    </svg>
+                    <span class="bo-label">{{ __('backoffice.menu.escalation_queue') }}</span>
+                    <span class="bo-tooltip">{{ __('backoffice.menu.escalation_queue') }}</span>
+                </a>
             </div>
         </div>
 

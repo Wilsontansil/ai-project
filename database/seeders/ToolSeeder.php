@@ -48,7 +48,6 @@ class ToolSeeder extends Seeder
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
-                        'username' => ['type' => 'string', 'description' => 'Username akun'],
                         'namarek' => ['type' => 'string', 'description' => 'Nama rekening'],
                         'norek' => ['type' => 'string', 'description' => 'Nomor rekening'],
                         'bank' => ['type' => 'string', 'description' => 'Nama bank'],
@@ -59,7 +58,6 @@ class ToolSeeder extends Seeder
                     'endpoint' => [
                         'route' => '/resetpassword',
                         'body' => [
-                            'username' => '',
                             'namarek' => '',
                             'norek' => '',
                             'bank' => '',

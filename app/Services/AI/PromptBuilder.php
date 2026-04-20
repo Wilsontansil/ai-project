@@ -63,7 +63,6 @@ class PromptBuilder
 
         $profile = (array) ($context['customer_profile'] ?? []);
         $behavior = (array) ($context['behavior'] ?? []);
-        $recentConversation = trim((string) ($context['recent_conversation'] ?? ''));
 
         $parts = [
             'Customer context (internal only — do not expose to user):',
@@ -84,10 +83,6 @@ class PromptBuilder
                 'sentiment' => $behavior['sentiment'] ?? null,
                 'frequency_score' => $behavior['frequency_score'] ?? null,
             ], JSON_UNESCAPED_UNICODE);
-        }
-
-        if ($recentConversation !== '') {
-            $parts[] = "Recent conversation:\n" . mb_substr($recentConversation, 0, 1200);
         }
 
         return implode("\n\n", $parts);

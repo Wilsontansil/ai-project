@@ -130,20 +130,15 @@ class AIService
     }
 
     /**
-     * Collect and debounce rapid successive messages from the same chat.
-     * Returns the merged message when the current process is elected leader,
-     * or null when another process is already handling debounce for this chat.
+     * Buffer a message for debouncing without blocking.
+     *
+     * Returns true if this process is the elected leader (first to buffer),
+     * false if another process is already leading, or null on invalid input.
      */
-    public function collectDebouncedMessage(string $chatId, string $message, string $channel = ''): ?string
+    public function bufferDebouncedMessage(string $chatId, string $message, string $channel = ''): ?bool
     {
         $chatId = trim($chatId);
-
-        if ($chatId === '') {
-            return trim($message);
-        }
-
-        $text = trim($message);
-        if ($text === '') {
+        if ($chatId === '' || trim($message) === '') {
             return null;
         }
 
@@ -153,26 +148,29 @@ class AIService
 
         $buffer = Cache::get($bufferKey, []);
         $buffer[] = [
-            'message' => $text,
+            'message' => trim($message),
             'at' => now()->timestamp,
         ];
-
         Cache::put($bufferKey, $buffer, now()->addMinutes(2));
 
-        $isLeader = Cache::add($leaderKey, 1, now()->addSeconds($this->debounceSeconds + 2));
+        return Cache::add($leaderKey, 1, now()->addSeconds($this->debounceSeconds + 2));
+    }
 
-        if (!$isLeader) {
-            return null;
-        }
-
-        usleep($this->debounceSeconds * 1000000);
+    /**
+     * Collect and merge all buffered messages for a chat, then clear the buffer.
+     */
+    public function collectBufferedMessages(string $chatId, string $channel = ''): ?string
+    {
+        $prefix = $channel !== '' ? $channel . ':' : '';
+        $bufferKey = 'chat:debounce:buffer:' . $prefix . $chatId;
+        $leaderKey = 'chat:debounce:leader:' . $prefix . $chatId;
 
         $messages = Cache::get($bufferKey, []);
         Cache::forget($bufferKey);
         Cache::forget($leaderKey);
 
         if (!is_array($messages) || $messages === []) {
-            return $text;
+            return null;
         }
 
         $parts = [];
@@ -185,6 +183,36 @@ class AIService
 
         $parts = array_values(array_unique($parts));
 
-        return $parts === [] ? $text : implode("\n", $parts);
+        return $parts === [] ? null : implode("\n", $parts);
+    }
+
+    /**
+     * Collect and debounce rapid successive messages from the same chat (blocking).
+     *
+     * Used only by synchronous channels (LiveChat) where the reply must be
+     * returned in the same HTTP response. Async channels should use
+     * bufferDebouncedMessage() + delayed job + collectBufferedMessages().
+     */
+    public function collectDebouncedMessage(string $chatId, string $message, string $channel = ''): ?string
+    {
+        $chatId = trim($chatId);
+
+        if ($chatId === '') {
+            return trim($message);
+        }
+
+        $isLeader = $this->bufferDebouncedMessage($chatId, $message, $channel);
+
+        if ($isLeader === null) {
+            return trim($message) !== '' ? trim($message) : null;
+        }
+
+        if (!$isLeader) {
+            return null;
+        }
+
+        usleep($this->debounceSeconds * 1000000);
+
+        return $this->collectBufferedMessages($chatId, $channel) ?? trim($message);
     }
 }

@@ -30,7 +30,6 @@ class AgentContextService
                 'frequency_score' => $behavior->frequency_score,
                 'last_intent_at' => optional($behavior->last_intent_at)?->toDateTimeString(),
             ],
-            'recent_conversation' => $this->memoryService->toPromptSnippet($customer, 10),
         ];
     }
 }

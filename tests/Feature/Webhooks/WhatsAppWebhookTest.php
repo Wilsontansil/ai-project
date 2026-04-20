@@ -30,10 +30,10 @@ class WhatsAppWebhookTest extends TestCase
         Queue::fake();
 
         $aiService = Mockery::mock(AIService::class);
-        $aiService->shouldReceive('collectDebouncedMessage')
+        $aiService->shouldReceive('bufferDebouncedMessage')
             ->once()
-            ->with(self::CHAT_ID, self::MESSAGE)
-            ->andReturn(self::MESSAGE);
+            ->with(self::CHAT_ID, self::MESSAGE, 'whatsapp')
+            ->andReturn(true);
 
         $this->app->instance(AIService::class, $aiService);
 
@@ -52,7 +52,7 @@ class WhatsAppWebhookTest extends TestCase
         Queue::assertPushed(ProcessAiReply::class, function (ProcessAiReply $job) {
             return $job->channel === 'whatsapp'
                 && $job->chatId === self::CHAT_ID
-                && $job->combinedText === self::MESSAGE;
+                && $job->combinedText === '';
         });
     }
 

@@ -22,10 +22,10 @@ class TelegramWebhookTest extends TestCase
         Queue::fake();
 
         $aiService = Mockery::mock(AIService::class);
-        $aiService->shouldReceive('collectDebouncedMessage')
+        $aiService->shouldReceive('bufferDebouncedMessage')
             ->once()
-            ->with(self::CHAT_ID, self::MESSAGE)
-            ->andReturn(self::MESSAGE);
+            ->with(self::CHAT_ID, self::MESSAGE, 'telegram')
+            ->andReturn(true);
 
         $this->app->instance(AIService::class, $aiService);
 
@@ -41,7 +41,7 @@ class TelegramWebhookTest extends TestCase
         Queue::assertPushed(ProcessAiReply::class, function (ProcessAiReply $job) {
             return $job->channel === 'telegram'
                 && $job->chatId === self::CHAT_ID
-                && $job->combinedText === self::MESSAGE;
+                && $job->combinedText === '';
         });
     }
 

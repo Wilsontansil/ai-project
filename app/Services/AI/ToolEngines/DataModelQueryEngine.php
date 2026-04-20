@@ -28,6 +28,8 @@ use Illuminate\Support\Facades\Log;
  */
 class DataModelQueryEngine
 {
+    private const MAX_ROWS = 100;
+
     private const SAFE_OPERATORS = ['=', '!=', '<>', '>', '<', '>=', '<=', 'like', 'not like'];
 
     // ─── Public entry points ────────────────────────────────────────────────
@@ -179,10 +181,9 @@ class DataModelQueryEngine
             }
 
             if ($cfgLimit > 0) {
-                $rows = $query->limit($cfgLimit)->get();
+                $rows = $query->limit(min($cfgLimit, self::MAX_ROWS))->get();
             } elseif ($queryConfig !== []) {
-                // meta.query configured but no limit — return all matching rows.
-                $rows = $query->get();
+                $rows = $query->limit(self::MAX_ROWS)->get();
             } else {
                 // Legacy default: single row.
                 $row = $query->first();
@@ -390,7 +391,7 @@ class DataModelQueryEngine
                     $wrappedField = $grammar->wrap($aggField);
                     $wrappedAlias = $grammar->wrap("{$aggFunc}_{$aggField}");
                     $query->selectRaw("{$aggFunc}({$wrappedField}) as {$wrappedAlias}");
-                    $rows = ($cfgLimit > 0 ? $query->limit($cfgLimit) : $query)
+                    $rows = $query->limit($cfgLimit > 0 ? min($cfgLimit, self::MAX_ROWS) : self::MAX_ROWS)
                         ->get()
                         ->map(fn ($r) => (array) $r)
                         ->toArray();
@@ -403,7 +404,7 @@ class DataModelQueryEngine
                     ];
                 } else {
                     if ($cfgLimit > 0) {
-                        $rows = $query->limit($cfgLimit)
+                        $rows = $query->limit(min($cfgLimit, self::MAX_ROWS))
                             ->get()
                             ->map(fn ($r) => $this->normalizeData((array) $r))
                             ->toArray();
@@ -513,15 +514,7 @@ class DataModelQueryEngine
             return $normalized;
         }
 
-        if (!is_string($value)) {
-            return $value;
-        }
-
-        return match (mb_strtolower(trim($value))) {
-            'true', 'yes', 'y', '1' => true,
-            'false', 'no', 'n', '0' => false,
-            default => $value,
-        };
+        return $value;
     }
 
     // ─── Private query helpers ───────────────────────────────────────────────

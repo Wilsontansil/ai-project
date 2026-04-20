@@ -45,20 +45,29 @@ class ProcessAiReply implements ShouldQueue
 
     public function handle(): void
     {
+        // For delayed-dispatch debounce: collect buffered messages.
+        $text = $this->combinedText;
+        if ($text === '') {
+            $text = app(AIService::class)->collectBufferedMessages($this->chatId, $this->channel);
+            if ($text === null || $text === '') {
+                return;
+            }
+        }
+
         $requestStart = MetricsCollector::startTimer();
 
         $customer = null;
         $agentContext = [];
 
         try {
-            $customer = app(CustomerIdentityService::class)->resolve($this->channel, $this->payload, $this->combinedText);
-            $agentContext = app(AgentContextService::class)->buildContext($customer, $this->combinedText);
+            $customer = app(CustomerIdentityService::class)->resolve($this->channel, $this->payload, $text);
+            $agentContext = app(AgentContextService::class)->buildContext($customer, $text);
 
             app(ConversationMemoryService::class)->addMessage(
                 $customer,
                 $this->channel,
                 'user',
-                $this->combinedText,
+                $text,
                 ['chat_id' => $this->chatId]
             );
         } catch (\Throwable $e) {
@@ -70,7 +79,7 @@ class ProcessAiReply implements ShouldQueue
 
         $this->sendTypingIndicator();
 
-        $reply = app(AIService::class)->reply($this->combinedText, $this->chatId, $this->channel, $agentContext);
+        $reply = app(AIService::class)->reply($text, $this->chatId, $this->channel, $agentContext);
 
         $this->stopTypingIndicator();
 

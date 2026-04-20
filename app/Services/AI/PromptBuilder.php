@@ -6,7 +6,6 @@ use App\Models\ChatAgent;
 use App\Models\AgentRule;
 use App\Models\ProjectSetting;
 use App\Models\Tool;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * Builds system prompts and agent context injections for OpenAI requests.
@@ -43,10 +42,9 @@ class PromptBuilder
             $basePrompt .= "\n\n" . $agentRulesPrompt;
         }
 
-        $toolRules = $this->getToolRulesPrompt();
-        if ($toolRules !== '') {
-            $basePrompt .= "\n\n" . $toolRules;
-        }
+        // Tool rules are intentionally NOT included here to reduce payload size.
+        // They are injected per-tool in the second OpenAI call (generateReplyFromToolResult)
+        // via $toolContext['tool_rules'], where they actually matter.
 
         return $basePrompt;
     }
@@ -95,40 +93,9 @@ class PromptBuilder
         return implode("\n\n", $parts);
     }
 
-    private function getToolRulesPrompt(): string
-    {
-        if (!Schema::hasTable('tools')) {
-            return '';
-        }
-
-        $tools = Tool::query()
-            ->where('is_enabled', true)
-            ->where('tool_name', '!=', '_bot_config')
-            ->get();
-
-        $lines = [];
-
-        foreach ($tools as $tool) {
-            $rules = trim((string) ($tool->tool_rules ?? ''));
-            if ($rules === '') {
-                continue;
-            }
-
-            $lines[] = "ATURAN TOOL [{$tool->tool_name}] ({$tool->display_name}):\n{$rules}";
-        }
-
-        if ($lines === []) {
-            return '';
-        }
-
-        return "INSTRUKSI PER-TOOL (ikuti dengan ketat saat menggunakan setiap tool):\n\n" . implode("\n\n", $lines);
-    }
-
     private function getAgentRulesPrompt(?ChatAgent $chatAgent): string
     {
-        if (!Schema::hasTable('agent_rules')) {
-            return '';
-        }
+        try {
 
         $query = AgentRule::query()->where('is_active', true);
 
@@ -169,17 +136,20 @@ class PromptBuilder
         }
 
         return implode("\n\n", $sections);
+        } catch (\Throwable) {
+            return '';
+        }
     }
 
     private function getBotName(): string
     {
-        if (!Schema::hasTable('tools')) {
+        try {
+            $config = Tool::query()->where('tool_name', '_bot_config')->first();
+
+            return trim((string) ($config?->meta['bot_name'] ?? 'xoneBot')) ?: 'xoneBot';
+        } catch (\Throwable) {
             return 'xoneBot';
         }
-
-        $config = Tool::query()->where('tool_name', '_bot_config')->first();
-
-        return trim((string) ($config?->meta['bot_name'] ?? 'xoneBot')) ?: 'xoneBot';
     }
 
     private function getSupportContact(string $channel): ?string

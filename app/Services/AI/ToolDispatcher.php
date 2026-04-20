@@ -11,7 +11,6 @@ use App\Support\MetricsCollector;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * Dispatches tool calls to the appropriate engine and generates the final reply.
@@ -42,15 +41,15 @@ class ToolDispatcher
      */
     public function getEnabledTools(): Collection
     {
-        if (!Schema::hasTable('tools')) {
+        try {
+            return Tool::query()
+                ->with('dataModel')
+                ->where('is_enabled', true)
+                ->where('tool_name', '!=', '_bot_config')
+                ->get();
+        } catch (\Throwable) {
             return collect();
         }
-
-        return Tool::query()
-            ->with('dataModel')
-            ->where('is_enabled', true)
-            ->where('tool_name', '!=', '_bot_config')
-            ->get();
     }
 
     /**
@@ -151,7 +150,7 @@ class ToolDispatcher
                         Cache::forget($pendingKey);
 
                         $arguments = $this->forceExtractArguments(
-                            $client, $pendingTool, $systemPrompt, $contextPrompt, $history, $userMessage, $model
+                            $client, $pendingTool, $contextPrompt, $history, $userMessage, $model
                         );
 
                         if ($arguments !== null) {
@@ -186,7 +185,7 @@ class ToolDispatcher
         if ($bestTool !== null && $bestScore > 0) {
             $arguments = $bestTool->needsArguments()
                 ? $this->forceExtractArguments(
-                    $client, $bestTool, $systemPrompt, $contextPrompt, $history, $userMessage, $model
+                    $client, $bestTool, $contextPrompt, $history, $userMessage, $model
                 )
                 : [];
 
@@ -347,6 +346,10 @@ class ToolDispatcher
             $toolRulesInstruction = "\n\nIMPORTANT — Follow these tool-specific rules strictly:\n" . $toolContext['tool_rules'];
         }
 
+        // Remove fields already handled or internal-only to shrink the JSON payload.
+        $cleanContext = $toolContext;
+        unset($cleanContext['tool_rules']);
+
         $resultInstruction = 'Use the tool context as the only source of truth. Do not mention internal tools, SQL, database query details, or raw JSON.';
 
         if ($executionType === 'http_endpoint') {
@@ -367,7 +370,7 @@ class ToolDispatcher
 
 Original user request:\n{$userMessage}
 
-Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
         ];
 
         foreach (array_slice($history, -6) as $item) {
@@ -462,7 +465,6 @@ Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_
     private function forceExtractArguments(
         mixed $client,
         Tool $tool,
-        string $systemPrompt,
         ?string $contextPrompt,
         array $history,
         string $userMessage,
@@ -474,16 +476,18 @@ Tool context:\n" . json_encode($toolContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_
             return [];
         }
 
-        $messages = [['role' => 'system', 'content' => $systemPrompt]];
+        // Use a minimal prompt — only extraction instruction + context.
+        // The full system prompt (agent rules, base prompt) is not needed here.
+        $messages = [
+            [
+                'role' => 'system',
+                'content' => "Choose the matched tool and extract arguments from the conversation. Be flexible: users may provide data in natural language, mixed order, shorthand, abbreviations, or without labels. Use the latest message first, but also use recent chat history when it clearly contains the missing values. Do not require a rigid format or numbered template. If the conversation does not contain enough data for a required field, still call the tool with whatever arguments are available so the application can return the configured missing-data message.",
+            ],
+        ];
 
         if ($contextPrompt !== null) {
             $messages[] = ['role' => 'system', 'content' => $contextPrompt];
         }
-
-        $messages[] = [
-            'role' => 'system',
-            'content' => "Choose the matched tool and extract arguments from the conversation. Be flexible: users may provide data in natural language, mixed order, shorthand, abbreviations, or without labels. Use the latest message first, but also use recent chat history when it clearly contains the missing values. Do not require a rigid format or numbered template. If the conversation does not contain enough data for a required field, still call the tool with whatever arguments are available so the application can return the configured missing-data message.",
-        ];
 
         foreach (array_slice($history, -6) as $item) {
             if (!is_array($item)) {

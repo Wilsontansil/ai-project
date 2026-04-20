@@ -106,7 +106,7 @@ class AgentRuleSeeder extends Seeder
 
             [
                 'title' => 'Human Support',
-                'instruction' => 'Gunakan Human Support jika diperlukan, untuk informasi Human Support bisa menggunakan "Support, Kontak dan link support untuk customer.". Setiap Platform akan Berbeda.',
+                'instruction' => 'Jika percakapan memerlukan bantuan manusia (CS), arahkan customer ke kontak human support yang tersedia di context. Berikan kontak support sesuai platform yang sedang digunakan customer. Jangan pernah mengarang kontak support sendiri.',
                 'type' => 'guideline',
                 'category' => 'behavior',
                 'level' => 'info',

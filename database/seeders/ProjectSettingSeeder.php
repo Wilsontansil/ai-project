@@ -100,6 +100,13 @@ class ProjectSettingSeeder extends Seeder
                 'group' => 'support',
                 'type' => 'text',
             ],
+            [
+                'key' => 'support_livechat_url',
+                'value' => env('SUPPORT_LIVECHAT_URL'),
+                'label' => 'LiveChat Support URL',
+                'group' => 'support',
+                'type' => 'url',
+            ],
         ];
 
         foreach ($settings as $setting) {

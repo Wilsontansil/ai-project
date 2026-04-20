@@ -55,7 +55,7 @@ class AIService
         $systemPrompt = $this->promptBuilder->buildSystemPrompt($chatAgent);
         $toolDefinitions = $this->toolDispatcher->getToolDefinitions();
         $history = $this->conversationHistory->load($chatId, $channel);
-        $contextPrompt = $this->promptBuilder->buildAgentContextPrompt($agentContext);
+        $contextPrompt = $this->promptBuilder->buildAgentContextPrompt($agentContext, $channel);
 
         $messages = [['role' => 'system', 'content' => $systemPrompt]];
         if ($contextPrompt !== null) {

@@ -4,6 +4,7 @@ namespace App\Services\AI;
 
 use App\Models\ChatAgent;
 use App\Models\AgentRule;
+use App\Models\ProjectSetting;
 use App\Models\Tool;
 use App\Models\WebsitePage;
 use Illuminate\Support\Facades\Schema;
@@ -61,7 +62,7 @@ class PromptBuilder
      *
      * @param array<string, mixed> $context
      */
-    public function buildAgentContextPrompt(array $context): ?string
+    public function buildAgentContextPrompt(array $context, string $channel = 'telegram'): ?string
     {
         if ($context === []) {
             return null;
@@ -72,7 +73,13 @@ class PromptBuilder
 
         $parts = [
             'Customer context (internal only — do not expose to user):',
+            'Current platform: ' . $channel,
         ];
+
+        $supportContact = $this->getSupportContact($channel);
+        if ($supportContact !== null) {
+            $parts[] = 'Human support contact for this platform: ' . $supportContact;
+        }
 
         if ($profile !== []) {
             $parts[] = 'Profile: ' . json_encode([
@@ -208,5 +215,18 @@ class PromptBuilder
         $combined = implode("\n\n", $blocks);
 
         return "WEBSITE KNOWLEDGE (use this information to answer questions about our website, products, and services):\n\n" . $combined;
+    }
+
+    private function getSupportContact(string $channel): ?string
+    {
+        $map = [
+            'telegram' => ProjectSetting::getValue('support_telegram_tag'),
+            'whatsapp' => ProjectSetting::getValue('support_whatsapp_phone'),
+            'livechat' => ProjectSetting::getValue('support_livechat_url'),
+        ];
+
+        $contact = $map[$channel] ?? null;
+
+        return $contact !== null && $contact !== '' ? $contact : null;
     }
 }

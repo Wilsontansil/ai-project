@@ -13,8 +13,8 @@ class TelegramController extends Controller
 {
     public function handleWebhook(Request $request)
     {
-        Log::info('Not Sanitized Telegram webhook received', ['body' => $request->all()]);
-        Log::info('Telegram webhook received', LogSanitizer::summarize($request->all()));
+        // Log::info('Not Sanitized Telegram webhook received', ['body' => $request->all()]);
+        // Log::info('Telegram webhook received', LogSanitizer::summarize($request->all()));
 
         $text = $request->input('message.text');
         $chatId = $request->input('message.chat.id');

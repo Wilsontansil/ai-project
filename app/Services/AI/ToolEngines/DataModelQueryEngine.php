@@ -185,7 +185,17 @@ class DataModelQueryEngine
                 $row = $query->first();
 
                 if ($row === null) {
-                    return ['mode' => 'direct', 'reply' => 'Data tidak ditemukan.'];
+                    return [
+                        'mode' => 'model',
+                        'tool_context' => [
+                            'tool_name' => $tool->tool_name,
+                            'tool_display_name' => $tool->display_name,
+                            'tool_description' => $tool->description,
+                            'lookup_filters' => $lookupFilters,
+                            'resolved_data' => null,
+                            'data_found' => false,
+                        ],
+                    ];
                 }
 
                 return [
@@ -201,7 +211,17 @@ class DataModelQueryEngine
             }
 
             if ($rows->isEmpty()) {
-                return ['mode' => 'direct', 'reply' => 'Data tidak ditemukan.'];
+                return [
+                    'mode' => 'model',
+                    'tool_context' => [
+                        'tool_name' => $tool->tool_name,
+                        'tool_display_name' => $tool->display_name,
+                        'tool_description' => $tool->description,
+                        'lookup_filters' => $lookupFilters,
+                        'resolved_data' => null,
+                        'data_found' => false,
+                    ],
+                ];
             }
 
             $resolvedRows = $rows->map(fn ($r) => $this->normalizeData((array) $r))->toArray();
@@ -247,7 +267,16 @@ class DataModelQueryEngine
         $dataModels = DataModel::query()->whereIn('id', $dataModelIds)->get();
 
         if ($dataModels->isEmpty()) {
-            return ['mode' => 'direct', 'reply' => 'Data model tidak ditemukan.'];
+            return [
+                'mode' => 'model',
+                'tool_context' => [
+                    'tool_name' => $tool->tool_name,
+                    'tool_display_name' => $tool->display_name,
+                    'tool_description' => $tool->description,
+                    'resolved_data' => null,
+                    'data_found' => false,
+                ],
+            ];
         }
 
         // Validate tool-level required parameters first.
@@ -418,10 +447,6 @@ class DataModelQueryEngine
 
         $hasData = collect($allResults)->contains(fn ($r) => $r['data'] !== null || isset($r['aggregate']));
 
-        if (!$hasData) {
-            return ['mode' => 'direct', 'reply' => 'Data tidak ditemukan di semua data model.'];
-        }
-
         return [
             'mode' => 'model',
             'tool_context' => [
@@ -430,6 +455,7 @@ class DataModelQueryEngine
                 'tool_description' => $tool->description,
                 'lookup_type' => 'multi_model',
                 'results' => $allResults,
+                'data_found' => $hasData,
             ],
         ];
     }

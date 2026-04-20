@@ -191,8 +191,15 @@
                                     class="block w-full rounded-lg border border-white/10 bg-slate-950/60 text-xs text-white outline-none transition placeholder:text-slate-600 focus:border-white/30 focus:ring-1 focus:ring-white/10"
                                     style="padding:0.5rem 0.75rem" />
                             @else
+                                @php
+                                    $placeholders = [
+                                        'support_telegram_url' => '@xoneassistant_bot',
+                                        'support_whatsapp_url' => '08120000000',
+                                    ];
+                                @endphp
                                 <input id="setting_{{ $setting->id }}" type="text"
                                     name="setting_{{ $setting->id }}" value="{{ $setting->value }}"
+                                    placeholder="{{ $placeholders[$setting->key] ?? '' }}"
                                     class="block w-full rounded-lg border border-white/10 bg-slate-950/60 text-xs text-white outline-none transition placeholder:text-slate-600 focus:border-white/30 focus:ring-1 focus:ring-white/10"
                                     style="padding:0.5rem 0.75rem" />
                             @endif

@@ -5,6 +5,7 @@ namespace App\Services\AI;
 use App\Models\ChatAgent;
 use App\Models\AgentRule;
 use App\Models\Tool;
+use App\Models\WebsitePage;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -45,6 +46,11 @@ class PromptBuilder
         $toolRules = $this->getToolRulesPrompt();
         if ($toolRules !== '') {
             $basePrompt .= "\n\n" . $toolRules;
+        }
+
+        $websiteKnowledge = $this->getWebsiteKnowledgePrompt();
+        if ($websiteKnowledge !== '') {
+            $basePrompt .= "\n\n" . $websiteKnowledge;
         }
 
         return $basePrompt;
@@ -173,5 +179,34 @@ class PromptBuilder
         $config = Tool::query()->where('tool_name', '_bot_config')->first();
 
         return trim((string) ($config?->meta['bot_name'] ?? 'xoneBot')) ?: 'xoneBot';
+    }
+
+    private function getWebsiteKnowledgePrompt(): string
+    {
+        if (!Schema::hasTable('website_pages')) {
+            return '';
+        }
+
+        $pages = WebsitePage::query()
+            ->where('status', 'scraped')
+            ->whereNotNull('content')
+            ->get();
+
+        if ($pages->isEmpty()) {
+            return '';
+        }
+
+        $maxPerPage = 3000;
+        $blocks = [];
+
+        foreach ($pages as $page) {
+            $content = mb_substr(trim($page->content), 0, $maxPerPage);
+            $title = $page->title ?: 'Untitled';
+            $blocks[] = "=== {$title} ({$page->url}) ===\n{$content}";
+        }
+
+        $combined = implode("\n\n", $blocks);
+
+        return "WEBSITE KNOWLEDGE (use this information to answer questions about our website, products, and services):\n\n" . $combined;
     }
 }

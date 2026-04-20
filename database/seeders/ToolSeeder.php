@@ -62,6 +62,7 @@ class ToolSeeder extends Seeder
                             'namarek' => '',
                             'norek' => '',
                             'bank' => '',
+                            'agent' => 'PG',
                         ],
                         'expected_response' => [
                             'status' => 200,
@@ -105,6 +106,7 @@ class ToolSeeder extends Seeder
                             'bank' => '',
                             'namarek' => '',
                             'norek' => '',
+                            'agent' => 'PG',
                         ],
                         'expected_response' => [
                             'status' => 200,

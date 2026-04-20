@@ -101,8 +101,8 @@
                 <div style="margin-top:0.75rem;display:flex;flex-wrap:wrap;gap:1rem;font-size:11px;color:#64748b">
                     <span>{{ __('backoffice.pages.chat_agents.max_tokens') }}: {{ $agent->max_tokens }}</span>
                     <span>{{ __('backoffice.pages.chat_agents.temp') }}: {{ $agent->temperature }}</span>
-                    <span>{{ __('backoffice.pages.chat_agents.forbidden') }}:
-                        {{ $agent->forbiddenBehaviours()->where('is_active', true)->count() }}</span>
+                    <span>{{ __('backoffice.pages.chat_agents.rules') }}:
+                        {{ $agent->agentRules()->where('is_active', true)->count() }}</span>
                 </div>
 
                 {{-- Actions --}}

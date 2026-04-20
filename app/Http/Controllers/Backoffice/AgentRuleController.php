@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Models\AgentRule;
 use App\Models\ChatAgent;
-use App\Models\ForbiddenBehaviour;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class ForbiddenBehaviourController extends Controller
+class AgentRuleController extends Controller
 {
     public function create(ChatAgent $chatAgent): View
     {
-        return view('backoffice.forbidden-behaviours.create', [
+        return view('backoffice.agent-rules.create', [
             'chatAgent' => $chatAgent,
             'boActive' => 'chat-agents',
             'currentTool' => null,
@@ -25,55 +25,67 @@ class ForbiddenBehaviourController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'instruction' => ['required', 'string', 'max:1000'],
+            'type' => ['required', 'in:guideline,forbidden'],
+            'category' => ['required', 'string', 'max:50'],
             'level' => ['required', 'in:info,warning,danger'],
+            'priority' => ['required', 'integer', 'min:1', 'max:9999'],
         ]);
 
-        $chatAgent->forbiddenBehaviours()->create([
+        $chatAgent->agentRules()->create([
             'title' => trim($data['title']),
             'instruction' => trim($data['instruction']),
+            'type' => $data['type'],
+            'category' => trim($data['category']),
             'level' => $data['level'],
+            'priority' => $data['priority'],
             'is_active' => true,
         ]);
 
         return redirect()->route('backoffice.chat-agents.edit', $chatAgent)
-            ->with('success', 'Rule berhasil ditambahkan.');
+            ->with('success', __('backoffice.agent_rules.created'));
     }
 
-    public function edit(ChatAgent $chatAgent, ForbiddenBehaviour $forbidden_behaviour): View
+    public function edit(ChatAgent $chatAgent, AgentRule $agentRule): View
     {
-        return view('backoffice.forbidden-behaviours.edit', [
+        return view('backoffice.agent-rules.edit', [
             'chatAgent' => $chatAgent,
-            'rule' => $forbidden_behaviour,
+            'rule' => $agentRule,
             'boActive' => 'chat-agents',
             'currentTool' => null,
         ]);
     }
 
-    public function update(Request $request, ChatAgent $chatAgent, ForbiddenBehaviour $forbidden_behaviour): RedirectResponse
+    public function update(Request $request, ChatAgent $chatAgent, AgentRule $agentRule): RedirectResponse
     {
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'instruction' => ['required', 'string', 'max:1000'],
+            'type' => ['required', 'in:guideline,forbidden'],
+            'category' => ['required', 'string', 'max:50'],
             'level' => ['required', 'in:info,warning,danger'],
+            'priority' => ['required', 'integer', 'min:1', 'max:9999'],
             'is_active' => ['nullable'],
         ]);
 
-        $forbidden_behaviour->update([
+        $agentRule->update([
             'title' => trim($data['title']),
             'instruction' => trim($data['instruction']),
+            'type' => $data['type'],
+            'category' => trim($data['category']),
             'level' => $data['level'],
+            'priority' => $data['priority'],
             'is_active' => $request->boolean('is_active'),
         ]);
 
         return redirect()->route('backoffice.chat-agents.edit', $chatAgent)
-            ->with('success', 'Rule berhasil diupdate.');
+            ->with('success', __('backoffice.agent_rules.updated'));
     }
 
-    public function destroy(ChatAgent $chatAgent, ForbiddenBehaviour $forbidden_behaviour): RedirectResponse
+    public function destroy(ChatAgent $chatAgent, AgentRule $agentRule): RedirectResponse
     {
-        $forbidden_behaviour->delete();
+        $agentRule->delete();
 
         return redirect()->route('backoffice.chat-agents.edit', $chatAgent)
-            ->with('success', 'Rule berhasil dihapus.');
+            ->with('success', __('backoffice.agent_rules.deleted'));
     }
 }

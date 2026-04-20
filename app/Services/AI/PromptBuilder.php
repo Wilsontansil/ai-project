@@ -3,7 +3,7 @@
 namespace App\Services\AI;
 
 use App\Models\ChatAgent;
-use App\Models\ForbiddenBehaviour;
+use App\Models\AgentRule;
 use App\Models\Tool;
 use Illuminate\Support\Facades\Schema;
 
@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Schema;
  * Builds system prompts and agent context injections for OpenAI requests.
  *
  * Responsibilities:
- *   - Compose the full system prompt from ChatAgent config + forbidden behaviours + tool rules.
+ *   - Compose the full system prompt from ChatAgent config + agent rules + tool rules.
  *   - Build the per-request customer context block (profile, behaviour, recent history).
  *   - Look up the configured bot name from the _bot_config tool row.
  */
@@ -34,31 +34,12 @@ class PromptBuilder
 
         CURRENT SERVER TIME: {$serverTime} ({$serverTimezone})
         Use this as the authoritative current datetime for all time-based calculations (e.g. today, yesterday, last week Monday-Sunday, this month, etc.).
-
-        RULES:
-        - Default language: Bahasa Indonesia. Follow user's language if different.
-        - Speak naturally, warm, casual-professional — like a real CS agent on chat.
-        - Never make up information. Be honest if unsure.
-        - Understand casual chat naturally. Do not require the user to follow a rigid format, template, numbering, or field order.
-        - When the user provides data in free-form text, mixed order, abbreviations, slang, or partial sentences, infer the intended fields carefully from context.
-        - If some required data is still missing, ask only for the missing parts in a natural sentence. Do not force the user to rewrite everything in a fixed format unless absolutely necessary.
-        - If a user asks about account status, suspend status, verification, or any action covered by a configured tool, you MUST use the relevant tool and never guess the answer.
-        - For tools linked to a data model, treat database lookup results as the only source of truth.
-        - DataModel/game database access is READ-ONLY. This restriction applies only to DataModel-linked game tables, not to internal application model/workflow handling.
-        - If input values seem wrong, suggest valid options and ask user to re-check.
-        - Stay professional with angry/abusive users — respond politely, add emoji to soften tone.
-        - Introduce yourself as {$botName} on first interaction only.
-        - Format replies cleanly, but keep them conversational. Do not overuse rigid lists when a natural chat reply is clearer.
-
-        TOOL DATA:
-        - 'bank': BCA, Mandiri, BRI, BNI, Danamon, CIMB Niaga, Permata, Maybank, Panin, BSI, Bank Jago, Bank Mega, Bank Bukopin, OCBC NISP, Mayapada, Sinarmas, Commonwealth, UOB Indonesia, BTN, Bank DKI, BTPN, Artha Graha, Mayora, JTrust Indonesia, Mestika, Victoria, Ina Perdana, Woori Saudara, Artos Indonesia, Harda Internasional, Ganesha, Maspion, QNB Indonesia, Royal Indonesia, Bumi Arta, Nusantara Parahyangan, and their Syariah variants.
-        - 'norek': Numeric only.
         ";
         }
 
-        $caseInstructions = $this->getCaseInstructions($chatAgent);
-        if ($caseInstructions !== '') {
-            $basePrompt .= "\n\n" . $caseInstructions;
+        $agentRulesPrompt = $this->getAgentRulesPrompt($chatAgent);
+        if ($agentRulesPrompt !== '') {
+            $basePrompt .= "\n\n" . $agentRulesPrompt;
         }
 
         $toolRules = $this->getToolRulesPrompt();
@@ -141,13 +122,13 @@ class PromptBuilder
         return "PER-TOOL INSTRUCTIONS (follow these strictly when using each tool):\n\n" . implode("\n\n", $lines);
     }
 
-    private function getCaseInstructions(?ChatAgent $chatAgent): string
+    private function getAgentRulesPrompt(?ChatAgent $chatAgent): string
     {
-        if (!Schema::hasTable('forbidden_behaviours')) {
+        if (!Schema::hasTable('agent_rules')) {
             return '';
         }
 
-        $query = ForbiddenBehaviour::query()->where('is_active', true);
+        $query = AgentRule::query()->where('is_active', true);
 
         if ($chatAgent) {
             $query->where('chat_agent_id', $chatAgent->id);
@@ -155,20 +136,37 @@ class PromptBuilder
             $query->whereNull('chat_agent_id');
         }
 
-        $rules = $query->orderByRaw("CASE level WHEN 'danger' THEN 1 WHEN 'warning' THEN 2 WHEN 'info' THEN 3 ELSE 4 END")->get();
+        $allRules = $query->orderBy('priority')->get();
 
-        if ($rules->isEmpty()) {
+        if ($allRules->isEmpty()) {
             return '';
         }
 
-        $lines = ['FORBIDDEN BEHAVIOURS (strictly prohibited — never violate):'];
+        $sections = [];
 
-        foreach ($rules as $rule) {
-            $levelTag = strtoupper($rule->level);
-            $lines[] = "- [{$levelTag}] {$rule->instruction}";
+        // Guidelines
+        $guidelines = $allRules->where('type', 'guideline');
+        if ($guidelines->isNotEmpty()) {
+            $lines = ['RULES (follow these strictly):'];
+            foreach ($guidelines as $rule) {
+                $tag = strtoupper($rule->category);
+                $lines[] = "- [{$tag}] {$rule->instruction}";
+            }
+            $sections[] = implode("\n", $lines);
         }
 
-        return implode("\n", $lines);
+        // Forbidden
+        $forbidden = $allRules->where('type', 'forbidden');
+        if ($forbidden->isNotEmpty()) {
+            $lines = ['FORBIDDEN BEHAVIOURS (strictly prohibited — never violate):'];
+            foreach ($forbidden as $rule) {
+                $levelTag = strtoupper($rule->level);
+                $lines[] = "- [{$levelTag}] {$rule->instruction}";
+            }
+            $sections[] = implode("\n", $lines);
+        }
+
+        return implode("\n\n", $sections);
     }
 
     private function getBotName(): string

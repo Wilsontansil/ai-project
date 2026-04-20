@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Database\Seeders\DataModelSeeder;
-use Database\Seeders\ForbiddenBehaviourSeeder;
+use Database\Seeders\AgentRuleSeeder;
 use Database\Seeders\ProjectSettingSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             ToolSeeder::class,
             ProjectSettingSeeder::class,
             ChatAgentSeeder::class,
-            ForbiddenBehaviourSeeder::class,
+            AgentRuleSeeder::class,
             DatabaseConnectionSeeder::class,
         ]);
     }

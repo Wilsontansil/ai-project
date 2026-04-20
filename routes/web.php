@@ -3,7 +3,7 @@
 use App\Http\Controllers\Backoffice\AuthController;
 use App\Http\Controllers\Backoffice\ChatAgentController;
 use App\Http\Controllers\Backoffice\DataModelController;
-use App\Http\Controllers\Backoffice\ForbiddenBehaviourController;
+use App\Http\Controllers\Backoffice\AgentRuleController;
 use App\Http\Controllers\Backoffice\DashboardController;
 use App\Http\Controllers\Backoffice\DatabaseConnectionController;
 use App\Http\Controllers\Backoffice\LocaleController;
@@ -39,13 +39,13 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
         Route::post('/backoffice/chat-agents/{chatAgent}/duplicate', [ChatAgentController::class, 'duplicate'])->name('backoffice.chat-agents.duplicate');
     });
 
-    // Forbidden behaviours scoped per agent (admin only)
-    Route::middleware('permission:manage forbidden-behaviours')->group(function () {
-        Route::get('/backoffice/chat-agents/{chatAgent}/forbidden/create', [ForbiddenBehaviourController::class, 'create'])->name('backoffice.forbidden.create');
-        Route::post('/backoffice/chat-agents/{chatAgent}/forbidden', [ForbiddenBehaviourController::class, 'store'])->name('backoffice.forbidden.store');
-        Route::get('/backoffice/chat-agents/{chatAgent}/forbidden/{forbidden_behaviour}/edit', [ForbiddenBehaviourController::class, 'edit'])->name('backoffice.forbidden.edit');
-        Route::put('/backoffice/chat-agents/{chatAgent}/forbidden/{forbidden_behaviour}', [ForbiddenBehaviourController::class, 'update'])->name('backoffice.forbidden.update');
-        Route::delete('/backoffice/chat-agents/{chatAgent}/forbidden/{forbidden_behaviour}', [ForbiddenBehaviourController::class, 'destroy'])->name('backoffice.forbidden.destroy');
+    // Agent rules scoped per agent (admin only)
+    Route::middleware('permission:manage agent-rules')->group(function () {
+        Route::get('/backoffice/chat-agents/{chatAgent}/rules/create', [AgentRuleController::class, 'create'])->name('backoffice.agent-rules.create');
+        Route::post('/backoffice/chat-agents/{chatAgent}/rules', [AgentRuleController::class, 'store'])->name('backoffice.agent-rules.store');
+        Route::get('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}/edit', [AgentRuleController::class, 'edit'])->name('backoffice.agent-rules.edit');
+        Route::put('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}', [AgentRuleController::class, 'update'])->name('backoffice.agent-rules.update');
+        Route::delete('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}', [AgentRuleController::class, 'destroy'])->name('backoffice.agent-rules.destroy');
     });
 
     // Tools (admin only)

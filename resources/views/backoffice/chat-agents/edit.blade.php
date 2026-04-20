@@ -135,20 +135,20 @@
         </form>
     </div>
 
-    {{-- Forbidden Rules Section --}}
+    {{-- Agent Rules Section --}}
     <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
             <div>
-                <h2 class="text-sm font-semibold text-white">{{ __('backoffice.pages.chat_agents.forbidden_rules') }}</h2>
-                <p class="text-xs text-slate-400">{{ __('backoffice.pages.chat_agents.forbidden_rules_subtitle') }}</p>
+                <h2 class="text-sm font-semibold text-white">{{ __('backoffice.pages.chat_agents.agent_rules') }}</h2>
+                <p class="text-xs text-slate-400">{{ __('backoffice.pages.chat_agents.agent_rules_subtitle') }}</p>
             </div>
-            <a href="{{ route('backoffice.forbidden.create', $agent) }}" class="bo-btn-primary"
+            <a href="{{ route('backoffice.agent-rules.create', $agent) }}" class="bo-btn-primary"
                 style="font-size:0.75rem;padding:0.5rem 1rem">
                 + {{ __('backoffice.pages.chat_agents.new_rule') }}
             </a>
         </div>
 
-        @if ($forbiddenRules->isEmpty())
+        @if ($agentRules->isEmpty())
             <div class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-6 text-center">
                 <p class="text-sm text-slate-400">{{ __('backoffice.pages.chat_agents.no_rules') }}</p>
             </div>
@@ -162,19 +162,32 @@
                                 <th class="px-3 py-2 font-medium">
                                     {{ __('backoffice.pages.chat_agents.rule_instruction') }}</th>
                                 <th class="px-3 py-2 font-medium text-center">
+                                    {{ __('backoffice.pages.chat_agents.rule_type') }}</th>
+                                <th class="px-3 py-2 font-medium text-center">
                                     {{ __('backoffice.pages.chat_agents.rule_level') }}</th>
                                 <th class="px-3 py-2 font-medium text-center">{{ __('backoffice.common.status') }}</th>
                                 <th class="px-3 py-2 font-medium text-right">{{ __('backoffice.common.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
-                            @foreach ($forbiddenRules as $rule)
+                            @foreach ($agentRules as $rule)
                                 <tr class="transition hover:bg-white/5">
                                     <td class="px-3 py-2">
                                         <p class="font-medium text-white">{{ $rule->title }}</p>
+                                        <p class="text-[10px] text-slate-500">{{ $rule->category }} ·
+                                            #{{ $rule->priority }}</p>
                                     </td>
                                     <td class="max-w-xs px-3 py-2">
                                         <p class="text-xs text-slate-300 line-clamp-2">{{ $rule->instruction }}</p>
+                                    </td>
+                                    <td class="px-3 py-2 text-center">
+                                        @if ($rule->type === 'forbidden')
+                                            <span
+                                                style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(239,68,68,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#fca5a5">FORBIDDEN</span>
+                                        @else
+                                            <span
+                                                style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(59,130,246,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#93c5fd">GUIDELINE</span>
+                                        @endif
                                     </td>
                                     <td class="px-3 py-2 text-center">
                                         @if ($rule->level === 'danger')
@@ -199,12 +212,12 @@
                                     </td>
                                     <td class="px-3 py-2 text-right">
                                         <div style="display:flex;align-items:center;justify-content:flex-end;gap:0.5rem">
-                                            <a href="{{ route('backoffice.forbidden.edit', [$agent, $rule]) }}"
+                                            <a href="{{ route('backoffice.agent-rules.edit', [$agent, $rule]) }}"
                                                 class="bo-btn-sm">
                                                 {{ __('backoffice.common.edit') }}
                                             </a>
                                             <form method="POST"
-                                                action="{{ route('backoffice.forbidden.destroy', [$agent, $rule]) }}"
+                                                action="{{ route('backoffice.agent-rules.destroy', [$agent, $rule]) }}"
                                                 onsubmit="return confirm('{{ __('backoffice.pages.chat_agents.delete_confirm_rule', ['title' => $rule->title]) }}')">
                                                 @csrf
                                                 @method('DELETE')

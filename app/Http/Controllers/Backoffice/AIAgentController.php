@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
-use App\Models\ForbiddenBehaviour;
+use App\Models\AgentRule;
 use App\Models\ProjectSetting;
 use App\Models\Tool;
 use Illuminate\Http\RedirectResponse;
@@ -15,8 +15,8 @@ class AIAgentController extends Controller
 {
     public function index(Request $request): View
     {
-        $activeForbidden = Schema::hasTable('forbidden_behaviours')
-            ? ForbiddenBehaviour::query()->where('is_active', true)->count()
+        $activeRules = Schema::hasTable('agent_rules')
+            ? AgentRule::query()->where('is_active', true)->count()
             : 0;
 
         $botName = 'xoneBot';
@@ -32,7 +32,7 @@ class AIAgentController extends Controller
                 'agent_kode' => ProjectSetting::getValue('agent_kode', config('services.agent.kode', 'PG')),
                 'agent_id' => ProjectSetting::getValue('agent_id', config('services.agent.id', 1)),
                 'max_tokens' => 420,
-                'active_forbidden' => $activeForbidden,
+                'active_rules' => $activeRules,
             ],
         ]);
     }

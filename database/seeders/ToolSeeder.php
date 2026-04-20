@@ -174,11 +174,11 @@ class ToolSeeder extends Seeder
                 'parameters' => null,
                 'endpoints' => null,
                 'keywords' => ['promo', 'list promo', 'daftar promo'],
-                'tool_rules' => "- Tampilkan daftar promo aktif saat ini\n- Hanya tampilkan: title, body, category, start_date, end_date, buttonlink\n- Jangan tampilkan field internal (id, slug, urutan, agent, image)\n- Jika ada buttonlink, sertakan linknya\n- Jika tidak ada promo aktif, sampaikan belum tersedia",
+                'tool_rules' => "- Pertama tampilkan HANYA daftar title promo aktif beserta ringkasan singkat (1 kalimat) dari body\n- Jangan tampilkan isi body lengkap kecuali customer bertanya detail promo tertentu\n- Jika customer minta detail, barulah berikan body lengkap promo tersebut\n- Jika ada buttonlink, sertakan linknya\n- Jika tidak ada promo aktif, sampaikan belum tersedia",
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['title', 'body', 'category', 'start_date', 'end_date', 'buttonlink'],
+                        'select' => ['title', 'body', 'category', 'buttonlink'],
                         'filters' => [
                             ['field' => 'status', 'operator' => '=', 'value' => 'active'],
                         ],

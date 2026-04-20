@@ -22,7 +22,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => '_bot_config',
                 'display_name' => 'Bot Config',
-                'description' => 'General bot configuration',
+                'description' => 'Konfigurasi umum bot',
                 'slug' => '_bot-config',
                 'type' => 'info',
                 'is_enabled' => false,
@@ -39,7 +39,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'resetPassword',
                 'display_name' => 'Reset Password',
-                'description' => 'Reset user password after account data verification',
+                'description' => 'Reset password user setelah verifikasi data akun',
                 'slug' => 'reset-password',
                 'type' => 'update',
                 'is_enabled' => true,
@@ -79,7 +79,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'register',
                 'display_name' => 'Register',
-                'description' => 'Register a new player account. Requires username, email, phone number (telepon/hp), bank name, account holder name (nama rekening), and account number (nomor rekening).',
+                'description' => 'Mendaftarkan akun player baru. Memerlukan username, email, nomor telepon (hp), nama bank, nama pemilik rekening (nama rekening), dan nomor rekening.',
                 'slug' => 'register',
                 'type' => 'update',
                 'is_enabled' => true,
@@ -124,8 +124,8 @@ class ToolSeeder extends Seeder
             // ─── GET type tools (DataModel lookup) ───
             [
                 'tool_name' => 'checkSuspend',
-                'display_name' => 'Check Suspend',
-                'description' => 'Check if a player account is suspended',
+                'display_name' => 'Cek Suspend',
+                'description' => 'Cek apakah akun player sedang di-suspend',
                 'slug' => 'check-suspend',
                 'type' => 'get',
                 'is_enabled' => true,
@@ -145,8 +145,8 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'toStatus',
-                'display_name' => 'TurnOver Status',
-                'description' => 'Provide information about TurnOver (TO) status for a player. Uses "to" and "targetTo" fields from the Player model.',
+                'display_name' => 'Status TurnOver',
+                'description' => 'Menyediakan informasi status TurnOver (TO) untuk player. Menggunakan field "to" dan "targetTo" dari model Player.',
                 'slug' => 'to-status',
                 'type' => 'get',
                 'is_enabled' => true,
@@ -167,7 +167,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'promo',
                 'display_name' => 'Promo',
-                'description' => 'Provide Promo Information. Retrieves active promotions that are currently running.',
+                'description' => 'Menyediakan informasi Promo. Menampilkan promo aktif yang sedang berjalan.',
                 'slug' => 'promo',
                 'type' => 'get',
                 'is_enabled' => true,
@@ -200,7 +200,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'game_gacor',
                 'display_name' => 'Game Gacor',
-                'description' => 'the latest Bocoran Slot Gacor for today. Only take information from the provided list. Do not create new content',
+                'description' => 'Bocoran Slot Gacor terbaru hari ini. Hanya ambil informasi dari list yang tersedia. Jangan buat konten baru.',
                 'slug' => 'game-gacor',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -222,7 +222,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'pola_gacor',
                 'display_name' => 'Pola Gacor',
-                'description' => 'the latest Pola Gacor for today. Only take information from the provided list. Do not create new content',
+                'description' => 'Pola Gacor terbaru hari ini. Hanya ambil informasi dari list yang tersedia. Jangan buat konten baru.',
                 'slug' => 'pola-gacor',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -237,7 +237,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'bonus',
                 'display_name' => 'Bonus',
-                'description' => 'detailed information about the bonus claims. Answer any questions members may have regarding how to claim bonuses, eligibility, and any specific conditions or requirements',
+                'description' => 'Informasi lengkap tentang klaim bonus. Jawab pertanyaan member tentang cara klaim bonus, kelayakan, dan syarat atau ketentuan yang berlaku.',
                 'slug' => 'bonus',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -252,7 +252,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'reward_claim_info',
                 'display_name' => 'Reward Claim Info',
-                'description' => 'Provide information about why a member cannot claim bonus in the Reward menu, and explain how bonus deposit gratis works after multiple deposits.',
+                'description' => 'Menyediakan informasi tentang mengapa member tidak bisa klaim bonus di menu Reward, dan menjelaskan cara kerja bonus deposit gratis setelah beberapa kali deposit.',
                 'slug' => 'reward-claim-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -270,7 +270,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'wd_charge_info',
                 'display_name' => 'WD Charge Info',
-                'description' => 'Provide information about withdrawal (WD) charge. Explains why the amount received does not match the withdrawal amount due to a 2.5% charge when withdrawing more than 5 times per day.',
+                'description' => 'Menyediakan informasi tentang charge penarikan (WD). Menjelaskan mengapa jumlah yang diterima tidak sesuai karena charge 2,5% jika WD lebih dari 5 kali per hari.',
                 'slug' => 'wd-charge-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -287,7 +287,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'ewallet_premium_info',
                 'display_name' => 'E-Wallet Premium Info',
-                'description' => 'Provide information that E-Wallet accounts must be Premium status for registration and transactions on the platform.',
+                'description' => 'Menyediakan informasi bahwa akun E-Wallet harus berstatus Premium untuk registrasi dan transaksi di platform.',
                 'slug' => 'ewallet-premium-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -304,7 +304,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'situs_partner_info',
                 'display_name' => 'Situs Partner Info',
-                'description' => 'Provide information that partner sites are only partners and not part of the same company.',
+                'description' => 'Menyediakan informasi bahwa situs partner hanya sebagai partner, bukan bagian dari perusahaan yang sama.',
                 'slug' => 'situs-partner-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -321,7 +321,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'parlay_lose_info',
                 'display_name' => 'Parlay Lose Info',
-                'description' => 'Provide information about what happens when one match in a Mix Parlay ticket loses.',
+                'description' => 'Menyediakan informasi tentang apa yang terjadi jika satu pertandingan di tiket Mix Parlay kalah.',
                 'slug' => 'parlay-lose-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -338,7 +338,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'parlay_draw_info',
                 'display_name' => 'Parlay Draw Info',
-                'description' => 'Provide information about what happens when a match in a Mix Parlay ticket results in a Draw.',
+                'description' => 'Menyediakan informasi tentang apa yang terjadi jika pertandingan di tiket Mix Parlay berakhir seri (Draw).',
                 'slug' => 'parlay-draw-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -355,7 +355,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'parlay_won_half_info',
                 'display_name' => 'Parlay Won Half Info',
-                'description' => 'Provide information about Won Half (Menang Setengah) status in Mix Parlay and how it affects odds calculation.',
+                'description' => 'Menyediakan informasi tentang status Menang Setengah (Won Half) di Mix Parlay dan pengaruhnya terhadap perhitungan odds.',
                 'slug' => 'parlay-won-half-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -373,7 +373,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'parlay_odds_calculation',
                 'display_name' => 'Parlay Odds Calculation',
-                'description' => 'Provide information about how to calculate total odds in Mix Parlay by multiplying all selected match odds together.',
+                'description' => 'Menyediakan informasi cara menghitung total odds di Mix Parlay dengan mengalikan semua odds pertandingan yang dipilih.',
                 'slug' => 'parlay-odds-calculation',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -390,7 +390,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'parlay_payout_calculation',
                 'display_name' => 'Parlay Payout Calculation',
-                'description' => 'Provide information about how to calculate total winnings or payout in Mix Parlay.',
+                'description' => 'Menyediakan informasi cara menghitung total kemenangan atau payout di Mix Parlay.',
                 'slug' => 'parlay-payout-calculation',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -407,7 +407,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'parlay_void_postponed_info',
                 'display_name' => 'Parlay Void / Postponed Info',
-                'description' => 'Provide information about what happens when a match in Mix Parlay is cancelled, postponed, or voided.',
+                'description' => 'Menyediakan informasi tentang apa yang terjadi jika pertandingan di Mix Parlay dibatalkan, ditunda, atau void.',
                 'slug' => 'parlay-void-postponed-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -424,7 +424,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'handicap_info',
                 'display_name' => 'Handicap (HDP) Info',
-                'description' => 'Provide information about HDP or Asian Handicap system in sports betting, explaining how voor (goal advantage/disadvantage) works.',
+                'description' => 'Menyediakan informasi tentang sistem HDP atau Asian Handicap di taruhan olahraga, menjelaskan cara kerja voor (keunggulan/kekurangan gol).',
                 'slug' => 'handicap-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -441,7 +441,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'over_under_info',
                 'display_name' => 'Over/Under (O/U) Info',
-                'description' => 'Provide information about Over/Under (O/U) betting type, explaining how total goals prediction works.',
+                'description' => 'Menyediakan informasi tentang jenis taruhan Over/Under (O/U), menjelaskan cara prediksi total gol.',
                 'slug' => 'over-under-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -458,7 +458,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => '1x2_info',
                 'display_name' => '1x2 Info',
-                'description' => 'Provide information about the 1x2 betting format, explaining Home win, Draw, and Away win.',
+                'description' => 'Menyediakan informasi tentang format taruhan 1x2, menjelaskan Home win, Draw, dan Away win.',
                 'slug' => '1x2-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -475,7 +475,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'odd_even_info',
                 'display_name' => 'Odd/Even (O/E) Info',
-                'description' => 'Provide information about Odd/Even (O/E) betting type, explaining how to predict whether total goals will be odd or even.',
+                'description' => 'Menyediakan informasi tentang jenis taruhan Odd/Even (O/E), menjelaskan cara menebak total gol ganjil atau genap.',
                 'slug' => 'odd-even-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -492,7 +492,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'link_rtp',
                 'display_name' => 'Link RTP',
-                'description' => 'Provide information about RTP links for online slots or games. Answer any questions regarding how RTP is calculated, where to find RTP links, and how it affects gameplay or chances of winning.',
+                'description' => 'Menyediakan informasi link RTP untuk slot atau game online. Jawab pertanyaan tentang cara menghitung RTP, di mana menemukan link RTP, dan pengaruhnya terhadap gameplay atau peluang menang.',
                 'slug' => 'link-rtp',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -507,7 +507,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'link_apk',
                 'display_name' => 'Link APK',
-                'description' => 'Provide a link to download the APK for the specified app. Ensure the link is from a trusted source to guarantee security.',
+                'description' => 'Menyediakan link untuk download APK aplikasi. Pastikan link dari sumber terpercaya untuk keamanan.',
                 'slug' => 'link-apk',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -522,7 +522,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'depositPulsa',
                 'display_name' => 'Deposit Pulsa',
-                'description' => 'Provide step-by-step instructions on how to make a deposit via mobile phone credit (pulsa). Covers XL and Telkomsel top-up process through the website deposit form.',
+                'description' => 'Menyediakan panduan langkah demi langkah cara deposit melalui pulsa. Mencakup proses top-up XL dan Telkomsel melalui form deposit website.',
                 'slug' => 'deposit-pulsa',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -539,7 +539,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'BonusCashback',
                 'display_name' => 'Bonus Cashback',
-                'description' => 'Provide information about bonus cashback. Compare total "amount" on Deposit and Withdraw model in LAST WEEK where status is "accept". If total Withdraw amount > total Deposit amount, the player has no cashback.',
+                'description' => 'Menyediakan informasi tentang bonus cashback. Bandingkan total "amount" pada model Deposit dan Withdraw di MINGGU LALU dengan status "accept". Jika total Withdraw > total Deposit, player tidak mendapat cashback.',
                 'slug' => 'bonus-cashback',
                 'type' => 'get_multiple',
                 'is_enabled' => true,
@@ -582,7 +582,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'referral_bonus_issue',
                 'display_name' => 'Referral Bonus Issue',
-                'description' => 'Provide information when a member asks about referral bonus not appearing after inviting a friend.',
+                'description' => 'Menyediakan informasi ketika member bertanya tentang bonus referral yang tidak muncul setelah mengajak teman.',
                 'slug' => 'referral-bonus-issue',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -599,7 +599,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'search_game_guide',
                 'display_name' => 'Search Game Guide',
-                'description' => 'Provide guidance when a member cannot find a specific game, directing them to use the search feature.',
+                'description' => 'Menyediakan panduan ketika member tidak bisa menemukan game tertentu, mengarahkan untuk menggunakan fitur pencarian.',
                 'slug' => 'search-game-guide',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -618,7 +618,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'checkDeposit',
                 'display_name' => 'Check Deposit',
-                'description' => 'Check deposit status for a player by username. Returns the latest deposit information from the deposit data model.',
+                'description' => 'Cek status deposit player berdasarkan username. Menampilkan informasi deposit terbaru dari data model deposit.',
                 'slug' => 'check-deposit',
                 'type' => 'get',
                 'is_enabled' => true,
@@ -647,7 +647,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'rejectDeposit',
                 'display_name' => 'Reject Deposit',
-                'description' => 'Reject a pending deposit for a player. Requires username. Sends request to API endpoint to reject the deposit.',
+                'description' => 'Menolak deposit pending untuk player. Memerlukan username. Mengirim request ke API endpoint untuk menolak deposit.',
                 'slug' => 'reject-deposit',
                 'type' => 'update',
                 'is_enabled' => true,

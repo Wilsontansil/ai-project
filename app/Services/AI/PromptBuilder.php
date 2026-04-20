@@ -32,10 +32,10 @@ class PromptBuilder
                 $chatAgent->system_prompt
             );
         } else {
-            $basePrompt = "You are {$botName}, a friendly customer support assistant for a gaming platform.
+            $basePrompt = "Kamu adalah {$botName}, asisten customer support yang ramah untuk platform gaming.
 
-        CURRENT SERVER TIME: {$serverTime} ({$serverTimezone})
-        Use this as the authoritative current datetime for all time-based calculations (e.g. today, yesterday, last week Monday-Sunday, this month, etc.).
+        WAKTU SERVER SAAT INI: {$serverTime} ({$serverTimezone})
+        Gunakan ini sebagai referensi waktu resmi untuk semua perhitungan berbasis waktu (misal: hari ini, kemarin, minggu lalu Senin-Minggu, bulan ini, dll.).
         ";
         }
 
@@ -72,17 +72,17 @@ class PromptBuilder
         $behavior = (array) ($context['behavior'] ?? []);
 
         $parts = [
-            'Customer context (internal only — do not expose to user):',
-            'Current platform: ' . $channel,
+            'Konteks customer (internal saja — jangan ungkapkan ke user):',
+            'Platform saat ini: ' . $channel,
         ];
 
         $supportContact = $this->getSupportContact($channel);
         if ($supportContact !== null) {
-            $parts[] = 'Human support contact for this platform: ' . $supportContact;
+            $parts[] = 'Kontak human support untuk platform ini: ' . $supportContact;
         }
 
         if ($profile !== []) {
-            $parts[] = 'Profile: ' . json_encode([
+            $parts[] = 'Profil: ' . json_encode([
                 'platform' => $profile['platform'] ?? null,
                 'name' => $profile['name'] ?? null,
                 'total_messages' => $profile['total_messages'] ?? null,
@@ -91,7 +91,7 @@ class PromptBuilder
         }
 
         if ($behavior !== []) {
-            $parts[] = 'Behavior: ' . json_encode([
+            $parts[] = 'Perilaku: ' . json_encode([
                 'intent' => $behavior['intent'] ?? null,
                 'sentiment' => $behavior['sentiment'] ?? null,
                 'frequency_score' => $behavior['frequency_score'] ?? null,
@@ -120,14 +120,14 @@ class PromptBuilder
                 continue;
             }
 
-            $lines[] = "TOOL [{$tool->tool_name}] ({$tool->display_name}) RULES:\n{$rules}";
+            $lines[] = "ATURAN TOOL [{$tool->tool_name}] ({$tool->display_name}):\n{$rules}";
         }
 
         if ($lines === []) {
             return '';
         }
 
-        return "PER-TOOL INSTRUCTIONS (follow these strictly when using each tool):\n\n" . implode("\n\n", $lines);
+        return "INSTRUKSI PER-TOOL (ikuti dengan ketat saat menggunakan setiap tool):\n\n" . implode("\n\n", $lines);
     }
 
     private function getAgentRulesPrompt(?ChatAgent $chatAgent): string
@@ -155,7 +155,7 @@ class PromptBuilder
         // Guidelines
         $guidelines = $allRules->where('type', 'guideline');
         if ($guidelines->isNotEmpty()) {
-            $lines = ['RULES (follow these strictly):'];
+            $lines = ['ATURAN (ikuti dengan ketat):'];
             foreach ($guidelines as $rule) {
                 $tag = strtoupper($rule->category);
                 $lines[] = "- [{$tag}] {$rule->instruction}";
@@ -166,7 +166,7 @@ class PromptBuilder
         // Forbidden
         $forbidden = $allRules->where('type', 'forbidden');
         if ($forbidden->isNotEmpty()) {
-            $lines = ['FORBIDDEN BEHAVIOURS (strictly prohibited — never violate):'];
+            $lines = ['PERILAKU TERLARANG (dilarang keras — jangan pernah dilanggar):'];
             foreach ($forbidden as $rule) {
                 $levelTag = strtoupper($rule->level);
                 $lines[] = "- [{$levelTag}] {$rule->instruction}";
@@ -214,7 +214,7 @@ class PromptBuilder
 
         $combined = implode("\n\n", $blocks);
 
-        return "WEBSITE KNOWLEDGE (use this information to answer questions about our website, products, and services):\n\n" . $combined;
+        return "PENGETAHUAN WEBSITE (gunakan informasi ini untuk menjawab pertanyaan tentang website, produk, dan layanan kami):\n\n" . $combined;
     }
 
     private function getSupportContact(string $channel): ?string

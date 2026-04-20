@@ -62,7 +62,7 @@ class ToolSeeder extends Seeder
                             'namarek' => '',
                             'norek' => '',
                             'bank' => '',
-                            'agent' => 'PG',
+                            'agent' => config('services.agent.kode'),
                         ],
                         'expected_response' => [
                             'status' => 200,
@@ -106,7 +106,7 @@ class ToolSeeder extends Seeder
                             'bank' => '',
                             'namarek' => '',
                             'norek' => '',
-                            'agent' => 'PG',
+                            'agent' => config('services.agent.kode'),
                         ],
                         'expected_response' => [
                             'status' => 200,
@@ -664,7 +664,7 @@ class ToolSeeder extends Seeder
                         'route' => '/rejectdeposit',
                         'body' => [
                             'username' => '',
-                            'agent' => 'PG',
+                            'agent' => config('services.agent.kode'),
                         ],
                         'expected_response' => [
                             'status' => 200,

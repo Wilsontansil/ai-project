@@ -104,6 +104,15 @@ class AgentRuleSeeder extends Seeder
                 'priority' => 110,
             ],
 
+            [
+                'title' => 'Human Support',
+                'instruction' => 'Gunakan Human Support jika diperlukan, untuk informasi Human Support bisa menggunakan "Support, Kontak dan link support untuk customer.". Setiap Platform akan Berbeda.',
+                'type' => 'guideline',
+                'category' => 'behavior',
+                'level' => 'info',
+                'priority' => 120,
+            ],
+
             // === Forbidden behaviours (moved from ForbiddenBehaviourSeeder) ===
             [
                 'title' => 'Dilarang membuat data player tanpa konfirmasi',

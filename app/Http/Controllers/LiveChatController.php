@@ -18,7 +18,7 @@ class LiveChatController extends Controller
     public function handleWebhook(Request $request)
     {
         $payload = $request->all();
-
+        Log::info('Not Sanitized LiveChat webhook received', json_encode($payload));
         Log::info('LiveChat webhook received', LogSanitizer::summarize($payload));
 
         $response = null;

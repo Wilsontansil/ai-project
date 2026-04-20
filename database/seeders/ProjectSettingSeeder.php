@@ -69,22 +69,6 @@ class ProjectSettingSeeder extends Seeder
                 'type' => 'secret',
             ],
 
-            // Agent
-            [
-                'key' => 'agent_id',
-                'value' => env('AGENT_ID', '1'),
-                'label' => 'Agent ID',
-                'group' => 'agent',
-                'type' => 'number',
-            ],
-            [
-                'key' => 'agent_kode',
-                'value' => env('AGENT_KODE', 'PG'),
-                'label' => 'Agent Kode',
-                'group' => 'agent',
-                'type' => 'text',
-            ],
-
             // Retention
             [
                 'key' => 'conversation_retention_days',

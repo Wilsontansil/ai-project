@@ -208,9 +208,9 @@ class ToolSeeder extends Seeder
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
-                        'game_name' => ['type' => 'string', 'description' => 'Nama game, provider, atau kategori yang dicari'],
+                        'name' => ['type' => 'string', 'description' => 'Nama game, provider, atau kategori yang dicari'],
                     ],
-                    'required' => ['game_name'],
+                    'required' => ['name'],
                 ],
                 'endpoints' => null,
                 'keywords' => ['game', 'slot', 'casino', 'provider', 'cek game', 'ada game', 'game aktif', 'cari game', 'game apa', 'live casino', 'sportbook', 'togel', 'arcade', 'fishing'],

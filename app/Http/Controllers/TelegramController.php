@@ -13,6 +13,8 @@ class TelegramController extends Controller
 {
     public function handleWebhook(Request $request)
     {
+        Log::info('Telegram webhook received', LogSanitizer::summarize($request->all()));
+
         $text = $request->input('message.text');
         $chatId = $request->input('message.chat.id');
 

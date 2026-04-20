@@ -19,6 +19,8 @@ class LiveChatController extends Controller
     {
         $payload = $request->all();
 
+        Log::info('LiveChat webhook received', LogSanitizer::summarize($payload));
+
         $response = null;
 
         $challenge = (string) $request->input('challenge', $request->query('challenge', ''));

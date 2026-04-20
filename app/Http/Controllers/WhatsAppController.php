@@ -15,6 +15,8 @@ class WhatsAppController extends Controller
     {
         $requestPayload = $request->all();
 
+        Log::info('WhatsApp webhook received', LogSanitizer::summarize($requestPayload));
+
         if ($request->isMethod('get')) {
             return response()->json(['status' => 'ok']);
         }

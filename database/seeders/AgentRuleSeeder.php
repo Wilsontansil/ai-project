@@ -49,7 +49,7 @@ class AgentRuleSeeder extends Seeder
             ],
             [
                 'title' => 'Human Support',
-                'instruction' => 'Gunakan tool escalate_to_human HANYA jika kamu benar-benar tidak bisa menyelesaikan masalah customer setelah mencoba membantu. Contoh: tool error berulang, data tidak ditemukan setelah verifikasi, masalah di luar kemampuanmu (komplain berat, dispute, refund). Jangan eskalasi hanya karena customer minta bicara CS — coba bantu dulu. Saat eskalasi, berikan kontak support sesuai platform dan sampaikan bahwa CS akan segera membantu.',
+                'instruction' => 'Jika percakapan memerlukan bantuan manusia (CS), arahkan customer ke kontak human support yang tersedia di context. Berikan kontak support sesuai platform yang sedang digunakan customer. Jangan pernah mengarang kontak support sendiri. Coba bantu selesaikan masalah terlebih dahulu sebelum mengarahkan ke CS.',
                 'type' => 'guideline',
                 'category' => 'behavior',
                 'level' => 'info',

@@ -4,7 +4,6 @@ namespace App\Services\AI;
 
 use App\Models\Tool;
 use App\Services\AI\ToolEngines\DataModelQueryEngine;
-use App\Services\AI\ToolEngines\EscalateToHumanEngine;
 use App\Services\AI\ToolEngines\HttpToolEngine;
 use App\Services\AI\ToolEngines\InfoToolEngine;
 use App\Services\AI\ToolEngines\WebScraperToolEngine;
@@ -32,7 +31,6 @@ class ToolDispatcher
         private readonly HttpToolEngine $httpEngine,
         private readonly DataModelQueryEngine $dataModelEngine,
         private readonly WebScraperToolEngine $webScraperEngine,
-        private readonly EscalateToHumanEngine $escalateEngine,
     ) {}
 
     // ─── Public API ──────────────────────────────────────────────────────────
@@ -98,11 +96,6 @@ class ToolDispatcher
             if ($arguments !== null) {
                 if ($pendingKey !== null) {
                     Cache::forget($pendingKey);
-                }
-
-                if ($tool->type === 'escalate') {
-                    $arguments['chat_id'] = $chatId;
-                    $arguments['channel'] = $channel;
                 }
 
                 return $this->dispatch(
@@ -294,7 +287,6 @@ class ToolDispatcher
             'get_multiple' => $this->dataModelEngine->executeMultiple($tool, $arguments),
             'update' => $this->httpEngine->execute($tool, $arguments),
             'web_scraper' => $this->webScraperEngine->execute($tool, $arguments),
-            'escalate' => $this->escalateEngine->execute($tool, $arguments),
             default => [
                 'mode' => 'direct',
                 'reply' => "Tool {$tool->display_name} belum dikonfigurasi.",

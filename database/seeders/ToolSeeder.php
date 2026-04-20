@@ -679,22 +679,7 @@ class ToolSeeder extends Seeder
                 'meta' => null,
             ],
 
-            // ─── Escalation tool ───
-            [
-                'tool_name' => 'escalate_to_human',
-                'display_name' => 'Eskalasi ke CS',
-                'description' => 'Eskalasi percakapan ke human customer service. HANYA gunakan tool ini jika kamu benar-benar tidak bisa menyelesaikan masalah customer setelah mencoba membantu. Contoh: tool error berulang, data tidak ditemukan setelah verifikasi, masalah di luar kemampuanmu.',
-                'slug' => 'escalate-to-human',
-                'type' => 'escalate',
-                'is_enabled' => true,
-                'data_model_id' => null,
-                'parameters' => null,
-                'endpoints' => null,
-                'keywords' => [],
-                'tool_rules' => "- JANGAN gunakan tool ini hanya karena customer minta bicara CS — coba bantu dulu\n- Gunakan HANYA jika kamu sudah mencoba membantu tapi benar-benar tidak bisa menyelesaikan masalah\n- Contoh situasi eskalasi: tool error berulang, data tidak ditemukan setelah verifikasi, komplain berat, dispute, refund\n- Saat eskalasi berhasil, sampaikan ke customer bahwa CS akan segera membantu dan berikan kontak support sesuai platform",
-                'information_text' => null,
-                'meta' => null,
-            ],
+
         ];
 
         foreach ($tools as $tool) {

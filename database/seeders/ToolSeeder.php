@@ -16,6 +16,7 @@ class ToolSeeder extends Seeder
         $depositModel = DataModel::query()->where('slug', 'deposit')->first();
         $withdrawModel = DataModel::query()->where('slug', 'withdraw')->first();
         $promoModel = DataModel::query()->where('slug', 'promo')->first();
+        $gameModel = DataModel::query()->where('slug', 'game')->first();
 
         $tools = [
             // ─── Internal config (no type) ───
@@ -192,6 +193,41 @@ class ToolSeeder extends Seeder
                             'field' => 'urutan',
                             'direction' => 'asc',
                         ],
+                    ],
+                ],
+            ],
+
+            [
+                'tool_name' => 'checkGame',
+                'display_name' => 'Cek Game',
+                'description' => 'Cek ketersediaan dan info game berdasarkan nama, provider, atau kategori',
+                'slug' => 'check-game',
+                'type' => 'get',
+                'is_enabled' => true,
+                'data_model_id' => $gameModel?->id,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'game_name' => ['type' => 'string', 'description' => 'Nama game, provider, atau kategori yang dicari'],
+                    ],
+                    'required' => ['game_name'],
+                ],
+                'endpoints' => null,
+                'keywords' => ['game', 'slot', 'casino', 'provider', 'cek game', 'ada game', 'game aktif', 'cari game', 'game apa', 'live casino', 'sportbook', 'togel', 'arcade', 'fishing'],
+                'tool_rules' => "- Cari game berdasarkan field name, provider, category, atau keyword\n- Hanya tampilkan game aktif (isshow = 1)\n- Tampilkan: name, provider, category\n- Jika ditemukan banyak hasil, tampilkan maksimal 10 dan infokan masih ada lainnya\n- Jika tidak ditemukan, sampaikan game tidak tersedia",
+                'information_text' => null,
+                'meta' => [
+                    'query' => [
+                        'select' => ['name', 'provider', 'category', 'gameid'],
+                        'filters' => [
+                            ['field' => 'isshow', 'operator' => '=', 'value' => 1],
+                        ],
+                        'search_fields' => ['name', 'provider', 'category', 'keyword'],
+                        'order_by' => [
+                            'field' => 'urutan',
+                            'direction' => 'asc',
+                        ],
+                        'limit' => 10,
                     ],
                 ],
             ],

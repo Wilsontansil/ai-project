@@ -244,5 +244,31 @@ class DataModelSeeder extends Seeder
                 ],
             ]
         );
+
+        DataModel::updateOrCreate(
+            ['slug' => 'game'],
+            [
+                'model_name' => 'Game',
+                'description' => 'Game data model schema.',
+                'table_name' => 'games',
+                'connection_name' => 'mysqlgame',
+                'fields' => [
+                    'id' => ['type' => 'bigint(20) UNSIGNED', 'required' => false],
+                    'name' => ['type' => 'varchar(125)', 'required' => false],
+                    'gameid' => ['type' => 'varchar(125)', 'required' => false],
+                    'provider' => ['type' => 'varchar(125)', 'required' => false],
+                    'category' => ['type' => 'varchar(125)', 'required' => false],
+                    'iframe' => ['type' => 'tinyint(1)', 'required' => false],
+                    'image' => ['type' => 'varchar(125)', 'required' => false],
+                    'url' => ['type' => 'varchar(125)', 'required' => false],
+                    'urutan' => ['type' => 'int(11)', 'required' => false],
+                    'isshow' => ['type' => 'tinyint(1)', 'required' => false],
+                    'isspecialto' => ['type' => 'tinyint(1)', 'required' => false],
+                    'keyword' => ['type' => 'text', 'required' => false],
+                    'created_at' => ['type' => 'timestamp', 'required' => false],
+                    'updated_at' => ['type' => 'timestamp', 'required' => false],
+                ],
+            ]
+        );
     }
 }

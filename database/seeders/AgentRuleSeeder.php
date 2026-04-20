@@ -57,6 +57,14 @@ class AgentRuleSeeder extends Seeder
                 'level' => 'danger',
                 'priority' => 20,
             ],
+            [
+                'title' => 'Kebocoran Data',
+                'instruction' => 'Dilarang membagikan informasi player (username, saldo, email, nomor HP, bank, atau data pribadi lainnya) kepada user lain. Hanya berikan informasi akun kepada pemilik akun yang sedang berkomunikasi.',
+                'type' => 'forbidden',
+                'category' => 'security',
+                'level' => 'danger',
+                'priority' => 30,
+            ],
         ];
 
         foreach ($rules as $rule) {

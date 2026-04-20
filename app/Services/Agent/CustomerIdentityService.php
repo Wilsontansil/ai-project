@@ -29,6 +29,7 @@ class CustomerIdentityService
                 'last_seen_at' => now(),
                 'total_messages' => 0,
                 'tags' => [],
+                'mode' => 'bot',
             ]
         );
 

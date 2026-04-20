@@ -294,7 +294,7 @@ class ToolSeeder extends Seeder
                 'data_model_id' => null,
                 'parameters' => null,
                 'endpoints' => null,
-                'keywords' => ['ewallet', 'e-wallet', 'ewallet premium', 'rek ewallet', 'dompet digital', 'ovo', 'dana', 'gopay', 'shopeepay', 'linkaja', 'wajib premium', 'premium ewallet', 'upgrade ewallet'],
+                'keywords' => ['ewallet', 'e-wallet', 'ewallet premium', 'rek ewallet', 'dompet digital', 'wajib premium', 'premium ewallet', 'upgrade ewallet'],
                 'tool_rules' => "- Jelaskan bahwa semua akun E-Wallet WAJIB berstatus Premium\n- Sarankan member untuk upgrade E-Wallet terlebih dahulu sebelum mendaftar atau melakukan transaksi\n- Gunakan tone ramah dan informatif",
                 'information_text' => [
                     "Halo Kak, untuk penggunaan E-Wallet di situs kami, semua akun diwajibkan sudah berstatus Premium. Silakan pastikan E-Wallet Kakak sudah di-upgrade sebelum melakukan pendaftaran atau transaksi ya Kak 😊",

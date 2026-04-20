@@ -166,10 +166,6 @@ class DataModelQueryEngine
                         'tool_name' => $tool->tool_name,
                         'tool_display_name' => $tool->display_name,
                         'tool_description' => $tool->description,
-                        'data_model' => [
-                            'model_name' => $dataModel->model_name,
-                            'table_name' => $tableName,
-                        ],
                         'lookup_filters' => $lookupFilters,
                         'aggregate' => [
                             'function' => $aggFunc,
@@ -198,12 +194,6 @@ class DataModelQueryEngine
                         'tool_name' => $tool->tool_name,
                         'tool_display_name' => $tool->display_name,
                         'tool_description' => $tool->description,
-                        'data_model' => [
-                            'model_name' => $dataModel->model_name,
-                            'table_name' => $tableName,
-                            'connection_name' => $connectionName,
-                            'allowed_fields' => $allowedFields,
-                        ],
                         'lookup_filters' => $lookupFilters,
                         'resolved_data' => $this->normalizeData((array) $row),
                     ],
@@ -222,10 +212,6 @@ class DataModelQueryEngine
                     'tool_name' => $tool->tool_name,
                     'tool_display_name' => $tool->display_name,
                     'tool_description' => $tool->description,
-                    'data_model' => [
-                        'model_name' => $dataModel->model_name,
-                        'table_name' => $tableName,
-                    ],
                     'lookup_filters' => $lookupFilters,
                     'resolved_data' => $resolvedRows,
                 ],
@@ -376,8 +362,6 @@ class DataModelQueryEngine
                     $aggResult = $query->{$aggFunc}($aggField);
 
                     $allResults[] = [
-                        'model_name' => $dataModel->model_name,
-                        'table_name' => $tableName,
                         'filters' => $lookupFilters,
                         'aggregate' => [
                             'function' => $aggFunc,
@@ -397,8 +381,6 @@ class DataModelQueryEngine
                         ->toArray();
 
                     $allResults[] = [
-                        'model_name' => $dataModel->model_name,
-                        'table_name' => $tableName,
                         'filters' => $lookupFilters,
                         'data' => $rows ?: null,
                     ];
@@ -414,8 +396,6 @@ class DataModelQueryEngine
                     }
 
                     $allResults[] = [
-                        'model_name' => $dataModel->model_name,
-                        'table_name' => $tableName,
                         'filters' => $lookupFilters,
                         'data' => $rows ?: null,
                     ];
@@ -429,8 +409,6 @@ class DataModelQueryEngine
                 ]);
 
                 $allResults[] = [
-                    'model_name' => $dataModel->model_name,
-                    'table_name' => $tableName,
                     'filters' => [],
                     'data' => null,
                     'error' => 'Gagal mengambil data.',

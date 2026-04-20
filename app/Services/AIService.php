@@ -146,12 +146,19 @@ class AIService
         $bufferKey = 'chat:debounce:buffer:' . $prefix . $chatId;
         $leaderKey = 'chat:debounce:leader:' . $prefix . $chatId;
 
-        $buffer = Cache::get($bufferKey, []);
-        $buffer[] = [
-            'message' => trim($message),
-            'at' => now()->timestamp,
-        ];
-        Cache::put($bufferKey, $buffer, now()->addMinutes(2));
+        $lock = Cache::lock('lock:' . $bufferKey, 5);
+        $lock->block(3);
+
+        try {
+            $buffer = Cache::get($bufferKey, []);
+            $buffer[] = [
+                'message' => trim($message),
+                'at' => now()->timestamp,
+            ];
+            Cache::put($bufferKey, $buffer, now()->addMinutes(2));
+        } finally {
+            $lock->release();
+        }
 
         return Cache::add($leaderKey, 1, now()->addSeconds($this->debounceSeconds + 2));
     }
@@ -165,9 +172,16 @@ class AIService
         $bufferKey = 'chat:debounce:buffer:' . $prefix . $chatId;
         $leaderKey = 'chat:debounce:leader:' . $prefix . $chatId;
 
-        $messages = Cache::get($bufferKey, []);
-        Cache::forget($bufferKey);
-        Cache::forget($leaderKey);
+        $lock = Cache::lock('lock:' . $bufferKey, 5);
+        $lock->block(3);
+
+        try {
+            $messages = Cache::get($bufferKey, []);
+            Cache::forget($bufferKey);
+            Cache::forget($leaderKey);
+        } finally {
+            $lock->release();
+        }
 
         if (!is_array($messages) || $messages === []) {
             return null;

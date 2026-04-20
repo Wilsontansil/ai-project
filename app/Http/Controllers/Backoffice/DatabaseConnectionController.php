@@ -142,7 +142,11 @@ class DatabaseConnectionController extends Controller
 
             Log::error('Database connection test failed', [
                 'connection' => $databaseConnection->name,
-                'error' => $e->getMessage(),
+                'error' => preg_replace(
+                    '/password\s*=\s*[^\s;]+/i',
+                    'password=***',
+                    $e->getMessage()
+                ),
             ]);
 
             return redirect()->back()->with('error', 'Koneksi gagal. Periksa konfigurasi dan coba lagi.');

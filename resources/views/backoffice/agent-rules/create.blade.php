@@ -34,8 +34,11 @@
 
             <div>
                 <label for="title" class="bo-label">{{ __('backoffice.pages.agent_rules.rule_title') }}</label>
-                <input id="title" type="text" name="title" value="{{ old('title') }}"
+                <input id="title" type="text" name="title" value="{{ old('title') }}" maxlength="100"
+                    oninput="document.getElementById('title-count').textContent=this.value.length"
                     placeholder="e.g. Must use tools for account actions" />
+                <p style="margin-top:0.25rem;font-size:0.7rem;color:#64748b"><span
+                        id="title-count">{{ strlen(old('title', '')) }}</span>/100</p>
             </div>
 
             <div>
@@ -43,8 +46,11 @@
                     class="bo-label">{{ __('backoffice.pages.agent_rules.instruction_for_ai') }}</label>
                 <p style="margin-bottom:0.375rem;font-size:0.75rem;color:#94a3b8">
                     {{ __('backoffice.pages.agent_rules.instruction_help') }}</p>
-                <textarea id="instruction" name="instruction" rows="4"
+                <textarea id="instruction" name="instruction" rows="4" maxlength="500"
+                    oninput="document.getElementById('instr-count').textContent=this.value.length"
                     placeholder="e.g. AI harus selalu menggunakan tool yang tersedia untuk cek status akun">{{ old('instruction') }}</textarea>
+                <p style="margin-top:0.25rem;font-size:0.7rem;color:#64748b"><span
+                        id="instr-count">{{ strlen(old('instruction', '')) }}</span>/500</p>
             </div>
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">

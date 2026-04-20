@@ -66,8 +66,11 @@
             <div>
                 <label for="description" class="bo-label">{{ __('backoffice.pages.chat_agents.description') }}</label>
                 <input id="description" type="text" name="description"
-                    value="{{ old('description', $agent->description) }}"
+                    value="{{ old('description', $agent->description) }}" maxlength="200"
+                    oninput="document.getElementById('desc-count').textContent=this.value.length"
                     placeholder="Short description of this agent's purpose" />
+                <p style="margin-top:0.25rem;font-size:0.7rem;color:#64748b"><span
+                        id="desc-count">{{ strlen(old('description', $agent->description) ?? '') }}</span>/200</p>
             </div>
 
             {{-- System Prompt --}}
@@ -77,8 +80,11 @@
                     {{ __('backoffice.pages.chat_agents.system_prompt_help') }}
                     Variabel: <code style="color:#22d3ee">{bot_name}</code>, <code
                         style="color:#22d3ee">{server_time}</code>, <code style="color:#22d3ee">{server_timezone}</code></p>
-                <textarea id="system_prompt" name="system_prompt" rows="14"
+                <textarea id="system_prompt" name="system_prompt" rows="14" maxlength="2000"
+                    oninput="document.getElementById('prompt-count').textContent=this.value.length"
                     style="font-family:ui-monospace,SFMono-Regular,monospace;font-size:12px">{{ old('system_prompt', $agent->system_prompt) }}</textarea>
+                <p style="margin-top:0.25rem;font-size:0.7rem;color:#64748b"><span
+                        id="prompt-count">{{ strlen(old('system_prompt', $agent->system_prompt) ?? '') }}</span>/2000</p>
             </div>
 
             {{-- Max Tokens, Temperature, Toggles --}}

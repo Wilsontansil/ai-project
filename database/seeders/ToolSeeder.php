@@ -72,14 +72,14 @@ class ToolSeeder extends Seeder
                     ],
                 ],
                 'keywords' => ['reset password', 'resetpass', 'kata sandi', 'lupa password', 'lupa kata sandi'],
-                'tool_rules' => "- Terima data user dalam format chat bebas, tidak harus list atau urutan tertentu\n- Jika sebagian data sudah ada, cukup minta data yang masih kurang: username, nama rekening, nomor rekening, atau nama bank\n- Jangan paksa user mengulang semua data jika hanya ada 1-2 data yang kurang\n- Jangan eksekusi tool sebelum semua data wajib terkumpul lengkap\n- Setelah berhasil, infokan bahwa password sudah direset ke 1234567\n- Jika data tidak ditemukan, jelaskan data tidak cocok dan minta user periksa kembali inputnya",
+                'tool_rules' => "- Terima data user dalam format chat bebas\n- Jika sebagian data sudah ada, cukup minta data yang masih kurang\n- Jangan eksekusi sebelum semua data wajib terkumpul lengkap\n- Setelah berhasil, infokan password direset ke 1234567\n- Jika data tidak cocok, minta user periksa kembali",
                 'information_text' => null,
                 'meta' => null,
             ],
             [
                 'tool_name' => 'register',
                 'display_name' => 'Register',
-                'description' => 'Mendaftarkan akun player baru. Memerlukan username, email, nomor telepon (hp), nama bank, nama pemilik rekening (nama rekening), dan nomor rekening.',
+                'description' => 'Mendaftarkan akun player baru',
                 'slug' => 'register',
                 'type' => 'update',
                 'is_enabled' => true,
@@ -146,7 +146,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'toStatus',
                 'display_name' => 'Status TurnOver',
-                'description' => 'Menyediakan informasi status TurnOver (TO) untuk player. Menggunakan field "to" dan "targetTo" dari model Player.',
+                'description' => 'Menyediakan informasi status TurnOver (TO) untuk player',
                 'slug' => 'to-status',
                 'type' => 'get',
                 'is_enabled' => true,
@@ -160,7 +160,7 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => null,
                 'keywords' => ['to', 'turnover', 'status to', 'jumlah to', 'target to'],
-                'tool_rules' => "- Jika username belum ada, minta username secara natural tanpa memaksa format tertentu\n- Hanya tampilkan informasi field 'to' (jumlah TO saat ini) dan 'targetTo' (target TO yang harus dicapai)\n- Jangan tampilkan field lain dari data player\n- Hitung sisa TO yang harus dicapai: targetTo - to\n- Jika TO sudah mencapai atau melebihi target, infokan bahwa TO sudah terpenuhi dan player bisa melakukan withdraw\n- Jika TO belum tercapai, infokan sisa TO yang harus dipenuhi sebelum bisa withdraw\n- Sarankan player untuk terus bermain agar target TO cepat terpenuhi",
+                'tool_rules' => "- Jika username belum ada, minta username secara natural\n- Tampilkan hanya field 'to' (TO saat ini) dan 'targetTo' (target TO)\n- Hitung sisa TO: targetTo - to\n- Jika TO sudah tercapai, infokan bisa withdraw\n- Jika belum, infokan sisa TO yang harus dipenuhi",
                 'information_text' => null,
                 'meta' => null,
             ],
@@ -175,7 +175,7 @@ class ToolSeeder extends Seeder
                 'parameters' => null,
                 'endpoints' => null,
                 'keywords' => ['promo', 'list promo', 'daftar promo'],
-                'tool_rules' => "- Tampilkan daftar promo yang sedang aktif saat ini\n- Hanya tampilkan field: title, body, category, start_date, end_date, dan buttonlink\n- Jangan tampilkan field internal seperti id, slug, urutan, agent, image, isbanner, ispromotion\n- Presentasikan setiap promo dalam format yang rapi dan menarik\n- Jika ada buttonlink, sertakan link tersebut agar player bisa langsung mengakses promo\n- Jika ada kategori (casino/sports), kelompokkan atau sebutkan kategorinya\n- Jika tidak ada promo aktif, sampaikan bahwa saat ini belum ada promo yang tersedia dan sarankan untuk cek kembali nanti\n- Jangan buat atau karang promo sendiri, hanya tampilkan data yang ada",
+                'tool_rules' => "- Tampilkan daftar promo aktif saat ini\n- Hanya tampilkan: title, body, category, start_date, end_date, buttonlink\n- Jangan tampilkan field internal (id, slug, urutan, agent, image)\n- Jika ada buttonlink, sertakan linknya\n- Jika tidak ada promo aktif, sampaikan belum tersedia",
                 'information_text' => null,
                 'meta' => [
                     'query' => [
@@ -237,7 +237,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'bonus',
                 'display_name' => 'Bonus',
-                'description' => 'Informasi lengkap tentang klaim bonus. Jawab pertanyaan member tentang cara klaim bonus, kelayakan, dan syarat atau ketentuan yang berlaku.',
+                'description' => 'Informasi tentang klaim bonus dan syarat yang berlaku',
                 'slug' => 'bonus',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -252,7 +252,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'reward_claim_info',
                 'display_name' => 'Reward Claim Info',
-                'description' => 'Menyediakan informasi tentang mengapa member tidak bisa klaim bonus di menu Reward, dan menjelaskan cara kerja bonus deposit gratis setelah beberapa kali deposit.',
+                'description' => 'Informasi mengapa member tidak bisa klaim bonus di menu Reward',
                 'slug' => 'reward-claim-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -270,7 +270,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'wd_charge_info',
                 'display_name' => 'WD Charge Info',
-                'description' => 'Menyediakan informasi tentang charge penarikan (WD). Menjelaskan mengapa jumlah yang diterima tidak sesuai karena charge 2,5% jika WD lebih dari 5 kali per hari.',
+                'description' => 'Informasi charge penarikan (WD) 2,5% jika lebih dari 5 kali per hari',
                 'slug' => 'wd-charge-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -287,7 +287,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'ewallet_premium_info',
                 'display_name' => 'E-Wallet Premium Info',
-                'description' => 'Menyediakan informasi bahwa akun E-Wallet harus berstatus Premium untuk registrasi dan transaksi di platform.',
+                'description' => 'Informasi bahwa E-Wallet harus berstatus Premium untuk transaksi',
                 'slug' => 'ewallet-premium-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -355,7 +355,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'parlay_won_half_info',
                 'display_name' => 'Parlay Won Half Info',
-                'description' => 'Menyediakan informasi tentang status Menang Setengah (Won Half) di Mix Parlay dan pengaruhnya terhadap perhitungan odds.',
+                'description' => 'Informasi Menang Setengah (Won Half) di Mix Parlay',
                 'slug' => 'parlay-won-half-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -424,7 +424,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'handicap_info',
                 'display_name' => 'Handicap (HDP) Info',
-                'description' => 'Menyediakan informasi tentang sistem HDP atau Asian Handicap di taruhan olahraga, menjelaskan cara kerja voor (keunggulan/kekurangan gol).',
+                'description' => 'Informasi sistem HDP atau Asian Handicap di taruhan olahraga',
                 'slug' => 'handicap-info',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -492,7 +492,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'link_rtp',
                 'display_name' => 'Link RTP',
-                'description' => 'Menyediakan informasi link RTP untuk slot atau game online. Jawab pertanyaan tentang cara menghitung RTP, di mana menemukan link RTP, dan pengaruhnya terhadap gameplay atau peluang menang.',
+                'description' => 'Link RTP slot dengan winrate game tertinggi',
                 'slug' => 'link-rtp',
                 'type' => 'info',
                 'is_enabled' => true,
@@ -539,7 +539,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'BonusCashback',
                 'display_name' => 'Bonus Cashback',
-                'description' => 'Menyediakan informasi tentang bonus cashback. Bandingkan total "amount" pada model Deposit dan Withdraw di MINGGU LALU dengan status "accept". Jika total Withdraw > total Deposit, player tidak mendapat cashback.',
+                'description' => 'Cek bonus cashback berdasarkan perbandingan deposit dan withdraw minggu lalu',
                 'slug' => 'bonus-cashback',
                 'type' => 'get_multiple',
                 'is_enabled' => true,
@@ -553,7 +553,7 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => null,
                 'keywords' => ['cashback', 'bonus cashback', 'cek cashback'],
-                'tool_rules' => "- Jika username belum ada, minta username secara natural tanpa memaksa format tertentu\n- Bandingkan total amount dari Deposit dan Withdraw minggu lalu (Senin-Minggu) dengan status \"accept\"\n- Periode minggu lalu = Senin 00:00:00 sampai Minggu 23:59:59 dari minggu sebelumnya\n- Jika total Withdraw > total Deposit, berarti pemain TIDAK mendapatkan cashback (sudah profit/menang)\n- Jika total Deposit > total Withdraw, pemain BERHAK mendapatkan cashback dari selisihnya\n- Jika tidak ada data deposit atau withdraw, sampaikan bahwa tidak ada transaksi di minggu lalu\n- Tampilkan: total deposit, total withdraw, selisih, dan status kelayakan cashback\n- Format angka dalam mata uang (gunakan separator ribuan)\n- Jangan simpulkan rate/persentase cashback, hanya sampaikan data perbandingan dan kelayakan",
+                'tool_rules' => "- Bandingkan total amount Deposit vs Withdraw minggu lalu (Senin-Minggu) dengan status 'accept'\n- Jika Withdraw > Deposit = tidak dapat cashback (sudah profit)\n- Jika Deposit > Withdraw = berhak cashback dari selisihnya\n- Tampilkan: total deposit, total withdraw, selisih, dan status kelayakan\n- Format angka dengan separator ribuan",
                 'information_text' => null,
                 'meta' => [
                     'data_model_ids' => array_filter([
@@ -618,7 +618,7 @@ class ToolSeeder extends Seeder
             [
                 'tool_name' => 'search_website_knowledge',
                 'display_name' => 'Cari Info Website',
-                'description' => 'Mencari informasi dari halaman website yang sudah di-scrape. Gunakan tool ini ketika customer bertanya tentang website, produk, layanan, fitur, cara daftar, atau informasi umum tentang platform.',
+                'description' => 'Mencari informasi dari halaman website yang sudah di-scrape',
                 'slug' => 'search-website-knowledge',
                 'type' => 'web_scraper',
                 'is_enabled' => true,
@@ -654,7 +654,7 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => null,
                 'keywords' => ['cek deposit', 'check deposit', 'status deposit', 'deposit status', 'deposit saya', 'deposit belum masuk', 'deposit pending'],
-                'tool_rules' => "- Jika username belum ada, minta username secara natural tanpa memaksa format tertentu\n- Tampilkan data dari deposit TERBARU berdasarkan operatortime\n- Tampilkan status deposit terbaru: status, nominal, tanggal (operatortime)\n- Jika deposit masih pending, infokan bahwa deposit sedang diproses dan minta member menunggu\n- Jika deposit sudah accepted, infokan bahwa deposit sudah berhasil diproses\n- Jika deposit ditolak (rejected), infokan alasannya jika tersedia dan sarankan member untuk menghubungi CS\n- Jangan menampilkan field internal yang tidak relevan untuk member",
+                'tool_rules' => "- Jika username belum ada, minta username secara natural\n- Tampilkan deposit TERBARU berdasarkan operatortime: status, nominal, tanggal\n- Jika pending, infokan sedang diproses\n- Jika accepted, infokan sudah berhasil\n- Jika rejected, infokan dan sarankan hubungi CS",
                 'information_text' => null,
                 'meta' => [
                     'query' => [

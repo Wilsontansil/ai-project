@@ -27,8 +27,8 @@ class ChatAgentController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
-            'description' => ['nullable', 'string', 'max:500'],
-            'system_prompt' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:200'],
+            'system_prompt' => ['nullable', 'string', 'max:2000'],
             'model' => ['required', 'string', 'max:60'],
             'max_tokens' => ['required', 'integer', 'min:50', 'max:4096'],
             'temperature' => ['required', 'numeric', 'min:0', 'max:2'],
@@ -67,8 +67,8 @@ class ChatAgentController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
-            'description' => ['nullable', 'string', 'max:500'],
-            'system_prompt' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:200'],
+            'system_prompt' => ['nullable', 'string', 'max:2000'],
             'model' => ['required', 'string', 'max:60'],
             'max_tokens' => ['required', 'integer', 'min:50', 'max:4096'],
             'temperature' => ['required', 'numeric', 'min:0', 'max:2'],

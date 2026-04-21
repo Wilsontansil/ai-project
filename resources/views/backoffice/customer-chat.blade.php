@@ -211,10 +211,8 @@
             }
 
             function scrollToBottom() {
-                const wrap = document.getElementById('chat-messages-wrap');
-                if (wrap) wrap.scrollIntoView({
-                    block: 'end'
-                });
+                const content = document.getElementById('bo-content');
+                if (content) content.scrollTop = content.scrollHeight;
             }
 
             // ---- Polling ----
@@ -273,7 +271,8 @@
         $canSend = $customer->mode === 'human' && in_array($customer->platform, ['telegram', 'whatsapp']);
     @endphp
 
-    <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-4">
+    <div id="chat-send-bar" class="rounded-2xl border border-slate-700/70 bg-slate-950 p-4"
+        style="position:sticky;bottom:0;z-index:20;">
         @if ($canSend)
             <form method="POST" action="{{ route('backoffice.customer.send-message', $customer->id) }}">
                 @csrf

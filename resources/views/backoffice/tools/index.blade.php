@@ -22,6 +22,20 @@
         </div>
     @endif
 
+    {{-- Category Filter --}}
+    <div class="flex flex-wrap gap-2">
+        <a href="{{ route('backoffice.tools.index') }}"
+            class="rounded-full px-3 py-1 text-xs font-semibold transition {{ !$selectedCategory ? 'bg-cyan-400 text-slate-950' : 'border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10' }}">
+            All
+        </a>
+        @foreach ($categories as $cat)
+            <a href="{{ route('backoffice.tools.index', ['category' => $cat]) }}"
+                class="rounded-full px-3 py-1 text-xs font-semibold capitalize transition {{ $selectedCategory === $cat ? 'bg-cyan-400 text-slate-950' : 'border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10' }}">
+                {{ $cat }}
+            </a>
+        @endforeach
+    </div>
+
     @if ($tools->isEmpty())
         <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-8 text-center">
             <p class="text-sm text-slate-400">{{ __('backoffice.pages.tools.no_tools') }}</p>
@@ -37,6 +51,7 @@
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.tools.tool_name') }}</th>
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.tools.display_name') }}</th>
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.tools.type') }}</th>
+                                <th class="px-3 py-2 font-medium">Category</th>
                                 <th class="px-3 py-2 font-medium text-center">{{ __('backoffice.common.status') }}</th>
                                 <th class="px-3 py-2 font-medium text-right">{{ __('backoffice.common.actions') }}</th>
                             </tr>
@@ -70,6 +85,28 @@
                                             <span
                                                 class="inline-flex items-center rounded-full bg-teal-500/20 px-2.5 py-0.5 text-xs font-semibold text-teal-300 ring-1 ring-teal-400/30">GET
                                                 MULTIPLE</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        @php
+                                            $catColors = [
+                                                'account' => 'bg-cyan-500/20 text-cyan-300 ring-cyan-400/30',
+                                                'sports' => 'bg-green-500/20 text-green-300 ring-green-400/30',
+                                                'games' => 'bg-purple-500/20 text-purple-300 ring-purple-400/30',
+                                                'promo' => 'bg-amber-500/20 text-amber-300 ring-amber-400/30',
+                                                'payment' => 'bg-blue-500/20 text-blue-300 ring-blue-400/30',
+                                                'general' => 'bg-slate-500/20 text-slate-300 ring-slate-400/30',
+                                                'system' => 'bg-rose-500/20 text-rose-300 ring-rose-400/30',
+                                            ];
+                                            $color =
+                                                $catColors[$tool->category] ??
+                                                'bg-slate-500/20 text-slate-300 ring-slate-400/30';
+                                        @endphp
+                                        @if ($tool->category)
+                                            <span
+                                                class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 capitalize {{ $color }}">{{ $tool->category }}</span>
+                                        @else
+                                            <span class="text-slate-500">—</span>
                                         @endif
                                     </td>
                                     <td class="px-3 py-2 text-center">

@@ -23,7 +23,7 @@
         <form method="POST" action="{{ route('backoffice.tools.store') }}" class="space-y-5">
             @csrf
 
-            <div class="grid gap-4 md:grid-cols-3">
+            <div class="grid gap-4 md:grid-cols-4">
                 <div>
                     <label for="tool_name"
                         class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.tool_name_key') }}</label>
@@ -54,6 +54,17 @@
                             {{ __('backoffice.pages.tools.type_get_multiple') }}</option>
                         <option value="update" {{ old('type') === 'update' ? 'selected' : '' }}>
                             {{ __('backoffice.pages.tools.type_update') }}</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="category" class="mb-2 block text-sm text-slate-200">Category</label>
+                    <p class="mb-2 text-xs text-slate-400">Group this tool for backoffice filtering.</p>
+                    <select id="category" name="category"
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
+                        <option value="">— None —</option>
+                        @foreach ($categories as $cat)
+                            <option value="{{ $cat }}" {{ old('category') === $cat ? 'selected' : '' }}>{{ ucfirst($cat) }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>

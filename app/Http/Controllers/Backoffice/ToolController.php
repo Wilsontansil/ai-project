@@ -18,24 +18,34 @@ use Illuminate\Support\Facades\Log;
 
 class ToolController extends Controller
 {
-    public function index(): View
+    private const CATEGORIES = ['account', 'sports', 'games', 'promo', 'payment', 'general', 'system'];
+
+    public function index(Request $request): View
     {
-        $tools = Tool::query()
+        $category = $request->query('category');
+
+        $query = Tool::query()
             ->where('tool_name', '!=', '_bot_config')
-            ->orderBy('id')
-            ->get();
+            ->orderBy('id');
+
+        if ($category && in_array($category, self::CATEGORIES, true)) {
+            $query->where('category', $category);
+        }
 
         return view('backoffice.tools.index', [
-            'tools' => $tools,
-            'boActive' => 'tools',
+            'tools'            => $query->get(),
+            'boActive'         => 'tools',
+            'categories'       => self::CATEGORIES,
+            'selectedCategory' => $category,
         ]);
     }
 
     public function create(): View
     {
         return view('backoffice.tools.create', [
-            'boActive' => 'tools',
+            'boActive'   => 'tools',
             'dataModels' => DataModel::query()->orderBy('model_name')->get(),
+            'categories' => self::CATEGORIES,
         ]);
     }
 
@@ -53,9 +63,10 @@ class ToolController extends Controller
     public function edit(Tool $tool): View
     {
         return view('backoffice.tools.edit', [
-            'tool' => $tool,
-            'boActive' => 'tools',
+            'tool'       => $tool,
+            'boActive'   => 'tools',
             'dataModels' => DataModel::query()->orderBy('model_name')->get(),
+            'categories' => self::CATEGORIES,
         ]);
     }
 
@@ -106,6 +117,7 @@ class ToolController extends Controller
             'error_responses' => ['nullable', 'array'],
             'error_responses.*.status' => ['required_with:error_responses', 'integer'],
             'error_responses.*.message' => ['required_with:error_responses', 'string', 'max:255'],
+            'category' => ['nullable', 'string', 'in:account,sports,games,promo,payment,general,system'],
         ];
 
         if ($isCreate) {
@@ -130,7 +142,8 @@ class ToolController extends Controller
             'keywords' => $this->normalizeKeywords($request, $data, $tool),
             'tool_rules' => trim($data['tool_rules'] ?? '') ?: null,
             'information_text' => $this->buildInformationTexts($request),
-            'meta' => $this->buildToolMeta($request, $tool, $type),
+            'meta'             => $this->buildToolMeta($request, $tool, $type),
+            'category'         => $data['category'] ?? null,
         ];
 
         if ($tool === null) {

@@ -33,6 +33,7 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
     Route::post('/backoffice/customer/{customer}/takeover', [DashboardController::class, 'takeover'])->name('backoffice.customer.takeover');
     Route::post('/backoffice/customer/{customer}/release', [DashboardController::class, 'releaseToBot'])->name('backoffice.customer.release');
     Route::post('/backoffice/customer/{customer}/send-message', [DashboardController::class, 'sendMessage'])->name('backoffice.customer.send-message');
+    Route::get('/backoffice/customer/{customer}/messages', [DashboardController::class, 'messages'])->name('backoffice.customer.messages');
 
     // Chat agents (admin only)
     Route::middleware('permission:manage agents')->group(function () {

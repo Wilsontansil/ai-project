@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\ProjectSetting;
 use App\Services\Agent\ConversationMemoryService;
 use App\Support\ResilientHttp;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -112,6 +113,33 @@ class DashboardController extends Controller
             'messages' => $messages,
             'startDate' => $startDate,
             'endDate' => $endDate,
+        ]);
+    }
+
+    public function messages(Request $request, Customer $customer): JsonResponse
+    {
+        $startDate = $request->query('start_date', now()->toDateString());
+        $endDate = $request->query('end_date', now()->toDateString());
+
+        $conversations = Conversation::query()
+            ->where('customer_id', $customer->id)
+            ->whereBetween('conversation_date', [$startDate, $endDate])
+            ->orderBy('conversation_date')
+            ->get();
+
+        $messages = [];
+        foreach ($conversations as $convo) {
+            $date = $convo->conversation_date->toDateString();
+            foreach ($convo->messages ?? [] as $msg) {
+                $msg['date'] = $date;
+                $messages[] = $msg;
+            }
+        }
+
+        return response()->json([
+            'messages'     => $messages,
+            'customer_mode' => $customer->mode,
+            'can_send'     => $customer->mode === 'human' && in_array($customer->platform, ['telegram', 'whatsapp']),
         ]);
     }
 

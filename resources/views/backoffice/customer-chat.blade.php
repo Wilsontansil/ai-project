@@ -89,11 +89,12 @@
         </form>
     </div>
 
-    <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 sm:p-6">
+    <div id="chat-messages-wrap" class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 sm:p-6">
         @if (empty($messages))
-            <p class="py-8 text-center text-sm text-slate-400">{{ __('backoffice.pages.customer_chat.empty') }}</p>
+            <p id="chat-empty" class="py-8 text-center text-sm text-slate-400">
+                {{ __('backoffice.pages.customer_chat.empty') }}</p>
         @else
-            <div class="space-y-4">
+            <div id="chat-messages" class="space-y-4">
                 @php $lastDate = null; @endphp
                 @foreach ($messages as $msg)
                     @php $msgDate = $msg['date'] ?? null; @endphp
@@ -134,6 +135,126 @@
             </div>
         @endif
     </div>
+
+    <script>
+        (function() {
+            const POLL_MS = 4000;
+            const customerId = {{ $customer->id }};
+            const startDate = document.getElementById('start_date')?.value || '{{ $startDate }}';
+            const endDate = document.getElementById('end_date')?.value || '{{ $endDate }}';
+            const pollUrl = '{{ route('backoffice.customer.messages', $customer->id) }}';
+
+            // Snapshot of last known message list for change detection
+            let lastCount = {{ count($messages) }};
+            let polling = true;
+
+            // ---- Renderers ----
+            function buildDateSep(date) {
+                return `<div class="flex items-center gap-3 py-2">
+            <div class="h-px flex-1 bg-white/10"></div>
+            <span class="rounded-full bg-white/10 px-3 py-1 text-xs text-slate-400">${date}</span>
+            <div class="h-px flex-1 bg-white/10"></div>
+        </div>`;
+            }
+
+            function buildUserBubble(msg) {
+                return `<div class="flex justify-start">
+            <div class="inline-flex w-auto max-w-[50%] flex-col break-words rounded-2xl rounded-bl-sm border border-white/10 bg-slate-800 px-4 py-3 shadow-lg shadow-black/20" style="max-width:50%;">
+                <p class="mb-1 text-[10px] font-semibold text-amber-400">{{ __('backoffice.pages.customer_chat.customer') }}</p>
+                <p class="whitespace-pre-wrap break-words text-sm text-slate-100">${escHtml(msg.message)}</p>
+                <p class="mt-1.5 text-[10px] text-slate-500">${msg.time ?? ''}</p>
+            </div>
+        </div>`;
+            }
+
+            function buildAssistantBubble(msg) {
+                const label = msg.role ?? '{{ __('backoffice.pages.customer_chat.assistant') }}';
+                return `<div class="flex justify-end">
+            <div class="inline-flex w-auto max-w-[50%] flex-col break-words rounded-2xl rounded-br-sm border border-cyan-500/20 bg-cyan-600/25 px-4 py-3 shadow-lg shadow-cyan-900/20" style="max-width:50%;">
+                <p class="mb-1 text-[10px] font-semibold text-cyan-400">${escHtml(label)}</p>
+                <p class="whitespace-pre-wrap break-words text-sm leading-6 text-white">${escHtml(msg.message)}</p>
+                <p class="mt-1.5 text-right text-[10px] text-cyan-300/60">${msg.time ?? ''}</p>
+            </div>
+        </div>`;
+            }
+
+            function escHtml(str) {
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+            }
+
+            function renderMessages(messages) {
+                const wrap = document.getElementById('chat-messages-wrap');
+                if (!wrap) return;
+
+                if (messages.length === 0) {
+                    wrap.innerHTML =
+                        `<p class="py-8 text-center text-sm text-slate-400">{{ __('backoffice.pages.customer_chat.empty') }}</p>`;
+                    return;
+                }
+
+                let html = '<div id="chat-messages" class="space-y-4">';
+                let lastDate = null;
+                messages.forEach(msg => {
+                    const d = msg.date ?? null;
+                    if (d !== lastDate) {
+                        html += buildDateSep(d);
+                        lastDate = d;
+                    }
+                    html += (msg.role === 'user') ? buildUserBubble(msg) : buildAssistantBubble(msg);
+                });
+                html += '</div>';
+                wrap.innerHTML = html;
+            }
+
+            function scrollToBottom() {
+                const wrap = document.getElementById('chat-messages-wrap');
+                if (wrap) wrap.scrollIntoView({
+                    block: 'end'
+                });
+            }
+
+            // ---- Polling ----
+            async function poll() {
+                if (!polling || document.visibilityState === 'hidden') return;
+                try {
+                    const qs = new URLSearchParams();
+                    const sdEl = document.getElementById('start_date');
+                    const edEl = document.getElementById('end_date');
+                    qs.set('start_date', sdEl ? sdEl.value : startDate);
+                    qs.set('end_date', edEl ? edEl.value : endDate);
+
+                    const res = await fetch(`${pollUrl}?${qs}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    if (!res.ok) return;
+                    const data = await res.json();
+
+                    if (data.messages.length !== lastCount) {
+                        lastCount = data.messages.length;
+                        renderMessages(data.messages);
+                        scrollToBottom();
+                    }
+                } catch (_) {
+                    /* network error — silently skip */ }
+            }
+
+            // Scroll to bottom on initial load
+            document.addEventListener('DOMContentLoaded', scrollToBottom);
+
+            // Pause/resume when tab visibility changes
+            document.addEventListener('visibilitychange', () => {
+                polling = document.visibilityState !== 'hidden';
+            });
+
+            setInterval(poll, POLL_MS);
+        }());
+    </script>
 
     {{-- Flash messages --}}
     @if (session('send_success'))

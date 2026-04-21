@@ -43,6 +43,8 @@ class PromptBuilder
             $basePrompt .= "\n\n" . $agentRulesPrompt;
         }
 
+        $basePrompt .= "\n\n" . $this->getToolUsagePolicyPrompt();
+
         $kbPrompt = $this->getKnowledgeBasePrompt();
         if ($kbPrompt !== '') {
             $basePrompt .= "\n\n" . $kbPrompt;
@@ -88,6 +90,31 @@ class PromptBuilder
         }
 
         return implode("\n\n", $parts);
+    }
+
+    private function getToolUsagePolicyPrompt(): string
+    {
+        return <<<'PROMPT'
+PANDUAN PENGGUNAAN TOOLS (ikuti dengan ketat):
+
+Kamu memiliki akses ke KNOWLEDGE BASE dan TOOLS. Ikuti urutan ini sebelum memutuskan:
+
+1. JAWAB DARI KNOWLEDGE BASE terlebih dahulu jika pertanyaan bersifat umum/informatif.
+   Contoh: "apa itu cashback?", "kapan cashback dibagikan?", "bagaimana cara hitung cashback?"
+   → Jawab langsung dari Knowledge Base. JANGAN panggil tool.
+
+2. PANGGIL TOOL hanya jika customer membutuhkan DATA SPESIFIK miliknya sendiri.
+   Contoh: "cek cashback saya", "berapa cashback saya minggu ini?", "lihat histori deposit saya"
+   → Ini memerlukan data real-time dari sistem. Panggil tool yang sesuai.
+
+3. KOMBINASI: Jika customer bertanya umum DAN ingin cek datanya sekaligus,
+   jawab penjelasan singkat dari Knowledge Base DULU, lalu panggil tool untuk datanya.
+
+PRINSIP UTAMA:
+- Jangan panggil tool hanya karena pertanyaan menyebut kata kunci tool.
+- Pertimbangkan konteks: apakah customer butuh PENJELASAN atau butuh DATA?
+- Jika ragu, jawab dari Knowledge Base dulu dan tawarkan untuk cek data jika diperlukan.
+PROMPT;
     }
 
     private function getKnowledgeBasePrompt(): string

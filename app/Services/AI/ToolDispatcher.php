@@ -143,6 +143,17 @@ class ToolDispatcher
                         }
                     }
 
+                    // Topic-switch detection: if the pending tool scores zero on the new message
+                    // but a different tool matches, the user has changed subject — abandon pending.
+                    if (!$rejected && $pendingTool->matchScore($userMessage) === 0) {
+                        foreach ($tools as $otherTool) {
+                            if ($otherTool->tool_name !== $pendingTool->tool_name && $otherTool->matchScore($userMessage) > 0) {
+                                $rejected = true;
+                                break;
+                            }
+                        }
+                    }
+
                     if ($rejected) {
                         Cache::forget($pendingKey);
                         // Fall through to keyword fallback so the correct tool can match.

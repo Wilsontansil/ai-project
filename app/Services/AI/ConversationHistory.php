@@ -14,11 +14,24 @@ class ConversationHistory
 {
     private int $maxMessages = 20;
 
-    private int $ttlHours = 12;
+    /** Cache TTL for conversation history. */
+    private int $ttlHours = 2;
+
+    /** If chat is idle longer than this, treat next message as a fresh session. */
+    private int $inactivityMinutes = 60;
 
     public function load(?string $chatId, string $channel = ''): array
     {
         if (!$chatId) {
+            return [];
+        }
+
+        // Reset context after a period of inactivity so old topics don't carry over.
+        $lastActive = Cache::get($this->lastActiveKey($chatId, $channel));
+        if ($lastActive !== null && (now()->timestamp - (int) $lastActive) > ($this->inactivityMinutes * 60)) {
+            Cache::forget($this->key($chatId, $channel));
+            Cache::forget($this->lastActiveKey($chatId, $channel));
+
             return [];
         }
 
@@ -39,7 +52,9 @@ class ConversationHistory
         // Keep only recent messages to control token usage.
         $history = array_slice($history, -$this->maxMessages);
 
-        Cache::put($this->key($chatId, $channel), $history, now()->addHours($this->ttlHours));
+        $ttl = now()->addHours($this->ttlHours);
+        Cache::put($this->key($chatId, $channel), $history, $ttl);
+        Cache::put($this->lastActiveKey($chatId, $channel), now()->timestamp, $ttl);
     }
 
     public function key(string $chatId, string $channel = ''): string
@@ -47,5 +62,12 @@ class ConversationHistory
         $prefix = $channel !== '' ? $channel . ':' : '';
 
         return 'chat_context:' . $prefix . $chatId;
+    }
+
+    private function lastActiveKey(string $chatId, string $channel = ''): string
+    {
+        $prefix = $channel !== '' ? $channel . ':' : '';
+
+        return 'chat_last_active:' . $prefix . $chatId;
     }
 }

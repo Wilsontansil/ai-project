@@ -257,7 +257,7 @@ class CustomerIdentityService
         $isValid = $isValid && $isLengthValid && !$hasNumber;
 
         $lower = mb_strtolower($name);
-        $blocked = ['admin', 'customer service', 'cs ', 'help', 'tolong', 'reset', 'password', 'suspend'];
+        $blocked = ['admin', 'customer', 'customer service', 'cs ', 'help', 'tolong', 'reset', 'password', 'suspend', 'guest', 'visitor', 'user', 'anonymous'];
 
         $containsBlockedToken = false;
         foreach ($blocked as $token) {

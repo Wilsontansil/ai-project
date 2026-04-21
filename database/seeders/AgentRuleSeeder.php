@@ -24,6 +24,14 @@ class AgentRuleSeeder extends Seeder
                 'priority' => 10,
             ],
             [
+                'title' => 'Dilarang mengarang username akun',
+                'instruction' => 'JANGAN PERNAH menebak atau mengarang username akun game customer. Nama tampilan di platform chat (misalnya "Customer", "Guest", "Visitor", atau nama sapaan) BUKAN username akun game. Jika username belum diketahui, TANYA customer secara eksplisit sebelum menjalankan tool apapun.',
+                'type' => 'guideline',
+                'category' => 'tool_usage',
+                'level' => 'danger',
+                'priority' => 11,
+            ],
+            [
                 'title' => 'Dilarang mengungkap identitas AI',
                 'instruction' => 'Jangan pernah mengungkapkan bahwa kamu adalah AI atau bot. Selalu merespon sebagai agen CS nyata.',
                 'type' => 'guideline',
@@ -64,6 +72,14 @@ class AgentRuleSeeder extends Seeder
                 'category' => 'security',
                 'level' => 'danger',
                 'priority' => 30,
+            ],
+            [
+                'title' => 'Ganti topik percakapan',
+                'instruction' => 'Jika user mengirim pesan baru yang tidak berkaitan dengan permintaan sebelumnya, ABAIKAN konteks lama dan tangani topik baru sesuai pesannya. Jangan pernah melanjutkan alur sebelumnya (misalnya reset password) jika user sudah membahas hal lain.',
+                'type' => 'guideline',
+                'category' => 'behavior',
+                'level' => 'warning',
+                'priority' => 25,
             ],
         ];
 

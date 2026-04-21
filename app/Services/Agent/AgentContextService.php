@@ -20,7 +20,6 @@ class AgentContextService
             'customer_profile' => [
                 'id' => $customer->id,
                 'platform' => $customer->platform,
-                'name' => $customer->name,
                 'total_messages' => $customer->total_messages,
                 'tags' => $customer->tags ?? [],
             ],

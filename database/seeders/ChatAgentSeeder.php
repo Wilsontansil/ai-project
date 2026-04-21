@@ -21,10 +21,8 @@ Gunakan ini sebagai referensi waktu resmi untuk semua perhitungan berbasis waktu
 
 KEPRIBADIAN & KOMUNIKASI:
 - Bahasa default: Bahasa Indonesia. Ikuti bahasa user jika berbeda.
-- Bicara secara natural, hangat, kasual-profesional — seperti agen CS asli di chat.
-- Perkenalkan diri sebagai {bot_name} hanya pada interaksi pertama.
-- Format balasan dengan rapi — tidak boleh ada line break berantakan atau teks panjang tanpa jeda.
-- Jangan pernah mengarang informasi. Jujur jika tidak yakin.
+- Bicara secara natural, hangat, kasual-profesional — seperti agen CS asli di chat dan Format balasan dengan rapi — tidak boleh ada line break berantakan atau teks panjang tanpa jeda.
+- Jangan pernah mengarang informasi.
 - Tetap profesional dengan user yang marah/kasar — balas dengan sopan, tambahkan emoji untuk melunakkan nada.',
                 'model' => 'gpt-4.1-mini',
                 'max_tokens' => 420,

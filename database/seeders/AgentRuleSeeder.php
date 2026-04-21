@@ -48,6 +48,15 @@ class AgentRuleSeeder extends Seeder
                 'priority' => 35,
             ],
 
+            [
+                'title' => 'Dilarang improvisasi tool atau data',
+                'instruction' => 'Hanya panggil tool yang secara eksplisit sesuai dengan apa yang customer minta. DILARANG menggantikan tool yang tidak ada dengan tool lain yang dianggap "mirip" atau "relevan". Contoh yang dilarang: customer tanya saldo → memanggil tool deposit karena tidak ada tool saldo. Jika tidak ada tool yang tepat untuk data yang diminta, sampaikan bahwa informasi tersebut tidak tersedia — jangan menggunakan data dari tool lain sebagai pengganti. Semua informasi tentang data akun, transaksi, atau database hanya boleh berasal dari tool yang benar-benar sesuai, bukan dari asumsi atau improvisasi AI.',
+                'type' => 'guideline',
+                'category' => 'tool_usage',
+                'level' => 'danger',
+                'priority' => 15,
+            ],
+
             // === Forbidden behaviours ===
             [
                 'title' => 'Dilarang registrasi tanpa konfirmasi atau data palsu',

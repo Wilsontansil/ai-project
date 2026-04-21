@@ -506,6 +506,7 @@ class DataModelQueryEngine
      * Recursively normalise a DB row's values:
      * - string "true"/"yes"/"1" → bool true
      * - string "false"/"no"/"0" → bool false
+     * - numeric strings from DECIMAL/FLOAT columns → int (if no fractional part) or float
      * - all other values unchanged
      */
     public function normalizeData(mixed $value): mixed
@@ -516,6 +517,11 @@ class DataModelQueryEngine
                 $normalized[$key] = $this->normalizeData($item);
             }
             return $normalized;
+        }
+
+        if (is_string($value) && is_numeric($value)) {
+            $float = (float) $value;
+            return ($float == (int) $float) ? (int) $float : $float;
         }
 
         return $value;

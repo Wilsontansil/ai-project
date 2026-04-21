@@ -270,6 +270,23 @@
                     </a>
                 @endcan
 
+                {{-- Knowledge Base --}}
+                @can('manage tools')
+                    <a href="{{ route('backoffice.knowledge-base.index') }}" class="bo-nav-item group"
+                        style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'knowledge-base' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
+                        onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'knowledge-base' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'knowledge-base' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
+                        <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'knowledge-base' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
+                            height="18">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                        </svg>
+                        <span class="bo-label">Knowledge Base</span>
+                        <span class="bo-tooltip">Knowledge Base</span>
+                    </a>
+                @endcan
+
                 {{-- Data Models --}}
                 @can('manage data-models')
                     <a href="{{ route('backoffice.data-models.index') }}" class="bo-nav-item group"

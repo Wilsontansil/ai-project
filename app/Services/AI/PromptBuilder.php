@@ -4,6 +4,7 @@ namespace App\Services\AI;
 
 use App\Models\ChatAgent;
 use App\Models\AgentRule;
+use App\Models\KnowledgeBase;
 use App\Models\ProjectSetting;
 use App\Models\Tool;
 
@@ -42,6 +43,11 @@ class PromptBuilder
             $basePrompt .= "\n\n" . $agentRulesPrompt;
         }
 
+        $kbPrompt = $this->getKnowledgeBasePrompt();
+        if ($kbPrompt !== '') {
+            $basePrompt .= "\n\n" . $kbPrompt;
+        }
+
         // Tool rules are intentionally NOT included here to reduce payload size.
         // They are injected per-tool in the second OpenAI call (generateReplyFromToolResult)
         // via $toolContext['tool_rules'], where they actually matter.
@@ -61,7 +67,6 @@ class PromptBuilder
         }
 
         $profile = (array) ($context['customer_profile'] ?? []);
-        $behavior = (array) ($context['behavior'] ?? []);
 
         $parts = [
             'Konteks customer (internal saja — jangan ungkapkan ke user):',
@@ -82,15 +87,25 @@ class PromptBuilder
             ], JSON_UNESCAPED_UNICODE);
         }
 
-        if ($behavior !== []) {
-            $parts[] = 'Perilaku: ' . json_encode([
-                'intent' => $behavior['intent'] ?? null,
-                'sentiment' => $behavior['sentiment'] ?? null,
-                'frequency_score' => $behavior['frequency_score'] ?? null,
-            ], JSON_UNESCAPED_UNICODE);
-        }
-
         return implode("\n\n", $parts);
+    }
+
+    private function getKnowledgeBasePrompt(): string
+    {
+        try {
+            $entries = KnowledgeBase::query()->where('is_active', true)->orderBy('id')->get();
+            if ($entries->isEmpty()) {
+                return '';
+            }
+            $lines = ['KNOWLEDGE BASE (gunakan sebagai referensi tambahan):'];
+            foreach ($entries as $entry) {
+                $lines[] = "### {$entry->title}\n{$entry->content}";
+            }
+
+            return implode("\n\n", $lines);
+        } catch (\Throwable) {
+            return '';
+        }
     }
 
     private function getAgentRulesPrompt(?ChatAgent $chatAgent): string

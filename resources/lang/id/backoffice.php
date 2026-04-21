@@ -94,6 +94,9 @@ return [
             'customer' => 'customer',
             'assistant' => 'assistant',
             'page_title' => 'Chat Pelanggan',
+            'type_message' => 'Ketik pesan...',
+            'send' => 'Kirim',
+            'send_hint' => 'Balas sebagai agen. Fitur ini akan segera tersedia.',
         ],
         'login' => [
             'title' => 'Login Backoffice',

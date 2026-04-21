@@ -95,6 +95,9 @@ return [
             'customer' => 'customer',
             'assistant' => 'assistant',
             'page_title' => 'Customer Chat',
+            'type_message' => 'Type a message...',
+            'send' => 'Send',
+            'send_hint' => 'Reply as agent. This feature is coming soon.',
         ],
         'login' => [
             'title' => 'Backoffice Login',

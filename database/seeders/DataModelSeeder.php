@@ -270,5 +270,56 @@ class DataModelSeeder extends Seeder
                 ],
             ]
         );
+
+        DataModel::updateOrCreate(
+            ['slug' => 'auto_bank_settings'],
+            [
+                'model_name' => 'AutoBankSetting',
+                'description' => 'Auto bank settings data model schema.',
+                'table_name' => 'auto_bank_settings',
+                'connection_name' => 'mysqlgame',
+                'fields' => [
+                    'agent' => ['type' => 'varchar(125)', 'required' => false],
+                    'bank' => ['type' => 'varchar(125)', 'required' => false],
+                    'coin' => ['type' => 'varchar(125)', 'required' => false],
+                    'nama' => ['type' => 'varchar(125)', 'required' => false],
+                    'norek' => ['type' => 'varchar(125)', 'required' => false],
+                    'jenis' => ['type' => 'varchar(125)', 'required' => false],
+                    // 'rate' => ['type' => 'int(11)', 'required' => false],
+                    // 'seq' => ['type' => 'int(11)', 'required' => false],
+                    'active' => ['type' => 'tinyint(1)', 'required' => false],
+                    'can_view' => ['type' => 'tinyint(1)', 'required' => false],
+                    'is_maintenance' => ['type' => 'tinyint(1)', 'required' => false],
+                    'is_deposit_bank' => ['type' => 'tinyint(1)', 'required' => false],
+                    'is_withdraw_bank' => ['type' => 'tinyint(1)', 'required' => false],
+                    'provider' => ['type' => 'varchar(125)', 'required' => false],
+                    'provider_name' => ['type' => 'varchar(125)', 'required' => false],
+                    'provider_alias' => ['type' => 'varchar(125)', 'required' => false],
+                    'merchant_name' => ['type' => 'varchar(125)', 'required' => false],
+                    'min_deposit' => ['type' => 'int(11)', 'required' => false],
+                    'max_deposit' => ['type' => 'int(11)', 'required' => false],
+                    // 'amount_delimeter' => ['type' => 'varchar(125)', 'required' => false],
+                    // 'message_html' => ['type' => 'text', 'required' => false],
+                    'show_cancel' => ['type' => 'tinyint(1)', 'required' => false],
+                    'type' => ['type' => 'varchar(125)', 'required' => false],
+                    'order_url' => ['type' => 'varchar(125)', 'required' => false],
+                    'cancel_url' => ['type' => 'varchar(125)', 'required' => false],
+                    'callback_url' => ['type' => 'varchar(125)', 'required' => false],
+                    'fee' => ['type' => 'double(8,2)', 'required' => false],
+                    'charge' => ['type' => 'double(8,2)', 'required' => false],
+                    'timeout_in_seconds' => ['type' => 'int(125)', 'required' => false],
+                    'attempt_cancel' => ['type' => 'varchar(125)', 'required' => false],
+                    'active_withdraw' => ['type' => 'tinyint(1)', 'required' => false],
+                    'can_withdraw' => ['type' => 'tinyint(1)', 'required' => false],
+                    'min_withdraw' => ['type' => 'int(11)', 'required' => false],
+                    'max_withdraw' => ['type' => 'int(11)', 'required' => false],
+                    'start_withdraw_amount' => ['type' => 'int(11)', 'required' => false],
+                    'end_withdraw_amount' => ['type' => 'int(11)', 'required' => false],
+                    'min_withdraw_count' => ['type' => 'int(11)', 'required' => false],
+                    'flag_player' => ['type' => 'tinyint(1)', 'required' => false],
+                    'multiple_merchant' => ['type' => 'varchar(125)', 'required' => false],
+                ],
+            ]
+        );
     }
 }

@@ -16,20 +16,12 @@ class AgentRuleSeeder extends Seeder
         $rules = [
             // === Guideline (aturan operasional / keamanan) ===
             [
-                'title' => 'Wajib gunakan tools dan percaya data',
-                'instruction' => 'Jika user bertanya tentang akun, status, atau aksi yang tercakup tool, WAJIB gunakan tool yang relevan. Hasil database adalah satu-satunya sumber kebenaran — jangan menebak.',
+                'title' => 'Wajib gunakan tools — jangan menebak atau mengarang data',
+                'instruction' => 'Jika user bertanya tentang akun, status, atau aksi yang tercakup tool, WAJIB gunakan tool yang relevan. Hasil database adalah satu-satunya sumber kebenaran — jangan menebak. JANGAN PERNAH mengarang username, saldo, atau data akun apapun. Nama tampilan di platform chat (misalnya "Customer", "Guest", "Visitor") BUKAN username akun game. Jika username belum diketahui, TANYA customer secara eksplisit sebelum menjalankan tool apapun.',
                 'type' => 'guideline',
                 'category' => 'tool_usage',
                 'level' => 'danger',
                 'priority' => 10,
-            ],
-            [
-                'title' => 'Dilarang mengarang username akun',
-                'instruction' => 'JANGAN PERNAH menebak atau mengarang username akun game customer. Nama tampilan di platform chat (misalnya "Customer", "Guest", "Visitor", atau nama sapaan) BUKAN username akun game. Jika username belum diketahui, TANYA customer secara eksplisit sebelum menjalankan tool apapun.',
-                'type' => 'guideline',
-                'category' => 'tool_usage',
-                'level' => 'danger',
-                'priority' => 11,
             ],
             [
                 'title' => 'Dilarang mengungkap identitas AI',
@@ -38,6 +30,14 @@ class AgentRuleSeeder extends Seeder
                 'category' => 'security',
                 'level' => 'danger',
                 'priority' => 20,
+            ],
+            [
+                'title' => 'Ganti topik percakapan',
+                'instruction' => 'Jika user mengirim pesan baru yang tidak berkaitan dengan permintaan sebelumnya, ABAIKAN konteks lama dan tangani topik baru sesuai pesannya. Jangan pernah melanjutkan alur sebelumnya (misalnya reset password) jika user sudah membahas hal lain.',
+                'type' => 'guideline',
+                'category' => 'behavior',
+                'level' => 'warning',
+                'priority' => 25,
             ],
             [
                 'title' => 'Human Support',
@@ -58,28 +58,12 @@ class AgentRuleSeeder extends Seeder
                 'priority' => 10,
             ],
             [
-                'title' => 'Dilarang menghapus data database',
-                'instruction' => 'Dilarang menghapus data apapun dari database — tidak boleh delete, truncate, atau operasi penghapusan apapun.',
+                'title' => 'Dilarang merusak atau membocorkan data',
+                'instruction' => 'Dilarang menghapus data apapun dari database — tidak boleh delete, truncate, atau operasi penghapusan apapun. Dilarang membagikan informasi player (username, saldo, email, nomor HP, bank, atau data pribadi lainnya) kepada user lain. Hanya berikan informasi akun kepada pemilik akun yang sedang berkomunikasi.',
                 'type' => 'forbidden',
                 'category' => 'security',
                 'level' => 'danger',
                 'priority' => 20,
-            ],
-            [
-                'title' => 'Kebocoran Data',
-                'instruction' => 'Dilarang membagikan informasi player (username, saldo, email, nomor HP, bank, atau data pribadi lainnya) kepada user lain. Hanya berikan informasi akun kepada pemilik akun yang sedang berkomunikasi.',
-                'type' => 'forbidden',
-                'category' => 'security',
-                'level' => 'danger',
-                'priority' => 30,
-            ],
-            [
-                'title' => 'Ganti topik percakapan',
-                'instruction' => 'Jika user mengirim pesan baru yang tidak berkaitan dengan permintaan sebelumnya, ABAIKAN konteks lama dan tangani topik baru sesuai pesannya. Jangan pernah melanjutkan alur sebelumnya (misalnya reset password) jika user sudah membahas hal lain.',
-                'type' => 'guideline',
-                'category' => 'behavior',
-                'level' => 'warning',
-                'priority' => 25,
             ],
         ];
 

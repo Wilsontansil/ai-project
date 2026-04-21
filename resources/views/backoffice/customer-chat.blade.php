@@ -142,7 +142,7 @@
             const customerId = {{ $customer->id }};
             const startDate = document.getElementById('start_date')?.value || '{{ $startDate }}';
             const endDate = document.getElementById('end_date')?.value || '{{ $endDate }}';
-            const pollUrl = '{{ route('backoffice.customer.messages', $customer->id) }}';
+            const pollUrl = '{{ parse_url(route('backoffice.customer.messages', $customer->id), PHP_URL_PATH) }}';
 
             // Snapshot of last known message list for change detection
             let lastCount = {{ count($messages) }};
@@ -241,7 +241,8 @@
                         scrollToBottom();
                     }
                 } catch (_) {
-                    /* network error — silently skip */ }
+                    /* network error — silently skip */
+                }
             }
 
             // Scroll to bottom on initial load

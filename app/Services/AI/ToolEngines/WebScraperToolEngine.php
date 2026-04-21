@@ -24,10 +24,9 @@ class WebScraperToolEngine
             ->get();
 
         if ($pages->isEmpty()) {
-            return [
-                'mode' => 'direct',
-                'reply' => 'Maaf, informasi website belum tersedia saat ini.',
-            ];
+            // No scraped pages yet — skip this tool and let the AI answer normally
+            // from Knowledge Base or its own knowledge.
+            return ['mode' => 'skip'];
         }
 
         $combinedContent = $pages->map(function (WebsitePage $page) {

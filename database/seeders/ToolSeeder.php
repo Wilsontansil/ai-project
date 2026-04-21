@@ -281,7 +281,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'bonus',
-                'category' => 'promo',
+                'category' => 'bonus',
                 'display_name' => 'Bonus',
                 'description' => 'Informasi tentang klaim bonus dan syarat yang berlaku',
                 'slug' => 'bonus',
@@ -297,7 +297,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'reward_claim_info',
-                'category' => 'promo',
+                'category' => 'bonus',
                 'display_name' => 'Reward Claim Info',
                 'description' => 'Informasi mengapa member tidak bisa klaim bonus di menu Reward',
                 'slug' => 'reward-claim-info',
@@ -601,7 +601,7 @@ class ToolSeeder extends Seeder
             // ─── GET MULTIPLE type tools ───
             [
                 'tool_name' => 'BonusCashback',
-                'category' => 'promo',
+                'category' => 'bonus',
                 'display_name' => 'Bonus Cashback',
                 'description' => 'Menyediakan informasi tentang bonus cashback. Bonus Cashback dibagikan setiap hari Senin.',
                 'slug' => 'bonus-cashback',
@@ -645,7 +645,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'referral_bonus_issue',
-                'category' => 'promo',
+                'category' => 'bonus',
                 'display_name' => 'Referral Bonus Issue',
                 'description' => 'Menyediakan informasi ketika member bertanya tentang bonus referral yang tidak muncul setelah mengajak teman.',
                 'slug' => 'referral-bonus-issue',

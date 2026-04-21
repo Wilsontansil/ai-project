@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Log;
 
 class ToolController extends Controller
 {
-    private const CATEGORIES = ['account', 'sports', 'games', 'promo', 'payment', 'general', 'system'];
+    private const CATEGORIES = ['account', 'sports', 'games', 'promo', 'bonus', 'payment', 'general', 'system'];
 
     public function index(Request $request): View
     {
@@ -117,7 +117,7 @@ class ToolController extends Controller
             'error_responses' => ['nullable', 'array'],
             'error_responses.*.status' => ['required_with:error_responses', 'integer'],
             'error_responses.*.message' => ['required_with:error_responses', 'string', 'max:255'],
-            'category' => ['nullable', 'string', 'in:account,sports,games,promo,payment,general,system'],
+            'category' => ['nullable', 'string', 'in:account,sports,games,promo,bonus,payment,general,system'],
         ];
 
         if ($isCreate) {

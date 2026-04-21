@@ -94,6 +94,7 @@
                                                 'sports' => 'bg-green-500/20 text-green-300 ring-green-400/30',
                                                 'games' => 'bg-purple-500/20 text-purple-300 ring-purple-400/30',
                                                 'promo' => 'bg-amber-500/20 text-amber-300 ring-amber-400/30',
+                                                'bonus' => 'bg-yellow-500/20 text-yellow-300 ring-yellow-400/30',
                                                 'payment' => 'bg-blue-500/20 text-blue-300 ring-blue-400/30',
                                                 'general' => 'bg-slate-500/20 text-slate-300 ring-slate-400/30',
                                                 'system' => 'bg-rose-500/20 text-rose-300 ring-rose-400/30',

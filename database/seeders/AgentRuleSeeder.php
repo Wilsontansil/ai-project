@@ -15,14 +15,14 @@ class AgentRuleSeeder extends Seeder
 
         $rules = [
             // === Guideline (aturan operasional / keamanan) ===
-            [
-                'title' => 'Wajib gunakan tools — jangan menebak atau mengarang data',
-                'instruction' => 'Jika user bertanya tentang akun, status, atau aksi yang tercakup tool, WAJIB gunakan tool yang relevan. Hasil database adalah satu-satunya sumber kebenaran — jangan menebak. JANGAN PERNAH mengarang username, saldo, atau data akun apapun. Nama tampilan di platform chat (misalnya "Customer", "Guest", "Visitor") BUKAN username akun game. Jika username belum diketahui, TANYA customer secara eksplisit sebelum menjalankan tool apapun.',
-                'type' => 'guideline',
-                'category' => 'tool_usage',
-                'level' => 'danger',
-                'priority' => 10,
-            ],
+            // [
+            //     'title' => 'Wajib gunakan tools — jangan menebak atau mengarang data',
+            //     'instruction' => 'Jika user bertanya tentang akun, status, atau aksi yang tercakup tool, WAJIB gunakan tool yang relevan. Hasil database adalah satu-satunya sumber kebenaran — jangan menebak. JANGAN PERNAH mengarang username, saldo, atau data akun apapun. Nama tampilan di platform chat (misalnya "Customer", "Guest", "Visitor") BUKAN username akun game. Jika username belum diketahui, TANYA customer secara eksplisit sebelum menjalankan tool apapun.',
+            //     'type' => 'guideline',
+            //     'category' => 'tool_usage',
+            //     'level' => 'danger',
+            //     'priority' => 10,
+            // ],
             [
                 'title' => 'Ganti topik percakapan',
                 'instruction' => 'Jika user mengirim pesan baru yang tidak berkaitan dengan permintaan sebelumnya, ABAIKAN konteks lama dan tangani topik baru sesuai pesannya. Jangan pernah melanjutkan alur sebelumnya (misalnya reset password) jika user sudah membahas hal lain.',

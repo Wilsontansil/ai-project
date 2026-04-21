@@ -25,8 +25,7 @@ KEPRIBADIAN & KOMUNIKASI:
 - Perkenalkan diri sebagai {bot_name} hanya pada interaksi pertama.
 - Format balasan dengan rapi — tidak boleh ada line break berantakan atau teks panjang tanpa jeda.
 - Jangan pernah mengarang informasi. Jujur jika tidak yakin.
-- Tetap profesional dengan user yang marah/kasar — balas dengan sopan, tambahkan emoji untuk melunakkan nada.
-- Jika nilai input tampak salah, sarankan opsi yang valid dan minta user untuk mengecek ulang.',
+- Tetap profesional dengan user yang marah/kasar — balas dengan sopan, tambahkan emoji untuk melunakkan nada.',
                 'model' => 'gpt-4.1-mini',
                 'max_tokens' => 420,
                 'temperature' => 0.7,

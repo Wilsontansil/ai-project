@@ -24,14 +24,6 @@ class AgentRuleSeeder extends Seeder
                 'priority' => 10,
             ],
             [
-                'title' => 'Dilarang mengungkap identitas AI',
-                'instruction' => 'Jangan pernah mengungkapkan bahwa kamu adalah AI atau bot. Selalu merespon sebagai agen CS nyata.',
-                'type' => 'guideline',
-                'category' => 'security',
-                'level' => 'danger',
-                'priority' => 20,
-            ],
-            [
                 'title' => 'Ganti topik percakapan',
                 'instruction' => 'Jika user mengirim pesan baru yang tidak berkaitan dengan permintaan sebelumnya, ABAIKAN konteks lama dan tangani topik baru sesuai pesannya. Jangan pernah melanjutkan alur sebelumnya (misalnya reset password) jika user sudah membahas hal lain.',
                 'type' => 'guideline',

@@ -135,22 +135,60 @@
         @endif
     </div>
 
-    <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-4">
-        <div class="flex items-end gap-3">
-            <textarea id="admin-message-input" rows="1" placeholder="{{ __('backoffice.pages.customer_chat.type_message') }}"
-                class="flex-1 resize-none rounded-xl border border-white/10 bg-slate-800 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-cyan-400"
-                style="max-height:140px;overflow-y:auto;" disabled></textarea>
-            <button type="button"
-                class="flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition"
-                style="background:rgba(34,211,238,0.15);color:#22d3ee;border:1px solid rgba(34,211,238,0.3);cursor:not-allowed;opacity:0.5;"
-                disabled>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
-                    <path
-                        d="M3.478 2.405a.75.75 0 0 0-.926.94l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.405Z" />
-                </svg>
-                {{ __('backoffice.pages.customer_chat.send') }}
-            </button>
+    {{-- Flash messages --}}
+    @if (session('send_success'))
+        <div class="mb-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
+            {{ session('send_success') }}
         </div>
-        <p class="mt-2 text-[11px] text-slate-500">{{ __('backoffice.pages.customer_chat.send_hint') }}</p>
+    @endif
+    @if (session('send_error'))
+        <div class="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            {{ session('send_error') }}
+        </div>
+    @endif
+
+    @php
+        $canSend = $customer->mode === 'human' && in_array($customer->platform, ['telegram', 'whatsapp']);
+    @endphp
+
+    <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-4">
+        @if ($canSend)
+            <form method="POST" action="{{ route('backoffice.customer.send-message', $customer->id) }}">
+                @csrf
+                <div class="flex items-end gap-3">
+                    <textarea name="message" rows="1" placeholder="{{ __('backoffice.pages.customer_chat.type_message') }}"
+                        class="flex-1 resize-none rounded-xl border border-white/10 bg-slate-800 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-cyan-400"
+                        style="max-height:140px;overflow-y:auto;"></textarea>
+                    <button type="submit"
+                        class="flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition"
+                        style="background:rgba(34,211,238,0.25);color:#22d3ee;border:1px solid rgba(34,211,238,0.5);">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                            <path
+                                d="M3.478 2.405a.75.75 0 0 0-.926.94l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.405Z" />
+                        </svg>
+                        {{ __('backoffice.pages.customer_chat.send') }}
+                    </button>
+                </div>
+                <p class="mt-2 text-[11px] text-slate-500">
+                    {{ __('backoffice.pages.customer_chat.send_hint_active', ['platform' => ucfirst($customer->platform)]) }}
+                </p>
+            </form>
+        @else
+            <div class="flex items-end gap-3">
+                <textarea rows="1" placeholder="{{ __('backoffice.pages.customer_chat.type_message') }}"
+                    class="flex-1 resize-none rounded-xl border border-white/10 bg-slate-800 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none"
+                    style="max-height:140px;overflow-y:auto;cursor:not-allowed;opacity:0.4;" disabled></textarea>
+                <button type="button" class="flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold"
+                    style="background:rgba(34,211,238,0.15);color:#22d3ee;border:1px solid rgba(34,211,238,0.3);cursor:not-allowed;opacity:0.4;"
+                    disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                        <path
+                            d="M3.478 2.405a.75.75 0 0 0-.926.94l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.405Z" />
+                    </svg>
+                    {{ __('backoffice.pages.customer_chat.send') }}
+                </button>
+            </div>
+            <p class="mt-2 text-[11px] text-slate-500">{{ __('backoffice.pages.customer_chat.send_hint') }}</p>
+        @endif
     </div>
 @endsection

@@ -5,8 +5,12 @@ namespace App\Http\Controllers\Backoffice;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\Customer;
+use App\Models\ProjectSetting;
+use App\Services\Agent\ConversationMemoryService;
+use App\Support\ResilientHttp;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -109,5 +113,91 @@ class DashboardController extends Controller
             'startDate' => $startDate,
             'endDate' => $endDate,
         ]);
+    }
+
+    public function sendMessage(Request $request, Customer $customer): RedirectResponse
+    {
+        if ($customer->mode !== 'human') {
+            return back()->with('send_error', __('backoffice.pages.customer_chat.send_error_not_human'));
+        }
+
+        if (!in_array($customer->platform, ['telegram', 'whatsapp'])) {
+            return back()->with('send_error', __('backoffice.pages.customer_chat.send_error_platform'));
+        }
+
+        $message = trim((string) $request->input('message', ''));
+
+        if ($message === '') {
+            return back()->with('send_error', __('backoffice.pages.customer_chat.send_error_empty'));
+        }
+
+        $chatId = $customer->platform_user_id;
+
+        try {
+            if ($customer->platform === 'telegram') {
+                $this->sendTelegram($chatId, $message);
+            } else {
+                $this->sendWhatsApp($chatId, $message);
+            }
+
+            app(ConversationMemoryService::class)->addMessage(
+                $customer,
+                $customer->platform,
+                'assistant',
+                $message,
+                ['sent_by' => 'admin']
+            );
+        } catch (\Throwable $e) {
+            Log::error('Admin send message failed', [
+                'customer_id' => $customer->id,
+                'platform' => $customer->platform,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('send_error', __('backoffice.pages.customer_chat.send_error_failed'));
+        }
+
+        return back()->with('send_success', __('backoffice.pages.customer_chat.send_success'));
+    }
+
+    private function sendTelegram(string $chatId, string $text): void
+    {
+        $token = (string) ProjectSetting::getValue('telegram_bot_token', config('services.telegram.bot_token', ''));
+
+        if ($token === '') {
+            throw new \RuntimeException('Telegram bot token is not configured.');
+        }
+
+        ResilientHttp::post('telegram', "https://api.telegram.org/bot{$token}/sendMessage", [
+            'chat_id' => $chatId,
+            'text' => $text,
+        ], timeoutSeconds: 10);
+    }
+
+    private function sendWhatsApp(string $chatId, string $text): void
+    {
+        $baseUrl = rtrim((string) ProjectSetting::getValue('whatsapp_base_url', config('services.whatsapp.base_url', '')), '/');
+
+        if ($baseUrl === '') {
+            throw new \RuntimeException('WAHA base URL is not configured.');
+        }
+
+        $session = (string) ProjectSetting::getValue('whatsapp_session', config('services.whatsapp.session', 'default'));
+        $apiKey = (string) ProjectSetting::getValue('whatsapp_api_key', config('services.whatsapp.api_key', ''));
+
+        $headers = ['Accept' => 'application/json'];
+        if ($apiKey !== '') {
+            $headers['X-Api-Key'] = $apiKey;
+        }
+
+        $response = ResilientHttp::post('waha', $baseUrl . '/api/sendText', [
+            'session' => $session,
+            'chatId' => $chatId,
+            'text' => $text,
+        ], $headers, timeoutSeconds: 10);
+
+        if ($response !== null && $response->failed()) {
+            throw new \RuntimeException('WAHA sendText failed with status: ' . $response->status());
+        }
     }
 }

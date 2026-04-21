@@ -47,6 +47,14 @@ class AgentRuleSeeder extends Seeder
                 'level' => 'info',
                 'priority' => 30,
             ],
+            [
+                'title' => 'Jawab ringkas, detail hanya jika diminta',
+                'instruction' => 'Saat menjelaskan sesuatu, selalu sampaikan ringkasan atau poin-poin penting terlebih dahulu. Berikan penjelasan detail hanya jika customer secara eksplisit memintanya.',
+                'type' => 'guideline',
+                'category' => 'behavior',
+                'level' => 'info',
+                'priority' => 35,
+            ],
 
             // === Forbidden behaviours ===
             [

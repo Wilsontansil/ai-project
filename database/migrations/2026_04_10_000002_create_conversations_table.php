@@ -21,6 +21,7 @@ return new class extends Migration
 
             $table->unique(['customer_id', 'conversation_date']);
             $table->index('channel');
+            $table->index('conversation_date');
         });
     }
 

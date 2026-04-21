@@ -25,6 +25,7 @@ class Tool extends Model
         'tool_rules',
         'information_text',
         'meta',
+        'category',
     ];
 
     protected $casts = [

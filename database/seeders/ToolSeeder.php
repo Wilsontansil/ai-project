@@ -22,6 +22,7 @@ class ToolSeeder extends Seeder
             // ─── Internal config (no type) ───
             [
                 'tool_name' => '_bot_config',
+                'category' => 'system',
                 'display_name' => 'Bot Config',
                 'description' => 'Konfigurasi umum bot',
                 'slug' => '_bot-config',
@@ -39,6 +40,7 @@ class ToolSeeder extends Seeder
             // ─── UPDATE type tools (API endpoint) ───
             [
                 'tool_name' => 'resetPassword',
+                'category' => 'account',
                 'display_name' => 'Reset Password',
                 'description' => 'Reset password user setelah verifikasi data akun',
                 'slug' => 'reset-password',
@@ -79,6 +81,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'register',
+                'category' => 'account',
                 'display_name' => 'Register',
                 'description' => 'Mendaftarkan akun player baru',
                 'slug' => 'register',
@@ -125,6 +128,7 @@ class ToolSeeder extends Seeder
             // ─── GET type tools (DataModel lookup) ───
             [
                 'tool_name' => 'checkSuspend',
+                'category' => 'account',
                 'display_name' => 'Cek Suspend',
                 'description' => 'Cek apakah akun player sedang di-suspend',
                 'slug' => 'check-suspend',
@@ -146,6 +150,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'toStatus',
+                'category' => 'account',
                 'display_name' => 'Status TurnOver',
                 'description' => 'Menyediakan informasi status TurnOver (TO) untuk player',
                 'slug' => 'to-status',
@@ -167,6 +172,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'promo',
+                'category' => 'promo',
                 'display_name' => 'Promo',
                 'description' => 'Menyediakan informasi Promo. Menampilkan promo aktif yang sedang berjalan.',
                 'slug' => 'promo',
@@ -199,6 +205,7 @@ class ToolSeeder extends Seeder
 
             [
                 'tool_name' => 'checkGame',
+                'category' => 'games',
                 'display_name' => 'Cek Game',
                 'description' => 'Cek ketersediaan dan info game berdasarkan nama, provider, atau kategori',
                 'slug' => 'check-game',
@@ -235,6 +242,7 @@ class ToolSeeder extends Seeder
             // ─── INFO type tools (static information) ───
             [
                 'tool_name' => 'game_gacor',
+                'category' => 'games',
                 'display_name' => 'Game Gacor',
                 'description' => 'Bocoran Slot Gacor terbaru hari ini. Hanya ambil informasi dari list yang tersedia. Jangan buat konten baru.',
                 'slug' => 'game-gacor',
@@ -257,6 +265,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'pola_gacor',
+                'category' => 'games',
                 'display_name' => 'Pola Gacor',
                 'description' => 'Pola Gacor terbaru hari ini. Hanya ambil informasi dari list yang tersedia. Jangan buat konten baru.',
                 'slug' => 'pola-gacor',
@@ -272,6 +281,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'bonus',
+                'category' => 'promo',
                 'display_name' => 'Bonus',
                 'description' => 'Informasi tentang klaim bonus dan syarat yang berlaku',
                 'slug' => 'bonus',
@@ -287,6 +297,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'reward_claim_info',
+                'category' => 'promo',
                 'display_name' => 'Reward Claim Info',
                 'description' => 'Informasi mengapa member tidak bisa klaim bonus di menu Reward',
                 'slug' => 'reward-claim-info',
@@ -305,6 +316,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'wd_charge_info',
+                'category' => 'payment',
                 'display_name' => 'WD Charge Info',
                 'description' => 'Informasi charge penarikan (WD) 2,5% jika lebih dari 5 kali per hari',
                 'slug' => 'wd-charge-info',
@@ -322,6 +334,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'ewallet_premium_info',
+                'category' => 'payment',
                 'display_name' => 'E-Wallet Premium Info',
                 'description' => 'Informasi bahwa E-Wallet harus berstatus Premium untuk transaksi',
                 'slug' => 'ewallet-premium-info',
@@ -339,6 +352,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'situs_partner_info',
+                'category' => 'general',
                 'display_name' => 'Situs Partner Info',
                 'description' => 'Menyediakan informasi bahwa situs partner hanya sebagai partner, bukan bagian dari perusahaan yang sama.',
                 'slug' => 'situs-partner-info',
@@ -356,6 +370,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'parlay_lose_info',
+                'category' => 'sports',
                 'display_name' => 'Parlay Lose Info',
                 'description' => 'Menyediakan informasi tentang apa yang terjadi jika satu pertandingan di tiket Mix Parlay kalah.',
                 'slug' => 'parlay-lose-info',
@@ -373,6 +388,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'parlay_draw_info',
+                'category' => 'sports',
                 'display_name' => 'Parlay Draw Info',
                 'description' => 'Menyediakan informasi tentang apa yang terjadi jika pertandingan di tiket Mix Parlay berakhir seri (Draw).',
                 'slug' => 'parlay-draw-info',
@@ -390,6 +406,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'parlay_won_half_info',
+                'category' => 'sports',
                 'display_name' => 'Parlay Won Half Info',
                 'description' => 'Informasi Menang Setengah (Won Half) di Mix Parlay',
                 'slug' => 'parlay-won-half-info',
@@ -408,6 +425,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'parlay_odds_calculation',
+                'category' => 'sports',
                 'display_name' => 'Parlay Odds Calculation',
                 'description' => 'Menyediakan informasi cara menghitung total odds di Mix Parlay dengan mengalikan semua odds pertandingan yang dipilih.',
                 'slug' => 'parlay-odds-calculation',
@@ -425,6 +443,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'parlay_payout_calculation',
+                'category' => 'sports',
                 'display_name' => 'Parlay Payout Calculation',
                 'description' => 'Menyediakan informasi cara menghitung total kemenangan atau payout di Mix Parlay.',
                 'slug' => 'parlay-payout-calculation',
@@ -442,6 +461,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'parlay_void_postponed_info',
+                'category' => 'sports',
                 'display_name' => 'Parlay Void / Postponed Info',
                 'description' => 'Menyediakan informasi tentang apa yang terjadi jika pertandingan di Mix Parlay dibatalkan, ditunda, atau void.',
                 'slug' => 'parlay-void-postponed-info',
@@ -459,6 +479,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'handicap_info',
+                'category' => 'sports',
                 'display_name' => 'Handicap (HDP) Info',
                 'description' => 'Informasi sistem HDP atau Asian Handicap di taruhan olahraga',
                 'slug' => 'handicap-info',
@@ -476,6 +497,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'over_under_info',
+                'category' => 'sports',
                 'display_name' => 'Over/Under (O/U) Info',
                 'description' => 'Menyediakan informasi tentang jenis taruhan Over/Under (O/U), menjelaskan cara prediksi total gol.',
                 'slug' => 'over-under-info',
@@ -493,6 +515,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => '1x2_info',
+                'category' => 'sports',
                 'display_name' => '1x2 Info',
                 'description' => 'Menyediakan informasi tentang format taruhan 1x2, menjelaskan Home win, Draw, dan Away win.',
                 'slug' => '1x2-info',
@@ -510,6 +533,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'odd_even_info',
+                'category' => 'sports',
                 'display_name' => 'Odd/Even (O/E) Info',
                 'description' => 'Menyediakan informasi tentang jenis taruhan Odd/Even (O/E), menjelaskan cara menebak total gol ganjil atau genap.',
                 'slug' => 'odd-even-info',
@@ -527,6 +551,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'link_rtp',
+                'category' => 'games',
                 'display_name' => 'Link RTP',
                 'description' => 'Link RTP slot dengan winrate game tertinggi',
                 'slug' => 'link-rtp',
@@ -542,6 +567,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'link_apk',
+                'category' => 'games',
                 'display_name' => 'Link APK',
                 'description' => 'Menyediakan link untuk download APK aplikasi. Pastikan link dari sumber terpercaya untuk keamanan.',
                 'slug' => 'link-apk',
@@ -557,6 +583,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'depositPulsa',
+                'category' => 'payment',
                 'display_name' => 'Deposit Pulsa',
                 'description' => 'Menyediakan panduan langkah demi langkah cara deposit melalui pulsa. Mencakup proses top-up XL dan Telkomsel melalui form deposit website.',
                 'slug' => 'deposit-pulsa',
@@ -574,6 +601,7 @@ class ToolSeeder extends Seeder
             // ─── GET MULTIPLE type tools ───
             [
                 'tool_name' => 'BonusCashback',
+                'category' => 'promo',
                 'display_name' => 'Bonus Cashback',
                 'description' => 'Menyediakan informasi tentang bonus cashback. Bonus Cashback dibagikan setiap hari Senin.',
                 'slug' => 'bonus-cashback',
@@ -617,6 +645,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'referral_bonus_issue',
+                'category' => 'promo',
                 'display_name' => 'Referral Bonus Issue',
                 'description' => 'Menyediakan informasi ketika member bertanya tentang bonus referral yang tidak muncul setelah mengajak teman.',
                 'slug' => 'referral-bonus-issue',
@@ -634,6 +663,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'search_game_guide',
+                'category' => 'games',
                 'display_name' => 'Search Game Guide',
                 'description' => 'Menyediakan panduan ketika member tidak bisa menemukan game tertentu, mengarahkan untuk menggunakan fitur pencarian.',
                 'slug' => 'search-game-guide',
@@ -653,6 +683,7 @@ class ToolSeeder extends Seeder
             // ─── Deposit tools ───
             [
                 'tool_name' => 'search_website_knowledge',
+                'category' => 'general',
                 'display_name' => 'Cari Info Website',
                 'description' => 'Mencari informasi dari halaman website yang sudah di-scrape',
                 'slug' => 'search-website-knowledge',
@@ -675,6 +706,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'checkDeposit',
+                'category' => 'payment',
                 'display_name' => 'Check Deposit',
                 'description' => 'Cek status deposit player berdasarkan username. Menampilkan informasi deposit terbaru dari data model deposit.',
                 'slug' => 'check-deposit',
@@ -704,6 +736,7 @@ class ToolSeeder extends Seeder
             ],
             [
                 'tool_name' => 'rejectDeposit',
+                'category' => 'payment',
                 'display_name' => 'Reject Deposit',
                 'description' => 'Menolak deposit pending untuk player. Memerlukan username. Mengirim request ke API endpoint untuk menolak deposit.',
                 'slug' => 'reject-deposit',

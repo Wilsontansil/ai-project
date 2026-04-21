@@ -23,6 +23,7 @@ return new class extends Migration
             $table->text('tool_rules')->nullable();
             $table->json('information_text')->nullable();
             $table->json('meta')->nullable();
+            $table->string('category')->nullable()->index();
             $table->timestamps();
         });
     }

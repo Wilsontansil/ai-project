@@ -59,7 +59,7 @@ class AgentRuleSeeder extends Seeder
             ],
             [
                 'title' => 'Dilarang merusak atau membocorkan data',
-                'instruction' => 'Dilarang menghapus data apapun dari database — tidak boleh delete, truncate, atau operasi penghapusan apapun. Dilarang membagikan informasi player (username, saldo, email, nomor HP, bank, atau data pribadi lainnya) kepada user lain. Hanya berikan informasi akun kepada pemilik akun yang sedang berkomunikasi.',
+                'instruction' => 'Dilarang melakukan penghapusan data apapun dari database, termasuk perintah DELETE, TRUNCATE, atau operasi penghapusan lainnya. Informasi pribadi pemain (seperti username, saldo, email, nomor HP, rekening bank, dan data sensitif lainnya) tidak boleh dibagikan kepada pihak lain. Informasi akun hanya boleh diberikan kepada pemilik akun yang sedang berkomunikasi, termasuk beberapa informasi terkait deposit(Deposit) dan penarikan(Withdraw/WD).',
                 'type' => 'forbidden',
                 'category' => 'security',
                 'level' => 'danger',

@@ -192,6 +192,7 @@ class LiveChatController extends Controller
             ?? data_get($payload, 'customer_id')
             ?? data_get($payload, 'user_id')
             ?? data_get($payload, 'payload.chatId')
+            ?? data_get($payload, 'payload.chat_id')
             ?? data_get($payload, 'payload.userId')
             ?? data_get($payload, 'payload.externalId')
             ?? data_get($payload, 'payload.attributes.default_chat_id')

@@ -98,6 +98,11 @@ class ProcessAiReply implements ShouldQueue
         $shouldEscalate = str_contains($reply, '[ESCALATE]');
         $reply = trim(str_replace('[ESCALATE]', '', $reply));
 
+        // Safety fallback: if the AI only output the marker with no message, send a default wait message.
+        if ($shouldEscalate && $reply === '') {
+            $reply = 'Permintaan Anda sedang diteruskan ke agen kami. Mohon tunggu sebentar 🙏';
+        }
+
         if ($shouldEscalate && $customer !== null) {
             $agent = ChatAgent::getDefault();
             $escalationEnabled = $agent === null || ($agent->escalation_enabled ?? true);

@@ -45,6 +45,20 @@ class ProjectSettingSeeder extends Seeder
                 'group' => 'livechat',
                 'type' => 'secret',
             ],
+            [
+                'key' => 'livechat_basic_token',
+                'value' => env('LIVECHAT_BASIC_TOKEN'),
+                'label' => 'API Basic Token (base64)',
+                'group' => 'livechat',
+                'type' => 'secret',
+            ],
+            [
+                'key' => 'livechat_agent_id',
+                'value' => env('LIVECHAT_AGENT_ID'),
+                'label' => 'Agent ID (email)',
+                'group' => 'livechat',
+                'type' => 'text',
+            ],
 
             // WhatsApp (WAHA)
             [

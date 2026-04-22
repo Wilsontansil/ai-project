@@ -139,7 +139,7 @@ class DashboardController extends Controller
         return response()->json([
             'messages'     => $messages,
             'customer_mode' => $customer->mode,
-            'can_send'     => $customer->mode === 'human' && in_array($customer->platform, ['telegram', 'whatsapp']),
+            'can_send'     => $customer->mode === 'human' && in_array($customer->platform, ['telegram', 'whatsapp', 'livechat']),
         ]);
     }
 
@@ -149,7 +149,7 @@ class DashboardController extends Controller
             return back()->with('send_error', __('backoffice.pages.customer_chat.send_error_not_human'));
         }
 
-        if (!in_array($customer->platform, ['telegram', 'whatsapp'])) {
+        if (!in_array($customer->platform, ['telegram', 'whatsapp', 'livechat'])) {
             return back()->with('send_error', __('backoffice.pages.customer_chat.send_error_platform'));
         }
 
@@ -164,8 +164,10 @@ class DashboardController extends Controller
         try {
             if ($customer->platform === 'telegram') {
                 $this->sendTelegram($chatId, $message);
-            } else {
+            } elseif ($customer->platform === 'whatsapp') {
                 $this->sendWhatsApp($chatId, $message);
+            } else {
+                $this->sendLiveChat($chatId, $message);
             }
 
             app(ConversationMemoryService::class)->addMessage(
@@ -228,4 +230,35 @@ class DashboardController extends Controller
             throw new \RuntimeException('WAHA sendText failed with status: ' . $response->status());
         }
     }
-}
+
+    private function sendLiveChat(string $chatId, string $text): void
+    {
+        $basicToken = (string) ProjectSetting::getValue('livechat_basic_token', config('services.livechat.basic_token', ''));
+
+        if ($basicToken === '') {
+            throw new \RuntimeException('LiveChat basic token is not configured.');
+        }
+
+        $response = ResilientHttp::post(
+            'livechat',
+            'https://api.livechatinc.com/v3.6/agent/action/send_event',
+            [
+                'chat_id' => $chatId,
+                'event'   => [
+                    'type'       => 'message',
+                    'text'       => $text,
+                    'visibility' => 'all',
+                ],
+            ],
+            [
+                'Authorization' => 'Basic ' . $basicToken,
+                'Content-Type'  => 'application/json',
+                'X-Region'      => 'us-south1',
+            ],
+            timeoutSeconds: 10
+        );
+
+        if ($response !== null && $response->failed()) {
+            throw new \RuntimeException('LiveChat send_event failed with status: ' . $response->status());
+        }
+    }

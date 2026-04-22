@@ -268,7 +268,7 @@
     @endif
 
     @php
-        $canSend = $customer->mode === 'human' && in_array($customer->platform, ['telegram', 'whatsapp']);
+        $canSend = $customer->mode === 'human' && in_array($customer->platform, ['telegram', 'whatsapp', 'livechat']);
     @endphp
 
     <div id="chat-send-bar" class="rounded-2xl border border-slate-700/70 bg-slate-950 p-4"

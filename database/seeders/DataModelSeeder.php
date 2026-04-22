@@ -374,5 +374,34 @@ class DataModelSeeder extends Seeder
                 ],
             ]
         );
+
+        DataModel::updateOrCreate(
+            ['slug' => 'pools-periode'],
+            [
+                'model_name' => 'PoolsPeriode',
+                'description' => 'Pools periode data model schema (lottery pool schedule & results).',
+                'table_name'  => 'pools_has_periodes',
+                'connection_name' => 'pgsqlgame',
+                'fields' => [
+                    'id'         => ['type' => 'bigint', 'required' => false],
+                    'pools_id'   => ['type' => 'bigint', 'required' => false],
+                    'date'       => ['type' => 'date', 'required' => false],
+                    'days'       => ['type' => 'varchar(255)', 'required' => false],
+                    'times'      => ['type' => 'varchar(255)', 'required' => false],
+                    'datetimes'  => ['type' => 'varchar(255)', 'required' => false],
+                    'opendt'     => ['type' => 'varchar(255)', 'required' => false],
+                    'closedt'    => ['type' => 'varchar(255)', 'required' => false],
+                    'resultdt'   => ['type' => 'varchar(255)', 'required' => false],
+                    'periode'    => ['type' => 'bigint', 'required' => false],
+                    'result1'    => ['type' => 'varchar(255)', 'required' => false],
+                    'result2'    => ['type' => 'varchar(255)', 'required' => false],
+                    'result3'    => ['type' => 'varchar(255)', 'required' => false],
+                    'agent'      => ['type' => 'varchar(255)', 'required' => false],
+                    'status'     => ['type' => 'varchar(255)', 'required' => false],
+                    'created_at' => ['type' => 'timestamp', 'required' => false],
+                    'updated_at' => ['type' => 'timestamp', 'required' => false],
+                ],
+            ]
+        );
     }
 }

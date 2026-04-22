@@ -88,7 +88,7 @@
             </div>
 
             {{-- Max Tokens, Temperature, Toggles --}}
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;align-items:end">
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;align-items:end">
                 <div>
                     <label for="max_tokens" class="bo-label">{{ __('backoffice.pages.chat_agents.max_tokens') }}</label>
                     <input id="max_tokens" type="number" name="max_tokens"
@@ -112,6 +112,13 @@
                         <input type="checkbox" name="is_default" value="1"
                             {{ old('is_default', $agent->is_default) ? 'checked' : '' }} />
                         <span>{{ __('backoffice.pages.chat_agents.default_agent') }}</span>
+                    </label>
+                </div>
+                <div>
+                    <label class="bo-checkbox-label">
+                        <input type="checkbox" name="escalation_enabled" value="1"
+                            {{ old('escalation_enabled', $agent->escalation_enabled) ? 'checked' : '' }} />
+                        <span>{{ __('backoffice.pages.chat_agents.escalation_enabled_label') }}</span>
                     </label>
                 </div>
             </div>

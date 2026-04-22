@@ -34,11 +34,13 @@ class ChatAgentController extends Controller
             'temperature' => ['required', 'numeric', 'min:0', 'max:2'],
             'is_enabled' => ['nullable'],
             'is_default' => ['nullable'],
+            'escalation_enabled' => ['nullable'],
         ]);
 
         $data['slug'] = Str::slug($data['name']);
         $data['is_enabled'] = $request->boolean('is_enabled');
         $data['is_default'] = $request->boolean('is_default');
+        $data['escalation_enabled'] = $request->boolean('escalation_enabled', true);
 
         if ($data['is_default']) {
             ChatAgent::query()->where('is_default', true)->update(['is_default' => false]);
@@ -74,10 +76,12 @@ class ChatAgentController extends Controller
             'temperature' => ['required', 'numeric', 'min:0', 'max:2'],
             'is_enabled' => ['nullable'],
             'is_default' => ['nullable'],
+            'escalation_enabled' => ['nullable'],
         ]);
 
         $data['is_enabled'] = $request->boolean('is_enabled');
         $data['is_default'] = $request->boolean('is_default');
+        $data['escalation_enabled'] = $request->boolean('escalation_enabled', true);
 
         if ($data['is_default'] && !$chatAgent->is_default) {
             ChatAgent::query()->where('is_default', true)->update(['is_default' => false]);

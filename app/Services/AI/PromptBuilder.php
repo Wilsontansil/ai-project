@@ -149,6 +149,11 @@ PROMPT;
 
         $allRules = $query->orderBy('priority')->get();
 
+        // When escalation is disabled for this agent, strip any rule that teaches the AI to escalate.
+        if ($chatAgent !== null && !($chatAgent->escalation_enabled ?? true)) {
+            $allRules = $allRules->filter(fn ($rule) => !str_contains($rule->instruction, '[ESCALATE]'));
+        }
+
         if ($allRules->isEmpty()) {
             return '';
         }

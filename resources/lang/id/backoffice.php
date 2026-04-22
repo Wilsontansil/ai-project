@@ -138,6 +138,7 @@ return [
             'system_prompt_help' => 'Prompt utama yang dikirim ke AI model. Variabel:',
             'enabled_label' => 'Aktif',
             'default_agent' => 'Agent Default',
+            'escalation_enabled_label' => 'Antrian Eskalasi Aktif',
             'create_agent' => 'Buat Agent',
             'edit_subtitle' => 'Pengaturan agent dan system prompt.',
             'agent_info' => 'Info Agent',

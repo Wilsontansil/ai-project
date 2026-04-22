@@ -139,6 +139,7 @@ return [
             'system_prompt_help' => 'Main prompt sent to AI model. Variables:',
             'enabled_label' => 'Enabled',
             'default_agent' => 'Default Agent',
+            'escalation_enabled_label' => 'Escalation Queue Enabled',
             'create_agent' => 'Create Agent',
             'edit_subtitle' => 'Agent settings & system prompt.',
             'agent_info' => 'Agent Info',

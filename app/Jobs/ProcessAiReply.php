@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\ChatAgent;
 use App\Models\ProjectSetting;
 use App\Services\Agent\AgentContextService;
 use App\Services\Agent\ConversationMemoryService;
@@ -93,22 +94,32 @@ class ProcessAiReply implements ShouldQueue
 
         $this->stopTypingIndicator();
 
-        // Detect escalation marker — set mode to 'waiting' and strip the marker from reply.
+        // Detect escalation marker — strip it always; only queue if escalation_enabled on agent.
         $shouldEscalate = str_contains($reply, '[ESCALATE]');
         $reply = trim(str_replace('[ESCALATE]', '', $reply));
 
         if ($shouldEscalate && $customer !== null) {
-            try {
-                $customer->update(['mode' => 'waiting']);
-                Log::info('Customer escalated to waiting queue by AI', [
+            $agent = ChatAgent::getDefault();
+            $escalationEnabled = $agent === null || ($agent->escalation_enabled ?? true);
+
+            if ($escalationEnabled) {
+                try {
+                    $customer->update(['mode' => 'waiting']);
+                    Log::info('Customer escalated to waiting queue by AI', [
+                        'customer_id' => $customer->id,
+                        'channel' => $this->channel,
+                        'chat_id' => $this->chatId,
+                    ]);
+                } catch (\Throwable $e) {
+                    Log::error('Failed to set customer mode to waiting during escalation', [
+                        'customer_id' => $customer->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            } else {
+                Log::info('Escalation marker detected but escalation_enabled is off — skipping queue', [
                     'customer_id' => $customer->id,
                     'channel' => $this->channel,
-                    'chat_id' => $this->chatId,
-                ]);
-            } catch (\Throwable $e) {
-                Log::error('Failed to set customer mode to waiting during escalation', [
-                    'customer_id' => $customer->id,
-                    'error' => $e->getMessage(),
                 ]);
             }
         }

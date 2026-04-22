@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('temperature', 2, 1)->default(0.7);
             $table->boolean('is_enabled')->default(true);
             $table->boolean('is_default')->default(false);
+            $table->boolean('escalation_enabled')->default(true);
             $table->json('meta')->nullable();
             $table->timestamps();
         });

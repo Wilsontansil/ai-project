@@ -17,12 +17,14 @@ class ChatAgent extends Model
         'temperature',
         'is_enabled',
         'is_default',
+        'escalation_enabled',
         'meta',
     ];
 
     protected $casts = [
         'is_enabled' => 'boolean',
         'is_default' => 'boolean',
+        'escalation_enabled' => 'boolean',
         'temperature' => 'float',
         'meta' => 'array',
     ];

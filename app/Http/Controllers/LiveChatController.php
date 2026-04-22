@@ -109,10 +109,16 @@ class LiveChatController extends Controller
             $customer = app(CustomerIdentityService::class)->resolve('livechat', $payload, $combinedText);
             $agentContext = app(AgentContextService::class)->buildContext($customer, $combinedText);
 
-            // Always keep the latest active chat_id for admin replies.
+            // Always keep the latest active chat_id and thread_id for admin replies.
             $tags = $customer->tags ?? [];
-            if (($tags['livechat_chat_id'] ?? null) !== $chatId) {
+            $threadId = (string) (data_get($payload, 'payload.thread_id') ?? '');
+            $changed = ($tags['livechat_chat_id'] ?? null) !== $chatId
+                || ($threadId !== '' && ($tags['livechat_thread_id'] ?? null) !== $threadId);
+            if ($changed) {
                 $tags['livechat_chat_id'] = $chatId;
+                if ($threadId !== '') {
+                    $tags['livechat_thread_id'] = $threadId;
+                }
                 $customer->update(['tags' => $tags]);
             }
 

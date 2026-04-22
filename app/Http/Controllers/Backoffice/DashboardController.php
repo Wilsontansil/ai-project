@@ -175,7 +175,8 @@ class DashboardController extends Controller
             } elseif ($customer->platform === 'whatsapp') {
                 $this->sendWhatsApp($chatId, $message);
             } else {
-                $this->sendLiveChat($chatId, $message);
+                $threadId = ($customer->tags ?? [])['livechat_thread_id'] ?? null;
+                $this->sendLiveChat($chatId, $message, $threadId);
             }
 
             app(ConversationMemoryService::class)->addMessage(
@@ -239,7 +240,7 @@ class DashboardController extends Controller
         }
     }
 
-    private function sendLiveChat(string $chatId, string $text): void
+    private function sendLiveChat(string $chatId, string $text, ?string $threadId = null): void
     {
         $basicToken = (string) ProjectSetting::getValue('livechat_basic_token', config('services.livechat.basic_token', ''));
 
@@ -247,26 +248,57 @@ class DashboardController extends Controller
             throw new \RuntimeException('LiveChat basic token is not configured.');
         }
 
+        $headers = [
+            'Authorization' => 'Basic ' . $basicToken,
+            'Content-Type'  => 'application/json',
+            'X-Region'      => 'us-south1',
+        ];
+
+        // Ensure the agent is a member of the chat before sending.
+        // The send_event API returns 422 if the agent is not a chat member.
+        $agentId = (string) ProjectSetting::getValue('livechat_agent_id', config('services.livechat.agent_id', ''));
+        if ($agentId !== '') {
+            ResilientHttp::post(
+                'livechat',
+                'https://api.livechatinc.com/v3.6/agent/action/add_user_to_chat',
+                [
+                    'chat_id'   => $chatId,
+                    'user_id'   => $agentId,
+                    'user_type' => 'agent',
+                ],
+                $headers,
+                timeoutSeconds: 10
+            );
+            // Ignore response — agent may already be a member, which is fine.
+        }
+
+        $eventPayload = [
+            'chat_id' => $chatId,
+            'event'   => [
+                'type'       => 'message',
+                'text'       => $text,
+                'visibility' => 'all',
+            ],
+        ];
+
+        if ($threadId !== null && $threadId !== '') {
+            $eventPayload['thread_id'] = $threadId;
+        }
+
         $response = ResilientHttp::post(
             'livechat',
             'https://api.livechatinc.com/v3.6/agent/action/send_event',
-            [
-                'chat_id' => $chatId,
-                'event'   => [
-                    'type'       => 'message',
-                    'text'       => $text,
-                    'visibility' => 'all',
-                ],
-            ],
-            [
-                'Authorization' => 'Basic ' . $basicToken,
-                'Content-Type'  => 'application/json',
-                'X-Region'      => 'us-south1',
-            ],
+            $eventPayload,
+            $headers,
             timeoutSeconds: 10
         );
 
         if ($response !== null && $response->failed()) {
+            Log::error('LiveChat send_event failed', [
+                'chat_id'   => $chatId,
+                'status'    => $response->status(),
+                'body'      => $response->body(),
+            ]);
             throw new \RuntimeException('LiveChat send_event failed with status: ' . $response->status());
         }
     }

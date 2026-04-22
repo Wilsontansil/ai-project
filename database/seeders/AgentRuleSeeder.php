@@ -33,7 +33,7 @@ class AgentRuleSeeder extends Seeder
             ],
             [
                 'title' => 'Human Support',
-                'instruction' => 'Coba bantu selesaikan masalah dahulu. Jika perlu CS manusia, arahkan ke kontak support sesuai platform dari context. Jangan mengarang kontak sendiri.',
+                'instruction' => 'Coba bantu selesaikan masalah customer terlebih dahulu. Jika masalah tidak bisa diselesaikan dan customer benar-benar perlu ditangani oleh CS manusia, informasikan bahwa mereka sedang dihubungkan ke agen manusia dan minta mereka menunggu sebentar. Di akhir balasanmu, tambahkan penanda tersembunyi persis: [ESCALATE] — tanpa spasi, tanpa teks tambahan setelahnya. Penanda ini hanya digunakan satu kali saat pertama kali mengalihkan ke CS manusia.',
                 'type' => 'guideline',
                 'category' => 'behavior',
                 'level' => 'info',

@@ -98,29 +98,6 @@ class ProjectSettingSeeder extends Seeder
                 'group' => 'retention',
                 'type' => 'number',
             ],
-
-            // Support
-            [
-                'key' => 'support_telegram_tag',
-                'value' => env('SUPPORT_TELEGRAM_TAG'),
-                'label' => 'Telegram Bot Tag',
-                'group' => 'support',
-                'type' => 'text',
-            ],
-            [
-                'key' => 'support_whatsapp_phone',
-                'value' => env('SUPPORT_WHATSAPP_PHONE'),
-                'label' => 'WhatsApp Phone Number',
-                'group' => 'support',
-                'type' => 'text',
-            ],
-            [
-                'key' => 'support_livechat_url',
-                'value' => env('SUPPORT_LIVECHAT_URL'),
-                'label' => 'LiveChat Support URL',
-                'group' => 'support',
-                'type' => 'url',
-            ],
         ];
 
         foreach ($settings as $setting) {

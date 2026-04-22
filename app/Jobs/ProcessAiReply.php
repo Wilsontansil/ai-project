@@ -93,6 +93,26 @@ class ProcessAiReply implements ShouldQueue
 
         $this->stopTypingIndicator();
 
+        // Detect escalation marker — set mode to 'waiting' and strip the marker from reply.
+        $shouldEscalate = str_contains($reply, '[ESCALATE]');
+        $reply = trim(str_replace('[ESCALATE]', '', $reply));
+
+        if ($shouldEscalate && $customer !== null) {
+            try {
+                $customer->update(['mode' => 'waiting']);
+                Log::info('Customer escalated to waiting queue by AI', [
+                    'customer_id' => $customer->id,
+                    'channel' => $this->channel,
+                    'chat_id' => $this->chatId,
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Failed to set customer mode to waiting during escalation', [
+                    'customer_id' => $customer->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
         if ($customer !== null) {
             try {
                 app(ConversationMemoryService::class)->addMessage(

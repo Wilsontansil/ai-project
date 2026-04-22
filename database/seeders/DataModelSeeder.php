@@ -321,5 +321,27 @@ class DataModelSeeder extends Seeder
                 ],
             ]
         );
+
+        DataModel::updateOrCreate(
+            ['slug' => 'providers'],
+            [
+                'model_name' => 'Provider',
+                'description' => 'Default providers data model schema.',
+                'table_name' => 'providers',
+                'connection_name' => 'mysqlgame',
+                'fields' => [
+                    'id'       => ['type' => 'bigint(20) UNSIGNED', 'required' => false],
+                    'name'     => ['type' => 'varchar(125)', 'required' => false],
+                    'image'    => ['type' => 'varchar(125)', 'required' => false],
+                    'slug'     => ['type' => 'varchar(125)', 'required' => false],
+                    'alias'    => ['type' => 'varchar(125)', 'required' => false],
+                    'active'   => ['type' => 'tinyint(1)', 'required' => false],
+                    'category' => ['type' => "enum('casino','sports','e-sports')", 'required' => false],
+                    'isshow'   => ['type' => 'tinyint(1)', 'required' => false],
+                    'urutan'   => ['type' => 'int(11)', 'required' => false],
+                    'timezone' => ['type' => 'varchar(50)', 'required' => false],
+                ],
+            ]
+        );
     }
 }

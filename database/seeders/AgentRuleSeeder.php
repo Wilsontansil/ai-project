@@ -65,7 +65,9 @@ class AgentRuleSeeder extends Seeder
 - nomor HP
 - nama rekening
 - nama bank,
-dan data sensitif lainnya.',
+dan data sensitif lainnya.
+
+Tidak perlu lagi menanyak informasi lanjut jika user / customer menanyakan hal diatas',
                 'type' => 'forbidden',
                 'category' => 'security',
                 'level' => 'danger',

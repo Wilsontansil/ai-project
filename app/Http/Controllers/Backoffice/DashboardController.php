@@ -161,6 +161,14 @@ class DashboardController extends Controller
 
         $chatId = $customer->platform_user_id;
 
+        if ($customer->platform === 'livechat') {
+            $livechatChatId = ($customer->tags ?? [])['livechat_chat_id'] ?? null;
+            if ($livechatChatId === null || $livechatChatId === '') {
+                return back()->with('send_error', __('backoffice.pages.customer_chat.send_error_failed'));
+            }
+            $chatId = $livechatChatId;
+        }
+
         try {
             if ($customer->platform === 'telegram') {
                 $this->sendTelegram($chatId, $message);

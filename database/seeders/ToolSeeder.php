@@ -17,6 +17,7 @@ class ToolSeeder extends Seeder
         $withdrawModel = DataModel::query()->where('slug', 'withdraw')->first();
         $promoModel = DataModel::query()->where('slug', 'promo')->first();
         $gameModel = DataModel::query()->where('slug', 'game')->first();
+        $poolsPeriodeModel = DataModel::query()->where('slug', 'pools-periode')->first();
 
         $tools = [
             // ─── Internal config (no type) ───
@@ -802,6 +803,84 @@ class ToolSeeder extends Seeder
                 'tool_rules' => "- Jika username belum ada, minta username terlebih dahulu\n- WAJIB konfirmasi ulang ke user sebelum menjalankan reject deposit — ini adalah aksi sensitif\n- Setelah user mengonfirmasi, baru jalankan tool\n- Jika berhasil, infokan bahwa deposit telah berhasil ditolak dan tampilkan status dari response\n- Jika gagal, infokan error dari response dan sarankan untuk mencoba lagi atau menghubungi CS",
                 'information_text' => null,
                 'meta' => null,
+            ],
+
+            // ─── LOTTERY / TOGEL tools ───
+            [
+                'tool_name' => 'checkPoolResult',
+                'category' => 'lottery',
+                'display_name' => 'Cek Hasil Togel',
+                'description' => 'Cek hasil result togel (result1, result2, result3) berdasarkan nama pool. Gunakan pools_id sesuai mapping nama pool.',
+                'slug' => 'check-pool-result',
+                'type' => 'get',
+                'is_enabled' => true,
+                'data_model_id' => $poolsPeriodeModel?->id,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'pools_id' => [
+                            'type' => 'integer',
+                            // Add more pool mappings here as needed, e.g. Jakarta = 2, Surabaya = 3
+                            'description' => 'ID pool togel. Mapping nama ke ID: Medan = 1. Gunakan ID integer yang sesuai dengan nama pool yang disebutkan user.',
+                            'enum' => [1],
+                        ],
+                    ],
+                    'required' => ['pools_id'],
+                ],
+                'endpoints' => null,
+                'keywords' => ['hasil togel', 'result togel', 'keluaran togel', 'angka togel', 'nomor togel', 'result pool', 'keluar togel', 'cek togel', 'togel hari ini', 'result medan'],
+                'tool_rules' => "- Terjemahkan nama pool dari user ke pools_id yang benar sesuai mapping di parameter\n- Tampilkan: tanggal, periode, result1, result2, result3, status\n- Urutkan dari yang terbaru\n- Jika belum ada result (result1 kosong), infokan bahwa result belum tersedia\n- Format angka result dengan jelas",
+                'information_text' => null,
+                'meta' => [
+                    'query' => [
+                        'select' => ['pools_id', 'date', 'days', 'periode', 'result1', 'result2', 'result3', 'status'],
+                        'order_by' => [
+                            'field' => 'date',
+                            'direction' => 'desc',
+                        ],
+                        'limit' => 5,
+                    ],
+                ],
+            ],
+            [
+                'tool_name' => 'checkPoolSchedule',
+                'category' => 'lottery',
+                'display_name' => 'Jadwal Pool Togel',
+                'description' => 'Cek jadwal buka/tutup/result togel (opendt, closedt, resultdt) berdasarkan nama pool untuk hari ini.',
+                'slug' => 'check-pool-schedule',
+                'type' => 'get',
+                'is_enabled' => true,
+                'data_model_id' => $poolsPeriodeModel?->id,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'pools_id' => [
+                            'type' => 'integer',
+                            // Add more pool mappings here as needed, e.g. Jakarta = 2, Surabaya = 3
+                            'description' => 'ID pool togel. Mapping nama ke ID: Medan = 1. Gunakan ID integer yang sesuai dengan nama pool yang disebutkan user.',
+                            'enum' => [1],
+                        ],
+                    ],
+                    'required' => ['pools_id'],
+                ],
+                'endpoints' => null,
+                'keywords' => ['jadwal togel', 'jam buka togel', 'jam tutup togel', 'waktu result togel', 'schedule togel', 'jadwal pool', 'jam keluar togel', 'opendt', 'closedt'],
+                'tool_rules' => "- Terjemahkan nama pool dari user ke pools_id yang benar sesuai mapping di parameter\n- Tampilkan jadwal hari ini: tanggal, hari, periode, jam buka (opendt), jam tutup (closedt), jam result (resultdt), status\n- Urutkan berdasarkan periode ascending\n- Jika tidak ada jadwal hari ini, infokan bahwa jadwal belum tersedia",
+                'information_text' => null,
+                'meta' => [
+                    'query' => [
+                        'select' => ['pools_id', 'date', 'days', 'times', 'opendt', 'closedt', 'resultdt', 'periode', 'status'],
+                        'date_range' => [
+                            'field' => 'date',
+                            'range' => 'today',
+                        ],
+                        'order_by' => [
+                            'field' => 'periode',
+                            'direction' => 'asc',
+                        ],
+                        'limit' => 20,
+                    ],
+                ],
             ],
         ];
 

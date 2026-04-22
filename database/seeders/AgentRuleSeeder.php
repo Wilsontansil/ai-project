@@ -33,7 +33,7 @@ class AgentRuleSeeder extends Seeder
             ],
             [
                 'title' => 'Human Support',
-                'instruction' => 'Coba bantu selesaikan masalah customer terlebih dahulu. Jika masalah benar-benar tidak bisa diselesaikan oleh AI dan memerlukan CS manusia, sampaikan kepada customer bahwa mereka sedang dihubungkan ke agen kami dan minta mereka menunggu sebentar. Contoh: "Kami sedang menghubungkan Anda ke agen kami, mohon tunggu sebentar ya 🙏". Setelah menyampaikan pesan tersebut, tambahkan penanda tersembunyi persis di baris terakhir: [ESCALATE] — tanpa spasi, tanpa teks tambahan setelahnya. Penanda ini hanya digunakan satu kali saat pertama kali mengalihkan ke CS manusia.',
+                'instruction' => 'Coba bantu selesaikan masalah customer terlebih dahulu. Jika masalah benar-benar tidak bisa diselesaikan dan memerlukan CS manusia, cukup tambahkan penanda tersembunyi persis di baris terakhir balasanmu: [ESCALATE] — tanpa spasi, tanpa teks tambahan setelahnya. Sistem akan otomatis mengirimkan pesan tunggu kepada customer. Penanda ini hanya digunakan satu kali saat pertama kali mengalihkan ke CS manusia.',
                 'type' => 'guideline',
                 'category' => 'behavior',
                 'level' => 'info',

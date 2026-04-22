@@ -98,9 +98,10 @@ class ProcessAiReply implements ShouldQueue
         $shouldEscalate = str_contains($reply, '[ESCALATE]');
         $reply = trim(str_replace('[ESCALATE]', '', $reply));
 
-        // Safety fallback: if the AI only output the marker with no message, send a default wait message.
-        if ($shouldEscalate && $reply === '') {
-            $reply = 'Permintaan Anda sedang diteruskan ke agen kami. Mohon tunggu sebentar 🙏';
+        // Always replace reply with a hardcoded bilingual wait message when escalating.
+        // This ensures consistent wording regardless of what the AI generated.
+        if ($shouldEscalate) {
+            $reply = "Permintaan Anda sedang diteruskan ke agen kami. Mohon tunggu sebentar 🙏\nYour request is being forwarded to our agent. Please wait a moment 🙏";
         }
 
         if ($shouldEscalate && $customer !== null) {

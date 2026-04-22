@@ -323,6 +323,37 @@ class DataModelSeeder extends Seeder
         );
 
         DataModel::updateOrCreate(
+            ['slug' => 'rekenings'],
+            [
+                'model_name' => 'Rekening',
+                'description' => 'Rekening (bank account) data model schema.',
+                'table_name' => 'rekenings',
+                'connection_name' => 'mysqlgame',
+                'fields' => [
+                    'id'               => ['type' => 'bigint(20) UNSIGNED', 'required' => false],
+                    'agents_id'        => ['type' => 'bigint(20) UNSIGNED', 'required' => false],
+                    'agent'            => ['type' => 'varchar(125)', 'required' => true, 'value' => config('services.agent.kode')],
+                    'bank'             => ['type' => 'varchar(125)', 'required' => false],
+                    'nama'             => ['type' => 'varchar(125)', 'required' => false],
+                    'norek'            => ['type' => 'varchar(125)', 'required' => false],
+                    'jenis'            => ['type' => 'varchar(125)', 'required' => false],
+                    'rate'             => ['type' => 'int(11)', 'required' => false],
+                    'seq'              => ['type' => 'int(11)', 'required' => false],
+                    'logo'             => ['type' => 'varchar(125)', 'required' => false],
+                    'isimage'          => ['type' => 'tinyint(1)', 'required' => false],
+                    'qrcode'           => ['type' => 'varchar(125)', 'required' => false],
+                    'active'           => ['type' => 'varchar(125)', 'required' => false],
+                    'online'           => ['type' => 'varchar(125)', 'required' => false],
+                    'jam_buka'         => ['type' => 'time', 'required' => false],
+                    'jam_tutup'        => ['type' => 'time', 'required' => false],
+                    'is_deposit_bank'  => ['type' => 'tinyint(1)', 'required' => false],
+                    'is_withdraw_bank' => ['type' => 'tinyint(1)', 'required' => false],
+                    'provider'         => ['type' => 'varchar(125)', 'required' => false],
+                ],
+            ]
+        );
+
+        DataModel::updateOrCreate(
             ['slug' => 'providers'],
             [
                 'model_name' => 'Provider',

@@ -820,15 +820,14 @@ class ToolSeeder extends Seeder
                     'properties' => [
                         'pools_id' => [
                             'type' => 'integer',
-                            // Add more pool mappings here as needed, e.g. Jakarta = 2, Surabaya = 3
-                            'description' => 'ID pool togel. Mapping nama ke ID: Medan = 1. Gunakan ID integer yang sesuai dengan nama pool yang disebutkan user.',
-                            'enum' => [1],
+                            'description' => 'ID pool togel. Mapping nama ke ID: Hongkong Lotto = 1, Singapore Pools = 2, Sydney Lotto = 3, Samosir Pools = 4, HK Siang = 5, Toto Macau = 6, China Pools = 7, Cambodia = 8, Oregon 1 = 9, Oregon 2 = 10, Oregon 3 = 11, Oregon 4 = 12, Bullseye = 13, Swiss = 14, Macau = 15, Cairo = 16, Taiwan = 17, Qatar = 18, Malaysia = 19, Medan Pools = 20. Gunakan ID integer yang sesuai dengan nama pool yang disebutkan user.',
+                            'enum' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
                         ],
                     ],
                     'required' => ['pools_id'],
                 ],
                 'endpoints' => null,
-                'keywords' => ['hasil togel', 'result togel', 'keluaran togel', 'angka togel', 'nomor togel', 'result pool', 'keluar togel', 'cek togel', 'togel hari ini', 'result medan'],
+                'keywords' => ['hasil togel', 'result togel', 'keluaran togel', 'angka togel', 'nomor togel', 'result pool', 'keluar togel', 'cek togel', 'togel hari ini', 'result medan', 'result hongkong', 'result singapore', 'result sydney', 'result macau', 'result taiwan', 'result malaysia'],
                 'tool_rules' => "- Terjemahkan nama pool dari user ke pools_id yang benar sesuai mapping di parameter\n- Tampilkan: tanggal, periode, result1, result2, result3, status\n- Urutkan dari yang terbaru\n- Jika belum ada result (result1 kosong), infokan bahwa result belum tersedia\n- Format angka result dengan jelas",
                 'information_text' => null,
                 'meta' => [
@@ -856,15 +855,14 @@ class ToolSeeder extends Seeder
                     'properties' => [
                         'pools_id' => [
                             'type' => 'integer',
-                            // Add more pool mappings here as needed, e.g. Jakarta = 2, Surabaya = 3
-                            'description' => 'ID pool togel. Mapping nama ke ID: Medan = 1. Gunakan ID integer yang sesuai dengan nama pool yang disebutkan user.',
-                            'enum' => [1],
+                            'description' => 'ID pool togel. Mapping nama ke ID: Hongkong Lotto = 1, Singapore Pools = 2, Sydney Lotto = 3, Samosir Pools = 4, HK Siang = 5, Toto Macau = 6, China Pools = 7, Cambodia = 8, Oregon 1 = 9, Oregon 2 = 10, Oregon 3 = 11, Oregon 4 = 12, Bullseye = 13, Swiss = 14, Macau = 15, Cairo = 16, Taiwan = 17, Qatar = 18, Malaysia = 19, Medan Pools = 20. Gunakan ID integer yang sesuai dengan nama pool yang disebutkan user.',
+                            'enum' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
                         ],
                     ],
                     'required' => ['pools_id'],
                 ],
                 'endpoints' => null,
-                'keywords' => ['jadwal togel', 'jam buka togel', 'jam tutup togel', 'waktu result togel', 'schedule togel', 'jadwal pool', 'jam keluar togel', 'opendt', 'closedt'],
+                'keywords' => ['jadwal togel', 'jam buka togel', 'jam tutup togel', 'waktu result togel', 'schedule togel', 'jadwal pool', 'jam keluar togel', 'opendt', 'closedt', 'jadwal hongkong', 'jadwal singapore', 'jadwal sydney', 'jadwal macau', 'jadwal medan'],
                 'tool_rules' => "- Terjemahkan nama pool dari user ke pools_id yang benar sesuai mapping di parameter\n- Tampilkan jadwal hari ini: tanggal, hari, periode, jam buka (opendt), jam tutup (closedt), jam result (resultdt), status\n- Urutkan berdasarkan periode ascending\n- Jika tidak ada jadwal hari ini, infokan bahwa jadwal belum tersedia",
                 'information_text' => null,
                 'meta' => [

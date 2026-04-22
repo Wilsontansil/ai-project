@@ -262,3 +262,4 @@ class DashboardController extends Controller
             throw new \RuntimeException('LiveChat send_event failed with status: ' . $response->status());
         }
     }
+}

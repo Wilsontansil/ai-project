@@ -39,14 +39,14 @@ class AgentRuleSeeder extends Seeder
                 'level' => 'info',
                 'priority' => 30,
             ],
-            [
-                'title' => 'Jawab ringkas, detail hanya jika diminta',
-                'instruction' => 'Saat menjelaskan sesuatu, selalu sampaikan ringkasan atau poin-poin penting terlebih dahulu. Berikan penjelasan detail hanya jika customer secara eksplisit memintanya.',
-                'type' => 'guideline',
-                'category' => 'behavior',
-                'level' => 'info',
-                'priority' => 35,
-            ],
+            // [
+            //     'title' => 'Jawab ringkas, detail hanya jika diminta',
+            //     'instruction' => 'Saat menjelaskan sesuatu, selalu sampaikan ringkasan atau poin-poin penting terlebih dahulu. Berikan penjelasan detail hanya jika customer secara eksplisit memintanya.',
+            //     'type' => 'guideline',
+            //     'category' => 'behavior',
+            //     'level' => 'info',
+            //     'priority' => 35,
+            // ],
 
             // === Forbidden behaviours ===
             [
@@ -59,11 +59,17 @@ class AgentRuleSeeder extends Seeder
             ],
             [
                 'title' => 'Dilarang membagikan data pribadi pemain',
-                'instruction' => 'Informasi pribadi pemain (seperti username, saldo / balance, email, nomor HP, rekening bank, dan data sensitif lainnya) tidak boleh dibagikan kepada pihak lain. Informasi akun hanya boleh diberikan kepada pemilik akun yang sedang berkomunikasi',
+                'instruction' =>  'DILARANG KERAS membagikan informasi :
+- saldo / balance
+- username
+- nomor HP
+- nama rekening
+- nama bank,
+dan data sensitif lainnya.',
                 'type' => 'forbidden',
                 'category' => 'security',
                 'level' => 'danger',
-                'priority' => 30,
+                'priority' => 50,
             ],
             [
                 'title' => 'Dilarang merusak atau membocorkan data',
@@ -71,7 +77,7 @@ class AgentRuleSeeder extends Seeder
                 'type' => 'forbidden',
                 'category' => 'security',
                 'level' => 'danger',
-                'priority' => 20,
+                'priority' => 100,
             ],
         ];
 

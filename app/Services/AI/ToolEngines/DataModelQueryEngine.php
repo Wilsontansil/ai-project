@@ -2,6 +2,7 @@
 
 namespace App\Services\AI\ToolEngines;
 
+use App\Models\DatabaseConnection;
 use App\Models\DataModel;
 use App\Models\Tool;
 use App\Support\LogSanitizer;
@@ -594,7 +595,58 @@ class DataModelQueryEngine
     {
         $connectionName = trim($connectionName);
 
-        return $connectionName !== '' ? $connectionName : 'mysqlgame';
+        if ($connectionName === '') {
+            return 'mysqlgame';
+        }
+
+        // If the connection is already registered in Laravel's config, use it directly.
+        if (config("database.connections.{$connectionName}") !== null) {
+            return $connectionName;
+        }
+
+        // Look up the connection in the DatabaseConnection model and register it dynamically.
+        $record = DatabaseConnection::query()
+            ->where('name', $connectionName)
+            ->where('is_active', true)
+            ->first();
+
+        if ($record === null) {
+            return $connectionName; // Let Laravel throw its own "not configured" error.
+        }
+
+        $driverDefaults = match ($record->driver) {
+            'pgsql' => [
+                'charset'     => 'utf8',
+                'prefix'      => '',
+                'prefix_indexes' => true,
+                'search_path' => 'public',
+                'sslmode'     => 'prefer',
+            ],
+            default => [
+                'unix_socket'    => '',
+                'charset'        => 'utf8mb4',
+                'collation'      => 'utf8mb4_unicode_ci',
+                'prefix'         => '',
+                'prefix_indexes' => true,
+                'strict'         => true,
+                'engine'         => null,
+            ],
+        };
+
+        config([
+            "database.connections.{$connectionName}" => array_merge($driverDefaults, [
+                'driver'   => $record->driver,
+                'host'     => $record->host,
+                'port'     => $record->port,
+                'database' => $record->database,
+                'username' => $record->username,
+                'password' => $record->decrypted_password,
+            ]),
+        ]);
+
+        DB::purge($connectionName);
+
+        return $connectionName;
     }
 
     /**

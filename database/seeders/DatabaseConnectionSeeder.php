@@ -29,7 +29,7 @@ class DatabaseConnectionSeeder extends Seeder
                 'driver'    => 'pgsql',
                 'host'      => '54.255.226.39',
                 'port'      => 5432,
-                'database'  => 'postgres',
+                'database'  => 'empatd',
                 'username'  => 'postgres',
                 'password'  => '1dQB5KzRWM8F',
                 'is_active' => true,

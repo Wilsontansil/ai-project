@@ -820,7 +820,7 @@ class ToolSeeder extends Seeder
                     'properties' => [
                         'pools_id' => [
                             'type' => 'integer',
-                            'description' => 'ID pool togel. Mapping nama ke ID: Hongkong Lotto = 1, Singapore Pools = 2, Sydney Lotto = 3, Samosir Pools = 4, HK Siang = 5, Toto Macau = 6, China Pools = 7, Cambodia = 8, Oregon 1 = 9, Oregon 2 = 10, Oregon 3 = 11, Oregon 4 = 12, Bullseye = 13, Swiss = 14, Macau = 15, Cairo = 16, Taiwan = 17, Qatar = 18, Malaysia = 19, Medan Pools = 20. Gunakan ID integer yang sesuai dengan nama pool yang disebutkan user.',
+                            'description' => 'Pool ID: Hongkong=1,Singapore=2,Sydney=3,Samosir=4,HKSiang=5,TotoMacau=6,China=7,Cambodia=8,Oregon1=9,Oregon2=10,Oregon3=11,Oregon4=12,Bullseye=13,Swiss=14,Macau=15,Cairo=16,Taiwan=17,Qatar=18,Malaysia=19,Medan=20. Use integer ID.',
                             'enum' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
                         ],
                     ],
@@ -828,13 +828,13 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => null,
                 'keywords' => ['hasil togel', 'result togel', 'keluaran togel', 'angka togel', 'nomor togel', 'result pool', 'keluar togel', 'cek togel', 'togel hari ini', 'result medan', 'result hongkong', 'result singapore', 'result sydney', 'result macau', 'result taiwan', 'result malaysia'],
-                'tool_rules' => "- Terjemahkan nama pool dari user ke pools_id yang benar sesuai mapping di parameter\n- Tampilkan: tanggal, periode, result1, result2, result3, status\n- Urutkan dari yang terbaru\n- Jika belum ada result (result1 kosong), infokan bahwa result belum tersedia\n- Format angka result dengan jelas",
+                'tool_rules' => "- Selalu minta nama pool terlebih dahulu jika belum disebutkan\n- Terjemahkan nama pool dari user ke pools_id yang benar sesuai mapping di parameter\n- Tampilkan: tanggal, periode, result1\n- Urutkan dari yang terbaru berdasarkan closedt\n- Jika belum ada result (result1 kosong), infokan bahwa result belum tersedia",
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['pools_id', 'date', 'days', 'periode', 'result1', 'result2', 'result3', 'status'],
+                        'select' => ['pools_id', 'date', 'closedt', 'periode', 'result1', 'status'],
                         'order_by' => [
-                            'field' => 'date',
+                            'field' => 'closedt',
                             'direction' => 'desc',
                         ],
                         'limit' => 5,
@@ -855,7 +855,7 @@ class ToolSeeder extends Seeder
                     'properties' => [
                         'pools_id' => [
                             'type' => 'integer',
-                            'description' => 'ID pool togel. Mapping nama ke ID: Hongkong Lotto = 1, Singapore Pools = 2, Sydney Lotto = 3, Samosir Pools = 4, HK Siang = 5, Toto Macau = 6, China Pools = 7, Cambodia = 8, Oregon 1 = 9, Oregon 2 = 10, Oregon 3 = 11, Oregon 4 = 12, Bullseye = 13, Swiss = 14, Macau = 15, Cairo = 16, Taiwan = 17, Qatar = 18, Malaysia = 19, Medan Pools = 20. Gunakan ID integer yang sesuai dengan nama pool yang disebutkan user.',
+                            'description' => 'Pool ID: Hongkong=1,Singapore=2,Sydney=3,Samosir=4,HKSiang=5,TotoMacau=6,China=7,Cambodia=8,Oregon1=9,Oregon2=10,Oregon3=11,Oregon4=12,Bullseye=13,Swiss=14,Macau=15,Cairo=16,Taiwan=17,Qatar=18,Malaysia=19,Medan=20. Use integer ID.',
                             'enum' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
                         ],
                     ],

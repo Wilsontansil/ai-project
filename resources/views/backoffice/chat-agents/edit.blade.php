@@ -7,6 +7,8 @@
 
 @section('content')
     @php($isGeneralTab = ($activeTab ?? 'general') === 'general')
+    @php($isKnowledgeTab = ($activeTab ?? 'general') === 'knowledge-base')
+    @php($isRulesTab = ($activeTab ?? 'general') === 'rules')
 
     {{-- Header --}}
     <div style="display:flex;align-items:center;justify-content:space-between"
@@ -44,8 +46,12 @@
                 General
             </a>
             <a href="{{ route('backoffice.chat-agents.edit', ['chatAgent' => $agent, 'tab' => 'rules']) }}"
-                class="rounded-lg px-4 py-2 text-xs font-semibold transition {{ !$isGeneralTab ? 'bg-cyan-400 text-slate-950' : 'bg-white/5 text-slate-200 hover:bg-white/10' }}">
+                class="rounded-lg px-4 py-2 text-xs font-semibold transition {{ $isRulesTab ? 'bg-cyan-400 text-slate-950' : 'bg-white/5 text-slate-200 hover:bg-white/10' }}">
                 {{ __('backoffice.pages.chat_agents.agent_rules') }}
+            </a>
+            <a href="{{ route('backoffice.chat-agents.edit', ['chatAgent' => $agent, 'tab' => 'knowledge-base']) }}"
+                class="rounded-lg px-4 py-2 text-xs font-semibold transition {{ $isKnowledgeTab ? 'bg-cyan-400 text-slate-950' : 'bg-white/5 text-slate-200 hover:bg-white/10' }}">
+                Knowledge Base
             </a>
         </div>
     </div>
@@ -172,95 +178,167 @@
                 </div>
             </form>
         </div>
-
-        <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+    @elseif ($isKnowledgeTab)
+        <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 space-y-5">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
                 <div>
-                    <h2 class="text-sm font-semibold text-white">Knowledge Sources</h2>
-                    <p class="text-xs text-slate-400">Knowledge base khusus untuk agent ini.</p>
+                    <h2 class="text-sm font-semibold text-white">Knowledge Base</h2>
+                    <p class="text-xs text-slate-400">Klik View/Edit pada tabel untuk melihat atau mengubah detail entry.
+                    </p>
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('backoffice.chat-agents.knowledge-base.store', $agent) }}"
-                enctype="multipart/form-data" class="space-y-4 rounded-xl border border-slate-700/50 bg-slate-950/40 p-4">
-                @csrf
-                <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem">
-                    <div>
-                        <label for="kb_title" class="bo-label">Title</label>
-                        <input id="kb_title" type="text" name="title" value="{{ old('title') }}"
-                            placeholder="e.g. Cara klaim bonus" />
-                    </div>
-                    <div>
-                        <label for="kb_file" class="bo-label">Upload .txt (optional)</label>
-                        <input id="kb_file" type="file" name="file" accept=".txt" />
-                    </div>
+            <div class="overflow-hidden rounded-xl border border-white/10">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-xs" style="width:100%">
+                        <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
+                            <tr>
+                                <th class="px-3 py-2 font-medium">Title</th>
+                                <th class="px-3 py-2 font-medium">Source</th>
+                                <th class="px-3 py-2 font-medium">Status</th>
+                                <th class="px-3 py-2 font-medium">Updated</th>
+                                <th class="px-3 py-2 font-medium text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            @forelse ($knowledgeEntries as $entry)
+                                <tr class="transition hover:bg-white/5">
+                                    <td class="px-3 py-2">
+                                        <span class="font-medium text-white">{{ $entry->title }}</span>
+                                    </td>
+                                    <td class="px-3 py-2 text-slate-300">{{ $entry->source }}</td>
+                                    <td class="px-3 py-2">
+                                        @if ($entry->is_active)
+                                            <span
+                                                style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(16,185,129,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#6ee7b7">ACTIVE</span>
+                                        @else
+                                            <span
+                                                style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(239,68,68,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#fca5a5">INACTIVE</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-3 py-2 text-slate-300">{{ $entry->updated_at->format('d M Y H:i') }}
+                                    </td>
+                                    <td class="px-3 py-2 text-right">
+                                        <div style="display:flex;align-items:center;justify-content:flex-end;gap:0.5rem">
+                                            <a class="bo-btn-sm"
+                                                href="{{ route('backoffice.chat-agents.edit', ['chatAgent' => $agent, 'tab' => 'knowledge-base', 'mode' => 'view', 'kb' => $entry->id]) }}">View</a>
+                                            <a class="bo-btn-sm"
+                                                href="{{ route('backoffice.chat-agents.edit', ['chatAgent' => $agent, 'tab' => 'knowledge-base', 'mode' => 'edit', 'kb' => $entry->id]) }}">Edit</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-4 py-6 text-center text-slate-400">No knowledge base
+                                        entries for this agent yet.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
-                <div>
-                    <label for="kb_content" class="bo-label">Content</label>
-                    <textarea id="kb_content" name="content" rows="6" placeholder="Knowledge text...">{{ old('content') }}</textarea>
-                </div>
-                <label class="bo-checkbox-label" style="max-width:max-content">
-                    <input type="checkbox" name="is_active" value="1"
-                        {{ old('is_active', true) ? 'checked' : '' }} />
-                    <span>{{ __('backoffice.common.active') }}</span>
-                </label>
-                <button type="submit" class="bo-btn-primary">+ Add Knowledge</button>
-            </form>
+            </div>
 
-            <div class="mt-4 space-y-3">
-                @forelse ($knowledgeEntries as $entry)
-                    <div class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-4">
-                        <form method="POST"
-                            action="{{ route('backoffice.chat-agents.knowledge-base.update', [$agent, $entry]) }}"
-                            enctype="multipart/form-data" class="space-y-3">
-                            @csrf
-                            @method('PUT')
-                            <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem">
-                                <div>
-                                    <label for="entry_title_{{ $entry->id }}" class="bo-label">Title</label>
-                                    <input id="entry_title_{{ $entry->id }}" type="text" name="title"
-                                        value="{{ $entry->title }}" />
-                                </div>
-                                <div>
-                                    <label for="entry_file_{{ $entry->id }}" class="bo-label">Re-upload .txt</label>
-                                    <input id="entry_file_{{ $entry->id }}" type="file" name="file"
-                                        accept=".txt" />
-                                </div>
+            @if (($knowledgeMode ?? 'view') === 'edit' && ($selectedKnowledge ?? null) !== null)
+                <div class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-4">
+                    <h3 class="mb-3 text-sm font-semibold text-white">Edit Knowledge Entry</h3>
+                    <form method="POST"
+                        action="{{ route('backoffice.chat-agents.knowledge-base.update', [$agent, $selectedKnowledge]) }}"
+                        enctype="multipart/form-data" class="space-y-3">
+                        @csrf
+                        @method('PUT')
+                        <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem">
+                            <div>
+                                <label for="kb_edit_title" class="bo-label">Title</label>
+                                <input id="kb_edit_title" type="text" name="title"
+                                    value="{{ $selectedKnowledge->title }}" />
                             </div>
                             <div>
-                                <label for="entry_content_{{ $entry->id }}" class="bo-label">Content</label>
-                                <textarea id="entry_content_{{ $entry->id }}" name="content" rows="6">{{ $entry->content }}</textarea>
+                                <label for="kb_edit_file" class="bo-label">Re-upload .txt</label>
+                                <input id="kb_edit_file" type="file" name="file" accept=".txt" />
                             </div>
-                            <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
-                                <span>Source: {{ $entry->source }}</span>
-                                @if ($entry->file_name)
-                                    <span>File: {{ $entry->file_name }}</span>
-                                @endif
-                                <span>Updated: {{ $entry->updated_at->format('d M Y H:i') }}</span>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-3">
-                                <label class="bo-checkbox-label" style="max-width:max-content">
-                                    <input type="checkbox" name="is_active" value="1"
-                                        {{ $entry->is_active ? 'checked' : '' }} />
-                                    <span>{{ __('backoffice.common.active') }}</span>
-                                </label>
-                                <button type="submit"
-                                    class="bo-btn-sm">{{ __('backoffice.common.save_changes') }}</button>
-                            </div>
-                        </form>
-                        <form method="POST"
-                            action="{{ route('backoffice.chat-agents.knowledge-base.destroy', [$agent, $entry]) }}"
-                            onsubmit="return confirm('Delete this knowledge entry?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="bo-btn-danger">{{ __('backoffice.common.delete') }}</button>
-                        </form>
+                        </div>
+                        <div>
+                            <label for="kb_edit_content" class="bo-label">Content</label>
+                            <textarea id="kb_edit_content" name="content" rows="8">{{ $selectedKnowledge->content }}</textarea>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                            <span>Source: {{ $selectedKnowledge->source }}</span>
+                            @if ($selectedKnowledge->file_name)
+                                <span>File: {{ $selectedKnowledge->file_name }}</span>
+                            @endif
+                            <span>Updated: {{ $selectedKnowledge->updated_at->format('d M Y H:i') }}</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <label class="bo-checkbox-label" style="max-width:max-content">
+                                <input type="checkbox" name="is_active" value="1"
+                                    {{ $selectedKnowledge->is_active ? 'checked' : '' }} />
+                                <span>{{ __('backoffice.common.active') }}</span>
+                            </label>
+                            <button type="submit"
+                                class="bo-btn-primary">{{ __('backoffice.common.save_changes') }}</button>
+                        </div>
+                    </form>
+
+                    <form method="POST"
+                        action="{{ route('backoffice.chat-agents.knowledge-base.destroy', [$agent, $selectedKnowledge]) }}"
+                        class="mt-3" onsubmit="return confirm('Delete this knowledge entry?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="bo-btn-danger">{{ __('backoffice.common.delete') }}</button>
+                    </form>
+                </div>
+            @elseif (($knowledgeMode ?? 'view') === 'view' && ($selectedKnowledge ?? null) !== null)
+                <div class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-4">
+                    <h3 class="mb-3 text-sm font-semibold text-white">View Knowledge Entry</h3>
+                    <div class="space-y-3 text-sm text-slate-200">
+                        <div>
+                            <p class="text-xs text-slate-400">Title</p>
+                            <p>{{ $selectedKnowledge->title }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Content</p>
+                            <div class="whitespace-pre-wrap rounded-lg border border-white/10 bg-slate-900/70 p-3">
+                                {{ $selectedKnowledge->content }}</div>
+                        </div>
+                        <div class="flex flex-wrap gap-4 text-xs text-slate-400">
+                            <span>Source: {{ $selectedKnowledge->source }}</span>
+                            @if ($selectedKnowledge->file_name)
+                                <span>File: {{ $selectedKnowledge->file_name }}</span>
+                            @endif
+                            <span>Status: {{ $selectedKnowledge->is_active ? 'ACTIVE' : 'INACTIVE' }}</span>
+                            <span>Updated: {{ $selectedKnowledge->updated_at->format('d M Y H:i') }}</span>
+                        </div>
                     </div>
-                @empty
-                    <div class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-6 text-center">
-                        <p class="text-sm text-slate-400">No knowledge base entries for this agent yet.</p>
+                </div>
+            @endif
+
+            <div class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-4">
+                <h3 class="mb-3 text-sm font-semibold text-white">Add New Knowledge Entry</h3>
+                <form method="POST" action="{{ route('backoffice.chat-agents.knowledge-base.store', $agent) }}"
+                    enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+                    <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem">
+                        <div>
+                            <label for="kb_title" class="bo-label">Title</label>
+                            <input id="kb_title" type="text" name="title" value="{{ old('title') }}"
+                                placeholder="e.g. Cara klaim bonus" />
+                        </div>
+                        <div>
+                            <label for="kb_file" class="bo-label">Upload .txt (optional)</label>
+                            <input id="kb_file" type="file" name="file" accept=".txt" />
+                        </div>
                     </div>
-                @endforelse
+                    <div>
+                        <label for="kb_content" class="bo-label">Content</label>
+                        <textarea id="kb_content" name="content" rows="6" placeholder="Knowledge text...">{{ old('content') }}</textarea>
+                    </div>
+                    <label class="bo-checkbox-label" style="max-width:max-content">
+                        <input type="checkbox" name="is_active" value="1"
+                            {{ old('is_active', true) ? 'checked' : '' }} />
+                        <span>{{ __('backoffice.common.active') }}</span>
+                    </label>
+                    <button type="submit" class="bo-btn-primary">+ Add Knowledge</button>
+                </form>
             </div>
         </div>
     @else

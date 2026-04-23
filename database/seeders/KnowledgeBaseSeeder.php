@@ -87,7 +87,6 @@ class KnowledgeBaseSeeder extends Seeder
             [
                 'title' => 'Bonus',
                         'content' => 'A. BONUS KLAIM
-
 1. Bonus Ajak Teman (Referral Bonus) [NONAKTIF]
 Program Referral Bonus adalah program yang memungkinkan pengguna mendapatkan bonus dengan mengajak teman untuk bergabung dan bermain. Harus Di Claim di menu Reward.
 

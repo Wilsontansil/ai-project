@@ -58,9 +58,16 @@ class ChatAgentController extends Controller
     public function edit(Request $request, ChatAgent $chatAgent): View
     {
         $activeTab = $request->query('tab');
-        if (!in_array($activeTab, ['general', 'rules'], true)) {
+        if (!in_array($activeTab, ['general', 'knowledge-base', 'rules'], true)) {
             $activeTab = 'general';
         }
+
+        $knowledgeMode = $request->query('mode');
+        if (!in_array($knowledgeMode, ['view', 'edit'], true)) {
+            $knowledgeMode = 'view';
+        }
+
+        $selectedKnowledgeId = (int) $request->query('kb', 0);
 
         $agentRules = $chatAgent->agentRules()
             ->orderBy('type')
@@ -71,10 +78,17 @@ class ChatAgentController extends Controller
             ->orderByDesc('updated_at')
             ->get();
 
+        $selectedKnowledge = null;
+        if ($selectedKnowledgeId > 0) {
+            $selectedKnowledge = $knowledgeEntries->firstWhere('id', $selectedKnowledgeId);
+        }
+
         return view('backoffice.chat-agents.edit', [
             'agent' => $chatAgent,
             'agentRules' => $agentRules,
             'knowledgeEntries' => $knowledgeEntries,
+            'selectedKnowledge' => $selectedKnowledge,
+            'knowledgeMode' => $knowledgeMode,
             'activeTab' => $activeTab,
         ]);
     }
@@ -161,7 +175,7 @@ class ChatAgentController extends Controller
             'is_active' => $request->boolean('is_active', true),
         ]);
 
-        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'general'])
+        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'knowledge-base'])
             ->with('success', 'Knowledge base entry created.');
     }
 
@@ -201,7 +215,7 @@ class ChatAgentController extends Controller
             'is_active' => $request->boolean('is_active'),
         ]);
 
-        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'general'])
+        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'knowledge-base'])
             ->with('success', 'Knowledge base entry updated.');
     }
 
@@ -211,7 +225,7 @@ class ChatAgentController extends Controller
 
         $knowledgeBase->delete();
 
-        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'general'])
+        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'knowledge-base'])
             ->with('success', 'Knowledge base entry deleted.');
     }
 

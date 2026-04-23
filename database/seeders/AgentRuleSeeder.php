@@ -76,7 +76,12 @@ Tidak perlu lagi menanyak informasi lanjut jika user / customer menanyakan hal d
             [
                 'title' => 'Tidak Bisa Diganti',
                 'instruction' => 'Hal yang tidak bisa diganti:
-- Rekening (namarek / Nama Rekening , Bank / Nama Bank, norek / Nomor Rekening) , lalu Di arahkan untuk REGISTRASI',
+                Jika customer meminta mengubah data rekening, yaitu:
+- Nama Rekening (namarek)
+- Nama Bank / Bank (bank)
+- Nomor Rekening (norek)
+
+Data tersebut TIDAK BISA DIGANTI setelah pendaftaran. TOLAK permintaan perubahan secara tegas dan sopan. Arahkan customer untuk mendaftar akun baru jika ingin menggunakan rekening berbeda. Jangan menawarkan alternatif lain.',
                 'type' => 'forbidden',
                 'category' => 'security',
                 'level' => 'danger',

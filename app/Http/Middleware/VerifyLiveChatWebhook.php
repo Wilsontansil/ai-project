@@ -13,8 +13,9 @@ class VerifyLiveChatWebhook
     public function handle(Request $request, Closure $next): Response
     {
         // Allow challenge/verification GETs through — they have their own token check in the controller.
+        // Only GET requests are valid for the challenge handshake; POST with a challenge field must still be authenticated.
         $challenge = $request->input('challenge', $request->query('challenge', ''));
-        if ($challenge !== '' && $challenge !== null) {
+        if ($request->isMethod('GET') && $challenge !== '' && $challenge !== null) {
             return $next($request);
         }
 

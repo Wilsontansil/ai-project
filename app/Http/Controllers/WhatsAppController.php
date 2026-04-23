@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\ProcessAiReply;
+use App\Services\Agent\CustomerIdentityService;
 use App\Support\LogSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -63,7 +64,15 @@ class WhatsAppController extends Controller
             return response()->json(['status' => 'queued']);
         }
 
-        ProcessAiReply::dispatch('whatsapp', $chatId, '', $requestPayload)
+        $customerId = null;
+        try {
+            $resolvedCustomer = app(CustomerIdentityService::class)->resolve('whatsapp', $requestPayload, (string) $text);
+            $customerId = $resolvedCustomer->id;
+        } catch (\Throwable $e) {
+            Log::warning('Failed to resolve WhatsApp customer before dispatch', ['chat_id' => $chatId, 'error' => $e->getMessage()]);
+        }
+
+        ProcessAiReply::dispatch('whatsapp', $chatId, '', $customerId)
             ->delay(now()->addSeconds(2));
 
         return response()->json(['status' => 'ok']);

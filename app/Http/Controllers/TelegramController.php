@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\ProcessAiReply;
+use App\Services\Agent\CustomerIdentityService;
 use App\Support\LogSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -31,7 +32,15 @@ class TelegramController extends Controller
             return response()->json(['status' => 'queued']);
         }
 
-        ProcessAiReply::dispatch('telegram', $chatId, '', $request->all())
+        $customerId = null;
+        try {
+            $resolvedCustomer = app(CustomerIdentityService::class)->resolve('telegram', $request->all(), (string) $text);
+            $customerId = $resolvedCustomer->id;
+        } catch (\Throwable $e) {
+            Log::warning('Failed to resolve Telegram customer before dispatch', ['chat_id' => $chatId, 'error' => $e->getMessage()]);
+        }
+
+        ProcessAiReply::dispatch('telegram', $chatId, '', $customerId)
             ->delay(now()->addSeconds(2));
 
         return response()->json(['status' => 'ok']);

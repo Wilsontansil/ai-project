@@ -40,7 +40,7 @@ class ChatAgentController extends Controller
         $data['slug'] = Str::slug($data['name']);
         $data['is_enabled'] = $request->boolean('is_enabled');
         $data['is_default'] = $request->boolean('is_default');
-        $data['escalation_enabled'] = $request->boolean('escalation_enabled', true);
+        $data['escalation_enabled'] = $request->boolean('escalation_enabled');
 
         if ($data['is_default']) {
             ChatAgent::query()->where('is_default', true)->update(['is_default' => false]);
@@ -81,7 +81,7 @@ class ChatAgentController extends Controller
 
         $data['is_enabled'] = $request->boolean('is_enabled');
         $data['is_default'] = $request->boolean('is_default');
-        $data['escalation_enabled'] = $request->boolean('escalation_enabled', true);
+        $data['escalation_enabled'] = $request->boolean('escalation_enabled');
 
         if ($data['is_default'] && !$chatAgent->is_default) {
             ChatAgent::query()->where('is_default', true)->update(['is_default' => false]);

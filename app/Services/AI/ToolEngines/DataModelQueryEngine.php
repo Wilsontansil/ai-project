@@ -520,6 +520,14 @@ class DataModelQueryEngine
             return $normalized;
         }
 
+        // PostgreSQL returns 't'/'f' strings for boolean columns
+        if ($value === 't') {
+            return true;
+        }
+        if ($value === 'f') {
+            return false;
+        }
+
         if (is_string($value) && is_numeric($value)) {
             $float = (float) $value;
             return ($float == (int) $float) ? (int) $float : $float;

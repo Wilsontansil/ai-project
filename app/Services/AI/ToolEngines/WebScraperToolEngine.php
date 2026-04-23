@@ -54,12 +54,48 @@ class WebScraperToolEngine
     }
 
     /**
+     * Reject URLs that resolve to private/reserved IP ranges to prevent SSRF.
+     * Returns true if the URL is unsafe (should be blocked).
+     */
+    private static function isPrivateUrl(string $url): bool
+    {
+        $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+        if (!in_array($scheme, ['http', 'https'], true)) {
+            return true;
+        }
+
+        $host = (string) parse_url($url, PHP_URL_HOST);
+        if ($host === '') {
+            return true;
+        }
+
+        // Resolve hostname to IP
+        $ip = gethostbyname($host);
+
+        // gethostbyname returns the original string if resolution fails — block it
+        if ($ip === $host && !filter_var($host, FILTER_VALIDATE_IP)) {
+            return true;
+        }
+
+        // Block private, loopback, link-local, and reserved ranges
+        return filter_var(
+            $ip,
+            FILTER_VALIDATE_IP,
+            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+        ) === false;
+    }
+
+    /**
      * Scrape a URL and extract text content from the HTML.
      *
      * @return array{title: string|null, content: string|null, meta: array<string, mixed>, error: string|null}
      */
     public static function scrapeUrl(string $url): array
     {
+        if (self::isPrivateUrl($url)) {
+            return ['title' => null, 'content' => null, 'meta' => [], 'error' => 'URL not allowed: private or reserved addresses are blocked.'];
+        }
+
         try {
             $context = stream_context_create([
                 'http' => [
@@ -73,10 +109,13 @@ class WebScraperToolEngine
                 ],
             ]);
 
-            $html = @file_get_contents($url, false, $context);
+            error_clear_last();
+            $html = file_get_contents($url, false, $context);
 
             if ($html === false) {
-                return ['title' => null, 'content' => null, 'meta' => [], 'error' => 'Failed to fetch URL.'];
+                $lastError = error_get_last();
+                $reason = $lastError['message'] ?? 'Failed to fetch URL.';
+                return ['title' => null, 'content' => null, 'meta' => [], 'error' => $reason];
             }
 
             // Extract title

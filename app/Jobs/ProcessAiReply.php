@@ -4,9 +4,9 @@ namespace App\Jobs;
 
 use App\Models\ChatAgent;
 use App\Models\ProjectSetting;
+use App\Models\Customer;
 use App\Services\Agent\AgentContextService;
 use App\Services\Agent\ConversationMemoryService;
-use App\Services\Agent\CustomerIdentityService;
 use App\Services\AIService;
 use App\Support\MetricsCollector;
 use App\Support\ResilientHttp;
@@ -41,7 +41,7 @@ class ProcessAiReply implements ShouldQueue
         public readonly string $channel,
         public readonly string $chatId,
         public readonly string $combinedText,
-        public readonly array $payload,
+        public readonly ?int $customerId,
     ) {}
 
     public function handle(): void
@@ -61,16 +61,18 @@ class ProcessAiReply implements ShouldQueue
         $agentContext = [];
 
         try {
-            $customer = app(CustomerIdentityService::class)->resolve($this->channel, $this->payload, $text);
-            $agentContext = app(AgentContextService::class)->buildContext($customer, $text);
+            $customer = $this->customerId !== null ? Customer::find($this->customerId) : null;
+            if ($customer !== null) {
+                $agentContext = app(AgentContextService::class)->buildContext($customer, $text);
 
-            app(ConversationMemoryService::class)->addMessage(
-                $customer,
-                $this->channel,
-                'user',
-                $text,
-                ['chat_id' => $this->chatId]
-            );
+                app(ConversationMemoryService::class)->addMessage(
+                    $customer,
+                    $this->channel,
+                    'user',
+                    $text,
+                    ['chat_id' => $this->chatId]
+                );
+            }
         } catch (\Throwable $e) {
             Log::warning("{$this->channel} customer context persistence failed (job)", [
                 'chat_id' => $this->chatId,

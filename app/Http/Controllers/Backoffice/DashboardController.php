@@ -90,7 +90,14 @@ class DashboardController extends Controller
     public function chat(Request $request, Customer $customer): View
     {
         $startDate = $request->query('start_date', now()->toDateString());
-        $endDate = $request->query('end_date', now()->toDateString());
+        $endDate   = $request->query('end_date', now()->toDateString());
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $startDate) || !strtotime((string) $startDate)) {
+            $startDate = now()->toDateString();
+        }
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $endDate) || !strtotime((string) $endDate)) {
+            $endDate = now()->toDateString();
+        }
 
         $conversations = Conversation::query()
             ->where('customer_id', $customer->id)
@@ -119,7 +126,14 @@ class DashboardController extends Controller
     public function messages(Request $request, Customer $customer): JsonResponse
     {
         $startDate = $request->query('start_date', now()->toDateString());
-        $endDate = $request->query('end_date', now()->toDateString());
+        $endDate   = $request->query('end_date', now()->toDateString());
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $startDate) || !strtotime((string) $startDate)) {
+            $startDate = now()->toDateString();
+        }
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $endDate) || !strtotime((string) $endDate)) {
+            $endDate = now()->toDateString();
+        }
 
         $conversations = Conversation::query()
             ->where('customer_id', $customer->id)

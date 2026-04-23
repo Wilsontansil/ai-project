@@ -23,14 +23,14 @@ class AgentRuleSeeder extends Seeder
             //     'level' => 'danger',
             //     'priority' => 10,
             // ],
-            [
-                'title' => 'Ganti topik percakapan',
-                'instruction' => 'Jika user mengirim pesan baru yang tidak berkaitan dengan permintaan sebelumnya, ABAIKAN konteks lama dan tangani topik baru sesuai pesannya. Jangan pernah melanjutkan alur sebelumnya (misalnya reset password) jika user sudah membahas hal lain.',
-                'type' => 'guideline',
-                'category' => 'behavior',
-                'level' => 'warning',
-                'priority' => 25,
-            ],
+            // [
+            //     'title' => 'Ganti topik percakapan',
+            //     'instruction' => 'Jika user mengirim pesan baru yang tidak berkaitan dengan permintaan sebelumnya, ABAIKAN konteks lama dan tangani topik baru sesuai pesannya. Jangan pernah melanjutkan alur sebelumnya (misalnya reset password) jika user sudah membahas hal lain.',
+            //     'type' => 'guideline',
+            //     'category' => 'behavior',
+            //     'level' => 'warning',
+            //     'priority' => 25,
+            // ],
             [
                 'title' => 'Human Support',
                 'instruction' => 'Coba bantu selesaikan masalah customer terlebih dahulu. Jika masalah benar-benar tidak bisa diselesaikan dan memerlukan CS manusia, cukup tambahkan penanda tersembunyi persis di baris terakhir balasanmu: [ESCALATE] — tanpa spasi, tanpa teks tambahan setelahnya. Sistem akan otomatis mengirimkan pesan tunggu kepada customer. Penanda ini hanya digunakan satu kali saat pertama kali mengalihkan ke CS manusia.',
@@ -74,8 +74,17 @@ Tidak perlu lagi menanyak informasi lanjut jika user / customer menanyakan hal d
                 'priority' => 50,
             ],
             [
+                'title' => 'Tidak Bisa Diganti',
+                'instruction' => 'Hal yang tidak bisa diganti:
+- Rekening (namarek / Nama Rekening , Bank / Nama Bank, norek / Nomor Rekening) , lalu Di arahkan untuk REGISTRASI',
+                'type' => 'forbidden',
+                'category' => 'security',
+                'level' => 'danger',
+                'priority' => 50,
+            ],
+            [
                 'title' => 'Dilarang merusak atau membocorkan data',
-                'instruction' => 'Dilarang melakukan penghapusan data apapun dari database, termasuk perintah DELETE, TRUNCATE, atau operasi penghapusan lainnya. Informasi pribadi pemain (seperti username, saldo, email, nomor HP, rekening bank, dan data sensitif lainnya) tidak boleh dibagikan kepada pihak lain. Informasi akun hanya boleh diberikan kepada pemilik akun yang sedang berkomunikasi, termasuk beberapa informasi terkait deposit(Deposit) dan penarikan(Withdraw/WD).',
+                'instruction' => 'Dilarang melakukan penghapusan data apapun dari database, termasuk perintah DELETE, TRUNCATE, atau operasi penghapusan lainnya.',
                 'type' => 'forbidden',
                 'category' => 'security',
                 'level' => 'danger',

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Laravel 13 API that connects Telegram, WhatsApp (WAHA), and LiveChat messages to an OpenAI-powered assistant (xoneBot). Includes a full backoffice for managing tools, data models, forbidden behaviours, and global settings.
+Laravel 13 API that connects Telegram, WhatsApp (WAHA), and LiveChat messages to an OpenAI-powered assistant (xoneBot). Includes a full backoffice for managing tools, data models, forbidden behaviours, per-agent knowledge base, and global settings.
 
 ## Architecture
 
@@ -45,22 +45,24 @@ Telegram / WhatsApp / LiveChat
 
 All backoffice routes require authentication (`auth` + `set.locale` middleware). The UI is mobile-responsive with an off-canvas sidebar drawer on screens < 1024px.
 
-| Path                               | Controller                   | Purpose                        |
-| ---------------------------------- | ---------------------------- | ------------------------------ |
-| `/backoffice/login`                | AuthController               | Admin login (rate-limited)     |
-| `/backoffice`                      | DashboardController          | Customer dashboard + stats     |
-| `/backoffice/customer/{id}/chat`   | DashboardController          | Chat history view              |
-| `/backoffice/ai-agent`             | AIAgentController            | Agent persona settings         |
-| `/backoffice/chat-agents`          | ChatAgentController          | Chat agent CRUD + duplication  |
-| `/backoffice/tools`                | ToolController               | CRUD for AI tools              |
-| `/backoffice/tools/test-endpoint`  | ToolController               | Test tool HTTP endpoint        |
-| `/backoffice/data-models`          | DataModelController          | CRUD for data models           |
-| `/backoffice/database-connections` | DatabaseConnectionController | CRUD for database connections  |
-| `/backoffice/forbidden-behaviours` | ForbiddenBehaviourController | CRUD for banned behavior rules |
-| `/backoffice/settings`             | SettingController            | Global project settings        |
-| `/backoffice/metrics`              | MetricsController            | Observability dashboard        |
-| `/backoffice/users`                | UserController               | User CRUD with role management |
-| `/backoffice/locale/{locale}`      | LocaleController             | Language toggle (id/en)        |
+| Path                                            | Controller                   | Purpose                                      |
+| ----------------------------------------------- | ---------------------------- | -------------------------------------------- |
+| `/backoffice/login`                             | AuthController               | Admin login (rate-limited)                   |
+| `/backoffice`                                   | DashboardController          | Customer dashboard + stats                   |
+| `/backoffice/customer/{id}/chat`                | DashboardController          | Chat history view                            |
+| `/backoffice/ai-agent`                          | AIAgentController            | Agent persona settings                       |
+| `/backoffice/chat-agents`                       | ChatAgentController          | Chat agent CRUD + duplication                |
+| `/backoffice/chat-agents/{id}/edit?tab=general` | ChatAgentController          | Agent settings + per-agent knowledge sources |
+| `/backoffice/chat-agents/{id}/edit?tab=rules`   | ChatAgentController          | Agent-specific rules management              |
+| `/backoffice/tools`                             | ToolController               | CRUD for AI tools                            |
+| `/backoffice/tools/test-endpoint`               | ToolController               | Test tool HTTP endpoint                      |
+| `/backoffice/data-models`                       | DataModelController          | CRUD for data models                         |
+| `/backoffice/database-connections`              | DatabaseConnectionController | CRUD for database connections                |
+| `/backoffice/forbidden-behaviours`              | ForbiddenBehaviourController | CRUD for banned behavior rules               |
+| `/backoffice/settings`                          | SettingController            | Global project settings                      |
+| `/backoffice/metrics`                           | MetricsController            | Observability dashboard                      |
+| `/backoffice/users`                             | UserController               | User CRUD with role management               |
+| `/backoffice/locale/{locale}`                   | LocaleController             | Language toggle (id/en)                      |
 
 ## Webhook Authentication Middleware
 
@@ -95,7 +97,7 @@ Additional middleware:
 - **UserController** — Full CRUD for backoffice users with Spatie Permission role assignment (admin, operator). Includes validation for unique username/email.
 - **DashboardController** — Customer list with search, summary stats, customer chat history viewer.
 - **AIAgentController** — View/update AI agent persona (name, system prompt, welcome message, etc.).
-- **ChatAgentController** — Chat agent CRUD with duplication support.
+- **ChatAgentController** — Chat agent CRUD with duplication support, plus per-agent knowledge base CRUD inside the edit page General tab.
 - **ToolController** — Full CRUD for tools (info/get/update types), includes endpoint tester.
 - **DataModelController** — Full CRUD for data model field schemas with required/value support.
 - **DatabaseConnectionController** — Database connection CRUD with connection test.
@@ -189,19 +191,20 @@ Cost estimation uses `gpt-4.1-mini` pricing: $0.0004/1K input tokens, $0.0016/1K
 
 ## Models
 
-| Model              | Table                | Key Fields                                                                        | Relationships            |
-| ------------------ | -------------------- | --------------------------------------------------------------------------------- | ------------------------ |
-| User               | users                | username, name, email, password, active_session_id                                | roles (Spatie)           |
-| ChatAgent          | chat_agents          | name, system_prompt, is_active                                                    | forbiddenBehaviours      |
-| Customer           | customers            | platform, platform_user_id, phone, name, tags, first/last_seen_at, total_messages | conversations, behaviors |
-| Conversation       | conversations        | customer_id, channel, conversation_date, messages (JSON)                          | customer                 |
-| CustomerBehavior   | customer_behaviors   | customer_id, intent, sentiment, frequency_score, last_intent_at                   | customer                 |
-| Tool               | tools                | tool_name, type, parameters, endpoints, keywords                                  | dataModel                |
-| DataModel          | data_models          | model_name, slug, table_name, connection_name, fields (JSON)                      | tools                    |
-| DatabaseConnection | database_connections | name, driver, host, port, database, username, password                            | dataModels               |
-| ForbiddenBehaviour | forbidden_behaviours | title, description, is_enabled, chat_agent_id                                     | chatAgent                |
-| ProjectSetting     | project_settings     | key, value, group, label                                                          | —                        |
-| BotMetric          | bot_metrics          | metric_type, channel, meta (JSON), created_at                                     | —                        |
+| Model              | Table                | Key Fields                                                                        | Relationships              |
+| ------------------ | -------------------- | --------------------------------------------------------------------------------- | -------------------------- |
+| User               | users                | username, name, email, password, active_session_id                                | roles (Spatie)             |
+| ChatAgent          | chat_agents          | name, system_prompt, is_active                                                    | agentRules, knowledgeBases |
+| KnowledgeBase      | knowledge_base       | chat_agent_id, title, content, source, file_name, is_active                       | chatAgent                  |
+| Customer           | customers            | platform, platform_user_id, phone, name, tags, first/last_seen_at, total_messages | conversations, behaviors   |
+| Conversation       | conversations        | customer_id, channel, conversation_date, messages (JSON)                          | customer                   |
+| CustomerBehavior   | customer_behaviors   | customer_id, intent, sentiment, frequency_score, last_intent_at                   | customer                   |
+| Tool               | tools                | tool_name, type, parameters, endpoints, keywords                                  | dataModel                  |
+| DataModel          | data_models          | model_name, slug, table_name, connection_name, fields (JSON)                      | tools                      |
+| DatabaseConnection | database_connections | name, driver, host, port, database, username, password                            | dataModels                 |
+| ForbiddenBehaviour | forbidden_behaviours | title, description, is_enabled, chat_agent_id                                     | chatAgent                  |
+| ProjectSetting     | project_settings     | key, value, group, label                                                          | —                          |
+| BotMetric          | bot_metrics          | metric_type, channel, meta (JSON), created_at                                     | —                          |
 
 ## Tool Types
 
@@ -258,6 +261,7 @@ Fields stored as JSON in `data_models.fields`:
 | project_settings                 | 2026_04_12_000001 |
 | data_models                      | 2026_04_12_000008 |
 | chat_agents                      | 2026_04_15_000001 |
+| knowledge_base                   | 2026_04_21_000001 |
 | database_connections             | 2026_04_15_000001 |
 | bot_metrics                      | 2026_04_17_120000 |
 
@@ -271,6 +275,7 @@ Fields stored as JSON in `data_models.fields`:
 | ToolSeeder               | Default tools: \_bot_config, resetPassword, register, checkSuspend, toStatus, game_gacor, pola_gacor, bonus, link_rtp, link_apk |
 | ForbiddenBehaviourSeeder | Banned behavior rules                                                                                                           |
 | ProjectSettingSeeder     | Global settings (API keys, bot tokens, support URLs, agent config)                                                              |
+| KnowledgeBaseSeeder      | Default knowledge entries attached to the default chat agent                                                                    |
 
 ## Environment Variables
 
@@ -370,6 +375,7 @@ All metrics stored in `bot_metrics` table via `MetricsCollector`. Fire-and-forge
 - Keep replies short unless user requests detail.
 - Conversation context per channel + chat ID (20 messages, 12h TTL). Cache keys are channel-isolated to prevent cross-platform history leakage.
 - Rapid messages debounced (2s) before AI processing.
+- Knowledge base injection is scoped to the active chat agent (no cross-agent knowledge leakage).
 - If uncertain, offer handover to human support.
 - Required DataModel fields with fixed values are always auto-injected into queries.
 

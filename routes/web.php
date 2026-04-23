@@ -9,7 +9,6 @@ use App\Http\Controllers\Backoffice\DatabaseConnectionController;
 use App\Http\Controllers\Backoffice\LocaleController;
 use App\Http\Controllers\Backoffice\MetricsController;
 use App\Http\Controllers\Backoffice\SettingController;
-use App\Http\Controllers\Backoffice\KnowledgeBaseController;
 use App\Http\Controllers\Backoffice\ToolController;
 use App\Http\Controllers\Backoffice\UserController;
 use App\Http\Controllers\Backoffice\WebsitePageController;
@@ -44,6 +43,10 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
         Route::put('/backoffice/chat-agents/{chatAgent}', [ChatAgentController::class, 'update'])->name('backoffice.chat-agents.update');
         Route::delete('/backoffice/chat-agents/{chatAgent}', [ChatAgentController::class, 'destroy'])->name('backoffice.chat-agents.destroy');
         Route::post('/backoffice/chat-agents/{chatAgent}/duplicate', [ChatAgentController::class, 'duplicate'])->name('backoffice.chat-agents.duplicate');
+
+        Route::post('/backoffice/chat-agents/{chatAgent}/knowledge-base', [ChatAgentController::class, 'storeKnowledgeBase'])->name('backoffice.chat-agents.knowledge-base.store');
+        Route::put('/backoffice/chat-agents/{chatAgent}/knowledge-base/{knowledgeBase}', [ChatAgentController::class, 'updateKnowledgeBase'])->name('backoffice.chat-agents.knowledge-base.update');
+        Route::delete('/backoffice/chat-agents/{chatAgent}/knowledge-base/{knowledgeBase}', [ChatAgentController::class, 'destroyKnowledgeBase'])->name('backoffice.chat-agents.knowledge-base.destroy');
     });
 
     // Agent rules scoped per agent (admin only)
@@ -64,14 +67,6 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
         Route::put('/backoffice/tools/{tool}', [ToolController::class, 'update'])->name('backoffice.tools.update');
         Route::delete('/backoffice/tools/{tool}', [ToolController::class, 'destroy'])->name('backoffice.tools.destroy');
         Route::post('/backoffice/tools/test-endpoint', [ToolController::class, 'testEndpoint'])->name('backoffice.tools.testEndpoint');
-
-        // Knowledge base
-        Route::get('/backoffice/knowledge-base', [KnowledgeBaseController::class, 'index'])->name('backoffice.knowledge-base.index');
-        Route::get('/backoffice/knowledge-base/create', [KnowledgeBaseController::class, 'create'])->name('backoffice.knowledge-base.create');
-        Route::post('/backoffice/knowledge-base', [KnowledgeBaseController::class, 'store'])->name('backoffice.knowledge-base.store');
-        Route::get('/backoffice/knowledge-base/{knowledgeBase}/edit', [KnowledgeBaseController::class, 'edit'])->name('backoffice.knowledge-base.edit');
-        Route::put('/backoffice/knowledge-base/{knowledgeBase}', [KnowledgeBaseController::class, 'update'])->name('backoffice.knowledge-base.update');
-        Route::delete('/backoffice/knowledge-base/{knowledgeBase}', [KnowledgeBaseController::class, 'destroy'])->name('backoffice.knowledge-base.destroy');
     });
 
     // Data models (admin only)

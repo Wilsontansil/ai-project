@@ -9,6 +9,7 @@ class KnowledgeBase extends Model
     protected $table = 'knowledge_base';
 
     protected $fillable = [
+        'chat_agent_id',
         'title',
         'content',
         'source',
@@ -19,4 +20,9 @@ class KnowledgeBase extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function chatAgent()
+    {
+        return $this->belongsTo(ChatAgent::class);
+    }
 }

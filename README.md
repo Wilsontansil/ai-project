@@ -1,6 +1,6 @@
 # xoneBot — AI Chatbot Platform
 
-Laravel 13 / PHP 8.3 API that connects **Telegram**, **WhatsApp (WAHA)**, and **LiveChat** to an OpenAI-powered assistant. Includes a backoffice for managing tools, data models, forbidden behaviours, and project settings.
+Laravel 13 / PHP 8.3 API that connects **Telegram**, **WhatsApp (WAHA)**, and **LiveChat** to an OpenAI-powered assistant. Includes a backoffice for managing tools, data models, forbidden behaviours, per-agent knowledge sources, and project settings.
 
 ## Architecture
 
@@ -85,20 +85,22 @@ All settings can also be managed from the backoffice Settings page (stored in `p
 
 All routes under `/backoffice` require authentication. The UI is mobile-responsive (off-canvas sidebar on < 1024px).
 
-| Path                               | Purpose                                                   |
-| ---------------------------------- | --------------------------------------------------------- |
-| `/backoffice/login`                | Admin login (username, rate-limited: 5 attempts / 15 min) |
-| `/backoffice`                      | Customer dashboard & stats                                |
-| `/backoffice/users`                | User management with role assignment                      |
-| `/backoffice/ai-agent`             | Agent persona settings                                    |
-| `/backoffice/chat-agents`          | Chat agent CRUD with duplication                          |
-| `/backoffice/tools`                | CRUD for AI tools                                         |
-| `/backoffice/data-models`          | CRUD for data model schemas                               |
-| `/backoffice/database-connections` | CRUD for database connections                             |
-| `/backoffice/forbidden-behaviours` | CRUD for banned behaviour rules                           |
-| `/backoffice/settings`             | Global project settings                                   |
-| `/backoffice/metrics`              | Observability dashboard (throughput, latency, cost)       |
-| `/backoffice/locale/{locale}`      | Language toggle (id/en)                                   |
+| Path                                            | Purpose                                                   |
+| ----------------------------------------------- | --------------------------------------------------------- |
+| `/backoffice/login`                             | Admin login (username, rate-limited: 5 attempts / 15 min) |
+| `/backoffice`                                   | Customer dashboard & stats                                |
+| `/backoffice/users`                             | User management with role assignment                      |
+| `/backoffice/ai-agent`                          | Agent persona settings                                    |
+| `/backoffice/chat-agents`                       | Chat agent CRUD with duplication                          |
+| `/backoffice/chat-agents/{id}/edit?tab=general` | Agent settings + per-agent knowledge sources              |
+| `/backoffice/chat-agents/{id}/edit?tab=rules`   | Agent-specific rules                                      |
+| `/backoffice/tools`                             | CRUD for AI tools                                         |
+| `/backoffice/data-models`                       | CRUD for data model schemas                               |
+| `/backoffice/database-connections`              | CRUD for database connections                             |
+| `/backoffice/forbidden-behaviours`              | CRUD for banned behaviour rules                           |
+| `/backoffice/settings`                          | Global project settings                                   |
+| `/backoffice/metrics`                           | Observability dashboard (throughput, latency, cost)       |
+| `/backoffice/locale/{locale}`                   | Language toggle (id/en)                                   |
 
 ## Testing
 

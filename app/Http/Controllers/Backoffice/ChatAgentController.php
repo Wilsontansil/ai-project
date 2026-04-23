@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
 use App\Models\ChatAgent;
+use App\Models\KnowledgeBase;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ChatAgentController extends Controller
@@ -53,16 +55,27 @@ class ChatAgentController extends Controller
             ->with('success', 'Agent berhasil dibuat.');
     }
 
-    public function edit(ChatAgent $chatAgent): View
+    public function edit(Request $request, ChatAgent $chatAgent): View
     {
+        $activeTab = $request->query('tab');
+        if (!in_array($activeTab, ['general', 'rules'], true)) {
+            $activeTab = 'general';
+        }
+
         $agentRules = $chatAgent->agentRules()
             ->orderBy('type')
             ->orderBy('priority')
             ->get();
 
+        $knowledgeEntries = $chatAgent->knowledgeBases()
+            ->orderByDesc('updated_at')
+            ->get();
+
         return view('backoffice.chat-agents.edit', [
             'agent' => $chatAgent,
             'agentRules' => $agentRules,
+            'knowledgeEntries' => $knowledgeEntries,
+            'activeTab' => $activeTab,
         ]);
     }
 
@@ -113,5 +126,99 @@ class ChatAgentController extends Controller
 
         return redirect()->route('backoffice.chat-agents.index')
             ->with('success', "Agent \"{$chatAgent->name}\" berhasil diduplikasi.");
+    }
+
+    public function storeKnowledgeBase(Request $request, ChatAgent $chatAgent): RedirectResponse
+    {
+        $data = $request->validate([
+            'title' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('knowledge_base', 'title')->where(fn ($query) => $query->where('chat_agent_id', $chatAgent->id)),
+            ],
+            'content' => ['nullable', 'string'],
+            'file' => ['nullable', 'file', 'mimes:txt', 'max:2048'],
+        ]);
+
+        $content = $data['content'] ?? '';
+        $source = 'manual';
+        $fileName = null;
+
+        if ($request->hasFile('file') && $request->file('file')->isValid()) {
+            $file = $request->file('file');
+            $content = (string) file_get_contents($file->getRealPath());
+            $source = 'file';
+            $fileName = $file->getClientOriginalName();
+        }
+
+        KnowledgeBase::query()->create([
+            'chat_agent_id' => $chatAgent->id,
+            'title' => $data['title'],
+            'content' => $content,
+            'source' => $source,
+            'file_name' => $fileName,
+            'is_active' => $request->boolean('is_active', true),
+        ]);
+
+        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'general'])
+            ->with('success', 'Knowledge base entry created.');
+    }
+
+    public function updateKnowledgeBase(Request $request, ChatAgent $chatAgent, KnowledgeBase $knowledgeBase): RedirectResponse
+    {
+        $this->ensureKnowledgeOwnership($chatAgent, $knowledgeBase);
+
+        $data = $request->validate([
+            'title' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('knowledge_base', 'title')
+                    ->where(fn ($query) => $query->where('chat_agent_id', $chatAgent->id))
+                    ->ignore($knowledgeBase->id),
+            ],
+            'content' => ['nullable', 'string'],
+            'file' => ['nullable', 'file', 'mimes:txt', 'max:2048'],
+        ]);
+
+        $content = $data['content'] ?? $knowledgeBase->content;
+        $source = $knowledgeBase->source;
+        $fileName = $knowledgeBase->file_name;
+
+        if ($request->hasFile('file') && $request->file('file')->isValid()) {
+            $file = $request->file('file');
+            $content = (string) file_get_contents($file->getRealPath());
+            $source = 'file';
+            $fileName = $file->getClientOriginalName();
+        }
+
+        $knowledgeBase->update([
+            'title' => $data['title'],
+            'content' => $content,
+            'source' => $source,
+            'file_name' => $fileName,
+            'is_active' => $request->boolean('is_active'),
+        ]);
+
+        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'general'])
+            ->with('success', 'Knowledge base entry updated.');
+    }
+
+    public function destroyKnowledgeBase(ChatAgent $chatAgent, KnowledgeBase $knowledgeBase): RedirectResponse
+    {
+        $this->ensureKnowledgeOwnership($chatAgent, $knowledgeBase);
+
+        $knowledgeBase->delete();
+
+        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'general'])
+            ->with('success', 'Knowledge base entry deleted.');
+    }
+
+    private function ensureKnowledgeOwnership(ChatAgent $chatAgent, KnowledgeBase $knowledgeBase): void
+    {
+        if ((int) $knowledgeBase->chat_agent_id !== (int) $chatAgent->id) {
+            abort(404);
+        }
     }
 }

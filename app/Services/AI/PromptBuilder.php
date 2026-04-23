@@ -45,7 +45,7 @@ class PromptBuilder
 
         $basePrompt .= "\n\n" . $this->getToolUsagePolicyPrompt();
 
-        $kbPrompt = $this->getKnowledgeBasePrompt();
+        $kbPrompt = $this->getKnowledgeBasePrompt($chatAgent);
         if ($kbPrompt !== '') {
             $basePrompt .= "\n\n" . $kbPrompt;
         }
@@ -117,10 +117,19 @@ PRINSIP UTAMA:
 PROMPT;
     }
 
-    private function getKnowledgeBasePrompt(): string
+    private function getKnowledgeBasePrompt(?ChatAgent $chatAgent): string
     {
+        if ($chatAgent === null) {
+            return '';
+        }
+
         try {
-            $entries = KnowledgeBase::query()->where('is_active', true)->orderBy('id')->get();
+            $entries = KnowledgeBase::query()
+                ->where('chat_agent_id', $chatAgent->id)
+                ->where('is_active', true)
+                ->orderBy('id')
+                ->get();
+
             if ($entries->isEmpty()) {
                 return '';
             }

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\ChatAgent;
 use App\Models\KnowledgeBase;
 use Illuminate\Database\Seeder;
 
@@ -9,6 +10,11 @@ class KnowledgeBaseSeeder extends Seeder
 {
     public function run(): void
     {
+      $defaultAgent = ChatAgent::getDefault() ?? ChatAgent::query()->first();
+      if ($defaultAgent === null) {
+         return;
+      }
+
         $entries = [
             [
                 'title' => 'Pools',
@@ -384,8 +390,17 @@ Bot sempat melakukan klarifikasi dengan benar, namun masih perlu peningkatan dal
 
         foreach ($entries as $entry) {
             KnowledgeBase::query()->updateOrCreate(
-                ['title' => $entry['title']],
-                $entry
+            [
+               'chat_agent_id' => $defaultAgent->id,
+               'title' => $entry['title'],
+            ],
+            [
+               'chat_agent_id' => $defaultAgent->id,
+               'content' => $entry['content'],
+               'source' => $entry['source'],
+               'file_name' => $entry['file_name'],
+               'is_active' => $entry['is_active'],
+            ]
             );
         }
     }

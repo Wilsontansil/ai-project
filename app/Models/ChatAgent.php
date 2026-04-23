@@ -58,4 +58,9 @@ class ChatAgent extends Model
     {
         return $this->hasMany(AgentRule::class);
     }
+
+    public function knowledgeBases()
+    {
+        return $this->hasMany(KnowledgeBase::class);
+    }
 }

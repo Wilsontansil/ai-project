@@ -56,6 +56,9 @@ class AIService
         $toolDefinitions = $this->toolDispatcher->getToolDefinitions();
         $history = $this->conversationHistory->load($chatId, $channel);
         $contextPrompt = $this->promptBuilder->buildAgentContextPrompt($agentContext, $channel);
+        $activeHistory = $this->shouldResetHistoryForNewTopic((string) $message, $history)
+            ? []
+            : $history;
 
         $messages = [['role' => 'system', 'content' => $systemPrompt]];
         if ($contextPrompt !== null) {
@@ -68,7 +71,7 @@ class AIService
         $systemChars = mb_strlen($systemPrompt) + mb_strlen($contextPrompt ?? '') + mb_strlen($message);
         $availableChars = max(0, $maxChars - $systemChars);
 
-        $trimmedHistory = $history;
+        $trimmedHistory = $activeHistory;
         $historyChars = array_sum(array_map(fn ($m) => mb_strlen($m['content'] ?? ''), $trimmedHistory));
 
         while ($historyChars > $availableChars && count($trimmedHistory) >= 2) {
@@ -77,11 +80,11 @@ class AIService
             $historyChars = array_sum(array_map(fn ($m) => mb_strlen($m['content'] ?? ''), $trimmedHistory));
         }
 
-        if (count($trimmedHistory) < count($history)) {
+        if (count($trimmedHistory) < count($activeHistory)) {
             Log::info('Trimmed conversation history', [
                 'channel' => $channel,
                 'chat_id' => $chatId,
-                'from' => count($history),
+                'from' => count($activeHistory),
                 'to' => count($trimmedHistory),
             ]);
         }
@@ -120,13 +123,13 @@ class AIService
 
             // Let the dispatcher handle tool calls and intent matching.
             $assistantReply = $this->toolDispatcher->resolve(
-                $client, $msg, $message, $systemPrompt, $contextPrompt, $history, $model,
+                $client, $msg, $message, $systemPrompt, $contextPrompt, $activeHistory, $model,
                 (string) $chatId, $channel
             );
 
             if ($assistantReply !== null) {
-                $assistantReply = $this->replyFormatter->prepare($history, $assistantReply);
-                $this->conversationHistory->save($chatId, $history, $message, $assistantReply, $channel);
+                $assistantReply = $this->replyFormatter->prepare($activeHistory, $assistantReply);
+                $this->conversationHistory->save($chatId, $activeHistory, $message, $assistantReply, $channel);
 
                 return $assistantReply;
             }
@@ -138,8 +141,8 @@ class AIService
                 $assistantReply .= "\n\nJika jawaban ini masih terpotong, balas: lanjut.";
             }
 
-            $assistantReply = $this->replyFormatter->prepare($history, $assistantReply);
-            $this->conversationHistory->save($chatId, $history, $message, $assistantReply, $channel);
+            $assistantReply = $this->replyFormatter->prepare($activeHistory, $assistantReply);
+            $this->conversationHistory->save($chatId, $activeHistory, $message, $assistantReply, $channel);
 
             return $assistantReply;
         } catch (\OpenAI\Exceptions\RateLimitException $e) {
@@ -289,5 +292,75 @@ class AIService
         }
 
         throw $lastException;
+    }
+
+    /**
+     * Reset conversational carry-over when the newest user turn clearly changes subject.
+     *
+     * @param array<int, array<string, string>> $history
+     */
+    private function shouldResetHistoryForNewTopic(string $message, array $history): bool
+    {
+        $message = trim(mb_strtolower($message));
+        $shouldReset = false;
+
+        if ($message !== '' && count($history) >= 2) {
+            $recentText = [];
+            foreach (array_slice($history, -4) as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+
+                $content = trim(mb_strtolower((string) ($item['content'] ?? '')));
+                if ($content !== '') {
+                    $recentText[] = $content;
+                }
+            }
+
+            if ($recentText !== []) {
+                $currentKeywords = $this->extractTopicKeywords($message);
+                if ($currentKeywords !== []) {
+                    $historyKeywords = [];
+                    foreach ($recentText as $text) {
+                        $historyKeywords = array_merge($historyKeywords, $this->extractTopicKeywords($text));
+                    }
+                    $historyKeywords = array_values(array_unique($historyKeywords));
+
+                    if ($historyKeywords !== []) {
+                        $shouldReset = count(array_intersect($currentKeywords, $historyKeywords)) === 0;
+                    }
+                }
+            }
+        }
+
+        return $shouldReset;
+    }
+
+    /**
+     * Extract lightweight topical keywords from a message for topic-shift detection.
+     *
+     * @return array<int, string>
+     */
+    private function extractTopicKeywords(string $text): array
+    {
+        preg_match_all('/[\p{L}\p{N}]{3,}/u', mb_strtolower($text), $matches);
+
+        $stopWords = [
+            'yang', 'dan', 'atau', 'untuk', 'dengan', 'dari', 'sudah', 'belum', 'mohon', 'tolong',
+            'kak', 'saya', 'aku', 'kami', 'kamu', 'anda', 'itu', 'ini', 'jadi', 'agar', 'bisa',
+            'mau', 'lagi', 'sih', 'kok', 'nih', 'nya', 'aja', 'cek', 'berapa', 'gimana', 'bagaimana',
+            'please', 'plis', 'the', 'and', 'for', 'with', 'from', 'have', 'what', 'when',
+        ];
+
+        $keywords = [];
+        foreach ($matches[0] ?? [] as $token) {
+            if (in_array($token, $stopWords, true)) {
+                continue;
+            }
+
+            $keywords[] = $token;
+        }
+
+        return array_values(array_unique($keywords));
     }
 }

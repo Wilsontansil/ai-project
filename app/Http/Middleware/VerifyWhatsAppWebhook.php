@@ -12,11 +12,6 @@ class VerifyWhatsAppWebhook
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Allow health-check GETs through without auth.
-        if ($request->isMethod('get')) {
-            return $next($request);
-        }
-
         $secret = (string) ProjectSetting::getValue(
             'whatsapp_webhook_secret',
             config('services.whatsapp.webhook_secret', '')

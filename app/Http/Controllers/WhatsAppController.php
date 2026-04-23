@@ -18,10 +18,6 @@ class WhatsAppController extends Controller
         // Log::info('Not Sanitized WAHA webhook received', ['body' => $requestPayload]);
         // Log::info('WhatsApp webhook received', LogSanitizer::summarize($requestPayload));
 
-        if ($request->isMethod('get')) {
-            return response()->json(['status' => 'ok']);
-        }
-
         $event = (string) ($request->input('event') ?? '');
         $payload = $request->input('payload', []);
 

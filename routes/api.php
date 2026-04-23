@@ -9,5 +9,5 @@ Route::get('/test', function () {
     return response()->json(['message' => 'API is working']);
 });
 Route::post('/telegram/webhook', [TelegramController::class, 'handleWebhook'])->middleware('verify.telegram');
-Route::match(['get', 'post'], '/whatsapp/webhook', [WhatsAppController::class, 'handleWebhook'])->middleware('verify.whatsapp');
+Route::post('/whatsapp/webhook', [WhatsAppController::class, 'handleWebhook'])->middleware('verify.whatsapp');
 Route::match(['get', 'post'], '/livechat/webhook', [LiveChatController::class, 'handleWebhook'])->middleware('verify.livechat');

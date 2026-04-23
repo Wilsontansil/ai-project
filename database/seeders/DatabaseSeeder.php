@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Database\Seeders\DataModelSeeder;
 use Database\Seeders\AgentRuleSeeder;
+use Database\Seeders\KnowledgeBaseSeeder;
 use Database\Seeders\ProjectSettingSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -26,6 +27,7 @@ class DatabaseSeeder extends Seeder
             ChatAgentSeeder::class,
             AgentRuleSeeder::class,
             DatabaseConnectionSeeder::class,
+            KnowledgeBaseSeeder::class,
         ]);
     }
 }

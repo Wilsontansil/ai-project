@@ -24,7 +24,7 @@ use OpenAI;
  */
 class AIService
 {
-    private int $debounceSeconds = 2;
+    private int $defaultDebounceSeconds = 2;
 
     private string $model = 'gpt-4.1-mini';
 
@@ -176,6 +176,8 @@ class AIService
             return null;
         }
 
+        $debounceSeconds = $this->getMessageAwaitSeconds();
+
         $prefix = $channel !== '' ? $channel . ':' : '';
         $bufferKey = 'chat:debounce:buffer:' . $prefix . $chatId;
         $leaderKey = 'chat:debounce:leader:' . $prefix . $chatId;
@@ -194,7 +196,7 @@ class AIService
             $lock->release();
         }
 
-        return Cache::add($leaderKey, 1, now()->addSeconds($this->debounceSeconds + 2));
+        return Cache::add($leaderKey, 1, now()->addSeconds($debounceSeconds + 2));
     }
 
     /**
@@ -259,9 +261,26 @@ class AIService
             return null;
         }
 
-        usleep($this->debounceSeconds * 1000000);
+        $debounceSeconds = $this->getMessageAwaitSeconds();
+        if ($debounceSeconds > 0) {
+            usleep($debounceSeconds * 1000000);
+        }
 
         return $this->collectBufferedMessages($chatId, $channel) ?? trim($message);
+    }
+
+    /**
+     * Delay before AI replies after the latest user message.
+     */
+    public function getMessageAwaitSeconds(): int
+    {
+        $seconds = Cache::remember('ai:message_await_seconds:default_agent', now()->addSeconds(20), function (): int {
+            $agent = ChatAgent::getDefault();
+
+            return (int) ($agent?->message_await_seconds ?? $this->defaultDebounceSeconds);
+        });
+
+        return max(0, min(15, (int) $seconds));
     }
 
     /**
@@ -305,35 +324,39 @@ class AIService
         $shouldReset = false;
 
         if ($message !== '' && count($history) >= 2) {
-            $recentText = [];
-            foreach (array_slice($history, -4) as $item) {
-                if (!is_array($item)) {
-                    continue;
-                }
+            $recentText = $this->recentHistoryTexts($history, 4);
+            $currentKeywords = $this->extractTopicKeywords($message);
+            $historyKeywords = $recentText !== []
+                ? $this->extractTopicKeywords(implode(' ', $recentText))
+                : [];
 
-                $content = trim(mb_strtolower((string) ($item['content'] ?? '')));
-                if ($content !== '') {
-                    $recentText[] = $content;
-                }
-            }
-
-            if ($recentText !== []) {
-                $currentKeywords = $this->extractTopicKeywords($message);
-                if ($currentKeywords !== []) {
-                    $historyKeywords = [];
-                    foreach ($recentText as $text) {
-                        $historyKeywords = array_merge($historyKeywords, $this->extractTopicKeywords($text));
-                    }
-                    $historyKeywords = array_values(array_unique($historyKeywords));
-
-                    if ($historyKeywords !== []) {
-                        $shouldReset = count(array_intersect($currentKeywords, $historyKeywords)) === 0;
-                    }
-                }
+            if ($recentText !== [] && $currentKeywords !== [] && $historyKeywords !== []) {
+                $shouldReset = count(array_intersect($currentKeywords, $historyKeywords)) === 0;
             }
         }
 
         return $shouldReset;
+    }
+
+    /**
+     * @param array<int, array<string, string>> $history
+     * @return array<int, string>
+     */
+    private function recentHistoryTexts(array $history, int $limit = 4): array
+    {
+        $texts = [];
+        foreach (array_slice($history, -$limit) as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $content = trim(mb_strtolower((string) ($item['content'] ?? '')));
+            if ($content !== '') {
+                $texts[] = $content;
+            }
+        }
+
+        return $texts;
     }
 
     /**

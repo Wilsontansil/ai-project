@@ -127,6 +127,8 @@ return [
             'no_description' => 'No description',
             'max_tokens' => 'Max tokens',
             'temp' => 'Temp',
+            'message_await_seconds' => 'Message Await (seconds)',
+            'message_await_help' => 'Delay before AI responds to a user message (0-15 seconds).',
             'rules' => 'Rules',
             'settings' => 'Settings',
             'clone' => 'Clone',

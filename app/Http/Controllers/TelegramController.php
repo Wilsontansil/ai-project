@@ -8,15 +8,11 @@ use App\Support\LogSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Services\AIService;
-use App\Models\ProjectSetting;
 
 class TelegramController extends Controller
 {
     public function handleWebhook(Request $request)
     {
-        // Log::info('Not Sanitized Telegram webhook received', ['body' => $request->all()]);
-        // Log::info('Telegram webhook received', LogSanitizer::summarize($request->all()));
-
         $text = $request->input('message.text');
         $chatId = $request->input('message.chat.id');
 
@@ -41,7 +37,7 @@ class TelegramController extends Controller
         }
 
         ProcessAiReply::dispatch('telegram', $chatId, '', $customerId)
-            ->delay(now()->addSeconds(2));
+            ->delay(now()->addSeconds(app(AIService::class)->getMessageAwaitSeconds()));
 
         return response()->json(['status' => 'ok']);
     }

@@ -15,6 +15,7 @@ class ChatAgent extends Model
         'model',
         'max_tokens',
         'temperature',
+        'message_await_seconds',
         'is_enabled',
         'is_default',
         'escalation_enabled',
@@ -26,6 +27,7 @@ class ChatAgent extends Model
         'is_default' => 'boolean',
         'escalation_enabled' => 'boolean',
         'temperature' => 'float',
+        'message_await_seconds' => 'integer',
         'meta' => 'array',
     ];
 

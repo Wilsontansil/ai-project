@@ -87,8 +87,8 @@
                         id="prompt-count">{{ strlen(old('system_prompt', $agent->system_prompt) ?? '') }}</span>/2000</p>
             </div>
 
-            {{-- Max Tokens, Temperature, Toggles --}}
-            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;align-items:end">
+            {{-- Max Tokens, Temperature, Await Delay, Toggles --}}
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:1rem;align-items:end">
                 <div>
                     <label for="max_tokens" class="bo-label">{{ __('backoffice.pages.chat_agents.max_tokens') }}</label>
                     <input id="max_tokens" type="number" name="max_tokens"
@@ -99,6 +99,15 @@
                     <input id="temperature" type="number" name="temperature"
                         value="{{ old('temperature', $agent->temperature) }}" min="0" max="2"
                         step="0.1" />
+                </div>
+                <div>
+                    <label for="message_await_seconds"
+                        class="bo-label">{{ __('backoffice.pages.chat_agents.message_await_seconds') }}</label>
+                    <input id="message_await_seconds" type="number" name="message_await_seconds"
+                        value="{{ old('message_await_seconds', $agent->message_await_seconds ?? 2) }}" min="0"
+                        max="15" step="1" />
+                    <p style="margin-top:0.25rem;font-size:0.7rem;color:#64748b">
+                        {{ __('backoffice.pages.chat_agents.message_await_help') }}</p>
                 </div>
                 <div>
                     <label class="bo-checkbox-label">

@@ -15,8 +15,6 @@ class WhatsAppController extends Controller
     public function handleWebhook(Request $request)
     {
         $requestPayload = $request->all();
-        // Log::info('Not Sanitized WAHA webhook received', ['body' => $requestPayload]);
-        // Log::info('WhatsApp webhook received', LogSanitizer::summarize($requestPayload));
 
         $event = (string) ($request->input('event') ?? '');
         $payload = $request->input('payload', []);
@@ -69,7 +67,7 @@ class WhatsAppController extends Controller
         }
 
         ProcessAiReply::dispatch('whatsapp', $chatId, '', $customerId)
-            ->delay(now()->addSeconds(2));
+            ->delay(now()->addSeconds(app(AIService::class)->getMessageAwaitSeconds()));
 
         return response()->json(['status' => 'ok']);
     }

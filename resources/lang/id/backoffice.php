@@ -126,6 +126,8 @@ return [
             'no_description' => 'Tanpa deskripsi',
             'max_tokens' => 'Maks token',
             'temp' => 'Suhu',
+            'message_await_seconds' => 'Message Await (detik)',
+            'message_await_help' => 'Delay sebelum AI merespons pesan user (0-15 detik).',
             'rules' => 'Rules',
             'settings' => 'Pengaturan',
             'clone' => 'Duplikat',

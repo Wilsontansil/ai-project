@@ -27,6 +27,7 @@ KEPRIBADIAN & KOMUNIKASI:
                 'model' => 'gpt-4.1-mini',
                 'max_tokens' => 420,
                 'temperature' => 0.7,
+                'message_await_seconds' => 2,
                 'is_enabled' => true,
                 'is_default' => true,
             ]

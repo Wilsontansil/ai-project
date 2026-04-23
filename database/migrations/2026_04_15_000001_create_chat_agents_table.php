@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('model', 60)->default('gpt-4.1-mini');
             $table->unsignedInteger('max_tokens')->default(420);
             $table->decimal('temperature', 2, 1)->default(0.7);
+            $table->unsignedSmallInteger('message_await_seconds')->default(2);
             $table->boolean('is_enabled')->default(true);
             $table->boolean('is_default')->default(false);
             $table->boolean('escalation_enabled')->default(true);

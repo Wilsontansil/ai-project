@@ -163,7 +163,10 @@ Deposit pulsa bisa dilakukan dari mana saja: konter pulsa, transfer pulsa melalu
 Deposit Bank:
 Deposit Berbeda bank akan dikenakan biaya sebesar 6.500 atau 2.500 (BI-Fast).
 Saat melakukan transfer antar bank, pastikan nominal yang dikirim sesuai dengan nominal permintaan, karena biaya akan ditanggung oleh pemain/user.
-Contoh: jika permintaan sebesar 20.000, maka transfer juga harus 20.000, namun bank akan mengenakan biaya sebesar 6.500 atau 2.500 sesuai dengan pilihan.',
+PENTING: Nominal di form deposit harus sama persis dengan nominal permintaan deposit (bukan ditambah biaya admin).
+Contoh 1: jika permintaan deposit 20.000, isi form deposit 20.000.
+Contoh 2: jika permintaan deposit 12.000, isi form deposit 12.000.
+Biaya antar bank 6.500 atau 2.500 (BI-Fast) adalah biaya tambahan dari bank dan ditanggung user di luar nominal deposit.',
                 'source' => 'manual',
                 'file_name' => null,
                 'is_active' => true,

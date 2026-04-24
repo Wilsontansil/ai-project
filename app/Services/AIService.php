@@ -56,9 +56,7 @@ class AIService
         $toolDefinitions = $this->toolDispatcher->getToolDefinitions();
         $history = $this->conversationHistory->load($chatId, $channel);
         $contextPrompt = $this->promptBuilder->buildAgentContextPrompt($agentContext, $channel);
-        $activeHistory = $this->shouldResetHistoryForNewTopic((string) $message, $history)
-            ? []
-            : $history;
+        $activeHistory = $history;
 
         $messages = [['role' => 'system', 'content' => $systemPrompt]];
         if ($contextPrompt !== null) {
@@ -311,79 +309,5 @@ class AIService
         }
 
         throw $lastException;
-    }
-
-    /**
-     * Reset conversational carry-over when the newest user turn clearly changes subject.
-     *
-     * @param array<int, array<string, string>> $history
-     */
-    private function shouldResetHistoryForNewTopic(string $message, array $history): bool
-    {
-        $message = trim(mb_strtolower($message));
-        $shouldReset = false;
-
-        if ($message !== '' && count($history) >= 2) {
-            $recentText = $this->recentHistoryTexts($history, 4);
-            $currentKeywords = $this->extractTopicKeywords($message);
-            $historyKeywords = $recentText !== []
-                ? $this->extractTopicKeywords(implode(' ', $recentText))
-                : [];
-
-            if ($recentText !== [] && $currentKeywords !== [] && $historyKeywords !== []) {
-                $shouldReset = count(array_intersect($currentKeywords, $historyKeywords)) === 0;
-            }
-        }
-
-        return $shouldReset;
-    }
-
-    /**
-     * @param array<int, array<string, string>> $history
-     * @return array<int, string>
-     */
-    private function recentHistoryTexts(array $history, int $limit = 4): array
-    {
-        $texts = [];
-        foreach (array_slice($history, -$limit) as $item) {
-            if (!is_array($item)) {
-                continue;
-            }
-
-            $content = trim(mb_strtolower((string) ($item['content'] ?? '')));
-            if ($content !== '') {
-                $texts[] = $content;
-            }
-        }
-
-        return $texts;
-    }
-
-    /**
-     * Extract lightweight topical keywords from a message for topic-shift detection.
-     *
-     * @return array<int, string>
-     */
-    private function extractTopicKeywords(string $text): array
-    {
-        preg_match_all('/[\p{L}\p{N}]{3,}/u', mb_strtolower($text), $matches);
-
-        $stopWords = [
-            'yang', 'dan', 'atau', 'untuk', 'dengan', 'dari', 'sudah', 'belum', 'mohon', 'tolong',
-            'kak', 'saya', 'aku', 'kami', 'kamu', 'anda', 'itu', 'ini', 'jadi', 'agar', 'bisa',
-            'mau', 'lagi', 'sih', 'kok', 'nih', 'nya', 'aja', 'cek', 'berapa', 'gimana', 'bagaimana',
-            'please', 'plis', 'the', 'and', 'for', 'with', 'from', 'have', 'what', 'when',
-        ];
-
-        $keywords = [];
-        foreach ($matches[0] ?? [] as $token) {
-            if (in_array($token, $stopWords, true)) {
-                continue;
-            }
-
-            $keywords[] = $token;
-        }
-
-        return array_values(array_unique($keywords));
     }
 }

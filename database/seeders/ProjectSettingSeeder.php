@@ -10,15 +10,6 @@ class ProjectSettingSeeder extends Seeder
     public function run(): void
     {
         $settings = [
-            // Webhook
-            [
-                'key' => 'webhook_base_url',
-                'value' => env('WEBHOOK_BASE_URL'),
-                'label' => 'Base URL',
-                'group' => 'webhook',
-                'type' => 'url',
-            ],
-
             // OpenAI
             [
                 'key' => 'openai_api_key',

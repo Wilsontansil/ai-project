@@ -405,6 +405,31 @@ Bot sempat melakukan klarifikasi dengan benar, namun masih perlu peningkatan dal
                 'file_name' => null,
                 'is_active' => true,
             ],
+            [
+                'title' => 'General',
+                'content' => 'PARTNER SITE HANDLING
+
+Daftar situs partner:
+- CMBET
+- BIGMSG
+- GSC11
+- IDXBIG
+
+Aturan respon:
+
+1. Jika user menanyakan atau menyebut salah satu nama situs di atas:
+   - Jawab bahwa situs tersebut adalah "web partner"
+
+2. Jika user menanyakan situs lain di luar daftar:
+   - Jawab bahwa tidak ada relasi atau tidak dikenal
+
+Catatan:
+- Jawaban harus singkat dan jelas
+- Jangan menambahkan informasi di luar konteks',
+                'source' => 'manual',
+                'file_name' => null,
+                'is_active' => true,
+            ],
         ];
 
         foreach ($entries as $entry) {

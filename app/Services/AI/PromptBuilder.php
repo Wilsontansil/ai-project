@@ -6,6 +6,7 @@ use App\Models\ChatAgent;
 use App\Models\AgentRule;
 use App\Models\KnowledgeBase;
 use App\Models\Tool;
+use App\Models\WebsitePage;
 
 /**
  * Builds system prompts and agent context injections for OpenAI requests.
@@ -48,6 +49,8 @@ class PromptBuilder
         if ($kbPrompt !== '') {
             $basePrompt .= "\n\n" . $kbPrompt;
         }
+
+        $basePrompt .= "\n\n" . $this->getWebsitePagesPrompt();
 
         // Tool rules are intentionally NOT included here to reduce payload size.
         // They are injected per-tool in the second OpenAI call (generateReplyFromToolResult)
@@ -213,6 +216,33 @@ PROMPT;
         }
 
         return implode("\n\n", $sections);
+        } catch (\Throwable) {
+            return '';
+        }
+    }
+
+    private function getWebsitePagesPrompt(): string
+    {
+        try {
+            $pages = WebsitePage::where('status', 'scraped')
+                ->orderBy('id')
+                ->get(['url', 'title']);
+
+            if ($pages->isEmpty()) {
+                return "HALAMAN WEBSITE RESMI KAMI:\nSaat ini tidak ada URL website yang terdaftar. Jika customer bertanya tentang website atau link, sampaikan bahwa informasi URL belum tersedia.";
+            }
+
+            $lines = [
+                'HALAMAN WEBSITE RESMI KAMI:',
+                'Halaman-halaman berikut adalah milik website resmi kami sendiri. Kamu BOLEH dan HARUS membagikan URL ini ke customer kapanpun relevan — ini bukan website pihak ketiga, jadi tidak perlu ragu.',
+            ];
+
+            foreach ($pages as $page) {
+                $label = $page->title ?: $page->url;
+                $lines[] = "- {$label}: {$page->url}";
+            }
+
+            return implode("\n", $lines);
         } catch (\Throwable) {
             return '';
         }

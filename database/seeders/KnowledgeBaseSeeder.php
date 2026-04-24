@@ -276,47 +276,29 @@ Penarikan dikenakan charge 2,5% jika jumlah WD melebihi 5 kali dalam sehari.',
             ],
             [
                 'title' => 'Case',
-                'content' => 'CASE 1: Member Baru Bertanya Informasi Situs
-CASE 2: Member Baru Bertanya Syarat Daftar
+                'content' => 'PANDUAN: Member Baru Bertanya Informasi Situs atau Syarat Daftar
 
-TUJUAN:
-- Memberikan informasi yang relevan sesuai pertanyaan user
-- Menjelaskan fitur dan keunggulan situs
-- Menjelaskan syarat & proses pendaftaran dengan benar
-- Mengarahkan user hingga tahap registrasi
-
----
-
-MASALAH YANG TERJADI:
-1. Bot keluar dari konteks percakapan (mengecek nomor tanpa diminta)
-2. Bot salah memahami intent user
-3. Bot memberikan jawaban yang tidak relevan (contoh: fokus ke umur)
-4. Bot tidak mengarahkan user ke proses pendaftaran
+PANDUAN:
+- Berikan informasi yang relevan sesuai pertanyaan user
+- Jelaskan fitur dan keunggulan situs
+- Jelaskan syarat & proses pendaftaran dengan benar
+- Arahkan user hingga tahap registrasi
 
 ---
 
-PERILAKU YANG SALAH:
-- Memberikan respon di luar pertanyaan user
-- Melakukan validasi/pengecekan nomor tanpa diminta
-- Menolak atau mengalihkan pembahasan ke hal yang tidak penting (contoh: umur)
-- Tidak menjelaskan proses daftar
-- Tidak memberikan call-to-action (CTA)
-
----
-
-PERILAKU YANG BENAR (EXPECTED BEHAVIOR):
+CARA MERESPONS:
 
 1. PAHAMI INTENT USER
    - Jika user tanya "informasi situs" → jelaskan fitur & keunggulan
    - Jika user tanya "syarat daftar" → jelaskan data/form yang dibutuhkan
 
-2. JELASKAN INFORMASI SITUS (CASE 1)
+2. JELASKAN INFORMASI SITUS
    - Jenis permainan (slot, live casino, togel, dll)
    - Bonus member baru & promo
    - Deposit & withdraw cepat
    - Customer support 24 jam
 
-3. JELASKAN SYARAT DAFTAR (CASE 2)
+3. JELASKAN SYARAT DAFTAR
    Fokus ke kebutuhan pendaftaran, bukan umur:
    - Username
    - Email
@@ -335,14 +317,14 @@ PERILAKU YANG BENAR (EXPECTED BEHAVIOR):
 
 ---
 
-FLOW IDEAL:
+ALUR PERCAKAPAN:
 
 A. USER TANYA INFORMASI SITUS
-→ Bot jelaskan fitur + keunggulan
+→ Jelaskan fitur + keunggulan
 → Tambahkan CTA (ajak daftar)
 
 B. USER TANYA SYARAT DAFTAR
-→ Bot jelaskan data yang dibutuhkan
+→ Jelaskan data yang dibutuhkan
 → Tawarkan bantuan daftar / arahkan ke CS
 
 ---
@@ -387,20 +369,7 @@ ATURAN PENTING:
 - Jangan fokus ke umur (kecuali ditanya langsung)
 - Selalu arahkan ke registrasi (goal conversion), Jangan memberikan informasi password sebelum sukses Daftar / Register
 - Gunakan soft-selling, bukan memaksa
-- Tidak ada Batasan umur untuk daftar, dan dapat menggunakan rekening orang lain dengan syarat data lengkap.
-
----
-
-DURASI IDEAL:
-≤ 5 menit untuk mengarahkan user ke tahap pendaftaran
-
----
-
-CATATAN:
-Bot sempat melakukan klarifikasi dengan benar, namun masih perlu peningkatan dalam:
-- Intent recognition
-- Konsistensi jawaban
-- Fokus pada conversion (daftar)',
+- Tidak ada batasan umur untuk daftar, dan dapat menggunakan rekening orang lain dengan syarat data lengkap.',
                 'source' => 'manual',
                 'file_name' => null,
                 'is_active' => true,

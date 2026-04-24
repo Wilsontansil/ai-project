@@ -6,7 +6,6 @@ use App\Models\ChatAgent;
 use App\Models\ProjectSetting;
 use App\Models\Customer;
 use App\Services\Agent\AgentContextService;
-use App\Services\Agent\ConversationMemoryService;
 use App\Services\AIService;
 use App\Support\MetricsCollector;
 use App\Support\ResilientHttp;
@@ -64,14 +63,6 @@ class ProcessAiReply implements ShouldQueue
             $customer = $this->customerId !== null ? Customer::find($this->customerId) : null;
             if ($customer !== null) {
                 $agentContext = app(AgentContextService::class)->buildContext($customer, $text);
-
-                app(ConversationMemoryService::class)->addMessage(
-                    $customer,
-                    $this->channel,
-                    'user',
-                    $text,
-                    ['chat_id' => $this->chatId]
-                );
             }
         } catch (\Throwable $e) {
             Log::warning("{$this->channel} customer context persistence failed (job)", [
@@ -128,23 +119,6 @@ class ProcessAiReply implements ShouldQueue
                 Log::info('Escalation marker detected but escalation_enabled is off — skipping queue', [
                     'customer_id' => $customer->id,
                     'channel' => $this->channel,
-                ]);
-            }
-        }
-
-        if ($customer !== null) {
-            try {
-                app(ConversationMemoryService::class)->addMessage(
-                    $customer,
-                    $this->channel,
-                    'assistant',
-                    $reply,
-                    ['chat_id' => $this->chatId]
-                );
-            } catch (\Throwable $e) {
-                Log::warning("{$this->channel} assistant message persistence failed (job)", [
-                    'chat_id' => $this->chatId,
-                    'error' => $e->getMessage(),
                 ]);
             }
         }

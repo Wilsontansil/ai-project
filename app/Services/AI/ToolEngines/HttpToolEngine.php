@@ -306,5 +306,3 @@ class HttpToolEngine
         return ['valid' => true];
     }
 }
-    }
-}

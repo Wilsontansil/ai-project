@@ -642,7 +642,7 @@
 
     <script>
         (function() {
-            var POLL_URL = '{{ route('backoffice.escalation-queue.count') }}';
+            var POLL_URL = '{{ parse_url(route('backoffice.escalation-queue.count'), PHP_URL_PATH) }}';
             var POLL_INTERVAL = 10000;
             var STORAGE_KEY = 'bo_eq_last_count';
             var lastCount = parseInt(localStorage.getItem(STORAGE_KEY) ?? '-1', 10);

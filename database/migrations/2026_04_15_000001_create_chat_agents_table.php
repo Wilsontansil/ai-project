@@ -20,7 +20,6 @@ return new class extends Migration
             $table->unsignedSmallInteger('message_await_seconds')->default(2);
             $table->boolean('is_enabled')->default(true);
             $table->boolean('is_default')->default(false);
-            $table->boolean('escalation_enabled')->default(true);
             $table->text('escalation_condition')->nullable();
             $table->boolean('stop_ai_after_handoff')->default(false);
             $table->boolean('silent_handoff')->default(false);

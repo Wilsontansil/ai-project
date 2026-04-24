@@ -147,13 +147,6 @@
                             <span>{{ __('backoffice.pages.chat_agents.default_agent') }}</span>
                         </label>
                     </div>
-                    <div>
-                        <label class="bo-checkbox-label">
-                            <input type="checkbox" name="escalation_enabled" value="1"
-                                {{ old('escalation_enabled', $agent->escalation_enabled) ? 'checked' : '' }} />
-                            <span>{{ __('backoffice.pages.chat_agents.escalation_enabled_label') }}</span>
-                        </label>
-                    </div>
                 </div>
 
                 {{-- Agent Transfer Conditions --}}

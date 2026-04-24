@@ -37,7 +37,6 @@ class ChatAgentController extends Controller
             'message_await_seconds' => ['required', 'integer', 'min:0', 'max:15'],
             'is_enabled' => ['nullable'],
             'is_default' => ['nullable'],
-            'escalation_enabled' => ['nullable'],
             'escalation_condition' => ['nullable', 'string', 'max:3000'],
             'stop_ai_after_handoff' => ['nullable'],
             'silent_handoff' => ['nullable'],
@@ -46,7 +45,6 @@ class ChatAgentController extends Controller
         $data['slug'] = Str::slug($data['name']);
         $data['is_enabled'] = $request->boolean('is_enabled');
         $data['is_default'] = $request->boolean('is_default');
-        $data['escalation_enabled'] = $request->boolean('escalation_enabled');
         $data['stop_ai_after_handoff'] = $request->boolean('stop_ai_after_handoff');
         $data['silent_handoff'] = $request->boolean('silent_handoff');
 
@@ -110,7 +108,6 @@ class ChatAgentController extends Controller
             'message_await_seconds' => ['required', 'integer', 'min:0', 'max:15'],
             'is_enabled' => ['nullable'],
             'is_default' => ['nullable'],
-            'escalation_enabled' => ['nullable'],
             'escalation_condition' => ['nullable', 'string', 'max:3000'],
             'stop_ai_after_handoff' => ['nullable'],
             'silent_handoff' => ['nullable'],
@@ -118,7 +115,6 @@ class ChatAgentController extends Controller
 
         $data['is_enabled'] = $request->boolean('is_enabled');
         $data['is_default'] = $request->boolean('is_default');
-        $data['escalation_enabled'] = $request->boolean('escalation_enabled');
         $data['stop_ai_after_handoff'] = $request->boolean('stop_ai_after_handoff');
         $data['silent_handoff'] = $request->boolean('silent_handoff');
 

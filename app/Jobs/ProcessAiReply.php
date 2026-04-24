@@ -96,46 +96,37 @@ class ProcessAiReply implements ShouldQueue
 
         $this->stopTypingIndicator();
 
-        // Detect escalation marker — strip it always; only act if escalation_enabled on agent.
+        // Detect escalation marker — strip it always; only act if agent has escalation_condition set.
         $shouldEscalate = str_contains($reply, '[ESCALATE]');
         $reply = trim(str_replace('[ESCALATE]', '', $reply));
 
         if ($shouldEscalate) {
             $agent = ChatAgent::getDefault();
-            $escalationEnabled = $agent === null || ($agent->escalation_enabled ?? true);
+            $silentHandoff      = $agent?->silent_handoff ?? false;
+            $stopAiAfterHandoff = $agent?->stop_ai_after_handoff ?? true;
 
-            if ($escalationEnabled) {
-                $silentHandoff      = $agent?->silent_handoff ?? false;
-                $stopAiAfterHandoff = $agent?->stop_ai_after_handoff ?? true;
+            if (!$silentHandoff) {
+                $reply = "Permintaan Anda sedang diteruskan ke agen kami. Mohon tunggu sebentar 🙏\nYour request is being forwarded to our agent. Please wait a moment 🙏";
+            } else {
+                $reply = ''; // Silent — send nothing to customer
+            }
 
-                if (!$silentHandoff) {
-                    $reply = "Permintaan Anda sedang diteruskan ke agen kami. Mohon tunggu sebentar 🙏\nYour request is being forwarded to our agent. Please wait a moment 🙏";
-                } else {
-                    $reply = ''; // Silent — send nothing to customer
-                }
-
-                if ($customer !== null && $stopAiAfterHandoff) {
-                    try {
-                        $customer->update(['mode' => 'waiting']);
-                        Log::info('Customer escalated to waiting queue by AI', [
-                            'customer_id' => $customer->id,
-                            'channel' => $this->channel,
-                            'chat_id' => $this->chatId,
-                        ]);
-                    } catch (\Throwable $e) {
-                        Log::error('Failed to set customer mode to waiting during escalation', [
-                            'customer_id' => $customer->id,
-                            'error' => $e->getMessage(),
-                        ]);
-                    }
-                } else {
-                    Log::info('Escalation triggered — stop_ai_after_handoff is off, customer mode unchanged', [
-                        'customer_id' => $customer?->id,
+            if ($customer !== null && $stopAiAfterHandoff) {
+                try {
+                    $customer->update(['mode' => 'waiting']);
+                    Log::info('Customer escalated to waiting queue by AI', [
+                        'customer_id' => $customer->id,
                         'channel' => $this->channel,
+                        'chat_id' => $this->chatId,
+                    ]);
+                } catch (\Throwable $e) {
+                    Log::error('Failed to set customer mode to waiting during escalation', [
+                        'customer_id' => $customer->id,
+                        'error' => $e->getMessage(),
                     ]);
                 }
             } else {
-                Log::info('Escalation marker detected but escalation_enabled is off — skipping', [
+                Log::info('Escalation triggered — stop_ai_after_handoff is off, customer mode unchanged', [
                     'customer_id' => $customer?->id,
                     'channel' => $this->channel,
                 ]);

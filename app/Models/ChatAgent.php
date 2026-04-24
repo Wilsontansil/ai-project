@@ -18,7 +18,6 @@ class ChatAgent extends Model
         'message_await_seconds',
         'is_enabled',
         'is_default',
-        'escalation_enabled',
         'escalation_condition',
         'stop_ai_after_handoff',
         'silent_handoff',
@@ -28,7 +27,6 @@ class ChatAgent extends Model
     protected $casts = [
         'is_enabled' => 'boolean',
         'is_default' => 'boolean',
-        'escalation_enabled' => 'boolean',
         'stop_ai_after_handoff' => 'boolean',
         'silent_handoff' => 'boolean',
         'temperature' => 'float',

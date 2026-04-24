@@ -215,13 +215,9 @@ PROMPT;
 
     private function getEscalationPrompt(?ChatAgent $chatAgent): string
     {
-        if ($chatAgent === null || !($chatAgent->escalation_enabled ?? true)) {
-            return '';
-        }
-
-        $condition = trim((string) ($chatAgent->escalation_condition ?? ''));
+        $condition = trim((string) ($chatAgent?->escalation_condition ?? ''));
         if ($condition === '') {
-            $condition = 'Jika masalah benar-benar tidak bisa diselesaikan dan memerlukan CS manusia';
+            return '';
         }
 
         return "ALIH KE CS MANUSIA:\nCoba bantu selesaikan masalah customer terlebih dahulu. {$condition}, cukup tambahkan penanda tersembunyi persis di baris terakhir balasanmu: [ESCALATE] — tanpa spasi, tanpa teks tambahan setelahnya. Sistem akan otomatis mengirimkan pesan tunggu kepada customer. Penanda ini hanya digunakan satu kali saat pertama kali mengalihkan ke CS manusia.";

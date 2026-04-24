@@ -52,7 +52,7 @@ class ToolSeeder extends Seeder
                     'type' => 'object',
                     'properties' => [
                         // 'username' => ['type' => 'string', 'description' => 'Username akun'],
-                        'namarek' => ['type' => 'string', 'description' => 'Nama rekening'],
+                        'namarek' => ['type' => 'string', 'description' => 'Nama pemilik rekening (bisa nama asli atau username/nickname yang terdaftar di bank, terima apa adanya)'],
                         'norek' => ['type' => 'string', 'description' => 'Nomor rekening'],
                         'bank' => ['type' => 'string', 'description' => 'Nama bank'],
                     ],
@@ -96,7 +96,7 @@ class ToolSeeder extends Seeder
                         'email' => ['type' => 'string', 'description' => 'Email untuk akun baru'],
                         'hp' => ['type' => 'string', 'description' => 'Nomor telepon/HP'],
                         'bank' => ['type' => 'string', 'description' => 'Nama bank'],
-                        'namarek' => ['type' => 'string', 'description' => 'Nama rekening'],
+                        'namarek' => ['type' => 'string', 'description' => 'Nama pemilik rekening (bisa nama asli atau username/nickname yang terdaftar di bank, terima apa adanya)'],
                         'norek' => ['type' => 'string', 'description' => 'Nomor rekening'],
                     ],
                     'required' => ['username', 'email', 'hp', 'bank', 'namarek', 'norek'],

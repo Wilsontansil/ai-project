@@ -244,7 +244,20 @@
             }
 
             // Scroll to bottom on initial load
-            document.addEventListener('DOMContentLoaded', scrollToBottom);
+            document.addEventListener('DOMContentLoaded', function() {
+                scrollToBottom();
+
+                const sendForm = document.getElementById('chat-send-form');
+                const sendTextarea = document.getElementById('chat-send-textarea');
+                if (sendForm && sendTextarea) {
+                    sendTextarea.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+                            e.preventDefault();
+                            sendForm.requestSubmit();
+                        }
+                    });
+                }
+            });
 
             // Pause/resume when tab visibility changes
             document.addEventListener('visibilitychange', () => {
@@ -255,18 +268,6 @@
         }());
     </script>
 
-    {{-- Flash messages --}}
-    @if (session('send_success'))
-        <div class="mb-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
-            {{ session('send_success') }}
-        </div>
-    @endif
-    @if (session('send_error'))
-        <div class="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-            {{ session('send_error') }}
-        </div>
-    @endif
-
     @php
         $canSend = $customer->mode === 'human' && in_array($customer->platform, ['telegram', 'whatsapp', 'livechat']);
     @endphp
@@ -274,10 +275,12 @@
     <div id="chat-send-bar" class="rounded-2xl border border-slate-700/70 bg-slate-950 p-4"
         style="position:sticky;bottom:0;z-index:20;">
         @if ($canSend)
-            <form method="POST" action="{{ route('backoffice.customer.send-message', $customer->id) }}">
+            <form id="chat-send-form" method="POST"
+                action="{{ route('backoffice.customer.send-message', $customer->id) }}">
                 @csrf
                 <div class="flex items-end gap-3">
-                    <textarea name="message" rows="1" placeholder="{{ __('backoffice.pages.customer_chat.type_message') }}"
+                    <textarea id="chat-send-textarea" name="message" rows="1"
+                        placeholder="{{ __('backoffice.pages.customer_chat.type_message') }}"
                         class="flex-1 resize-none rounded-xl border border-white/10 bg-slate-800 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-cyan-400"
                         style="max-height:140px;overflow-y:auto;"></textarea>
                     <button type="submit"

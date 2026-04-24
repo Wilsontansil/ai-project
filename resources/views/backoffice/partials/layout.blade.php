@@ -640,6 +640,100 @@
         })();
     </script>
 
+    <script>
+        (function() {
+            var POLL_URL = '/backoffice/escalation-queue/count';
+            var POLL_INTERVAL = 10000;
+            var STORAGE_KEY = 'bo_eq_last_count';
+            var lastCount = parseInt(localStorage.getItem(STORAGE_KEY) ?? '-1', 10);
+            var audioCtx = null;
+            var isEscalationPage = window.location.pathname.includes('/escalation-queue');
+
+            function getAudioCtx() {
+                if (!audioCtx) {
+                    audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                }
+                return audioCtx;
+            }
+
+            function playBeep() {
+                try {
+                    var ctx = getAudioCtx();
+                    var osc = ctx.createOscillator();
+                    var gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.5);
+                } catch (e) {}
+            }
+
+            function showBrowserNotif(count) {
+                if (!('Notification' in window)) return;
+                if (Notification.permission === 'granted') {
+                    new Notification('Escalation Queue', {
+                        body: count + ' customer' + (count > 1 ? 's are' : ' is') +
+                            ' waiting for human support.',
+                        icon: '/favicon.ico',
+                        tag: 'bo-escalation',
+                        renotify: true,
+                    });
+                }
+            }
+
+            function updateBadge(count) {
+                var badge = document.getElementById('bo-eq-badge');
+                if (!badge) return;
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.style.display = '';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+
+            function poll() {
+                fetch(POLL_URL, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(function(res) {
+                        return res.ok ? res.json() : null;
+                    })
+                    .then(function(data) {
+                        if (!data) return;
+                        var count = parseInt(data.count, 10);
+                        updateBadge(count);
+                        if (!isEscalationPage && lastCount >= 0 && count > lastCount) {
+                            playBeep();
+                            showBrowserNotif(count);
+                        }
+                        lastCount = count;
+                        localStorage.setItem(STORAGE_KEY, count);
+                    })
+                    .catch(function() {});
+            }
+
+            poll();
+            setInterval(poll, POLL_INTERVAL);
+
+            // Request notification permission on first click (requires user gesture)
+            document.addEventListener('click', function askPermission() {
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission();
+                }
+                document.removeEventListener('click', askPermission);
+            }, {
+                once: true
+            });
+        })();
+    </script>
+
     @yield('scripts')
 </body>
 

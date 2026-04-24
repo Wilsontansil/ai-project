@@ -73,6 +73,13 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function escalationCount(): JsonResponse
+    {
+        return response()->json([
+            'count' => Customer::query()->where('mode', 'waiting')->count(),
+        ]);
+    }
+
     public function takeover(Customer $customer): RedirectResponse
     {
         $customer->update(['mode' => 'human']);

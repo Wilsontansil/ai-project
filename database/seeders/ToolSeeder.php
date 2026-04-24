@@ -596,7 +596,7 @@ class ToolSeeder extends Seeder
                 'endpoints' => null,
                 'keywords' => ['link apk', 'download apk', 'apk', 'url apk'],
                 'tool_rules' => "- Berikan link APK dari information text\n- Jangan buat atau tebak link sendiri, gunakan HANYA link yang tersedia\n- Ajak user untuk mendaftar atau bermain dengan nada ramah dan semangat",
-                'information_text' => ["silahkan akses link apk untuk daftar ataupun bermain di bigmsg ya kak\n\nhttps://apk.hi11office.com/BIGMSG(2.0.6).apk\n\nselamat bermain dan semoga beruntung"],
+                'information_text' => ["silahkan akses link apk untuk daftar ataupun bermain di cmbet ya kak\n\nhttps://apk.hi11office.com/CMBET(2.0.6).apk\n\nselamat bermain dan semoga beruntung"],
                 'meta' => null,
             ],
             // [
@@ -739,36 +739,36 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => null,
             ],
-            [
-                'tool_name' => 'checkDeposit',
-                'category' => 'payment',
-                'display_name' => 'Check Deposit',
-                'description' => 'Cek status deposit player berdasarkan username. Menampilkan informasi deposit terbaru dari data model deposit.',
-                'slug' => 'check-deposit',
-                'type' => 'get',
-                'is_enabled' => true,
-                'data_model_id' => $depositModel?->id,
-                'parameters' => [
-                    'type' => 'object',
-                    'properties' => [
-                        'username' => ['type' => 'string', 'description' => 'Username pemain'],
-                    ],
-                    'required' => ['username'],
-                ],
-                'endpoints' => null,
-                'keywords' => ['cek deposit', 'check deposit', 'status deposit', 'deposit status', 'deposit saya', 'deposit belum masuk', 'deposit pending'],
-                'tool_rules' => "- Jika username belum ada, minta username secara natural\n- Tampilkan deposit TERBARU berdasarkan operatortime: status, nominal, tanggal\n- Jika pending, infokan sedang diproses\n- Jika accepted, infokan sudah berhasil\n- Jika rejected, infokan dan sarankan hubungi CS",
-                'information_text' => null,
-                'meta' => [
-                    'query' => [
-                        'order_by' => [
-                            'field' => 'operatortime',
-                            'direction' => 'desc',
-                        ],
-                        'limit' => 1,
-                    ],
-                ],
-            ],
+            // [
+            //     'tool_name' => 'checkDeposit',
+            //     'category' => 'payment',
+            //     'display_name' => 'Check Deposit',
+            //     'description' => 'Cek status deposit player berdasarkan username. Menampilkan informasi deposit terbaru dari data model deposit.',
+            //     'slug' => 'check-deposit',
+            //     'type' => 'get',
+            //     'is_enabled' => true,
+            //     'data_model_id' => $depositModel?->id,
+            //     'parameters' => [
+            //         'type' => 'object',
+            //         'properties' => [
+            //             'username' => ['type' => 'string', 'description' => 'Username pemain'],
+            //         ],
+            //         'required' => ['username'],
+            //     ],
+            //     'endpoints' => null,
+            //     'keywords' => ['cek deposit', 'check deposit', 'status deposit', 'deposit status', 'deposit saya', 'deposit belum masuk', 'deposit pending'],
+            //     'tool_rules' => "- Jika username belum ada, minta username secara natural\n- Tampilkan deposit TERBARU berdasarkan operatortime: status, nominal, tanggal\n- Jika pending, infokan sedang diproses\n- Jika accepted, infokan sudah berhasil\n- Jika rejected, infokan dan sarankan hubungi CS",
+            //     'information_text' => null,
+            //     'meta' => [
+            //         'query' => [
+            //             'order_by' => [
+            //                 'field' => 'operatortime',
+            //                 'direction' => 'desc',
+            //             ],
+            //             'limit' => 1,
+            //         ],
+            //     ],
+            // ],
             [
                 'tool_name' => 'rejectDeposit',
                 'category' => 'payment',

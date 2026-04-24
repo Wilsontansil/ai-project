@@ -86,7 +86,7 @@ class KnowledgeBaseSeeder extends Seeder
             ],
             [
                 'title' => 'Bonus',
-                        'content' => 'A. BONUS KLAIM
+                'content' => 'A. BONUS KLAIM
 1. Bonus Ajak Teman (Referral Bonus) [NONAKTIF]
 Program Referral Bonus adalah program yang memungkinkan pengguna mendapatkan bonus dengan mengajak teman untuk bergabung dan bermain. Harus Di Claim di menu Reward.
 
@@ -94,18 +94,25 @@ Cara mengikuti program ini:
 - Bagikan link referral yang tersedia di menu Profil/Akun.
 - Ajak teman untuk mendaftar melalui link tersebut.
 - Bonus akan diberikan secara otomatis setelah teman yang diundang melakukan deposit.
-- [Penting] Player yang mendapatkan Bonus harus melakukan 1 kali deposit sukses sebelum teman yang diajak melakukan deposit.
+- [Penting] Player yang mendapatkan Bonus Harus melakukan 1 kali deposit sukses sebelum Teman yang diajak melakukan Deposit.
 
 [Setting]
 - Multiplier = 1x
+- Minimal Deposit = 20000-30000
+- Teman Deposit 20000-30000 Dapat Bonus 20000
+- Teman Deposit > 30000 Dapat Bonus 30000
 
 
 2. Bonus Deposit Beruntun (Daily Streak Bonus) [AKTIF]
-Bonus Deposit Beruntun adalah bonus spesial yang bisa didapatkan dengan melakukan deposit setiap hari secara berturut-turut. Harus Di Claim di menu Reward.
-Semakin konsisten melakukan deposit harian, semakin besar peluang mendapatkan bonus tambahan.
+Bonus Deposit Beruntun adalah bonus spesial yang bisa didapatkan dengan melakukan deposit setiap hari secara berturut-turut. Pastikan Balance dibawah 1000 untuk dihitung sebagai deposit beruntun.
+Harus Di Claim di menu Reward.
 
 [Setting]
 - Multiplier = 1x
+- Minimal Deposit = 50000
+- Max Bonus = 50000
+- Jumlah Beruntun = 8x
+- Termasuk Non Bank = false
 
 
 3. Bonus Freespin [AKTIF]
@@ -115,20 +122,27 @@ Bonus ini biasanya berupa putaran gratis (free spin) yang dapat digunakan pada p
 
 [Setting]
 - Multiplier = 1x
+- Minimal Deposit = 2000
+- Termasuk Non Bank = false
 
 
 4. Bonus Deposit [NONAKTIF]
 - Bonus First Deposit Bank
-   Bonus yang diberikan pada saat pengguna melakukan deposit pertama kali. Harus Di Claim di menu Reward.
+  Bonus yang diberikan pada saat pengguna melakukan deposit pertama kali. Harus Di Claim di menu Reward.
+
+  [Setting]
+  - Minimal Deposit = 2000
+  - Multiplier = 1x
 
 - Bonus Daily Deposit Bank
-   Bonus yang diberikan untuk setiap deposit harian setelah deposit pertama. Harus Di Claim di menu Reward.
+  Bonus yang diberikan untuk setiap deposit harian setelah deposit pertama. Harus Di Claim di menu Reward.
+
+  [Setting]
+  - Minimal Deposit = 2000
+  - Multiplier = 1x
 
 Catatan:
 Jika pengguna telah mendapatkan Bonus First Deposit Bank, maka tidak dapat lagi mendapatkan Bonus Daily Deposit Bank pada hari yang sama.
-
-[Setting]
-- Multiplier = 1x
 
 
 5. Bonus APK [NONAKTIF]
@@ -142,17 +156,23 @@ Bonus APK adalah bonus yang hanya dapat diklaim melalui aplikasi (APK). Harus Di
 
 [Setting]
 - Multiplier = 1x
+- First Deposit
+- Minimal Deposit = 10000
+- Category To = Slot
 
 =======================================================================
 
 
 B. Bonus Cashback
-Bonus Cashback adalah bonus yang diberikan kepada member setiap hari Senin berdasarkan aktivitas deposit dan withdraw minggu lalu (Senin-Minggu).
+Bonus Cashback adalah bonus yang diberikan kepada member setiap hari Senin berdasarkan aktivitas deposit dan withdraw minggu lalu (Senin–Minggu).
 
 Syarat kelayakan:
 - Hanya transaksi dengan status accept yang dihitung.
-- Jika Total Deposit > Total Withdraw, member berhak menerima cashback dari selisihnya.
-- Jika Total Withdraw > Total Deposit, member tidak dapat cashback (sudah profit).',
+- Jika Total Deposit > Total Withdraw → member berhak menerima cashback dari selisihnya.
+- Jika Total Withdraw > Total Deposit → member tidak dapat cashback (sudah profit).
+
+Catatan:
+- Tidak ada bonus lain selain bonus diatas.',
                 'source' => 'manual',
                 'file_name' => null,
                 'is_active' => true,

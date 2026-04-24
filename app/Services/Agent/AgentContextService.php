@@ -11,7 +11,6 @@ class AgentContextService
         return [
             'customer_profile' => [
                 'id' => $customer->id,
-                'name' => $customer->name ?? null,
                 'platform' => $customer->platform,
                 'total_messages' => $customer->total_messages,
                 'tags' => $customer->tags ?? [],

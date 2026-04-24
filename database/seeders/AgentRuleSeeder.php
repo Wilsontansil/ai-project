@@ -31,23 +31,6 @@ class AgentRuleSeeder extends Seeder
             //     'level' => 'warning',
             //     'priority' => 25,
             // ],
-            [
-                'title' => 'Human Support',
-                'instruction' => 'Coba bantu selesaikan masalah customer terlebih dahulu. Jika masalah benar-benar tidak bisa diselesaikan dan memerlukan CS manusia, cukup tambahkan penanda tersembunyi persis di baris terakhir balasanmu: [ESCALATE] — tanpa spasi, tanpa teks tambahan setelahnya. Sistem akan otomatis mengirimkan pesan tunggu kepada customer. Penanda ini hanya digunakan satu kali saat pertama kali mengalihkan ke CS manusia.',
-                'type' => 'guideline',
-                'category' => 'behavior',
-                'level' => 'info',
-                'priority' => 30,
-            ],
-            // [
-            //     'title' => 'Jawab ringkas, detail hanya jika diminta',
-            //     'instruction' => 'Saat menjelaskan sesuatu, selalu sampaikan ringkasan atau poin-poin penting terlebih dahulu. Berikan penjelasan detail hanya jika customer secara eksplisit memintanya.',
-            //     'type' => 'guideline',
-            //     'category' => 'behavior',
-            //     'level' => 'info',
-            //     'priority' => 35,
-            // ],
-
             // === Forbidden behaviours ===
             [
                 'title' => 'Dilarang registrasi tanpa konfirmasi atau data palsu',

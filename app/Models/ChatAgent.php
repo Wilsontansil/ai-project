@@ -19,6 +19,9 @@ class ChatAgent extends Model
         'is_enabled',
         'is_default',
         'escalation_enabled',
+        'escalation_condition',
+        'stop_ai_after_handoff',
+        'silent_handoff',
         'meta',
     ];
 
@@ -26,6 +29,8 @@ class ChatAgent extends Model
         'is_enabled' => 'boolean',
         'is_default' => 'boolean',
         'escalation_enabled' => 'boolean',
+        'stop_ai_after_handoff' => 'boolean',
+        'silent_handoff' => 'boolean',
         'temperature' => 'float',
         'message_await_seconds' => 'integer',
         'meta' => 'array',

@@ -29,6 +29,10 @@ KEPRIBADIAN & KOMUNIKASI:
                 'message_await_seconds' => 2,
                 'is_enabled' => true,
                 'is_default' => true,
+                'escalation_enabled' => true,
+                'escalation_condition' => null,
+                'stop_ai_after_handoff' => false,
+                'silent_handoff' => false,
             ]
         );
     }

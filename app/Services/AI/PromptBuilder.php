@@ -52,6 +52,11 @@ class PromptBuilder
 
         $basePrompt .= "\n\n" . $this->getWebsitePagesPrompt();
 
+        $escalationPrompt = $this->getEscalationPrompt($chatAgent);
+        if ($escalationPrompt !== '') {
+            $basePrompt .= "\n\n" . $escalationPrompt;
+        }
+
         // Tool rules are intentionally NOT included here to reduce payload size.
         // They are injected per-tool in the second OpenAI call (generateReplyFromToolResult)
         // via $toolContext['tool_rules'], where they actually matter.
@@ -174,11 +179,6 @@ PROMPT;
 
         $allRules = $query->orderBy('priority')->get();
 
-        // When escalation is disabled for this agent, strip any rule that teaches the AI to escalate.
-        if ($chatAgent !== null && !($chatAgent->escalation_enabled ?? true)) {
-            $allRules = $allRules->filter(fn ($rule) => !str_contains($rule->instruction, '[ESCALATE]'));
-        }
-
         if ($allRules->isEmpty()) {
             return '';
         }
@@ -211,6 +211,20 @@ PROMPT;
         } catch (\Throwable) {
             return '';
         }
+    }
+
+    private function getEscalationPrompt(?ChatAgent $chatAgent): string
+    {
+        if ($chatAgent === null || !($chatAgent->escalation_enabled ?? true)) {
+            return '';
+        }
+
+        $condition = trim((string) ($chatAgent->escalation_condition ?? ''));
+        if ($condition === '') {
+            $condition = 'Jika masalah benar-benar tidak bisa diselesaikan dan memerlukan CS manusia';
+        }
+
+        return "ALIH KE CS MANUSIA:\nCoba bantu selesaikan masalah customer terlebih dahulu. {$condition}, cukup tambahkan penanda tersembunyi persis di baris terakhir balasanmu: [ESCALATE] — tanpa spasi, tanpa teks tambahan setelahnya. Sistem akan otomatis mengirimkan pesan tunggu kepada customer. Penanda ini hanya digunakan satu kali saat pertama kali mengalihkan ke CS manusia.";
     }
 
     private function getWebsitePagesPrompt(): string

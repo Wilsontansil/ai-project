@@ -38,12 +38,17 @@ class ChatAgentController extends Controller
             'is_enabled' => ['nullable'],
             'is_default' => ['nullable'],
             'escalation_enabled' => ['nullable'],
+            'escalation_condition' => ['nullable', 'string', 'max:3000'],
+            'stop_ai_after_handoff' => ['nullable'],
+            'silent_handoff' => ['nullable'],
         ]);
 
         $data['slug'] = Str::slug($data['name']);
         $data['is_enabled'] = $request->boolean('is_enabled');
         $data['is_default'] = $request->boolean('is_default');
         $data['escalation_enabled'] = $request->boolean('escalation_enabled');
+        $data['stop_ai_after_handoff'] = $request->boolean('stop_ai_after_handoff');
+        $data['silent_handoff'] = $request->boolean('silent_handoff');
 
         if ($data['is_default']) {
             ChatAgent::query()->where('is_default', true)->update(['is_default' => false]);
@@ -106,11 +111,16 @@ class ChatAgentController extends Controller
             'is_enabled' => ['nullable'],
             'is_default' => ['nullable'],
             'escalation_enabled' => ['nullable'],
+            'escalation_condition' => ['nullable', 'string', 'max:3000'],
+            'stop_ai_after_handoff' => ['nullable'],
+            'silent_handoff' => ['nullable'],
         ]);
 
         $data['is_enabled'] = $request->boolean('is_enabled');
         $data['is_default'] = $request->boolean('is_default');
         $data['escalation_enabled'] = $request->boolean('escalation_enabled');
+        $data['stop_ai_after_handoff'] = $request->boolean('stop_ai_after_handoff');
+        $data['silent_handoff'] = $request->boolean('silent_handoff');
 
         if ($data['is_default'] && !$chatAgent->is_default) {
             ChatAgent::query()->where('is_default', true)->update(['is_default' => false]);

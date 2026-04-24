@@ -299,7 +299,7 @@ PERILAKU YANG BENAR (EXPECTED BEHAVIOR):
 3. JELASKAN SYARAT DAFTAR (CASE 2)
    Fokus ke kebutuhan pendaftaran, bukan umur:
    - Username
-   - Password
+   - Email
    - Nomor HP aktif
    - Rekening bank / E-wallet (status premium jika diperlukan)
 

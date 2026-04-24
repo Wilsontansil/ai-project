@@ -90,7 +90,6 @@ class PromptBuilder
     {
         return <<<'PROMPT'
 PANDUAN PENGGUNAAN TOOLS (ikuti dengan ketat):
-
 Kamu memiliki akses ke KNOWLEDGE BASE dan TOOLS. Ikuti urutan ini sebelum memutuskan:
 
 1. JAWAB DARI KNOWLEDGE BASE terlebih dahulu jika pertanyaan bersifat umum/informatif.

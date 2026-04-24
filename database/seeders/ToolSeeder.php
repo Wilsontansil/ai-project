@@ -841,45 +841,6 @@ class ToolSeeder extends Seeder
                     ],
                 ],
             ],
-            // [
-            //     'tool_name' => 'checkPoolSchedule',
-            //     'category' => 'lottery',
-            //     'display_name' => 'Jadwal Pool Togel',
-            //     'description' => 'Cek jadwal buka/tutup/result togel (opendt, closedt, resultdt) berdasarkan nama pool untuk hari ini.',
-            //     'slug' => 'check-pool-schedule',
-            //     'type' => 'get',
-            //     'is_enabled' => true,
-            //     'data_model_id' => $poolsPeriodeModel?->id,
-            //     'parameters' => [
-            //         'type' => 'object',
-            //         'properties' => [
-            //             'pools_id' => [
-            //                 'type' => 'integer',
-            //                 'description' => 'Pool ID: Hongkong=1,Singapore=2,Sydney=3,Samosir=4,HKSiang=5,TotoMacau=6,China=7,Cambodia=8,Oregon1=9,Oregon2=10,Oregon3=11,Oregon4=12,Bullseye=13,Swiss=14,Macau=15,Cairo=16,Taiwan=17,Qatar=18,Malaysia=19,Medan=20. Use integer ID.',
-            //                 'enum' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-            //             ],
-            //         ],
-            //         'required' => ['pools_id'],
-            //     ],
-            //     'endpoints' => null,
-            //     'keywords' => ['jadwal togel', 'jam buka togel', 'jam tutup togel', 'waktu result togel', 'schedule togel', 'jadwal pool', 'jam keluar togel', 'opendt', 'closedt', 'jadwal hongkong', 'jadwal singapore', 'jadwal sydney', 'jadwal macau', 'jadwal medan'],
-            //     'tool_rules' => "- Terjemahkan nama pool dari user ke pools_id yang benar sesuai mapping di parameter\n- Tampilkan jadwal hari ini: tanggal, hari, periode, jam buka (opendt), jam tutup (closedt), jam result (resultdt), status\n- Urutkan berdasarkan periode ascending\n- Jika tidak ada jadwal hari ini, infokan bahwa jadwal belum tersedia",
-            //     'information_text' => null,
-            //     'meta' => [
-            //         'query' => [
-            //             'select' => ['pools_id', 'date', 'days', 'times', 'opendt', 'closedt', 'resultdt', 'periode', 'status'],
-            //             'date_range' => [
-            //                 'field' => 'date',
-            //                 'range' => 'today',
-            //             ],
-            //             'order_by' => [
-            //                 'field' => 'periode',
-            //                 'direction' => 'asc',
-            //             ],
-            //             'limit' => 20,
-            //         ],
-            //     ],
-            // ],
         ];
 
         foreach ($tools as $tool) {

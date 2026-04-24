@@ -5,7 +5,6 @@ namespace App\Services\AI;
 use App\Models\ChatAgent;
 use App\Models\AgentRule;
 use App\Models\KnowledgeBase;
-use App\Models\ProjectSetting;
 use App\Models\Tool;
 
 /**
@@ -74,11 +73,6 @@ class PromptBuilder
             'Konteks customer (internal saja — jangan ungkapkan ke user):',
             'Platform saat ini: ' . $channel,
         ];
-
-        $supportContact = $this->getSupportContact($channel);
-        if ($supportContact !== null) {
-            $parts[] = 'Kontak human support untuk platform ini: ' . $supportContact;
-        }
 
         if ($profile !== []) {
             $parts[] = 'Profil: ' . json_encode([
@@ -228,18 +222,5 @@ PROMPT;
         } catch (\Throwable) {
             return 'xoneBot';
         }
-    }
-
-    private function getSupportContact(string $channel): ?string
-    {
-        $map = [
-            'telegram' => ProjectSetting::getValue('support_telegram_tag'),
-            'whatsapp' => ProjectSetting::getValue('support_whatsapp_phone'),
-            'livechat' => ProjectSetting::getValue('support_livechat_url'),
-        ];
-
-        $contact = $map[$channel] ?? null;
-
-        return $contact !== null && $contact !== '' ? $contact : null;
     }
 }

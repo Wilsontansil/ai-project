@@ -115,6 +115,16 @@ class ToolDispatcher
                     }
                 }
 
+                // If required fields are missing, arm the pending state so the next
+                // message resumes this tool instead of starting fresh.
+                if ($tool->needsArguments() && $this->hasMissingRequiredArgs($tool, $arguments)) {
+                    if ($pendingKey !== null) {
+                        Cache::put($pendingKey, $tool->tool_name, now()->addMinutes(5));
+                    }
+
+                    return $this->buildMissingDataMessage($tool);
+                }
+
                 if ($pendingKey !== null) {
                     Cache::forget($pendingKey);
                 }
@@ -211,7 +221,7 @@ class ToolDispatcher
                 )
                 : [];
 
-            if ($bestTool->needsArguments() && $arguments === null) {
+            if ($bestTool->needsArguments() && ($arguments === null || $this->hasMissingRequiredArgs($bestTool, $arguments))) {
                 if ($pendingKey !== null) {
                     Cache::put($pendingKey, $bestTool->tool_name, now()->addMinutes(5));
                 }
@@ -225,6 +235,23 @@ class ToolDispatcher
         }
 
         return null;
+    }
+
+    /**
+     * Check whether any required tool parameters are absent or empty in $arguments.
+     *
+     * @param array<string, mixed> $arguments
+     */
+    private function hasMissingRequiredArgs(Tool $tool, array $arguments): bool
+    {
+        $required = (array) data_get($tool->parameters, 'required', []);
+        foreach ($required as $field) {
+            if (trim((string) ($arguments[$field] ?? '')) === '') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

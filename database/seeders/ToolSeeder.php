@@ -43,7 +43,7 @@ class ToolSeeder extends Seeder
                 'tool_name' => 'resetPassword',
                 'category' => 'account',
                 'display_name' => 'Reset Password',
-                'description' => 'Reset password user setelah verifikasi data akun',
+                'description' => 'Reset password user Jika User meminta untuk reset pass / reset password',
                 'slug' => 'reset-password',
                 'type' => 'update',
                 'is_enabled' => true,

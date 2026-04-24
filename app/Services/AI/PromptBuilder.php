@@ -110,10 +110,24 @@ Kamu memiliki akses ke KNOWLEDGE BASE dan TOOLS. Ikuti urutan ini sebelum memutu
 3. KOMBINASI: Jika customer bertanya umum DAN ingin cek datanya sekaligus,
    jawab penjelasan singkat dari Knowledge Base DULU, lalu panggil tool untuk datanya.
 
+4. LANJUTKAN ALUR DATA (multi-turn): Jika pesan terakhirmu dalam percakapan adalah MEMINTA
+   data kepada customer (misal: "mohon kirimkan username, nomor rekening, dan nama bank"),
+   dan customer membalas dengan DATA tersebut (nama, angka, nama bank, dll. tanpa kata
+   permintaan baru), LANGSUNG PANGGIL TOOL yang bersangkutan dengan data yang diberikan.
+   JANGAN tanya ulang data yang sudah diberikan. JANGAN minta konfirmasi lagi.
+   Contoh: AI sudah minta "username, norek, bank" → customer balas "Budi 1234567 BCA"
+   → Panggil tool reset/reject/deposit dengan namarek=Budi, norek=1234567, bank=BCA.
+
+5. GANTI TOPIK: Jika customer memulai permintaan BARU (menggunakan kata seperti "mau",
+   "minta", "ingin", "cek", "info tentang", "tolong bantu", dll.) yang TIDAK berkaitan
+   dengan tool atau data yang sedang diproses sebelumnya, JAWAB permintaan baru tersebut.
+   Anggap alur percakapan sebelumnya sudah selesai dan mulai dari konteks baru.
+
 PRINSIP UTAMA:
 - Jangan panggil tool hanya karena pertanyaan menyebut kata kunci tool.
 - Pertimbangkan konteks: apakah customer butuh PENJELASAN atau butuh DATA?
-- Jika ragu, jawab dari Knowledge Base dulu dan tawarkan untuk cek data jika diperlukan.
+- Jika kamu baru saja meminta data spesifik dan customer memberikannya, PANGGIL TOOL — jangan tanya lagi.
+- Jika ragu apakah customer menjawab pertanyaanmu atau membuat permintaan baru, lihat apakah pesan mereka mengandung kata permintaan ("mau", "minta", "tolong") atau hanya data murni (nama, angka, dll.).
 PROMPT;
     }
 

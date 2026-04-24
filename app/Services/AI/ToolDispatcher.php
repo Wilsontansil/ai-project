@@ -152,6 +152,17 @@ class ToolDispatcher
                                 break;
                             }
                         }
+
+                        // Also reject if message contains intent-opening words (new request),
+                        // even when no other tool keyword matches. This prevents a pending tool
+                        // from being force-dispatched when the customer clearly changes topic
+                        // (e.g. "Mau minta jadwal togel" after a pending reject-deposit flow).
+                        if (!$rejected && preg_match(
+                            '/\b(mau|minta|ingin|pengen|tolong|bantu|cek|lihat|info|gimana|bagaimana|cara|kapan|berapa|kenapa|jadwal|daftar|register|tanya|nanya)\b/iu',
+                            $userMessage
+                        )) {
+                            $rejected = true;
+                        }
                     }
 
                     if ($rejected) {

@@ -111,7 +111,7 @@
                     </p>
                 </div>
 
-                <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:1rem;align-items:end">
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;align-items:end">
                     <div>
                         <label for="max_tokens"
                             class="bo-label">{{ __('backoffice.pages.chat_agents.max_tokens') }}</label>
@@ -123,15 +123,6 @@
                         <input id="temperature" type="number" name="temperature"
                             value="{{ old('temperature', $agent->temperature) }}" min="0" max="2"
                             step="0.1" />
-                    </div>
-                    <div>
-                        <label for="message_await_seconds"
-                            class="bo-label">{{ __('backoffice.pages.chat_agents.message_await_seconds') }}</label>
-                        <input id="message_await_seconds" type="number" name="message_await_seconds"
-                            value="{{ old('message_await_seconds', $agent->message_await_seconds ?? 2) }}" min="0"
-                            max="15" step="1" />
-                        <p style="margin-top:0.25rem;font-size:0.7rem;color:#64748b">
-                            {{ __('backoffice.pages.chat_agents.message_await_help') }}</p>
                     </div>
                     <div>
                         <label class="bo-checkbox-label">
@@ -149,17 +140,28 @@
                     </div>
                 </div>
 
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;align-items:end">
+                    <div>
+                        <label for="message_await_seconds"
+                            class="bo-label">{{ __('backoffice.pages.chat_agents.message_await_seconds') }}</label>
+                        <input id="message_await_seconds" type="number" name="message_await_seconds"
+                            value="{{ old('message_await_seconds', $agent->message_await_seconds ?? 2) }}" min="0"
+                            max="15" step="1" />
+                        <p style="margin-top:0.25rem;font-size:0.7rem;color:#64748b">
+                            {{ __('backoffice.pages.chat_agents.message_await_help') }}</p>
+                    </div>
+                </div>
+
                 {{-- Agent Transfer Conditions --}}
                 <div class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-4 space-y-4">
                     <div>
-                        <h3 class="text-xs font-semibold text-cyan-400 mb-1">Agent Transfer Conditions</h3>
-                        <p class="text-[11px] text-slate-400">Define conditions that trigger the AI to transfer the chat to
-                            a human agent. Chat status will become <span class="text-orange-400 font-medium">Pending</span>
-                            and appear in the <span class="text-cyan-400 font-medium">Assigned</span> queue.</p>
+                        <h3 class="text-xs font-semibold text-cyan-400 mb-1">
+                            {{ __('backoffice.pages.chat_agents.agent_transfer_title') }}</h3>
+                        <p class="text-[11px] text-slate-400">{!! __('backoffice.pages.chat_agents.agent_transfer_subtitle') !!}</p>
                     </div>
                     <div>
                         <textarea name="escalation_condition" rows="3" maxlength="3000"
-                            placeholder="Contoh: ketika chat sudah stuck maka ganti ke human"
+                            placeholder="{{ __('backoffice.pages.chat_agents.agent_transfer_placeholder') }}"
                             class="block w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-xs text-white outline-none transition focus:border-cyan-400 placeholder-slate-500 resize-none"
                             style="background-color:rgba(15,23,42,0.7)">{{ old('escalation_condition', $agent->escalation_condition) }}</textarea>
                         <p class="mt-1 text-[11px] text-slate-500">
@@ -170,19 +172,19 @@
                             <label class="bo-checkbox-label">
                                 <input type="checkbox" name="stop_ai_after_handoff" value="1"
                                     {{ old('stop_ai_after_handoff', $agent->stop_ai_after_handoff) ? 'checked' : '' }} />
-                                <span class="font-medium">Stop AI after Handoff</span>
+                                <span
+                                    class="font-medium">{{ __('backoffice.pages.chat_agents.stop_ai_after_handoff_label') }}</span>
                             </label>
-                            <p class="mt-0.5 ml-5 text-[11px] text-slate-400">Stop the AI from sending messages after the
-                                chat status changes to <span class="text-orange-400">Pending</span>.</p>
+                            <p class="mt-0.5 ml-5 text-[11px] text-slate-400">{!! __('backoffice.pages.chat_agents.stop_ai_after_handoff_help') !!}</p>
                         </div>
                         <div>
                             <label class="bo-checkbox-label">
                                 <input type="checkbox" name="silent_handoff" value="1"
                                     {{ old('silent_handoff', $agent->silent_handoff) ? 'checked' : '' }} />
-                                <span class="font-medium">Silent Agent Handoff</span>
+                                <span
+                                    class="font-medium">{{ __('backoffice.pages.chat_agents.silent_handoff_label') }}</span>
                             </label>
-                            <p class="mt-0.5 ml-5 text-[11px] text-slate-400">AI silently transfers the conversation to an
-                                agent with no further AI replies.</p>
+                            <p class="mt-0.5 ml-5 text-[11px] text-slate-400">{!! __('backoffice.pages.chat_agents.silent_handoff_help') !!}</p>
                         </div>
                     </div>
                 </div>

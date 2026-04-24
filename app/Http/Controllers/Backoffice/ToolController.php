@@ -427,22 +427,13 @@ class ToolController extends Controller
             'body' => ['nullable', 'array'],
         ]);
 
-        $baseUrl = rtrim(ProjectSetting::getValue('webhook_base_url', ''), '/');
-
-        if (empty($baseUrl)) {
-            return response()->json(['success' => false, 'error' => 'Webhook base URL belum dikonfigurasi di Settings.'], 422);
-        }
-
-        $route = '/' . ltrim($data['route'], '/');
-        $url = $baseUrl . $route;
+        $url = $data['route'];
 
         $body = $data['body'] ?? [];
 
         Log::info('Webhook test request', [
             'channel' => 'tool.test_endpoint',
             'method' => 'POST',
-            'base_url' => $baseUrl,
-            'route' => $route,
             'url' => $url,
             'body' => LogSanitizer::redactArguments($body),
             'timestamp' => now()->toIso8601String(),

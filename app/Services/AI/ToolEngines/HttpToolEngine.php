@@ -2,7 +2,6 @@
 
 namespace App\Services\AI\ToolEngines;
 
-use App\Models\ProjectSetting;
 use App\Models\Tool;
 use App\Services\AI\Concerns\BuildsMissingDataMessage;
 use App\Support\LogSanitizer;
@@ -14,7 +13,7 @@ use Illuminate\Support\Facades\Log;
  *
  * Endpoint config lives in tool.endpoints['endpoint']:
  * {
- *   "route": "/api/some-action",
+ *   "route": "https://yourdomain.com/api/some-action",
  *   "body": { "username": "$arg->username", "type": "player" },
  *   "expected_response": { "status": 200, "message": "Success", "data": {} }
  * }
@@ -76,14 +75,7 @@ class HttpToolEngine
             'data' => [],
         ];
 
-        $webhookBaseUrl = trim((string) ProjectSetting::getValue('webhook_base_url', ''));
-        if ($webhookBaseUrl === '') {
-            Log::warning('Webhook base URL not configured', ['tool_name' => $tool->tool_name]);
-
-            return ['mode' => 'direct', 'reply' => self::USER_FACING_ERROR];
-        }
-
-        $fullUrl = rtrim($webhookBaseUrl, '/') . $route;
+        $fullUrl = $route;
 
         Log::info('Executing HTTP endpoint', [
             'tool_name' => $tool->tool_name,

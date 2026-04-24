@@ -60,7 +60,7 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => [
                     'endpoint' => [
-                        'route' => '/resetpassword',
+                        'route' => 'https://api-stg.pilartestengine.com/aiservice/api/resetpassword',
                         'body' => [
                             // 'username' => '$arg->username',
                             'namarek' => '$arg->namarek',
@@ -103,7 +103,7 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => [
                     'endpoint' => [
-                        'route' => '/register',
+                        'route' => 'https://api-stg.pilartestengine.com/aiservice/api/register',
                         'body' => [
                             'username' => '',
                             'email' => '',
@@ -787,7 +787,7 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => [
                     'endpoint' => [
-                        'route' => '/rejectdeposit',
+                        'route' => 'https://api-stg.pilartestengine.com/aiservice/api/rejectdeposit',
                         'body' => [
                             'username' => '',
                             'agent' => config('services.agent.kode'),

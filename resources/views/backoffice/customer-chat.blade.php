@@ -193,8 +193,10 @@
             const pollUrl = '{{ parse_url(route('backoffice.customer.messages', $customer->id), PHP_URL_PATH) }}';
 
             // Snapshot of last known message list for change detection
-            let lastCount = {{ count($messages) }};
+            const initialMessages = @json($messages);
+            let lastSignature = buildMessagesSignature(initialMessages);
             let polling = true;
+            let pollInFlight = false;
 
             // ---- Renderers ----
             const attBase = '{{ parse_url(route('backoffice.chat-attachment'), PHP_URL_PATH) }}';
@@ -276,6 +278,23 @@
                 wrap.innerHTML = html;
             }
 
+            function buildMessagesSignature(messages) {
+                if (!Array.isArray(messages)) {
+                    return '';
+                }
+
+                return messages.map(msg => {
+                    const attachmentPath = msg?.meta?.attachment?.path ?? '';
+                    return [
+                        msg?.date ?? '',
+                        msg?.time ?? '',
+                        msg?.role ?? '',
+                        msg?.message ?? '',
+                        attachmentPath,
+                    ].join('~');
+                }).join('||');
+            }
+
             function scrollToBottom() {
                 const content = document.getElementById('bo-content');
                 if (content) content.scrollTop = content.scrollHeight;
@@ -283,7 +302,8 @@
 
             // ---- Polling ----
             async function poll() {
-                if (!polling || document.visibilityState === 'hidden') return;
+                if (!polling || document.visibilityState === 'hidden' || pollInFlight) return;
+                pollInFlight = true;
                 try {
                     const qs = new URLSearchParams();
                     const sdEl = document.getElementById('start_date');
@@ -298,14 +318,17 @@
                     });
                     if (!res.ok) return;
                     const data = await res.json();
+                    const nextSignature = buildMessagesSignature(data.messages);
 
-                    if (data.messages.length !== lastCount) {
-                        lastCount = data.messages.length;
+                    if (nextSignature !== lastSignature) {
+                        lastSignature = nextSignature;
                         renderMessages(data.messages);
                         scrollToBottom();
                     }
                 } catch (_) {
                     /* network error — silently skip */
+                } finally {
+                    pollInFlight = false;
                 }
             }
 
@@ -328,6 +351,10 @@
             // Pause/resume when tab visibility changes
             document.addEventListener('visibilitychange', () => {
                 polling = document.visibilityState !== 'hidden';
+
+                if (polling) {
+                    poll();
+                }
             });
 
             setInterval(poll, POLL_MS);

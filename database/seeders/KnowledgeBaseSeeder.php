@@ -210,7 +210,10 @@ Saat melakukan transfer antar bank, pastikan nominal yang dikirim sesuai dengan 
 PENTING: Nominal di form deposit harus sama persis dengan nominal permintaan deposit (bukan ditambah biaya admin).
 Contoh 1: jika permintaan deposit 20.000, isi form deposit 20.000.
 Contoh 2: jika permintaan deposit 12.000, isi form deposit 12.000.
-Biaya antar bank 6.500 atau 2.500 (BI-Fast) adalah biaya tambahan dari bank dan ditanggung user di luar nominal deposit.',
+Biaya antar bank 6.500 atau 2.500 (BI-Fast) adalah biaya tambahan dari bank dan ditanggung user di luar nominal deposit.
+
+Catatan Deposit:
+-Jika Terjadi kesalahan transfer , seperti transfer pulsa ke dana , atau sebaliknya. infokan ke Player / Customer akan dikenakan biaya admin 5000.',
                 'source' => 'manual',
                 'file_name' => null,
                 'is_active' => true,

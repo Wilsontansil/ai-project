@@ -82,6 +82,7 @@ return [
             'empty' => 'Tidak ada pelanggan yang dieskalasi.',
             'takeover' => 'Ambil Alih',
             'release' => 'Kembalikan ke Bot',
+            'remove_from_queue' => 'Hapus dari Antrian',
             'chat' => 'Chat',
             'takeover_success' => 'Pelanggan berhasil diambil alih.',
             'release_success' => 'Pelanggan dikembalikan ke bot.',

@@ -82,17 +82,16 @@
                                                     onmouseover="this.style.background='rgba(34,211,238,0.3)'"
                                                     onmouseout="this.style.background='rgba(34,211,238,0.2)'">{{ __('backoffice.pages.escalation.takeover') }}</button>
                                             </form>
-                                        @else
-                                            <form method="POST"
-                                                action="{{ route('backoffice.customer.release', $customer->id) }}">
-                                                @csrf
-                                                <button type="submit"
-                                                    class="rounded px-2 py-1 text-[10px] font-semibold transition"
-                                                    style="background:rgba(52,211,153,0.2);color:#34d399;"
-                                                    onmouseover="this.style.background='rgba(52,211,153,0.3)'"
-                                                    onmouseout="this.style.background='rgba(52,211,153,0.2)'">{{ __('backoffice.pages.escalation.release') }}</button>
-                                            </form>
                                         @endif
+                                        <form method="POST"
+                                            action="{{ route('backoffice.customer.release', $customer->id) }}">
+                                            @csrf
+                                            <button type="submit"
+                                                class="rounded px-2 py-1 text-[10px] font-semibold transition"
+                                                style="background:rgba(52,211,153,0.2);color:#34d399;"
+                                                onmouseover="this.style.background='rgba(52,211,153,0.3)'"
+                                                onmouseout="this.style.background='rgba(52,211,153,0.2)'">{{ __('backoffice.pages.escalation.remove_from_queue') }}</button>
+                                        </form>
                                         <a href="{{ route('backoffice.customer.chat', $customer->id) }}"
                                             class="rounded px-2 py-1 text-[10px] font-semibold transition"
                                             style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);"

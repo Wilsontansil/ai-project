@@ -82,6 +82,7 @@ return [
             'empty' => 'No escalated customers.',
             'takeover' => 'Take Over',
             'release' => 'Release to Bot',
+            'remove_from_queue' => 'Remove from Queue',
             'chat' => 'Chat',
             'takeover_success' => 'Customer taken over successfully.',
             'release_success' => 'Customer released back to bot.',

@@ -268,6 +268,20 @@ Semua akun E-Wallet wajib berstatus Premium sebelum penarikan dana/Withdraw(WD).
 Pastikan upgrade E-Wallet terlebih dahulu jika belum Premium.
 E-Wallet Premium adalah Wajib sejak awal.
 
+[Informasi]
+-Minimal Withdraw Rp 25.000
+-Withdraw berkelipatan Rp 1.000
+
+Withdraw dengan E-WALLET:
+Semua akun E-Wallet wajib berstatus Premium sebelum penarikan dana/Withdraw(WD).
+Pastikan upgrade E-Wallet terlebih dahulu jika belum Premium.
+E-Wallet Premium adalah Wajib sejak awal.
+
+Withdraw dengan Bank Digital:
+[ Bank Jago , SeaBank , blu by BCA Digital , Bank Neo Commerce (Neo Bank / Neo+) , Jenius (BTPN)]
+Semua penarikan ke rekening Bank Digital, akan di kenakan 6.500 ditanggung Player.
+Misalnya: WD 50.000 , maka akan masuk ke Rekening 43.500 yaitu dari 50.000 - 6.500(Biaya Admin).
+
 BIAYA PENARIKAN (WD):
 Penarikan dikenakan charge 2,5% jika jumlah WD melebihi 5 kali dalam sehari.',
                 'source' => 'manual',

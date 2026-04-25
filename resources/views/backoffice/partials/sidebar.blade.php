@@ -374,24 +374,62 @@
                     </a>
                 @endcan
 
-                {{-- Users --}}
-                @can('manage users')
-                    <a href="{{ route('backoffice.users.index') }}" class="bo-nav-item group"
-                        style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'users' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
-                        onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
-                        onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'users' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'users' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
-                        <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'users' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
-                            height="18">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                        </svg>
-                        <span class="bo-label">{{ __('backoffice.menu.users') }}</span>
-                        <span class="bo-tooltip">{{ __('backoffice.menu.users') }}</span>
-                    </a>
-                @endcan
             </div>
         </div>
+
+        {{-- Section: USER MANAGEMENT --}}
+        @canany(['manage users', 'manage roles'])
+            <div class="bo-section" data-section="user-management">
+                <button type="button" class="bo-section-header"
+                    style="display:flex;width:100%;align-items:center;justify-content:space-between;border-radius:0.5rem;padding:0.5rem 0.75rem;color:rgba(255,255,255,0.5);background:none;border:none;cursor:pointer;transition:background 0.15s;"
+                    onmouseover="this.style.background='rgba(255,255,255,0.06)'"
+                    onmouseout="this.style.background='none'">
+                    <span class="bo-section-label"
+                        style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">
+                        {{ __('backoffice.section.user_management') }}
+                    </span>
+                    <svg class="bo-section-chevron rotated" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        width="12" height="12" style="width:12px;height:12px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+                <div class="bo-section-items" style="margin-top:0.25rem;">
+                    {{-- Users --}}
+                    @can('manage users')
+                        <a href="{{ route('backoffice.users.index') }}" class="bo-nav-item group"
+                            style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'users' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
+                            onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
+                            onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'users' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'users' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
+                            <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'users' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
+                                height="18">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                            </svg>
+                            <span class="bo-label">{{ __('backoffice.menu.users') }}</span>
+                            <span class="bo-tooltip">{{ __('backoffice.menu.users') }}</span>
+                        </a>
+                    @endcan
+
+                    {{-- Roles --}}
+                    @can('manage roles')
+                        <a href="{{ route('backoffice.roles.index') }}" class="bo-nav-item group"
+                            style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'roles' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
+                            onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
+                            onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'roles' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'roles' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
+                            <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'roles' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
+                                height="18">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                            </svg>
+                            <span class="bo-label">{{ __('backoffice.menu.roles') }}</span>
+                            <span class="bo-tooltip">{{ __('backoffice.menu.roles') }}</span>
+                        </a>
+                    @endcan
+                </div>
+            </div>
+        @endcanany
 
     </nav>
 </aside>

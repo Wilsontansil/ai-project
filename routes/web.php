@@ -10,6 +10,7 @@ use App\Http\Controllers\Backoffice\LocaleController;
 use App\Http\Controllers\Backoffice\MetricsController;
 use App\Http\Controllers\Backoffice\SettingController;
 use App\Http\Controllers\Backoffice\ToolController;
+use App\Http\Controllers\Backoffice\RoleController;
 use App\Http\Controllers\Backoffice\UserController;
 use App\Http\Controllers\Backoffice\WebsitePageController;
 use Illuminate\Support\Facades\Route;
@@ -101,6 +102,16 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
     // Metrics
     Route::middleware('permission:view metrics')->group(function () {
         Route::get('/backoffice/metrics', [MetricsController::class, 'index'])->name('backoffice.metrics.index');
+    });
+
+    // Role management
+    Route::middleware('permission:manage roles')->group(function () {
+        Route::get('/backoffice/roles', [RoleController::class, 'index'])->name('backoffice.roles.index');
+        Route::get('/backoffice/roles/create', [RoleController::class, 'create'])->name('backoffice.roles.create');
+        Route::post('/backoffice/roles', [RoleController::class, 'store'])->name('backoffice.roles.store');
+        Route::get('/backoffice/roles/{role}/edit', [RoleController::class, 'edit'])->name('backoffice.roles.edit');
+        Route::put('/backoffice/roles/{role}', [RoleController::class, 'update'])->name('backoffice.roles.update');
+        Route::delete('/backoffice/roles/{role}', [RoleController::class, 'destroy'])->name('backoffice.roles.destroy');
     });
 
     // User management (admin only)

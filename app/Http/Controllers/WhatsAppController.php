@@ -35,11 +35,7 @@ class WhatsAppController extends Controller
             return response()->json(['status' => 'ignored', 'reason' => 'outgoing_message']);
         }
 
-        $chatId = $payload['from']
-            ?? $payload['chatId']
-            ?? ($payload['chat']['id'] ?? null)
-            ?? $request->input('from')
-            ?? $request->input('chatId');
+        $chatId = $this->resolveChatId($request, $payload);
 
         // Text extraction (returns null for pure media messages).
         $text = $payload['body']
@@ -96,6 +92,13 @@ class WhatsAppController extends Controller
         }
 
         if (!$text || !$chatId) {
+            Log::warning('WAHA payload rejected by validator', [
+                'has_text' => (bool) $text,
+                'chat_id' => (string) ($chatId ?? ''),
+                'media_type' => $mediaType,
+                'has_media_signal' => $hasMediaSignal,
+                'payload_keys' => array_keys($payload),
+            ]);
             Log::warning('Invalid WAHA webhook payload', LogSanitizer::summarize($requestPayload));
             return response()->json(['status' => 'ignored', 'reason' => 'invalid_payload']);
         }
@@ -294,6 +297,29 @@ class WhatsAppController extends Controller
         }
 
         return null;
+    }
+
+    private function resolveChatId(Request $request, array $payload): ?string
+    {
+        $chatId = $payload['from']
+            ?? $payload['chatId']
+            ?? ($payload['chat']['id'] ?? null)
+            ?? data_get($payload, 'key.remoteJid')
+            ?? data_get($payload, 'message.key.remoteJid')
+            ?? data_get($payload, 'sender.id')
+            ?? data_get($payload, 'author')
+            ?? data_get($payload, 'from.id')
+            ?? $request->input('from')
+            ?? $request->input('chatId')
+            ?? $request->input('payload.key.remoteJid');
+
+        if (!is_string($chatId)) {
+            return null;
+        }
+
+        $chatId = trim($chatId);
+
+        return $chatId !== '' ? $chatId : null;
     }
 
     private function hasMediaSignal(array $payload): bool

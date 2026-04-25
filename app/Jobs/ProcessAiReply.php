@@ -85,8 +85,8 @@ class ProcessAiReply implements ShouldQueue
             ]);
         }
 
-        // If customer is escalated (waiting/human), save the message but don't reply.
-        if ($customer !== null && $customer->mode !== 'bot') {
+        // If customer is escalated, block replies based on current handoff setting.
+        if ($customer !== null && $this->shouldBlockAiReply($customer)) {
             Log::info("Skipping AI reply — customer mode is '{$customer->mode}'", [
                 'customer_id' => $customer->id,
                 'channel' => $this->channel,
@@ -111,12 +111,16 @@ class ProcessAiReply implements ShouldQueue
             $stopAiAfterHandoff = $agent?->stop_ai_after_handoff ?? true;
 
             if (!$silentHandoff) {
-                $reply = "Permintaan Anda sedang diteruskan ke agen kami. Mohon tunggu sebentar 🙏\nYour request is being forwarded to our agent. Please wait a moment 🙏";
+                if ($stopAiAfterHandoff) {
+                    $reply = "Permintaan Anda sedang diteruskan ke agen kami. Mohon tunggu sebentar 🙏\nYour request is being forwarded to our agent. Please wait a moment 🙏";
+                } elseif ($reply === '') {
+                    $reply = "Permintaan Anda sedang diteruskan ke Human CS. Mohon tunggu sebentar 🙏";
+                }
             } else {
                 $reply = ''; // Silent — send nothing to customer
             }
 
-            if ($customer !== null && $stopAiAfterHandoff) {
+            if ($customer !== null) {
                 try {
                     $customer->update(['mode' => 'waiting']);
                     Log::info('Customer escalated to waiting queue by AI', [
@@ -130,11 +134,6 @@ class ProcessAiReply implements ShouldQueue
                         'error' => $e->getMessage(),
                     ]);
                 }
-            } else {
-                Log::info('Escalation triggered — stop_ai_after_handoff is off, customer mode unchanged', [
-                    'customer_id' => $customer?->id,
-                    'channel' => $this->channel,
-                ]);
             }
         }
 
@@ -297,5 +296,20 @@ class ProcessAiReply implements ShouldQueue
     private function wahaSession(): string
     {
         return (string) ProjectSetting::getValue('whatsapp_session', config('services.whatsapp.session', 'default'));
+    }
+
+    private function shouldBlockAiReply(Customer $customer): bool
+    {
+        if ($customer->mode === 'human') {
+            return true;
+        }
+
+        if ($customer->mode === 'waiting') {
+            $agent = ChatAgent::getDefault();
+
+            return $agent?->stop_ai_after_handoff ?? true;
+        }
+
+        return false;
     }
 }

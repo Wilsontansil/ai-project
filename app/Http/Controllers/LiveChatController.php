@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChatAgent;
 use App\Models\ProjectSetting;
 use App\Services\Agent\ChatAttachmentStorageService;
 use App\Support\LogSanitizer;
@@ -147,8 +148,8 @@ class LiveChatController extends Controller
             ]);
         }
 
-        // If customer is escalated (waiting/human), save the message but return empty.
-        if ($customer !== null && $customer->mode !== 'bot') {
+        // If customer is escalated, block replies based on current handoff setting.
+        if ($customer !== null && $this->shouldBlockAiReply($customer)) {
             Log::info("Skipping AI reply — customer mode is '{$customer->mode}'", [
                 'customer_id' => $customer->id,
                 'channel' => 'livechat',
@@ -158,6 +159,42 @@ class LiveChatController extends Controller
         }
 
         $reply = app(AIService::class)->reply($combinedText, $chatId, 'livechat', $agentContext);
+
+        // Detect escalation marker and enforce queue behavior.
+        $shouldEscalate = str_contains($reply, '[ESCALATE]');
+        $reply = trim(str_replace('[ESCALATE]', '', $reply));
+
+        if ($shouldEscalate) {
+            $agent = ChatAgent::getDefault();
+            $silentHandoff = $agent?->silent_handoff ?? false;
+            $stopAiAfterHandoff = $agent?->stop_ai_after_handoff ?? true;
+
+            if ($silentHandoff) {
+                $reply = '';
+            } elseif ($stopAiAfterHandoff) {
+                $reply = "Permintaan Anda sedang diteruskan ke agen kami. Mohon tunggu sebentar 🙏\nYour request is being forwarded to our agent. Please wait a moment 🙏";
+            } elseif ($reply === '') {
+                $reply = 'Permintaan Anda sedang diteruskan ke Human CS. Mohon tunggu sebentar 🙏';
+            }
+
+            if ($customer !== null) {
+                try {
+                    $customer->update(['mode' => 'waiting']);
+                    Log::info('Customer escalated to waiting queue by AI', [
+                        'customer_id' => $customer->id,
+                        'channel' => 'livechat',
+                        'chat_id' => $chatId,
+                    ]);
+                } catch (\Throwable $e) {
+                    Log::error('Failed to set customer mode to waiting during escalation', [
+                        'customer_id' => $customer->id,
+                        'channel' => 'livechat',
+                        'chat_id' => $chatId,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
 
         MetricsCollector::recordRequest('livechat', MetricsCollector::elapsed($requestStart));
 
@@ -240,6 +277,21 @@ class LiveChatController extends Controller
         $chatId = is_scalar($chatId) ? trim((string) $chatId) : '';
 
         return $chatId !== '' ? $chatId : null;
+    }
+
+    private function shouldBlockAiReply($customer): bool
+    {
+        if (($customer->mode ?? null) === 'human') {
+            return true;
+        }
+
+        if (($customer->mode ?? null) === 'waiting') {
+            $agent = ChatAgent::getDefault();
+
+            return $agent?->stop_ai_after_handoff ?? true;
+        }
+
+        return false;
     }
 
     /**

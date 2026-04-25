@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\ProcessAiReply;
+use App\Models\ProjectSetting;
 use App\Services\Agent\ChatAttachmentStorageService;
 use App\Services\Agent\CustomerIdentityService;
 use App\Support\LogSanitizer;
@@ -52,13 +53,14 @@ class WhatsAppController extends Controller
         }
 
         $attachmentMeta = [];
+        $mediaType = $this->resolveMediaType($payload);
 
-        // If no text, check whether this is a media message.
-        if ($text === null) {
-            $mediaType = (string) ($payload['type'] ?? $payload['mediaType'] ?? '');
+        // Process media even when text/caption is present, so attachment is still stored.
+        if ($mediaType !== null) {
+            [$mediaSyntheticText, $attachmentMeta] = $this->extractMedia($payload, (string) ($chatId ?? ''), $mediaType);
 
-            if (in_array(strtolower($mediaType), self::MEDIA_TYPES, true)) {
-                [$text, $attachmentMeta] = $this->extractMedia($payload, (string) ($chatId ?? ''));
+            if ($text === null || trim((string) $text) === '') {
+                $text = $mediaSyntheticText;
             }
         }
 
@@ -99,12 +101,27 @@ class WhatsAppController extends Controller
      *
      * @return array{0: string|null, 1: array}
      */
-    private function extractMedia(array $payload, string $chatId): array
+    private function extractMedia(array $payload, string $chatId, string $mediaType): array
     {
-        $mediaType = strtolower((string) ($payload['type'] ?? $payload['mediaType'] ?? 'document'));
-        $mimeType  = (string) ($payload['mimetype'] ?? $payload['mime_type'] ?? 'application/octet-stream');
-        $filename  = (string) ($payload['filename'] ?? $payload['name'] ?? '');
-        $caption   = trim((string) ($payload['caption'] ?? ''));
+        $mimeType  = (string) (
+            $payload['mimetype']
+            ?? $payload['mime_type']
+            ?? data_get($payload, 'message.mimetype')
+            ?? data_get($payload, 'message.mime_type')
+            ?? 'application/octet-stream'
+        );
+        $filename  = (string) (
+            $payload['filename']
+            ?? $payload['name']
+            ?? data_get($payload, 'message.filename')
+            ?? data_get($payload, 'message.fileName')
+            ?? ''
+        );
+        $caption   = trim((string) (
+            $payload['caption']
+            ?? data_get($payload, 'message.caption')
+            ?? ''
+        ));
 
         // Derive a sensible filename if none was provided.
         if ($filename === '') {
@@ -131,8 +148,17 @@ class WhatsAppController extends Controller
         $contents = null;
 
         try {
-            $mediaUrl = (string) ($payload['mediaUrl'] ?? $payload['media_url'] ?? '');
-            $apiKey   = (string) config('services.whatsapp.api_key', '');
+            $mediaUrl = (string) (
+                $payload['mediaUrl']
+                ?? $payload['media_url']
+                ?? $payload['url']
+                ?? data_get($payload, 'message.mediaUrl')
+                ?? data_get($payload, 'message.media_url')
+                ?? data_get($payload, 'message.url')
+                ?? data_get($payload, 'message.downloadUrl')
+                ?? ''
+            );
+            $apiKey   = (string) ProjectSetting::getValue('whatsapp_api_key', config('services.whatsapp.api_key', ''));
             $headers  = $apiKey !== '' ? ['X-Api-Key' => $apiKey] : [];
 
             if ($mediaUrl !== '') {
@@ -146,7 +172,7 @@ class WhatsAppController extends Controller
 
             // Fallback: body might be a data-URL (data:image/jpeg;base64,...).
             if ($contents === null) {
-                $body = (string) ($payload['body'] ?? '');
+                $body = (string) ($payload['body'] ?? data_get($payload, 'message.body') ?? '');
                 if (str_starts_with($body, 'data:')) {
                     $commaPos = strpos($body, ',');
                     if ($commaPos !== false) {
@@ -186,12 +212,21 @@ class WhatsAppController extends Controller
         $messageId = (string) (
             $payload['id']
             ?? ($payload['message']['id'] ?? null)
+            ?? data_get($payload, 'message.id._serialized')
+            ?? data_get($payload, 'message.key.id')
             ?? $request->input('id')
             ?? ''
         );
 
         if ($messageId === '') {
-            $messageId = sha1($chatId . '|' . trim($text));
+            $mediaFingerprint = implode('|', array_filter([
+                $this->resolveMediaType($payload) ?? '',
+                (string) ($payload['mediaUrl'] ?? $payload['media_url'] ?? data_get($payload, 'message.mediaUrl') ?? data_get($payload, 'message.url') ?? ''),
+                (string) ($payload['filename'] ?? $payload['name'] ?? data_get($payload, 'message.filename') ?? ''),
+                (string) ($payload['timestamp'] ?? data_get($payload, 'messageTimestamp') ?? data_get($payload, 'message.timestamp') ?? ''),
+            ]));
+
+            $messageId = sha1($chatId . '|' . trim($text) . '|' . $mediaFingerprint);
         }
 
         $cacheKey = 'waha:processed:' . $messageId;
@@ -205,6 +240,23 @@ class WhatsAppController extends Controller
         }
 
         return !$isNew;
+    }
+
+    private function resolveMediaType(array $payload): ?string
+    {
+        $candidate = strtolower((string) (
+            $payload['type']
+            ?? $payload['mediaType']
+            ?? data_get($payload, 'message.type')
+            ?? data_get($payload, 'message.mediaType')
+            ?? ''
+        ));
+
+        if (in_array($candidate, self::MEDIA_TYPES, true)) {
+            return $candidate;
+        }
+
+        return null;
     }
 }
 

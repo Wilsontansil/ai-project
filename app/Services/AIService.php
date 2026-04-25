@@ -39,8 +39,10 @@ class AIService
      * Main AI entrypoint — called by all webhook controllers.
      *
      * @param array<string, mixed> $agentContext
+     * @param array<string, mixed> $attachmentMeta  Optional attachment from ChatAttachmentStorageService.
+     *                                               When type=image the image URL is sent as a vision block.
      */
-    public function reply(mixed $message, mixed $chatId = null, string $channel = 'telegram', array $agentContext = []): string
+    public function reply(mixed $message, mixed $chatId = null, string $channel = 'telegram', array $agentContext = [], array $attachmentMeta = []): string
     {
         $apiKey = (string) ProjectSetting::getValue('openai_api_key', config('services.openai.api_key', ''));
 
@@ -87,7 +89,7 @@ class AIService
             ]);
         }
 
-        $messages = array_merge($messages, $trimmedHistory, [['role' => 'user', 'content' => $message]]);
+        $messages = array_merge($messages, $trimmedHistory, [['role' => 'user', 'content' => $this->buildUserContent((string) $message, $attachmentMeta)]]);
 
         try {
             $payload = [
@@ -284,6 +286,48 @@ class AIService
     /**
      * Call OpenAI with retry on transient 500 errors.
      */
+    /**
+     * Build the user message content for OpenAI.
+     *
+     * If the attachment is an image, returns a multimodal vision array so the model
+     * can actually see the image. For all other cases returns a plain string.
+     *
+     * @param  array<string, mixed>  $attachmentMeta
+     * @return string|array<int, mixed>
+     */
+    private function buildUserContent(string $textMessage, array $attachmentMeta): string|array
+    {
+        if (
+            empty($attachmentMeta['type']) ||
+            $attachmentMeta['type'] !== 'image' ||
+            empty($attachmentMeta['path'])
+        ) {
+            return $textMessage;
+        }
+
+        // Build the publicly accessible image URL from the SFTP disk's configured url.
+        $baseUrl = rtrim((string) config('filesystems.disks.sftp.url', ''), '/');
+
+        if ($baseUrl === '') {
+            return $textMessage;
+        }
+
+        $imageUrl = $baseUrl . '/' . ltrim((string) $attachmentMeta['path'], '/');
+
+        $content = [];
+
+        if ($textMessage !== '' && $textMessage !== '[image]') {
+            $content[] = ['type' => 'text', 'text' => $textMessage];
+        }
+
+        $content[] = [
+            'type'      => 'image_url',
+            'image_url' => ['url' => $imageUrl, 'detail' => 'auto'],
+        ];
+
+        return $content;
+    }
+
     private function callOpenAiWithRetry(mixed $client, array $payload, int $maxRetries = 2): mixed
     {
         $lastException = null;

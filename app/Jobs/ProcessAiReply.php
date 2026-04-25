@@ -97,7 +97,7 @@ class ProcessAiReply implements ShouldQueue
 
         $this->sendTypingIndicator();
 
-        $reply = app(AIService::class)->reply($text, $this->chatId, $this->channel, $agentContext);
+        $reply = app(AIService::class)->reply($text, $this->chatId, $this->channel, $agentContext, $this->attachmentMeta);
 
         $this->stopTypingIndicator();
 

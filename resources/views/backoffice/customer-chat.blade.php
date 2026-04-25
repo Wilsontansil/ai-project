@@ -114,6 +114,30 @@
                                 style="max-width: 50%;">
                                 <p class="mb-1 text-[10px] font-semibold text-amber-400">
                                     {{ __('backoffice.pages.customer_chat.customer') }}</p>
+                                @if (!empty($msg['meta']['attachment']))
+                                    @php
+                                        $att = $msg['meta']['attachment'];
+                                        $attPath = $att['path'] ?? '';
+                                    @endphp
+                                    @php $attUrl = parse_url(route('backoffice.chat-attachment'), PHP_URL_PATH) . '?path=' . urlencode($attPath); @endphp
+                                    @if (($att['type'] ?? '') === 'image')
+                                        <a href="{{ $attUrl }}" target="_blank" class="mb-1 block">
+                                            <img src="{{ $attUrl }}" alt="{{ $att['original_name'] ?? 'image' }}"
+                                                class="max-w-full rounded-xl" style="max-height:200px;object-fit:cover;" />
+                                        </a>
+                                    @else
+                                        <a href="{{ $attUrl }}" target="_blank"
+                                            class="mb-1 flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs text-slate-300 hover:bg-white/5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                                class="h-4 w-4 shrink-0 text-slate-400">
+                                                <path fill-rule="evenodd"
+                                                    d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875Zm6.905 9.97a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 1 0 1.06 1.06l1.72-1.72V18a.75.75 0 0 0 1.5 0v-4.19l1.72 1.72a.75.75 0 1 0 1.06-1.06l-3-3Z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            {{ $att['original_name'] ?? 'download' }}
+                                        </a>
+                                    @endif
+                                @endif
                                 <p class="whitespace-pre-wrap break-words text-sm text-slate-100">{{ $msg['message'] }}</p>
                                 <p class="mt-1.5 text-[10px] text-slate-500">{{ $msg['time'] ?? '' }}</p>
                             </div>
@@ -125,6 +149,30 @@
                                 <p class="mb-1 text-[10px] font-semibold text-cyan-400">
                                     {{ $msg['role'] ?? __('backoffice.pages.customer_chat.assistant') }}
                                 </p>
+                                @if (!empty($msg['meta']['attachment']))
+                                    @php
+                                        $att = $msg['meta']['attachment'];
+                                        $attPath = $att['path'] ?? '';
+                                    @endphp
+                                    @php $attUrl = parse_url(route('backoffice.chat-attachment'), PHP_URL_PATH) . '?path=' . urlencode($attPath); @endphp
+                                    @if (($att['type'] ?? '') === 'image')
+                                        <a href="{{ $attUrl }}" target="_blank" class="mb-1 block">
+                                            <img src="{{ $attUrl }}" alt="{{ $att['original_name'] ?? 'image' }}"
+                                                class="max-w-full rounded-xl" style="max-height:200px;object-fit:cover;" />
+                                        </a>
+                                    @else
+                                        <a href="{{ $attUrl }}" target="_blank"
+                                            class="mb-1 flex items-center gap-2 rounded-xl border border-cyan-500/20 px-3 py-2 text-xs text-cyan-300 hover:bg-cyan-500/10">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                fill="currentColor" class="h-4 w-4 shrink-0">
+                                                <path fill-rule="evenodd"
+                                                    d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875Zm6.905 9.97a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 1 0 1.06 1.06l1.72-1.72V18a.75.75 0 0 0 1.5 0v-4.19l1.72 1.72a.75.75 0 1 0 1.06-1.06l-3-3Z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            {{ $att['original_name'] ?? 'download' }}
+                                        </a>
+                                    @endif
+                                @endif
                                 <p class="whitespace-pre-wrap break-words text-sm leading-6 text-white">
                                     {{ $msg['message'] }}</p>
                                 <p class="mt-1.5 text-right text-[10px] text-cyan-300/60">{{ $msg['time'] ?? '' }}</p>
@@ -149,6 +197,22 @@
             let polling = true;
 
             // ---- Renderers ----
+            const attBase = '{{ parse_url(route('backoffice.chat-attachment'), PHP_URL_PATH) }}';
+
+            function buildAttachmentHtml(meta, isUser) {
+                if (!meta || !meta.attachment) return '';
+                const att = meta.attachment;
+                if (!att.path) return '';
+                const url = attBase + '?path=' + encodeURIComponent(att.path);
+                const name = escHtml(att.original_name || 'download');
+                if (att.type === 'image') {
+                    return `<a href="${url}" target="_blank" class="mb-1 block"><img src="${url}" alt="${name}" class="max-w-full rounded-xl" style="max-height:200px;object-fit:cover;"/></a>`;
+                }
+                const borderCls = isUser ? 'border-white/10 text-slate-300 hover:bg-white/5' :
+                    'border-cyan-500/20 text-cyan-300 hover:bg-cyan-500/10';
+                return `<a href="${url}" target="_blank" class="mb-1 flex items-center gap-2 rounded-xl border ${borderCls} px-3 py-2 text-xs"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 shrink-0"><path fill-rule="evenodd" d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875Zm6.905 9.97a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 1 0 1.06 1.06l1.72-1.72V18a.75.75 0 0 0 1.5 0v-4.19l1.72 1.72a.75.75 0 1 0 1.06-1.06l-3-3Z" clip-rule="evenodd" /></svg>${name}</a>`;
+            }
+
             function buildDateSep(date) {
                 return `<div class="flex items-center gap-3 py-2">
             <div class="h-px flex-1 bg-white/10"></div>
@@ -161,6 +225,7 @@
                 return `<div class="flex justify-start">
             <div class="inline-flex w-auto max-w-[50%] flex-col break-words rounded-2xl rounded-bl-sm border border-white/10 bg-slate-800 px-4 py-3 shadow-lg shadow-black/20" style="max-width:50%;">
                 <p class="mb-1 text-[10px] font-semibold text-amber-400">{{ __('backoffice.pages.customer_chat.customer') }}</p>
+                ${buildAttachmentHtml(msg.meta, true)}
                 <p class="whitespace-pre-wrap break-words text-sm text-slate-100">${escHtml(msg.message)}</p>
                 <p class="mt-1.5 text-[10px] text-slate-500">${msg.time ?? ''}</p>
             </div>
@@ -172,6 +237,7 @@
                 return `<div class="flex justify-end">
             <div class="inline-flex w-auto max-w-[50%] flex-col break-words rounded-2xl rounded-br-sm border border-cyan-500/20 bg-cyan-600/25 px-4 py-3 shadow-lg shadow-cyan-900/20" style="max-width:50%;">
                 <p class="mb-1 text-[10px] font-semibold text-cyan-400">${escHtml(label)}</p>
+                ${buildAttachmentHtml(msg.meta, false)}
                 <p class="whitespace-pre-wrap break-words text-sm leading-6 text-white">${escHtml(msg.message)}</p>
                 <p class="mt-1.5 text-right text-[10px] text-cyan-300/60">${msg.time ?? ''}</p>
             </div>

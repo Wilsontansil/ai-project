@@ -42,6 +42,7 @@ class ProcessAiReply implements ShouldQueue
         public readonly string $chatId,
         public readonly string $combinedText,
         public readonly ?int $customerId,
+        public readonly array $attachmentMeta = [],
     ) {}
 
     public function handle(): void
@@ -65,12 +66,16 @@ class ProcessAiReply implements ShouldQueue
             if ($customer !== null) {
                 $agentContext = app(AgentContextService::class)->buildContext($customer, $text);
 
+                $msgMeta = ['chat_id' => $this->chatId];
+                if (!empty($this->attachmentMeta)) {
+                    $msgMeta['attachment'] = $this->attachmentMeta;
+                }
                 app(ConversationMemoryService::class)->addMessage(
                     $customer,
                     $this->channel,
                     'user',
                     $text,
-                    ['chat_id' => $this->chatId]
+                    $msgMeta
                 );
             }
         } catch (\Throwable $e) {

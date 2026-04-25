@@ -11,7 +11,9 @@ use App\Support\ResilientHttp;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -77,6 +79,43 @@ class DashboardController extends Controller
     {
         return response()->json([
             'count' => Customer::query()->where('mode', 'waiting')->count(),
+        ]);
+    }
+
+    /**
+     * Stream a chat attachment stored on the SFTP disk.
+     * The `path` query parameter must start with `chat-attachments/`.
+     */
+    public function chatAttachment(Request $request): Response
+    {
+        $path = (string) $request->query('path', '');
+
+        // Prevent path traversal; only allow our own attachment directory.
+        if (!str_starts_with($path, 'chat-attachments/') || str_contains($path, '..')) {
+            abort(403);
+        }
+
+        if (!Storage::disk('sftp')->exists($path)) {
+            abort(404);
+        }
+
+        $contents = (string) Storage::disk('sftp')->get($path);
+
+        $ext     = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $mimeMap = [
+            'jpg'  => 'image/jpeg',  'jpeg' => 'image/jpeg',
+            'png'  => 'image/png',   'gif'  => 'image/gif',
+            'webp' => 'image/webp',  'mp4'  => 'video/mp4',
+            'webm' => 'video/webm',  'mp3'  => 'audio/mpeg',
+            'ogg'  => 'audio/ogg',   'wav'  => 'audio/wav',
+            'm4a'  => 'audio/mp4',   'pdf'  => 'application/pdf',
+        ];
+        $mime = $mimeMap[$ext] ?? 'application/octet-stream';
+
+        return response($contents, 200, [
+            'Content-Type'        => $mime,
+            'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
+            'Cache-Control'       => 'private, max-age=3600',
         ]);
     }
 

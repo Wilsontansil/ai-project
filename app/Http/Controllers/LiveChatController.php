@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProjectSetting;
+use App\Services\Agent\ChatAttachmentStorageService;
 use App\Support\LogSanitizer;
 use App\Support\MetricsCollector;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Services\Agent\AgentContextService;
 use App\Services\Agent\ConversationMemoryService;
@@ -63,17 +65,23 @@ class LiveChatController extends Controller
                 'reason' => 'invalid_payload',
             ]);
         } elseif ($text === null) {
-            // No message text (e.g. testing / webhook ping) — return default response
-            Log::info('LiveChat webhook has no message text, returning default response', ['chat_id' => $chatId]);
-            $response = response()->json([
-                'responses' => [
-                    [
-                        'type' => 'text',
-                        'delay' => 1000,
-                        'message' => 'Halo! Ada yang bisa saya bantu?',
+            // Check for an attachment before falling back to the default ping response.
+            [$attText, $attachmentMeta] = $this->extractAttachment($payload, $chatId ?? '');
+
+            if ($attText !== null) {
+                $text = $attText;
+            } else {
+                Log::info('LiveChat webhook has no message text, returning default response', ['chat_id' => $chatId]);
+                $response = response()->json([
+                    'responses' => [
+                        [
+                            'type'    => 'text',
+                            'delay'   => 1000,
+                            'message' => 'Halo! Ada yang bisa saya bantu?',
+                        ],
                     ],
-                ],
-            ]);
+                ]);
+            }
         }
 
         if ($chatId !== null && $text !== null) {
@@ -82,7 +90,7 @@ class LiveChatController extends Controller
             if ($combinedText === null) {
                 $response = response()->json(['status' => 'queued']);
             } else {
-                $reply = $this->generateAiReply($payload, $chatId, $combinedText);
+                $reply = $this->generateAiReply($payload, $chatId, $combinedText, $attachmentMeta ?? []);
                 $response = response()->json([
                     'responses' => [
                         [
@@ -98,7 +106,7 @@ class LiveChatController extends Controller
         return $response;
     }
 
-    private function generateAiReply(array $payload, string $chatId, string $combinedText): string
+    private function generateAiReply(array $payload, string $chatId, string $combinedText, array $attachmentMeta = []): string
     {
         $requestStart = MetricsCollector::startTimer();
         $customer = null;
@@ -121,12 +129,16 @@ class LiveChatController extends Controller
                 $customer->update(['tags' => $tags]);
             }
 
+            $msgMeta = ['chat_id' => $chatId];
+            if (!empty($attachmentMeta)) {
+                $msgMeta['attachment'] = $attachmentMeta;
+            }
             app(ConversationMemoryService::class)->addMessage(
                 $customer,
                 'livechat',
                 'user',
                 $combinedText,
-                ['chat_id' => $chatId]
+                $msgMeta
             );
         } catch (\Throwable $e) {
             Log::warning('LiveChat customer context persistence failed', [
@@ -228,5 +240,79 @@ class LiveChatController extends Controller
         $chatId = is_scalar($chatId) ? trim((string) $chatId) : '';
 
         return $chatId !== '' ? $chatId : null;
+    }
+
+    /**
+     * Detect a file attachment in the LiveChat webhook payload, download it,
+     * store it on SFTP, and return [syntheticText, attachmentMeta].
+     *
+     * @return array{0: string|null, 1: array}
+     */
+    private function extractAttachment(array $payload, string $chatId): array
+    {
+        $url = (string) (
+            data_get($payload, 'payload.attachment.url')
+            ?? data_get($payload, 'payload.file.url')
+            ?? data_get($payload, 'payload.files.0.url')
+            ?? data_get($payload, 'payload.url')
+            ?? data_get($payload, 'attachment.url')
+            ?? data_get($payload, 'file.url')
+            ?? data_get($payload, 'url')
+            ?? ''
+        );
+
+        if ($url === '') {
+            return [null, []];
+        }
+
+        $filename = (string) (
+            data_get($payload, 'payload.attachment.name')
+            ?? data_get($payload, 'payload.file.name')
+            ?? data_get($payload, 'payload.files.0.name')
+            ?? data_get($payload, 'attachment.name')
+            ?? data_get($payload, 'file.name')
+            ?? basename(parse_url($url, PHP_URL_PATH) ?: 'file')
+        );
+
+        $mimeType = (string) (
+            data_get($payload, 'payload.attachment.content_type')
+            ?? data_get($payload, 'payload.file.content_type')
+            ?? data_get($payload, 'attachment.content_type')
+            ?? data_get($payload, 'file.content_type')
+            ?? 'application/octet-stream'
+        );
+
+        $mediaType     = str_starts_with($mimeType, 'image/') ? 'image'
+                       : (str_starts_with($mimeType, 'video/') ? 'video'
+                       : (str_starts_with($mimeType, 'audio/') ? 'audio' : 'document'));
+        $syntheticText = $mediaType === 'document'
+            ? '[document: ' . $filename . ']'
+            : '[' . $mediaType . ']';
+
+        try {
+            $download = Http::timeout(20)->get($url);
+
+            if (!$download->successful()) {
+                Log::warning('LiveChat attachment download failed', ['url' => $url, 'status' => $download->status()]);
+                return [$syntheticText, []];
+            }
+
+            $meta = app(ChatAttachmentStorageService::class)->store(
+                'livechat',
+                $chatId,
+                $filename,
+                $mimeType,
+                $download->body()
+            );
+
+            return [$syntheticText, $meta];
+        } catch (\Throwable $e) {
+            Log::error('LiveChat attachment download/store failed', [
+                'chat_id' => $chatId,
+                'error'   => $e->getMessage(),
+            ]);
+
+            return [$syntheticText, []];
+        }
     }
 }

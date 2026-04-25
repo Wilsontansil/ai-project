@@ -307,7 +307,6 @@ CARA MERESPONS:
 
 4. ARAHKAN KE REGISTRASI
    - Berikan panduan daftar
-   - Atau arahkan ke CS untuk bantuan pendaftaran
 
 5. GUNAKAN BAHASA:
    - Ramah
@@ -325,7 +324,7 @@ A. USER TANYA INFORMASI SITUS
 
 B. USER TANYA SYARAT DAFTAR
 → Jelaskan data yang dibutuhkan
-→ Tawarkan bantuan daftar / arahkan ke CS
+→ Tawarkan bantuan daftar
 
 ---
 

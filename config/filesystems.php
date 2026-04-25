@@ -60,6 +60,24 @@ return [
             'report' => false,
         ],
 
+        'ftp' => [
+            'driver' => 'ftp',
+            'host' => env('FTP_HOST', ''),
+            'username' => env('FTP_USERNAME', ''),
+            'password' => env('FTP_PASSWORD', ''),
+            'root' => env('FTP_LOCAL_PATH',''),
+            'visibility' => 'public'
+        ],
+
+        'sftp' => [
+            'driver' => 'sftp',
+            'host' => env('FTP_HOST', ''),
+            'username' => env('FTP_USERNAME', ''),
+            'password' => env('FTP_PASSWORD', ''),
+            'root' => env('FTP_LOCAL_PATH',''),
+            'visibility' => 'public'
+        ],
+
     ],
 
     /*

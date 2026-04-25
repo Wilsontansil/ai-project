@@ -11,9 +11,7 @@ use App\Support\ResilientHttp;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -83,10 +81,10 @@ class DashboardController extends Controller
     }
 
     /**
-     * Stream a chat attachment stored on the SFTP disk.
+     * Redirect to the public HTTP URL of a chat attachment stored on the SFTP disk.
      * The `path` query parameter must start with `chat-attachments/`.
      */
-    public function chatAttachment(Request $request): Response
+    public function chatAttachment(Request $request): RedirectResponse
     {
         $path = (string) $request->query('path', '');
 
@@ -95,28 +93,15 @@ class DashboardController extends Controller
             abort(403);
         }
 
-        if (!Storage::disk('sftp')->exists($path)) {
-            abort(404);
+        // Build the public HTTP URL from the disk's url config key.
+        // e.g. https://devasset.pilartestengine.com/assets/aiproject/chat-attachments/...
+        $baseUrl = rtrim((string) config('filesystems.disks.sftp.url', ''), '/');
+
+        if ($baseUrl === '') {
+            abort(500, 'Asset HTTP base URL is not configured.');
         }
 
-        $contents = (string) Storage::disk('sftp')->get($path);
-
-        $ext     = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-        $mimeMap = [
-            'jpg'  => 'image/jpeg',  'jpeg' => 'image/jpeg',
-            'png'  => 'image/png',   'gif'  => 'image/gif',
-            'webp' => 'image/webp',  'mp4'  => 'video/mp4',
-            'webm' => 'video/webm',  'mp3'  => 'audio/mpeg',
-            'ogg'  => 'audio/ogg',   'wav'  => 'audio/wav',
-            'm4a'  => 'audio/mp4',   'pdf'  => 'application/pdf',
-        ];
-        $mime = $mimeMap[$ext] ?? 'application/octet-stream';
-
-        return response($contents, 200, [
-            'Content-Type'        => $mime,
-            'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
-            'Cache-Control'       => 'private, max-age=3600',
-        ]);
+        return redirect($baseUrl . '/' . ltrim($path, '/'));
     }
 
     public function takeover(Customer $customer): RedirectResponse

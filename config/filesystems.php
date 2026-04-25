@@ -70,12 +70,15 @@ return [
         ],
 
         'sftp' => [
-            'driver' => 'sftp',
-            'host' => env('FTP_HOST', ''),
-            'username' => env('FTP_USERNAME', ''),
-            'password' => env('FTP_PASSWORD', ''),
-            'root' => env('FTP_LOCAL_PATH',''),
-            'visibility' => 'public'
+            'driver'     => 'sftp',
+            'host'       => env('FTP_HOST', ''),
+            'username'   => env('FTP_USERNAME', ''),
+            'password'   => env('FTP_PASSWORD', ''),
+            'root'       => env('FTP_LOCAL_PATH', ''),
+            'visibility' => 'public',
+            // Public HTTP base URL for this disk root (used by chatAttachment redirect).
+            // FTP_HTTP_URL is the parent directory; the last segment of FTP_LOCAL_PATH is appended.
+            'url'        => rtrim(env('FTP_HTTP_URL', ''), '/') . '/' . basename(rtrim(env('FTP_LOCAL_PATH', ''), '/')),
         ],
 
     ],

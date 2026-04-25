@@ -131,6 +131,8 @@ return [
             'temp' => 'Temp',
             'message_await_seconds' => 'Message Await (seconds)',
             'message_await_help' => 'Delay before AI responds to a user message (0-15 seconds).',
+            'timezone' => 'Timezone',
+            'timezone_help' => 'Timezone used by AI for {server_time} and {server_timezone}.',
             'rules' => 'Rules',
             'settings' => 'Settings',
             'clone' => 'Clone',

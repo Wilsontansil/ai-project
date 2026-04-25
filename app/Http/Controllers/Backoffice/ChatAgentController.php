@@ -22,7 +22,9 @@ class ChatAgentController extends Controller
 
     public function create(): View
     {
-        return view('backoffice.chat-agents.create');
+        return view('backoffice.chat-agents.create', [
+            'timezoneOptions' => $this->timezoneOptions(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -35,6 +37,7 @@ class ChatAgentController extends Controller
             'max_tokens' => ['required', 'integer', 'min:50', 'max:4096'],
             'temperature' => ['required', 'numeric', 'min:0', 'max:2'],
             'message_await_seconds' => ['required', 'integer', 'min:0', 'max:15'],
+            'timezone' => ['required', 'string', 'timezone'],
             'is_enabled' => ['nullable'],
             'is_default' => ['nullable'],
             'escalation_condition' => ['nullable', 'string', 'max:3000'],
@@ -93,6 +96,7 @@ class ChatAgentController extends Controller
             'selectedKnowledge' => $selectedKnowledge,
             'knowledgeMode' => $knowledgeMode,
             'activeTab' => $activeTab,
+            'timezoneOptions' => $this->timezoneOptions(),
         ]);
     }
 
@@ -106,6 +110,7 @@ class ChatAgentController extends Controller
             'max_tokens' => ['required', 'integer', 'min:50', 'max:4096'],
             'temperature' => ['required', 'numeric', 'min:0', 'max:2'],
             'message_await_seconds' => ['required', 'integer', 'min:0', 'max:15'],
+            'timezone' => ['required', 'string', 'timezone'],
             'is_enabled' => ['nullable'],
             'is_default' => ['nullable'],
             'escalation_condition' => ['nullable', 'string', 'max:3000'],
@@ -240,5 +245,13 @@ class ChatAgentController extends Controller
         if ((int) $knowledgeBase->chat_agent_id !== (int) $chatAgent->id) {
             abort(404);
         }
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function timezoneOptions(): array
+    {
+        return \DateTimeZone::listIdentifiers();
     }
 }

@@ -131,6 +131,8 @@ return [
             'temp' => 'Suhu',
             'message_await_seconds' => 'Message Await (detik)',
             'message_await_help' => 'Delay sebelum AI merespons pesan user (0-15 detik).',
+            'timezone' => 'Zona Waktu',
+            'timezone_help' => 'Zona waktu yang dipakai AI untuk {server_time} dan {server_timezone}.',
             'rules' => 'Rules',
             'settings' => 'Pengaturan',
             'clone' => 'Duplikat',

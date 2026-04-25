@@ -16,6 +16,7 @@ class ChatAgent extends Model
         'max_tokens',
         'temperature',
         'message_await_seconds',
+        'timezone',
         'is_enabled',
         'is_default',
         'escalation_condition',

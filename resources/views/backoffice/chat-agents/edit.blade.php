@@ -150,6 +150,20 @@
                         <p style="margin-top:0.25rem;font-size:0.7rem;color:#64748b">
                             {{ __('backoffice.pages.chat_agents.message_await_help') }}</p>
                     </div>
+                    <div>
+                        <label for="timezone" class="bo-label">{{ __('backoffice.pages.chat_agents.timezone') }}</label>
+                        <select id="timezone" name="timezone">
+                            @php($selectedTimezone = old('timezone', $agent->timezone ?? config('app.timezone', 'UTC')))
+                            @foreach ($timezoneOptions as $timezone)
+                                <option value="{{ $timezone }}"
+                                    {{ $selectedTimezone === $timezone ? 'selected' : '' }}>
+                                    {{ $timezone }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <p style="margin-top:0.25rem;font-size:0.7rem;color:#64748b">
+                            {{ __('backoffice.pages.chat_agents.timezone_help') }}</p>
+                    </div>
                 </div>
 
                 {{-- Agent Transfer Conditions --}}

@@ -21,8 +21,19 @@ class PromptBuilder
     public function buildSystemPrompt(?ChatAgent $chatAgent): string
     {
         $botName = $chatAgent->name ?? $this->getBotName();
-        $serverTime = now()->format('Y-m-d H:i:s (l)');
-        $serverTimezone = now()->getTimezone()->getName();
+        $now = now();
+        $timezone = trim((string) ($chatAgent?->timezone ?? ''));
+
+        if ($timezone !== '') {
+            try {
+                $now = $now->setTimezone($timezone);
+            } catch (\Throwable) {
+                // Keep app default timezone if stored timezone is invalid.
+            }
+        }
+
+        $serverTime = $now->format('Y-m-d H:i:s (l)');
+        $serverTimezone = $now->getTimezone()->getName();
 
         if ($chatAgent && !empty($chatAgent->system_prompt)) {
             $basePrompt = str_replace(
@@ -31,12 +42,10 @@ class PromptBuilder
                 $chatAgent->system_prompt
             );
         } else {
-            $basePrompt = "Kamu adalah {$botName}, asisten customer support yang ramah untuk platform gaming.
-
-        WAKTU SERVER SAAT INI: {$serverTime} ({$serverTimezone})
-        Gunakan ini sebagai referensi waktu resmi untuk semua perhitungan berbasis waktu (misal: hari ini, kemarin, minggu lalu Senin-Minggu, bulan ini, dll.).
-        ";
+            $basePrompt = "Kamu adalah {$botName}, asisten customer support yang ramah untuk platform gaming.";
         }
+
+        $basePrompt .= "\n\n" . $this->getTimeReferencePrompt($serverTime, $serverTimezone);
 
         $agentRulesPrompt = $this->getAgentRulesPrompt($chatAgent);
         if ($agentRulesPrompt !== '') {
@@ -62,6 +71,11 @@ class PromptBuilder
         // via $toolContext['tool_rules'], where they actually matter.
 
         return $basePrompt;
+    }
+
+    private function getTimeReferencePrompt(string $serverTime, string $serverTimezone): string
+    {
+        return "WAKTU ACUAN SAAT INI: {$serverTime} ({$serverTimezone})\nGunakan ini sebagai referensi waktu resmi untuk semua perhitungan berbasis waktu (misal: hari ini, kemarin, minggu lalu Senin-Minggu, bulan ini, dll.).";
     }
 
     /**

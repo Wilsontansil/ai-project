@@ -64,7 +64,6 @@ return [
     'support' => [
         'telegram_tag' => env('SUPPORT_TELEGRAM_TAG'),
         'whatsapp_phone' => env('SUPPORT_WHATSAPP_PHONE'),
-        'livechat_url' => env('SUPPORT_LIVECHAT_URL'),
     ],
 
 ];

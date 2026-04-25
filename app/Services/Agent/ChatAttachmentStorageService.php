@@ -33,7 +33,11 @@ class ChatAttachmentStorageService
 
         $path = "chat-attachments/{$platform}/{$safeId}/{$year}/{$month}/{$uuid}-{$safeName}.{$ext}";
 
-        Storage::disk('sftp')->put($path, $contents);
+        $ok = Storage::disk('sftp')->put($path, $contents);
+
+        if ($ok === false) {
+            throw new \RuntimeException("SFTP upload failed for path: {$path}");
+        }
 
         return [
             'disk'          => 'sftp',

@@ -54,6 +54,22 @@ class WhatsAppController extends Controller
 
         $attachmentMeta = [];
         $mediaType = $this->resolveMediaType($payload);
+        $hasMediaSignal = $this->hasMediaSignal($payload);
+
+        if ($mediaType === null && $hasMediaSignal) {
+            $mediaType = $this->inferMediaTypeFromPayload($payload);
+        }
+
+        if ($hasMediaSignal) {
+            Log::info('WAHA media diagnostics', [
+                'event' => $event,
+                'chat_id_present' => !empty($chatId),
+                'media_type' => $mediaType,
+                'mimetype' => (string) ($payload['mimetype'] ?? data_get($payload, 'message.mimetype') ?? ''),
+                'has_media_url' => (string) ($payload['mediaUrl'] ?? $payload['media_url'] ?? data_get($payload, 'message.mediaUrl') ?? data_get($payload, 'message.url') ?? '') !== '',
+                'has_data_url_body' => str_starts_with((string) ($payload['body'] ?? data_get($payload, 'message.body') ?? ''), 'data:'),
+            ]);
+        }
 
         // Process media even when text/caption is present, so attachment is still stored.
         if ($mediaType !== null) {
@@ -62,6 +78,21 @@ class WhatsAppController extends Controller
             if ($text === null || trim((string) $text) === '') {
                 $text = $mediaSyntheticText;
             }
+
+            if ($attachmentMeta === []) {
+                Log::warning('WAHA media detected but attachment not stored', [
+                    'chat_id' => (string) ($chatId ?? ''),
+                    'media_type' => $mediaType,
+                    'mimetype' => (string) ($payload['mimetype'] ?? data_get($payload, 'message.mimetype') ?? ''),
+                ]);
+            }
+        } elseif ($hasMediaSignal) {
+            Log::warning('WAHA media signal present but media type unresolved', [
+                'chat_id' => (string) ($chatId ?? ''),
+                'type' => (string) ($payload['type'] ?? data_get($payload, 'message.type') ?? ''),
+                'media_type' => (string) ($payload['mediaType'] ?? data_get($payload, 'message.mediaType') ?? ''),
+                'mimetype' => (string) ($payload['mimetype'] ?? data_get($payload, 'message.mimetype') ?? ''),
+            ]);
         }
 
         if (!$text || !$chatId) {
@@ -185,6 +216,12 @@ class WhatsAppController extends Controller
             }
 
             if ($contents === null || $chatId === '') {
+                Log::warning('WAHA media skipped: empty content or chat id', [
+                    'chat_id' => $chatId,
+                    'media_type' => $mediaType,
+                    'has_media_url' => $mediaUrl !== '',
+                    'has_data_url_body' => str_starts_with((string) ($payload['body'] ?? data_get($payload, 'message.body') ?? ''), 'data:'),
+                ]);
                 return [$syntheticText, []];
             }
 
@@ -254,6 +291,97 @@ class WhatsAppController extends Controller
 
         if (in_array($candidate, self::MEDIA_TYPES, true)) {
             return $candidate;
+        }
+
+        return null;
+    }
+
+    private function hasMediaSignal(array $payload): bool
+    {
+        $mediaUrl = (string) (
+            $payload['mediaUrl']
+            ?? $payload['media_url']
+            ?? $payload['url']
+            ?? data_get($payload, 'message.mediaUrl')
+            ?? data_get($payload, 'message.media_url')
+            ?? data_get($payload, 'message.url')
+            ?? data_get($payload, 'message.downloadUrl')
+            ?? ''
+        );
+
+        $mimeType = (string) (
+            $payload['mimetype']
+            ?? $payload['mime_type']
+            ?? data_get($payload, 'message.mimetype')
+            ?? data_get($payload, 'message.mime_type')
+            ?? ''
+        );
+
+        $body = (string) ($payload['body'] ?? data_get($payload, 'message.body') ?? '');
+
+        return $mediaUrl !== '' || $mimeType !== '' || str_starts_with($body, 'data:');
+    }
+
+    private function inferMediaTypeFromPayload(array $payload): ?string
+    {
+        $mimeType = strtolower((string) (
+            $payload['mimetype']
+            ?? $payload['mime_type']
+            ?? data_get($payload, 'message.mimetype')
+            ?? data_get($payload, 'message.mime_type')
+            ?? ''
+        ));
+
+        if (str_starts_with($mimeType, 'image/')) {
+            return 'image';
+        }
+        if (str_starts_with($mimeType, 'video/')) {
+            return 'video';
+        }
+        if (str_starts_with($mimeType, 'audio/')) {
+            return 'audio';
+        }
+        if ($mimeType !== '') {
+            return 'document';
+        }
+
+        $mediaUrl = strtolower((string) (
+            $payload['mediaUrl']
+            ?? $payload['media_url']
+            ?? $payload['url']
+            ?? data_get($payload, 'message.mediaUrl')
+            ?? data_get($payload, 'message.media_url')
+            ?? data_get($payload, 'message.url')
+            ?? data_get($payload, 'message.downloadUrl')
+            ?? ''
+        ));
+
+        if ($mediaUrl !== '') {
+            if (str_contains($mediaUrl, '.jpg') || str_contains($mediaUrl, '.jpeg') || str_contains($mediaUrl, '.png') || str_contains($mediaUrl, '.webp') || str_contains($mediaUrl, '/image/')) {
+                return 'image';
+            }
+            if (str_contains($mediaUrl, '.mp4') || str_contains($mediaUrl, '/video/')) {
+                return 'video';
+            }
+            if (str_contains($mediaUrl, '.mp3') || str_contains($mediaUrl, '.ogg') || str_contains($mediaUrl, '/audio/')) {
+                return 'audio';
+            }
+
+            return 'document';
+        }
+
+        $body = (string) ($payload['body'] ?? data_get($payload, 'message.body') ?? '');
+        if (str_starts_with($body, 'data:image/')) {
+            return 'image';
+        }
+        if (str_starts_with($body, 'data:video/')) {
+            return 'video';
+        }
+        if (str_starts_with($body, 'data:audio/')) {
+            return 'audio';
+        }
+        if (str_starts_with($body, 'data:')) {
+            return 'document';
         }
 
         return null;

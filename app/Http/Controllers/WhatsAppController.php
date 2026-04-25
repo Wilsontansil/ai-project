@@ -140,20 +140,30 @@ class WhatsAppController extends Controller
         $mimeType  = (string) (
             $payload['mimetype']
             ?? $payload['mime_type']
+            ?? data_get($payload, 'media.mimetype')
+            ?? data_get($payload, 'media.mime_type')
             ?? data_get($payload, 'message.mimetype')
             ?? data_get($payload, 'message.mime_type')
+            ?? data_get($payload, '_data.mimetype')
+            ?? data_get($payload, '_data.type')
             ?? 'application/octet-stream'
         );
         $filename  = (string) (
             $payload['filename']
             ?? $payload['name']
+            ?? data_get($payload, 'media.filename')
+            ?? data_get($payload, 'media.fileName')
             ?? data_get($payload, 'message.filename')
             ?? data_get($payload, 'message.fileName')
+            ?? data_get($payload, '_data.filename')
+            ?? data_get($payload, '_data.fileName')
             ?? ''
         );
         $caption   = trim((string) (
             $payload['caption']
+            ?? data_get($payload, 'media.caption')
             ?? data_get($payload, 'message.caption')
+            ?? data_get($payload, '_data.caption')
             ?? ''
         ));
 
@@ -186,10 +196,14 @@ class WhatsAppController extends Controller
                 $payload['mediaUrl']
                 ?? $payload['media_url']
                 ?? $payload['url']
+                ?? data_get($payload, 'media.url')
+                ?? data_get($payload, 'media.mediaUrl')
                 ?? data_get($payload, 'message.mediaUrl')
                 ?? data_get($payload, 'message.media_url')
                 ?? data_get($payload, 'message.url')
                 ?? data_get($payload, 'message.downloadUrl')
+                ?? data_get($payload, '_data.deprecatedMms3Url')
+                ?? data_get($payload, '_data.directPath')
                 ?? ''
             );
             $apiKey   = (string) ProjectSetting::getValue('whatsapp_api_key', config('services.whatsapp.api_key', ''));
@@ -206,7 +220,13 @@ class WhatsAppController extends Controller
 
             // Fallback: body might be a data-URL (data:image/jpeg;base64,...).
             if ($contents === null) {
-                $body = (string) ($payload['body'] ?? data_get($payload, 'message.body') ?? '');
+                $body = (string) (
+                    $payload['body']
+                    ?? data_get($payload, 'media.data')
+                    ?? data_get($payload, 'message.body')
+                    ?? data_get($payload, '_data.body')
+                    ?? ''
+                );
                 if (str_starts_with($body, 'data:')) {
                     $commaPos = strpos($body, ',');
                     if ($commaPos !== false) {
@@ -214,6 +234,11 @@ class WhatsAppController extends Controller
                         if ($decoded !== false) {
                             $contents = $decoded;
                         }
+                    }
+                } else {
+                    $decoded = base64_decode($body, true);
+                    if ($decoded !== false && $decoded !== '') {
+                        $contents = $decoded;
                     }
                 }
             }
@@ -287,6 +312,7 @@ class WhatsAppController extends Controller
         $candidate = strtolower((string) (
             $payload['type']
             ?? $payload['mediaType']
+            ?? data_get($payload, 'media.type')
             ?? data_get($payload, 'message.type')
             ?? data_get($payload, 'message.mediaType')
             ?? ''
@@ -294,6 +320,10 @@ class WhatsAppController extends Controller
 
         if (in_array($candidate, self::MEDIA_TYPES, true)) {
             return $candidate;
+        }
+
+        if ((bool) ($payload['hasMedia'] ?? false)) {
+            return $this->inferMediaTypeFromPayload($payload) ?? 'document';
         }
 
         return null;
@@ -328,24 +358,43 @@ class WhatsAppController extends Controller
             $payload['mediaUrl']
             ?? $payload['media_url']
             ?? $payload['url']
+            ?? data_get($payload, 'media.url')
+            ?? data_get($payload, 'media.mediaUrl')
             ?? data_get($payload, 'message.mediaUrl')
             ?? data_get($payload, 'message.media_url')
             ?? data_get($payload, 'message.url')
             ?? data_get($payload, 'message.downloadUrl')
+            ?? data_get($payload, '_data.deprecatedMms3Url')
+            ?? data_get($payload, '_data.directPath')
             ?? ''
         );
 
         $mimeType = (string) (
             $payload['mimetype']
             ?? $payload['mime_type']
+            ?? data_get($payload, 'media.mimetype')
+            ?? data_get($payload, 'media.mime_type')
             ?? data_get($payload, 'message.mimetype')
             ?? data_get($payload, 'message.mime_type')
+            ?? data_get($payload, '_data.mimetype')
+            ?? data_get($payload, '_data.type')
             ?? ''
         );
 
-        $body = (string) ($payload['body'] ?? data_get($payload, 'message.body') ?? '');
+        $body = (string) (
+            $payload['body']
+            ?? data_get($payload, 'media.data')
+            ?? data_get($payload, 'message.body')
+            ?? data_get($payload, '_data.body')
+            ?? ''
+        );
 
-        return $mediaUrl !== '' || $mimeType !== '' || str_starts_with($body, 'data:');
+        return (bool) ($payload['hasMedia'] ?? false)
+            || !empty($payload['media'])
+            || $mediaUrl !== ''
+            || $mimeType !== ''
+            || str_starts_with($body, 'data:')
+            || (base64_decode($body, true) !== false && $body !== '');
     }
 
     private function inferMediaTypeFromPayload(array $payload): ?string
@@ -353,8 +402,12 @@ class WhatsAppController extends Controller
         $mimeType = strtolower((string) (
             $payload['mimetype']
             ?? $payload['mime_type']
+            ?? data_get($payload, 'media.mimetype')
+            ?? data_get($payload, 'media.mime_type')
             ?? data_get($payload, 'message.mimetype')
             ?? data_get($payload, 'message.mime_type')
+            ?? data_get($payload, '_data.mimetype')
+            ?? data_get($payload, '_data.type')
             ?? ''
         ));
 
@@ -375,10 +428,14 @@ class WhatsAppController extends Controller
             $payload['mediaUrl']
             ?? $payload['media_url']
             ?? $payload['url']
+            ?? data_get($payload, 'media.url')
+            ?? data_get($payload, 'media.mediaUrl')
             ?? data_get($payload, 'message.mediaUrl')
             ?? data_get($payload, 'message.media_url')
             ?? data_get($payload, 'message.url')
             ?? data_get($payload, 'message.downloadUrl')
+            ?? data_get($payload, '_data.deprecatedMms3Url')
+            ?? data_get($payload, '_data.directPath')
             ?? ''
         ));
 

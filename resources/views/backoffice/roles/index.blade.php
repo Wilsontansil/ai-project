@@ -43,7 +43,6 @@
                         <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
                             <tr>
                                 <th class="py-2 pl-4 pr-3 font-medium">{{ __('backoffice.pages.roles.name') }}</th>
-                                <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.roles.permissions') }}</th>
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.roles.users') }}</th>
                                 <th class="px-3 py-2 font-medium text-right">{{ __('backoffice.common.actions') }}</th>
                             </tr>
@@ -53,14 +52,6 @@
                                 <tr class="transition hover:bg-white/5">
                                     <td class="py-2 pl-4 pr-3">
                                         <span class="font-semibold text-white">{{ $role->name }}</span>
-                                    </td>
-                                    <td class="px-3 py-2">
-                                        @if ($role->permissions->isEmpty())
-                                            <span class="text-slate-500">—</span>
-                                        @else
-                                            <span
-                                                class="text-slate-300">{{ $role->permissions->pluck('name')->implode(', ') }}</span>
-                                        @endif
                                     </td>
                                     <td class="px-3 py-2 text-slate-300">{{ $role->users_count }}</td>
                                     <td class="px-3 py-2 text-right">

@@ -32,44 +32,44 @@
                 @csrf
                 @method('PUT')
 
-                {{-- Role Name --}}
-                <div class="max-w-lg">
+                <div class="rounded-xl border border-white/10 bg-slate-950/30 p-4">
                     <label for="name" class="mb-1 block text-xs font-medium text-slate-300">
                         {{ __('backoffice.pages.roles.name') }} <span class="text-rose-400">*</span>
                     </label>
                     <input type="text" id="name" name="name" value="{{ old('name', $role->name) }}" required
                         @if ($role->name === 'admin') readonly @endif
-                        class="block w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 disabled:opacity-60 read-only:opacity-60">
+                        class="block w-full max-w-2xl rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 disabled:opacity-60 read-only:opacity-60">
                     @if ($role->name === 'admin')
                         <p class="mt-1 text-[11px] text-amber-400">{{ __('backoffice.pages.roles.admin_name_locked') }}</p>
                     @endif
                 </div>
 
-                {{-- Permissions --}}
-                <div>
-                    <h2 class="mb-2 text-sm font-semibold text-slate-200">
+                <div class="rounded-xl border border-white/10 bg-slate-950/30 p-4">
+                    <h2 class="mb-1 text-sm font-semibold text-slate-200">
                         {{ __('backoffice.pages.roles.assign_permissions') }}</h2>
                     <p class="mb-3 text-xs text-slate-400">{{ __('backoffice.pages.roles.assign_permissions_help') }}</p>
 
                     @if ($allPermissions->isEmpty())
                         <p class="text-xs text-slate-500">{{ __('backoffice.pages.roles.no_permissions') }}</p>
                     @else
-                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                            @foreach ($allPermissions as $permission)
-                                <label
-                                    class="flex cursor-pointer items-center gap-2.5 rounded-lg border border-white/10 px-3 py-2.5 transition hover:bg-white/5
-                                    {{ in_array($permission->name, $rolePerms) ? 'border-cyan-500/40 bg-cyan-500/10' : '' }}">
-                                    <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
-                                        {{ in_array($permission->name, $rolePerms) ? 'checked' : '' }}
-                                        class="h-4 w-4 rounded border-white/20 bg-white/5 text-cyan-400 focus:ring-cyan-400">
-                                    <span class="text-xs text-slate-200">{{ $permission->name }}</span>
-                                </label>
-                            @endforeach
+                        <div class="max-h-[50vh] overflow-y-auto pr-1">
+                            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                @foreach ($allPermissions as $permission)
+                                    <label
+                                        class="flex cursor-pointer items-center gap-2.5 rounded-lg border border-white/10 px-3 py-2.5 transition hover:bg-white/5
+                                        {{ in_array($permission->name, $rolePerms) ? 'border-cyan-500/40 bg-cyan-500/10' : '' }}">
+                                        <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
+                                            {{ in_array($permission->name, $rolePerms) ? 'checked' : '' }}
+                                            class="h-4 w-4 rounded border-white/20 bg-white/5 text-cyan-400 focus:ring-cyan-400">
+                                        <span class="text-xs text-slate-200">{{ $permission->name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
                         </div>
                     @endif
                 </div>
 
-                <div class="flex items-center gap-3 pt-1">
+                <div class="flex flex-wrap items-center gap-3 pt-1">
                     <button type="submit"
                         class="rounded-lg bg-cyan-400 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
                         {{ __('backoffice.pages.roles.save_changes') }}

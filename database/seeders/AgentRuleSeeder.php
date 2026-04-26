@@ -64,7 +64,8 @@ Tidak perlu lagi menanyak informasi lanjut jika user / customer menanyakan hal d
 - Nama Bank / Bank (bank)
 - Nomor Rekening (norek)
 
-Data tersebut TIDAK BISA DIGANTI setelah pendaftaran. TOLAK permintaan perubahan secara tegas dan sopan. Arahkan customer untuk mendaftar akun baru jika ingin menggunakan rekening berbeda. Jangan menawarkan alternatif lain.',
+Data tersebut TIDAK BISA DIGANTI setelah pendaftaran. TOLAK permintaan perubahan secara tegas dan sopan.',
+// Arahkan customer untuk mendaftar akun baru jika ingin menggunakan rekening berbeda. Jangan menawarkan alternatif lain.',
                 'type' => 'forbidden',
                 'category' => 'security',
                 'level' => 'danger',

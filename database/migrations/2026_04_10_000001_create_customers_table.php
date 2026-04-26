@@ -22,11 +22,14 @@ return new class extends Migration
             $table->unsignedInteger('total_messages')->default(0);
             $table->json('tags')->nullable();
             $table->string('mode', 20)->default('bot');
+            $table->foreignId('assigned_user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('assigned_at')->nullable();
             $table->timestamps();
 
             $table->unique(['platform', 'platform_user_id']);
             $table->index('phone_number');
             $table->index('last_seen_at');
+            $table->index('assigned_user_id');
         });
     }
 

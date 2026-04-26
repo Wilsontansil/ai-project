@@ -6,6 +6,8 @@
 @php($boActive = 'escalation')
 
 @section('content')
+    @php($currentUserId = auth()->id())
+
     <div class="flex items-center justify-between rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
         <div>
             <h1 class="text-lg font-semibold sm:text-2xl">{{ __('backoffice.pages.escalation.title') }}</h1>
@@ -49,12 +51,21 @@
                             <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.escalation.platform') }}</th>
                             <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.escalation.phone') }}</th>
                             <th class="px-3 py-2 font-medium text-center">{{ __('backoffice.pages.escalation.mode') }}</th>
+                            <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.customer_chat.assigned_to') }}</th>
                             <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.escalation.last_update') }}</th>
                             <th class="px-3 py-2 font-medium"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/5">
                         @forelse ($customers as $customer)
+                            @php
+                                $assignedUserName =
+                                    $customer->assignedUser?->name ?: $customer->assignedUser?->username;
+                                $isOwnedByCurrentUser =
+                                    $customer->assigned_user_id !== null &&
+                                    (int) $customer->assigned_user_id === (int) $currentUserId;
+                                $isAssignedToOther = $customer->assigned_user_id !== null && !$isOwnedByCurrentUser;
+                            @endphp
                             <tr class="hover:bg-white/5">
                                 <td class="px-3 py-2 text-white">{{ $customer->name ?: '-' }}</td>
                                 <td class="px-3 py-2 text-slate-300">{{ ucfirst($customer->platform) }}</td>
@@ -68,6 +79,14 @@
                                             style="background:rgba(34,211,238,0.2);color:#22d3ee;">{{ __('backoffice.pages.escalation.human') }}</span>
                                     @endif
                                 </td>
+                                <td class="px-3 py-2 text-slate-300">
+                                    @if ($assignedUserName)
+                                        <span
+                                            class="inline-flex rounded-full bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-300">{{ $assignedUserName }}</span>
+                                    @else
+                                        <span class="text-slate-500">-</span>
+                                    @endif
+                                </td>
                                 <td class="px-3 py-2 text-slate-400">{{ $customer->updated_at?->diffForHumans() ?: '-' }}
                                 </td>
                                 <td class="px-3 py-2">
@@ -78,9 +97,12 @@
                                                 @csrf
                                                 <button type="submit"
                                                     class="rounded px-2 py-1 text-[10px] font-semibold transition"
+                                                    @if ($isAssignedToOther) disabled @endif
                                                     style="background:rgba(34,211,238,0.2);color:#22d3ee;"
                                                     onmouseover="this.style.background='rgba(34,211,238,0.3)'"
-                                                    onmouseout="this.style.background='rgba(34,211,238,0.2)'">{{ __('backoffice.pages.escalation.takeover') }}</button>
+                                                    onmouseout="this.style.background='rgba(34,211,238,0.2)'"
+                                                    onfocus="this.style.background='rgba(34,211,238,0.3)'"
+                                                    onblur="this.style.background='rgba(34,211,238,0.2)'">{{ __('backoffice.pages.escalation.takeover') }}</button>
                                             </form>
                                         @endif
                                         <form method="POST"
@@ -88,21 +110,26 @@
                                             @csrf
                                             <button type="submit"
                                                 class="rounded px-2 py-1 text-[10px] font-semibold transition"
+                                                @if ($isAssignedToOther) disabled @endif
                                                 style="background:rgba(52,211,153,0.2);color:#34d399;"
                                                 onmouseover="this.style.background='rgba(52,211,153,0.3)'"
-                                                onmouseout="this.style.background='rgba(52,211,153,0.2)'">{{ __('backoffice.pages.escalation.remove_from_queue') }}</button>
+                                                onmouseout="this.style.background='rgba(52,211,153,0.2)'"
+                                                onfocus="this.style.background='rgba(52,211,153,0.3)'"
+                                                onblur="this.style.background='rgba(52,211,153,0.2)'">{{ __('backoffice.pages.escalation.remove_from_queue') }}</button>
                                         </form>
                                         <a href="{{ route('backoffice.customer.chat', $customer->id) }}"
                                             class="rounded px-2 py-1 text-[10px] font-semibold transition"
                                             style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);"
                                             onmouseover="this.style.background='rgba(255,255,255,0.15)'"
-                                            onmouseout="this.style.background='rgba(255,255,255,0.1)'">{{ __('backoffice.pages.escalation.chat') }}</a>
+                                            onmouseout="this.style.background='rgba(255,255,255,0.1)'"
+                                            onfocus="this.style.background='rgba(255,255,255,0.15)'"
+                                            onblur="this.style.background='rgba(255,255,255,0.1)'">{{ __('backoffice.pages.escalation.chat') }}</a>
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-3 py-6 text-center text-slate-500">
+                                <td colspan="7" class="px-3 py-6 text-center text-slate-500">
                                     {{ __('backoffice.pages.escalation.empty') }}</td>
                             </tr>
                         @endforelse

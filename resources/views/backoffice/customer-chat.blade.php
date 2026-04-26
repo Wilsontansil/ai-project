@@ -10,6 +10,14 @@
 @section('page-title', __('backoffice.pages.customer_chat.page_title'))
 
 @section('content')
+    @php
+        $currentUserId = auth()->id();
+        $assignedUserName = $customer->assignedUser?->name ?: $customer->assignedUser?->username;
+        $isOwnedByCurrentUser =
+            $customer->assigned_user_id !== null && (int) $customer->assigned_user_id === (int) $currentUserId;
+        $isAssignedToOther = $customer->assigned_user_id !== null && !$isOwnedByCurrentUser;
+    @endphp
+
     <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 sm:p-6">
         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
@@ -31,6 +39,14 @@
                         <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold"
                             style="background:rgba(52,211,153,0.2);color:#34d399;">{{ __('backoffice.pages.dashboard.mode_bot') }}</span>
                     @endif
+
+                    @if ($assignedUserName)
+                        <span class="text-slate-400">•</span>
+                        <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                            style="background:rgba(56,189,248,0.15);color:#7dd3fc;">
+                            {{ __('backoffice.pages.customer_chat.assigned_to') }}: {{ $assignedUserName }}
+                        </span>
+                    @endif
                 </p>
             </div>
             <div style="display:flex;align-items:center;gap:0.5rem;">
@@ -40,23 +56,31 @@
                         <button type="submit" class="rounded-2xl px-4 py-2 text-sm font-semibold transition"
                             style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);"
                             onmouseover="this.style.background='rgba(251,191,36,0.25)'"
-                            onmouseout="this.style.background='rgba(251,191,36,0.15)'">{{ __('backoffice.pages.escalation.takeover') }}</button>
+                            onmouseout="this.style.background='rgba(251,191,36,0.15)'"
+                            onfocus="this.style.background='rgba(251,191,36,0.25)'"
+                            onblur="this.style.background='rgba(251,191,36,0.15)'">{{ __('backoffice.pages.escalation.takeover') }}</button>
                     </form>
                 @elseif ($customer->mode === 'human')
                     <form method="POST" action="{{ route('backoffice.customer.release', $customer->id) }}">
                         @csrf
                         <button type="submit" class="rounded-2xl px-4 py-2 text-sm font-semibold transition"
+                            @if (!$isOwnedByCurrentUser) disabled @endif
                             style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);"
                             onmouseover="this.style.background='rgba(52,211,153,0.25)'"
-                            onmouseout="this.style.background='rgba(52,211,153,0.15)'">{{ __('backoffice.pages.escalation.release') }}</button>
+                            onmouseout="this.style.background='rgba(52,211,153,0.15)'"
+                            onfocus="this.style.background='rgba(52,211,153,0.25)'"
+                            onblur="this.style.background='rgba(52,211,153,0.15)'">{{ __('backoffice.pages.escalation.release') }}</button>
                     </form>
                 @elseif ($customer->mode === 'waiting')
                     <form method="POST" action="{{ route('backoffice.customer.takeover', $customer->id) }}">
                         @csrf
                         <button type="submit" class="rounded-2xl px-4 py-2 text-sm font-semibold transition"
+                            @if ($isAssignedToOther) disabled @endif
                             style="background:rgba(34,211,238,0.15);color:#22d3ee;border:1px solid rgba(34,211,238,0.3);"
                             onmouseover="this.style.background='rgba(34,211,238,0.25)'"
-                            onmouseout="this.style.background='rgba(34,211,238,0.15)'">{{ __('backoffice.pages.escalation.takeover') }}</button>
+                            onmouseout="this.style.background='rgba(34,211,238,0.15)'"
+                            onfocus="this.style.background='rgba(34,211,238,0.25)'"
+                            onblur="this.style.background='rgba(34,211,238,0.15)'">{{ __('backoffice.pages.escalation.takeover') }}</button>
                     </form>
                 @endif
                 <a href="{{ route('backoffice.dashboard') }}"
@@ -122,7 +146,8 @@
                                     @php $attUrl = parse_url(route('backoffice.chat-attachment'), PHP_URL_PATH) . '?path=' . urlencode($attPath); @endphp
                                     @if (($att['type'] ?? '') === 'image')
                                         <a href="{{ $attUrl }}" target="_blank" class="mb-1 block">
-                                            <img src="{{ $attUrl }}" alt="{{ $att['original_name'] ?? 'image' }}"
+                                            <img src="{{ $attUrl }}"
+                                                alt="{{ $att['original_name'] ?? 'attachment' }}"
                                                 class="max-w-full rounded-xl" style="max-height:200px;object-fit:cover;" />
                                         </a>
                                     @else
@@ -144,10 +169,17 @@
                         </div>
                     @else
                         <div class="flex justify-end">
+                            @php
+                                $senderLabel =
+                                    data_get($msg, 'meta.sent_by_user_name') ?:
+                                    (($msg['role'] ?? '') === 'assistant'
+                                        ? __('backoffice.pages.customer_chat.assistant')
+                                        : $msg['role'] ?? __('backoffice.pages.customer_chat.assistant'));
+                            @endphp
                             <div class="inline-flex w-auto max-w-[50%] flex-col break-words rounded-2xl rounded-br-sm border border-cyan-500/20 bg-cyan-600/25 px-4 py-3 shadow-lg shadow-cyan-900/20"
                                 style="max-width: 50%;">
                                 <p class="mb-1 text-[10px] font-semibold text-cyan-400">
-                                    {{ $msg['role'] ?? __('backoffice.pages.customer_chat.assistant') }}
+                                    {{ $senderLabel }}
                                 </p>
                                 @if (!empty($msg['meta']['attachment']))
                                     @php
@@ -157,8 +189,10 @@
                                     @php $attUrl = parse_url(route('backoffice.chat-attachment'), PHP_URL_PATH) . '?path=' . urlencode($attPath); @endphp
                                     @if (($att['type'] ?? '') === 'image')
                                         <a href="{{ $attUrl }}" target="_blank" class="mb-1 block">
-                                            <img src="{{ $attUrl }}" alt="{{ $att['original_name'] ?? 'image' }}"
-                                                class="max-w-full rounded-xl" style="max-height:200px;object-fit:cover;" />
+                                            <img src="{{ $attUrl }}"
+                                                alt="{{ $att['original_name'] ?? 'attachment' }}"
+                                                class="max-w-full rounded-xl"
+                                                style="max-height:200px;object-fit:cover;" />
                                         </a>
                                     @else
                                         <a href="{{ $attUrl }}" target="_blank"
@@ -235,7 +269,9 @@
             }
 
             function buildAssistantBubble(msg) {
-                const label = msg.role ?? '{{ __('backoffice.pages.customer_chat.assistant') }}';
+                const label = msg?.meta?.sent_by_user_name ||
+                    ((msg.role === 'assistant' || !msg.role) ? '{{ __('backoffice.pages.customer_chat.assistant') }}' :
+                        msg.role);
                 return `<div class="flex justify-end">
             <div class="inline-flex w-auto max-w-[50%] flex-col break-words rounded-2xl rounded-br-sm border border-cyan-500/20 bg-cyan-600/25 px-4 py-3 shadow-lg shadow-cyan-900/20" style="max-width:50%;">
                 <p class="mb-1 text-[10px] font-semibold text-cyan-400">${escHtml(label)}</p>
@@ -362,7 +398,10 @@
     </script>
 
     @php
-        $canSend = $customer->mode === 'human' && in_array($customer->platform, ['telegram', 'whatsapp', 'livechat']);
+        $canSend =
+            $customer->mode === 'human' &&
+            $isOwnedByCurrentUser &&
+            in_array($customer->platform, ['telegram', 'whatsapp', 'livechat']);
     @endphp
 
     <div id="chat-send-bar" class="rounded-2xl border border-slate-700/70 bg-slate-950 p-4"
@@ -405,7 +444,13 @@
                     {{ __('backoffice.pages.customer_chat.send') }}
                 </button>
             </div>
-            <p class="mt-2 text-[11px] text-slate-500">{{ __('backoffice.pages.customer_chat.send_hint') }}</p>
+            <p class="mt-2 text-[11px] text-slate-500">
+                @if ($isAssignedToOther)
+                    {{ __('backoffice.pages.customer_chat.reply_locked_by', ['name' => $assignedUserName]) }}
+                @else
+                    {{ __('backoffice.pages.customer_chat.send_hint') }}
+                @endif
+            </p>
         @endif
     </div>
 @endsection

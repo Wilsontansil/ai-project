@@ -11,6 +11,7 @@ use App\Support\ResilientHttp;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
@@ -21,6 +22,7 @@ class DashboardController extends Controller
         $search = trim((string) $request->query('search', ''));
 
         $customers = Customer::query()
+            ->with(['assignedUser:id,name,username'])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
                     $inner->where('name', 'like', '%' . $search . '%')
@@ -50,6 +52,7 @@ class DashboardController extends Controller
         $search = trim((string) $request->query('search', ''));
 
         $customers = Customer::query()
+            ->with(['assignedUser:id,name,username'])
             ->whereIn('mode', ['waiting', 'human'])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
@@ -106,20 +109,78 @@ class DashboardController extends Controller
 
     public function takeover(Customer $customer): RedirectResponse
     {
-        $customer->update(['mode' => 'human']);
+        $user = request()->user();
+
+        $result = DB::transaction(function () use ($customer, $user) {
+            $lockedCustomer = Customer::query()
+                ->with(['assignedUser:id,name,username'])
+                ->lockForUpdate()
+                ->findOrFail($customer->id);
+
+            if ($lockedCustomer->assigned_user_id !== null && $lockedCustomer->assigned_user_id !== $user->id) {
+                return [
+                    'blocked' => true,
+                    'owner_name' => $lockedCustomer->assignedUser?->name
+                        ?: $lockedCustomer->assignedUser?->username
+                        ?: __('backoffice.pages.customer_chat.another_user'),
+                ];
+            }
+
+            $lockedCustomer->update([
+                'mode' => 'human',
+                'assigned_user_id' => $user->id,
+                'assigned_at' => now(),
+            ]);
+
+            return ['blocked' => false];
+        });
+
+        if (($result['blocked'] ?? false) === true) {
+            return back()->with('error', __('backoffice.pages.customer_chat.assign_blocked', ['name' => $result['owner_name']]));
+        }
 
         return back()->with('success', __('backoffice.pages.escalation.takeover_success'));
     }
 
     public function releaseToBot(Customer $customer): RedirectResponse
     {
-        $customer->update(['mode' => 'bot']);
+        $user = request()->user();
+
+        $result = DB::transaction(function () use ($customer, $user) {
+            $lockedCustomer = Customer::query()
+                ->with(['assignedUser:id,name,username'])
+                ->lockForUpdate()
+                ->findOrFail($customer->id);
+
+            if ($lockedCustomer->assigned_user_id !== null && $lockedCustomer->assigned_user_id !== $user->id) {
+                return [
+                    'blocked' => true,
+                    'owner_name' => $lockedCustomer->assignedUser?->name
+                        ?: $lockedCustomer->assignedUser?->username
+                        ?: __('backoffice.pages.customer_chat.another_user'),
+                ];
+            }
+
+            $lockedCustomer->update([
+                'mode' => 'bot',
+                'assigned_user_id' => null,
+                'assigned_at' => null,
+            ]);
+
+            return ['blocked' => false];
+        });
+
+        if (($result['blocked'] ?? false) === true) {
+            return back()->with('error', __('backoffice.pages.customer_chat.assign_blocked', ['name' => $result['owner_name']]));
+        }
 
         return back()->with('success', __('backoffice.pages.escalation.release_success'));
     }
 
     public function chat(Request $request, Customer $customer): View
     {
+        $customer->loadMissing(['assignedUser:id,name,username']);
+
         $startDate = $request->query('start_date', now()->toDateString());
         $endDate   = $request->query('end_date', now()->toDateString());
 
@@ -156,6 +217,8 @@ class DashboardController extends Controller
 
     public function messages(Request $request, Customer $customer): JsonResponse
     {
+        $customer->loadMissing(['assignedUser:id,name,username']);
+
         $startDate = $request->query('start_date', now()->toDateString());
         $endDate   = $request->query('end_date', now()->toDateString());
 
@@ -181,17 +244,30 @@ class DashboardController extends Controller
             }
         }
 
+        $isOwner = $customer->assigned_user_id !== null
+            && (int) $customer->assigned_user_id === (int) optional($request->user())->id;
+
         return response()->json([
             'messages'     => $messages,
             'customer_mode' => $customer->mode,
-            'can_send'     => $customer->mode === 'human' && in_array($customer->platform, ['telegram', 'whatsapp', 'livechat']),
+            'can_send'     => $customer->mode === 'human' && $isOwner && in_array($customer->platform, ['telegram', 'whatsapp', 'livechat']),
+            'assigned_user_id' => $customer->assigned_user_id,
+            'assigned_user_name' => $customer->assignedUser?->name ?: $customer->assignedUser?->username,
         ]);
     }
 
     public function sendMessage(Request $request, Customer $customer): RedirectResponse
     {
+        $currentUser = $request->user();
+        $customer->loadMissing(['assignedUser:id,name,username']);
+
         if ($customer->mode !== 'human') {
             return back()->with('send_error', __('backoffice.pages.customer_chat.send_error_not_human'));
+        }
+
+        if ((int) $customer->assigned_user_id !== (int) $currentUser->id) {
+            $ownerName = $customer->assignedUser?->name ?: $customer->assignedUser?->username ?: __('backoffice.pages.customer_chat.another_user');
+            return back()->with('send_error', __('backoffice.pages.customer_chat.send_error_not_owner', ['name' => $ownerName]));
         }
 
         if (!in_array($customer->platform, ['telegram', 'whatsapp', 'livechat'])) {
@@ -229,7 +305,11 @@ class DashboardController extends Controller
                 $customer->platform,
                 'assistant',
                 $message,
-                ['sent_by' => 'admin']
+                [
+                    'sent_by' => 'admin',
+                    'sent_by_user_id' => $currentUser->id,
+                    'sent_by_user_name' => $currentUser->name ?: $currentUser->username,
+                ]
             );
         } catch (\Throwable $e) {
             Log::error('Admin send message failed', [

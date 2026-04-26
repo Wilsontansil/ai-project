@@ -6,6 +6,8 @@
 @php($boActive = 'customer')
 
 @section('content')
+    @php($currentUserId = auth()->id())
+
     <style>
         .bo-stats-grid {
             display: grid;
@@ -79,6 +81,7 @@
                             <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.dashboard.platform') }}</th>
                             <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.dashboard.phone') }}</th>
                             <th class="px-3 py-2 font-medium text-center">{{ __('backoffice.pages.dashboard.mode') }}</th>
+                            <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.customer_chat.assigned_to') }}</th>
                             <th class="px-3 py-2 font-medium text-center">{{ __('backoffice.pages.dashboard.msgs') }}</th>
                             <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.dashboard.last_seen') }}</th>
                             <th class="px-3 py-2 font-medium"></th>
@@ -86,6 +89,14 @@
                     </thead>
                     <tbody class="divide-y divide-white/5">
                         @forelse ($customers as $customer)
+                            @php
+                                $assignedUserName =
+                                    $customer->assignedUser?->name ?: $customer->assignedUser?->username;
+                                $isOwnedByCurrentUser =
+                                    $customer->assigned_user_id !== null &&
+                                    (int) $customer->assigned_user_id === (int) $currentUserId;
+                                $isAssignedToOther = $customer->assigned_user_id !== null && !$isOwnedByCurrentUser;
+                            @endphp
                             <tr class="hover:bg-white/5">
                                 <td class="px-3 py-2 text-white">
                                     {{ $customer->name ?: '-' }}
@@ -111,12 +122,23 @@
                                         @endif
                                         <button type="submit"
                                             class="ml-1 rounded px-1.5 py-0.5 text-[9px] font-medium transition"
+                                            @if ($isAssignedToOther) disabled @endif
                                             style="background:rgba(255,255,255,0.06);color:#94a3b8;"
                                             onmouseover="this.style.background='rgba(255,255,255,0.12)'"
-                                            onmouseout="this.style.background='rgba(255,255,255,0.06)'">
+                                            onmouseout="this.style.background='rgba(255,255,255,0.06)'"
+                                            onfocus="this.style.background='rgba(255,255,255,0.12)'"
+                                            onblur="this.style.background='rgba(255,255,255,0.06)'">
                                             {{ $customer->mode === 'bot' ? '→ Human' : '→ Bot' }}
                                         </button>
                                     </form>
+                                </td>
+                                <td class="px-3 py-2 text-slate-300">
+                                    @if ($assignedUserName)
+                                        <span
+                                            class="inline-flex rounded-full bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-300">{{ $assignedUserName }}</span>
+                                    @else
+                                        <span class="text-slate-500">-</span>
+                                    @endif
                                 </td>
                                 <td class="px-3 py-2 text-center text-slate-400">{{ $customer->total_messages }}</td>
                                 <td class="px-3 py-2 text-slate-400">{{ $customer->last_seen_at?->diffForHumans() ?: '-' }}
@@ -128,7 +150,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-3 py-6 text-center text-slate-500">
+                                <td colspan="8" class="px-3 py-6 text-center text-slate-500">
                                     {{ __('backoffice.pages.dashboard.empty') }}</td>
                             </tr>
                         @endforelse

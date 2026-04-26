@@ -210,7 +210,13 @@ Saat melakukan transfer antar bank, pastikan nominal yang dikirim sesuai dengan 
 PENTING: Nominal di form deposit harus sama persis dengan nominal permintaan deposit (bukan ditambah biaya admin).
 Contoh 1: jika permintaan deposit 20.000, isi form deposit 20.000.
 Contoh 2: jika permintaan deposit 12.000, isi form deposit 12.000.
-Biaya antar bank 6.500 atau 2.500 (BI-Fast) adalah biaya tambahan dari bank dan ditanggung user di luar nominal deposit.',
+Biaya antar bank 6.500 atau 2.500 (BI-Fast) adalah biaya tambahan dari bank dan ditanggung user di luar nominal deposit.
+
+Deposit Beberapa Kali Transfer (Multiple Transfer):
+Jika Kakak sudah melakukan beberapa kali transfer untuk 1 tujuan deposit, cukup isi 1x form deposit saja 😊
+Masukkan total keseluruhan nominal dari semua transfer yang sudah dilakukan.
+Contoh: Transfer 100.000 + 200.000 + 300.000 = isi form 600.000
+Jangan submit form lebih dari 1x — cukup 1 form dengan total semua transfer.',
                 'source' => 'manual',
                 'file_name' => null,
                 'is_active' => true,

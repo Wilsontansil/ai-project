@@ -324,7 +324,7 @@ class DashboardController extends Controller
                 }
             } elseif ($customer->platform === 'whatsapp') {
                 if ($attachmentMeta !== null) {
-                    $this->sendWhatsAppAttachmentFallback($chatId, $attachmentMeta, $message);
+                    $this->sendWhatsAppAttachment($chatId, $attachmentMeta, $message);
                 } else {
                     $this->sendWhatsApp($chatId, $message);
                 }
@@ -452,10 +452,109 @@ class DashboardController extends Controller
         }
     }
 
-    private function sendWhatsAppAttachmentFallback(string $chatId, array $attachmentMeta, string $caption = ''): void
+    private function sendWhatsAppAttachment(string $chatId, array $attachmentMeta, string $caption = ''): void
     {
-        $message = $this->buildAttachmentFallbackMessage($attachmentMeta, $caption);
-        $this->sendWhatsApp($chatId, $message);
+        $baseUrl = rtrim((string) ProjectSetting::getValue('whatsapp_base_url', config('services.whatsapp.base_url', '')), '/');
+
+        if ($baseUrl === '') {
+            throw new \RuntimeException('WAHA base URL is not configured.');
+        }
+
+        $session = (string) ProjectSetting::getValue('whatsapp_session', config('services.whatsapp.session', 'default'));
+        $apiKey = (string) ProjectSetting::getValue('whatsapp_api_key', config('services.whatsapp.api_key', ''));
+        $headers = ['Accept' => 'application/json'];
+        if ($apiKey !== '') {
+            $headers['X-Api-Key'] = $apiKey;
+        }
+
+        $fileUrl = $this->publicAttachmentUrl((string) ($attachmentMeta['path'] ?? ''));
+        $fileName = (string) ($attachmentMeta['original_name'] ?? 'file');
+        $mimeType = (string) ($attachmentMeta['mime_type'] ?? 'application/octet-stream');
+        $isImage = ($attachmentMeta['type'] ?? '') === 'image';
+
+        $attempts = [];
+        $payloadVariants = $isImage
+            ? [
+                ['/api/sendImage', [
+                    'session' => $session,
+                    'chatId' => $chatId,
+                    'file' => ['url' => $fileUrl],
+                    'caption' => $caption,
+                ]],
+                ['/api/sendImage', [
+                    'session' => $session,
+                    'chatId' => $chatId,
+                    'image' => $fileUrl,
+                    'caption' => $caption,
+                ]],
+                ['/api/sendImage', [
+                    'session' => $session,
+                    'chatId' => $chatId,
+                    'url' => $fileUrl,
+                    'caption' => $caption,
+                ]],
+                ['/api/sendFile', [
+                    'session' => $session,
+                    'chatId' => $chatId,
+                    'file' => [
+                        'url' => $fileUrl,
+                        'filename' => $fileName,
+                        'mimetype' => $mimeType,
+                    ],
+                    'caption' => $caption,
+                ]],
+            ]
+            : [
+                ['/api/sendFile', [
+                    'session' => $session,
+                    'chatId' => $chatId,
+                    'file' => [
+                        'url' => $fileUrl,
+                        'filename' => $fileName,
+                        'mimetype' => $mimeType,
+                    ],
+                    'caption' => $caption,
+                ]],
+                ['/api/sendDocument', [
+                    'session' => $session,
+                    'chatId' => $chatId,
+                    'file' => [
+                        'url' => $fileUrl,
+                        'filename' => $fileName,
+                        'mimetype' => $mimeType,
+                    ],
+                    'caption' => $caption,
+                ]],
+                ['/api/sendFile', [
+                    'session' => $session,
+                    'chatId' => $chatId,
+                    'url' => $fileUrl,
+                    'filename' => $fileName,
+                    'caption' => $caption,
+                ]],
+            ];
+
+        foreach ($payloadVariants as [$endpoint, $payload]) {
+            $response = ResilientHttp::post('waha', $baseUrl . $endpoint, $payload, $headers, timeoutSeconds: 20);
+
+            $attempts[] = [
+                'endpoint' => $endpoint,
+                'status' => $response?->status(),
+                'ok' => $response !== null && $response->successful(),
+            ];
+
+            if ($response !== null && $response->successful()) {
+                return;
+            }
+        }
+
+        Log::error('WAHA attachment send failed across all endpoint variants', [
+            'chat_id' => $chatId,
+            'path' => $attachmentMeta['path'] ?? null,
+            'attempts' => $attempts,
+        ]);
+
+        throw new \RuntimeException('WAHA attachment send failed for all endpoint variants.');
     }
 
     private function sendLiveChat(string $chatId, string $text, ?string $threadId = null): void

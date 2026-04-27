@@ -174,7 +174,11 @@
 
                     @php
                         $selectedTools = old('tool_ids', $selectedToolIds ?? []);
-                        $selectedTools = collect($selectedTools)->map(fn($id) => (int) $id)->all();
+                        $normalizedToolIds = [];
+                        foreach ((array) $selectedTools as $id) {
+                            $normalizedToolIds[] = (int) $id;
+                        }
+                        $selectedTools = $normalizedToolIds;
                     @endphp
 
                     @if (($availableTools ?? collect())->isEmpty())

@@ -78,7 +78,7 @@ class ChatAgentController extends Controller
         $chatAgent->loadMissing('tools:id');
 
         $activeTab = $request->query('tab');
-        if (!in_array($activeTab, ['general', 'knowledge-base', 'rules'], true)) {
+        if (!in_array($activeTab, ['general', 'knowledge-base', 'rules', 'tools'], true)) {
             $activeTab = 'general';
         }
 
@@ -115,7 +115,7 @@ class ChatAgentController extends Controller
                 ->where('tool_name', '!=', '_bot_config')
                 ->orderBy('category')
                 ->orderBy('display_name')
-                ->get(['id', 'display_name', 'tool_name', 'category']),
+                ->get(),
             'selectedToolIds' => $chatAgent->tools->pluck('id')->all(),
         ]);
     }
@@ -175,6 +175,19 @@ class ChatAgentController extends Controller
 
         return redirect()->route('backoffice.chat-agents.index')
             ->with('success', "Agent \"{$chatAgent->name}\" berhasil diduplikasi.");
+    }
+
+    public function syncTools(Request $request, ChatAgent $chatAgent): RedirectResponse
+    {
+        $request->validate([
+            'tool_ids' => ['nullable', 'array'],
+            'tool_ids.*' => ['integer', 'exists:tools,id'],
+        ]);
+
+        $this->syncAgentTools($chatAgent, $request->input('tool_ids', []));
+
+        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'tools'])
+            ->with('success', 'Tool assignments saved.');
     }
 
     public function storeKnowledgeBase(Request $request, ChatAgent $chatAgent): RedirectResponse

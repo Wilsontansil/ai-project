@@ -255,23 +255,6 @@
                     </a>
                 @endcan
 
-                {{-- Tools --}}
-                @can('manage tools')
-                    <a href="{{ route('backoffice.tools.index') }}" class="bo-nav-item group"
-                        style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'tools' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
-                        onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
-                        onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'tools' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'tools' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
-                        <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'tools' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
-                            height="18">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M11.42 15.17l-5.1 5.1a2.121 2.121 0 01-3-3l5.1-5.1m0 0L4.16 7.91a2.13 2.13 0 010-3l1.26-1.26a2.13 2.13 0 013 0l4.26 4.26m-1.26 1.26l6.97-6.97a2.121 2.121 0 013 3l-6.97 6.97" />
-                        </svg>
-                        <span class="bo-label">{{ __('backoffice.menu.tools') }}</span>
-                        <span class="bo-tooltip">{{ __('backoffice.menu.tools') }}</span>
-                    </a>
-                @endcan
-
                 {{-- Data Models --}}
                 @can('manage data-models')
                     <a href="{{ route('backoffice.data-models.index') }}" class="bo-nav-item group"

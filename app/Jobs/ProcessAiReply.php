@@ -324,10 +324,10 @@ class ProcessAiReply implements ShouldQueue
             $agent  = ChatAgent::getDefault();
             $model  = $agent?->model ?? 'gpt-4.1-mini';
 
-            $response = $client->chat()->create([
+            $isReasoningModel = (bool) preg_match('/^o\d/', $model);
+            $summarizePayload = [
                 'model' => $model,
                 'max_completion_tokens' => 80,
-                'temperature' => 0.3,
                 'messages' => [
                     [
                         'role' => 'system',
@@ -338,7 +338,12 @@ class ProcessAiReply implements ShouldQueue
                         'content' => $transcript,
                     ],
                 ],
-            ]);
+            ];
+            if (! $isReasoningModel) {
+                $summarizePayload['temperature'] = 0.3;
+            }
+
+            $response = $client->chat()->create($summarizePayload);
 
             $summary = trim($response->choices[0]->message->content ?? '');
 

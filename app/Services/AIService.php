@@ -98,7 +98,10 @@ class AIService
                 'max_completion_tokens' => $chatAgent->max_tokens ?? 420,
             ];
 
-            if ($chatAgent->temperature !== null) {
+            // Reasoning models (o1/o3/o4 series) only support temperature=1 (default).
+            // Skip the parameter entirely for those models to avoid API errors.
+            $isReasoningModel = preg_match('/^o\d/', $model);
+            if (! $isReasoningModel && $chatAgent->temperature !== null) {
                 $payload['temperature'] = $chatAgent->temperature;
             }
 

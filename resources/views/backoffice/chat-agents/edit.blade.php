@@ -264,7 +264,9 @@
                 </div>
             </form>
         </div>
-    @elseif ($isKnowledgeTab)
+    @endif
+
+    @if ($isKnowledgeTab)
         <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 space-y-5">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
                 <div>
@@ -427,7 +429,9 @@
                 </form>
             </div>
         </div>
-    @else
+    @endif
+
+    @if ($isRulesTab)
         <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
                 <div>

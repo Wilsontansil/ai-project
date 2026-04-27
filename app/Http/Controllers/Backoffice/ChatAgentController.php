@@ -64,7 +64,6 @@ class ChatAgentController extends Controller
             ? (array) $request->input('tool_ids', [])
             : Tool::query()
                 ->where('tool_name', '!=', '_bot_config')
-                ->where('is_enabled', true)
                 ->pluck('id')
                 ->all();
 
@@ -116,7 +115,7 @@ class ChatAgentController extends Controller
                 ->where('tool_name', '!=', '_bot_config')
                 ->orderBy('category')
                 ->orderBy('display_name')
-                ->get(['id', 'display_name', 'tool_name', 'category', 'is_enabled']),
+                ->get(['id', 'display_name', 'tool_name', 'category']),
             'selectedToolIds' => $chatAgent->tools->pluck('id')->all(),
         ]);
     }

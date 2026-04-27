@@ -52,7 +52,6 @@
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.tools.display_name') }}</th>
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.tools.type') }}</th>
                                 <th class="px-3 py-2 font-medium">Category</th>
-                                <th class="px-3 py-2 font-medium text-center">{{ __('backoffice.common.status') }}</th>
                                 <th class="px-3 py-2 font-medium text-right">{{ __('backoffice.common.actions') }}</th>
                             </tr>
                         </thead>
@@ -108,19 +107,6 @@
                                                 class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 capitalize {{ $color }}">{{ $tool->category }}</span>
                                         @else
                                             <span class="text-slate-500">—</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-3 py-2 text-center">
-                                        @if ($tool->is_enabled)
-                                            <span
-                                                class="inline-flex items-center rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-400/30">
-                                                {{ __('backoffice.common.on') }}
-                                            </span>
-                                        @else
-                                            <span
-                                                class="inline-flex items-center rounded-full bg-red-500/20 px-2.5 py-0.5 text-xs font-semibold text-red-300 ring-1 ring-red-400/30">
-                                                {{ __('backoffice.common.off') }}
-                                            </span>
                                         @endif
                                     </td>
                                     <td class="px-3 py-2 text-right">

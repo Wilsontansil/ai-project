@@ -196,9 +196,6 @@
                                         <span class="block text-[11px] text-slate-400">
                                             {{ strtoupper((string) ($tool->category ?: 'general')) }} •
                                             {{ $tool->tool_name }}
-                                            @if (!$tool->is_enabled)
-                                                • DISABLED
-                                            @endif
                                         </span>
                                     </span>
                                 </label>

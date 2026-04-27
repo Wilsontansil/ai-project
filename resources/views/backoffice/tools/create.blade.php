@@ -289,16 +289,6 @@
                 </div>
             </div>{{-- end #section-info --}}
 
-            <div>
-                <label
-                    class="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-slate-900/50 px-4 py-2 text-sm text-slate-200">
-                    <input type="checkbox" name="is_enabled" value="1"
-                        {{ old('is_enabled', true) ? 'checked' : '' }}
-                        class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
-                    {{ __('backoffice.pages.tools.enable_tool') }}
-                </label>
-            </div>
-
             <div class="flex items-center gap-4 pt-2">
                 <button type="submit" onclick="return validateForm()"
                     class="rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">

@@ -135,7 +135,6 @@ class ToolController extends Controller
             'type' => $type,
             'display_name' => trim($data['display_name']),
             'description' => trim($data['description'] ?? ''),
-            'is_enabled' => $request->boolean('is_enabled'),
             'data_model_id' => $type === 'get' ? ($data['data_model_id'] ?? null) : null,
             'parameters' => $this->buildParametersFromInput($request->input('params', [])),
             'endpoints' => $this->buildEndpointsFromInput($request),

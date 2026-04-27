@@ -46,7 +46,6 @@ class ToolDispatcher
             if ($chatAgent !== null) {
                 return $chatAgent->tools()
                     ->with('dataModel')
-                    ->where('is_enabled', true)
                     ->where('tool_name', '!=', '_bot_config')
                     ->orderBy('tools.id')
                     ->get();
@@ -54,7 +53,6 @@ class ToolDispatcher
 
             return Tool::query()
                 ->with('dataModel')
-                ->where('is_enabled', true)
                 ->where('tool_name', '!=', '_bot_config')
                 ->get();
         } catch (\Throwable) {

@@ -57,6 +57,11 @@ class ToolController extends Controller
 
         Tool::create($this->buildToolPayload($request, $data));
 
+        if ($fromAgent = $request->input('from_agent')) {
+            return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $fromAgent, 'tab' => 'tools'])
+                ->with('success', 'Tool berhasil ditambahkan.');
+        }
+
         return redirect()->route('backoffice.tools.index')->with('success', 'Tool berhasil ditambahkan.');
     }
 
@@ -78,13 +83,24 @@ class ToolController extends Controller
 
         $tool->update($this->buildToolPayload($request, $data, $tool));
 
+        if ($fromAgent = $request->input('from_agent')) {
+            return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $fromAgent, 'tab' => 'tools'])
+                ->with('success', $tool->display_name . ' berhasil diperbarui.');
+        }
+
         return redirect()->route('backoffice.tools.index')->with('success', $tool->display_name . ' berhasil diperbarui.');
     }
 
     public function destroy(Tool $tool): RedirectResponse
     {
         $name = $tool->display_name;
+        $fromAgent = $request->input('from_agent');
         $tool->delete();
+
+        if ($fromAgent) {
+            return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $fromAgent, 'tab' => 'tools'])
+                ->with('success', $name . ' berhasil dihapus.');
+        }
 
         return redirect()->route('backoffice.tools.index')->with('success', $name . ' berhasil dihapus.');
     }

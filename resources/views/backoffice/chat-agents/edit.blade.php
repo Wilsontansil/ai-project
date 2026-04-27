@@ -500,7 +500,7 @@
                     <p class="text-xs text-slate-400">All tools are available to this agent by default.</p>
                 </div>
                 @can('manage tools')
-                    <a href="{{ route('backoffice.tools.create') }}" class="bo-btn-primary"
+                    <a href="{{ route('backoffice.tools.create', ['from_agent' => $agent->id]) }}" class="bo-btn-primary"
                         style="font-size:0.75rem;padding:0.5rem 1rem">+ New Tool</a>
                 @endcan
             </div>
@@ -561,13 +561,15 @@
                                             <td class="px-3 py-2 text-right">
                                                 <div
                                                     style="display:flex;align-items:center;justify-content:flex-end;gap:0.5rem">
-                                                    <a href="{{ route('backoffice.tools.edit', $tool) }}"
+                                                    <a href="{{ route('backoffice.tools.edit', $tool) }}?from_agent={{ $agent->id }}"
                                                         class="bo-btn-sm">Edit</a>
                                                     <form method="POST"
                                                         action="{{ route('backoffice.tools.destroy', $tool) }}"
                                                         onsubmit="return confirm('Delete tool \'{{ addslashes($tool->display_name) }}\'?')">
                                                         @csrf
                                                         @method('DELETE')
+                                                        <input type="hidden" name="from_agent"
+                                                            value="{{ $agent->id }}">
                                                         <button type="submit" class="bo-btn-danger">Delete</button>
                                                     </form>
                                                 </div>

@@ -12,6 +12,7 @@
     <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
         <form method="POST" action="{{ route('backoffice.tools.store') }}" class="space-y-5">
             @csrf
+            <input type="hidden" name="from_agent" value="{{ request('from_agent') }}">
 
             <div class="grid gap-4 md:grid-cols-4">
                 <div>
@@ -287,7 +288,7 @@
                     class="rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
                     {{ __('backoffice.pages.tools.add_tool') }}
                 </button>
-                <a href="{{ route('backoffice.tools.index') }}"
+                <a href="{{ request('from_agent') ? route('backoffice.chat-agents.edit', ['chatAgent' => request('from_agent'), 'tab' => 'tools']) : route('backoffice.tools.index') }}"
                     class="rounded-2xl border border-white/10 px-6 py-3 text-sm text-slate-300 transition hover:bg-white/5">
                     {{ __('backoffice.common.cancel') }}
                 </a>

@@ -374,6 +374,7 @@
 
                 const sendForm = document.getElementById('chat-send-form');
                 const sendTextarea = document.getElementById('chat-send-textarea');
+                const fileInput = document.getElementById('chat-send-attachment');
                 if (sendForm && sendTextarea) {
                     sendTextarea.addEventListener('keydown', function(e) {
                         if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
@@ -382,6 +383,8 @@
                         }
                     });
                 }
+
+
             });
 
             // Pause/resume when tab visibility changes
@@ -417,24 +420,15 @@
                         placeholder="{{ __('backoffice.pages.customer_chat.type_message') }}"
                         class="flex-1 resize-none rounded-xl border border-white/10 bg-slate-800 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-cyan-400"
                         style="max-height:140px;overflow-y:auto;"></textarea>
-                    <div class="flex shrink-0 items-center gap-1">
-                        <label id="chat-attach-label" for="chat-send-attachment"
-                            class="flex cursor-pointer items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition"
-                            style="background:rgba(255,255,255,0.08);color:#e2e8f0;border:1px solid rgba(255,255,255,0.12);">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                class="h-4 w-4">
-                                <path
-                                    d="M16.5 6v11.25a4.125 4.125 0 1 1-8.25 0V7.5a2.625 2.625 0 1 1 5.25 0v8.625a1.125 1.125 0 1 1-2.25 0V9.75a.75.75 0 0 0-1.5 0v6.375a2.625 2.625 0 1 0 5.25 0V7.5a4.125 4.125 0 1 0-8.25 0v9.75a5.625 5.625 0 1 0 11.25 0V6a.75.75 0 0 0-1.5 0Z" />
-                            </svg>
-                            {{ __('backoffice.pages.customer_chat.attach_file') }}
-                        </label>
-                        <button id="chat-send-attachment-clear" type="button"
-                            class="hidden items-center justify-center rounded-full px-2 py-2 text-xs text-slate-300 transition hover:bg-white/10"
-                            title="{{ __('backoffice.pages.customer_chat.clear_file') }}"
-                            style="border:1px solid rgba(255,255,255,0.12);line-height:1;">
-                            ×
-                        </button>
-                    </div>
+                    <label for="chat-send-attachment"
+                        class="flex shrink-0 cursor-pointer items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition"
+                        style="background:rgba(255,255,255,0.08);color:#e2e8f0;border:1px solid rgba(255,255,255,0.12);">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                            <path
+                                d="M16.5 6v11.25a4.125 4.125 0 1 1-8.25 0V7.5a2.625 2.625 0 1 1 5.25 0v8.625a1.125 1.125 0 1 1-2.25 0V9.75a.75.75 0 0 0-1.5 0v6.375a2.625 2.625 0 1 0 5.25 0V7.5a4.125 4.125 0 1 0-8.25 0v9.75a5.625 5.625 0 1 0 11.25 0V6a.75.75 0 0 0-1.5 0Z" />
+                        </svg>
+                        {{ __('backoffice.pages.customer_chat.attach_file') }}
+                    </label>
                     <button type="submit"
                         class="flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition"
                         style="background:rgba(34,211,238,0.25);color:#22d3ee;border:1px solid rgba(34,211,238,0.5);">
@@ -445,6 +439,7 @@
                         {{ __('backoffice.pages.customer_chat.send') }}
                     </button>
                 </div>
+
                 <p class="mt-2 text-[11px] text-slate-500">
                     {{ __('backoffice.pages.customer_chat.send_hint_active', ['platform' => ucfirst($customer->platform)]) }}
                 </p>
@@ -521,26 +516,6 @@
             const fileInput = document.getElementById('chat-send-attachment');
             const sendForm = document.getElementById('chat-send-form');
 
-            const attachLabel = document.getElementById('chat-attach-label');
-            const clearBtn = document.getElementById('chat-send-attachment-clear');
-
-            function setAttachActive(active) {
-                if (!attachLabel) return;
-                if (active) {
-                    attachLabel.style.border = '1px solid rgba(34,211,238,0.6)';
-                    attachLabel.style.background = 'rgba(34,211,238,0.12)';
-                    attachLabel.style.color = '#22d3ee';
-                    if (clearBtn) clearBtn.classList.remove('hidden');
-                    if (clearBtn) clearBtn.classList.add('flex');
-                } else {
-                    attachLabel.style.border = '1px solid rgba(255,255,255,0.12)';
-                    attachLabel.style.background = 'rgba(255,255,255,0.08)';
-                    attachLabel.style.color = '#e2e8f0';
-                    if (clearBtn) clearBtn.classList.add('hidden');
-                    if (clearBtn) clearBtn.classList.remove('flex');
-                }
-            }
-
             if (fileInput) {
                 fileInput.addEventListener('change', function() {
                     const file = fileInput.files && fileInput.files[0];
@@ -550,17 +525,7 @@
                             title: 'File too large. Maximum size is 10 MB.'
                         });
                         fileInput.value = '';
-                        setAttachActive(false);
-                        return;
                     }
-                    setAttachActive(!!file);
-                });
-            }
-
-            if (clearBtn) {
-                clearBtn.addEventListener('click', function() {
-                    if (fileInput) fileInput.value = '';
-                    setAttachActive(false);
                 });
             }
 

@@ -375,6 +375,8 @@
                 const sendForm = document.getElementById('chat-send-form');
                 const sendTextarea = document.getElementById('chat-send-textarea');
                 const fileInput = document.getElementById('chat-send-attachment');
+                const fileName = document.getElementById('chat-send-attachment-name');
+                const clearButton = document.getElementById('chat-send-attachment-clear');
                 if (sendForm && sendTextarea) {
                     sendTextarea.addEventListener('keydown', function(e) {
                         if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
@@ -384,7 +386,26 @@
                     });
                 }
 
+                if (fileInput && fileName) {
+                    fileInput.addEventListener('change', function() {
+                        const nextName = fileInput.files && fileInput.files[0] ? fileInput.files[0]
+                            .name : '';
+                        fileName.textContent = nextName ||
+                            '{{ __('backoffice.pages.customer_chat.no_file_selected') }}';
+                        if (clearButton) {
+                            clearButton.classList.toggle('hidden', nextName === '');
+                        }
+                    });
+                }
 
+                if (clearButton && fileInput && fileName) {
+                    clearButton.addEventListener('click', function() {
+                        fileInput.value = '';
+                        fileName.textContent =
+                            '{{ __('backoffice.pages.customer_chat.no_file_selected') }}';
+                        clearButton.classList.add('hidden');
+                    });
+                }
             });
 
             // Pause/resume when tab visibility changes
@@ -439,7 +460,14 @@
                         {{ __('backoffice.pages.customer_chat.send') }}
                     </button>
                 </div>
-
+                <div class="mt-2 flex items-center gap-2 text-[11px] text-slate-400">
+                    <span id="chat-send-attachment-name"
+                        style="max-width:260px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom;">{{ __('backoffice.pages.customer_chat.no_file_selected') }}</span>
+                    <button id="chat-send-attachment-clear" type="button"
+                        class="hidden rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-slate-300 transition hover:bg-white/5">
+                        {{ __('backoffice.pages.customer_chat.clear_file') }}
+                    </button>
+                </div>
                 <p class="mt-2 text-[11px] text-slate-500">
                     {{ __('backoffice.pages.customer_chat.send_hint_active', ['platform' => ucfirst($customer->platform)]) }}
                 </p>
@@ -525,6 +553,11 @@
                             title: 'File too large. Maximum size is 10 MB.'
                         });
                         fileInput.value = '';
+                        const nameEl = document.getElementById('chat-send-attachment-name');
+                        const clearBtn = document.getElementById('chat-send-attachment-clear');
+                        if (nameEl) nameEl.textContent =
+                            '{{ __('backoffice.pages.customer_chat.no_file_selected') }}';
+                        if (clearBtn) clearBtn.classList.add('hidden');
                     }
                 });
             }

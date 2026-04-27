@@ -9,16 +9,6 @@
         <p class="mt-2 text-sm text-slate-300">Add reference text the AI will use as background knowledge.</p>
     </div>
 
-    @if ($errors->any())
-        <div class="rounded-2xl border border-rose-300/30 bg-rose-500/15 px-4 py-3 text-sm text-rose-100">
-            <ul class="list-inside list-disc space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
         <form method="POST" action="{{ route('backoffice.knowledge-base.store') }}" enctype="multipart/form-data"
             class="space-y-5">

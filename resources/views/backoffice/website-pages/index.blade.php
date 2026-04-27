@@ -16,18 +16,6 @@
         </a>
     </div>
 
-    @if (session('success'))
-        <div class="rounded-xl border border-emerald-300/30 bg-emerald-500/15 px-4 py-3 text-xs text-emerald-100">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="rounded-xl border border-red-300/30 bg-red-500/15 px-4 py-3 text-xs text-red-100">
-            {{ session('error') }}
-        </div>
-    @endif
-
     @if ($pages->isEmpty())
         <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-8 text-center">
             <svg class="mx-auto mb-3 h-12 w-12 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"

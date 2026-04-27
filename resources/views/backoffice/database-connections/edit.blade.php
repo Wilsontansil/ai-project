@@ -11,16 +11,6 @@
         <p class="text-xs text-slate-400">{{ $connection->name }}</p>
     </div>
 
-    @if ($errors->any())
-        <div class="rounded-2xl border border-rose-300/30 bg-rose-500/15 px-4 py-3 text-sm text-rose-100">
-            <ul class="list-inside list-disc space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-6">
         <form method="POST" action="{{ route('backoffice.database-connections.update', $connection) }}" class="space-y-5">
             @csrf
@@ -28,8 +18,7 @@
 
             <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem">
                 <div>
-                    <label for="name"
-                        class="bo-label">{{ __('backoffice.pages.db_connections.connection_name') }}</label>
+                    <label for="name" class="bo-label">{{ __('backoffice.pages.db_connections.connection_name') }}</label>
                     <input id="name" type="text" name="name" value="{{ old('name', $connection->name) }}"
                         placeholder="e.g. mysqlgame" />
                 </div>

@@ -16,12 +16,6 @@
         </a>
     </div>
 
-    @if (session('success'))
-        <div class="rounded-xl border border-emerald-300/30 bg-emerald-500/15 px-4 py-3 text-xs text-emerald-100">
-            {{ session('success') }}
-        </div>
-    @endif
-
     {{-- Category Filter --}}
     <div class="flex flex-wrap gap-2">
         <a href="{{ route('backoffice.tools.index') }}"

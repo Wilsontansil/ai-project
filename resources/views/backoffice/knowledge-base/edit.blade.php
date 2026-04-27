@@ -9,16 +9,6 @@
         <p class="mt-2 text-sm text-slate-300">Update the reference text or re-upload a file.</p>
     </div>
 
-    @if ($errors->any())
-        <div class="rounded-2xl border border-rose-300/30 bg-rose-500/15 px-4 py-3 text-sm text-rose-100">
-            <ul class="list-inside list-disc space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
         <form method="POST" action="{{ route('backoffice.knowledge-base.update', $entry) }}" enctype="multipart/form-data"
             class="space-y-5">
@@ -35,7 +25,8 @@
                 <label for="content" class="mb-2 block text-sm text-slate-200">Content</label>
                 @if ($entry->source === 'file')
                     <p class="mb-2 text-xs text-amber-400">This entry was imported from
-                        <strong>{{ $entry->file_name }}</strong>. You can edit the content directly or re-upload a file.</p>
+                        <strong>{{ $entry->file_name }}</strong>. You can edit the content directly or re-upload a file.
+                    </p>
                 @endif
                 <textarea id="content" name="content" rows="10"
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('content', $entry->content) }}</textarea>

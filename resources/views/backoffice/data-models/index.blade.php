@@ -16,12 +16,6 @@
         </a>
     </div>
 
-    @if (session('success'))
-        <div class="rounded-xl border border-emerald-300/30 bg-emerald-500/15 px-4 py-3 text-xs text-emerald-100">
-            {{ session('success') }}
-        </div>
-    @endif
-
     @if ($dataModels->isEmpty())
         <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-8 text-center">
             <p class="text-sm text-slate-400">{{ __('backoffice.pages.data_models.no_models') }} <span

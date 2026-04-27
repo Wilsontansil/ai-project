@@ -14,16 +14,6 @@
             </div>
         </div>
 
-        @if ($errors->any())
-            <div class="rounded-xl border border-rose-300/30 bg-rose-500/15 px-4 py-3 text-xs text-rose-100">
-                <ul class="list-disc space-y-1 pl-4">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
         <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-4 sm:p-6">
             <form method="POST" action="{{ route('backoffice.roles.store') }}" class="space-y-6 max-w-2xl">
                 @csrf

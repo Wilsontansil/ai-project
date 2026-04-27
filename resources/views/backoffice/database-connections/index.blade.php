@@ -21,18 +21,6 @@
         </a>
     </div>
 
-    @if (session('success'))
-        <div class="rounded-xl border border-emerald-300/30 bg-emerald-500/15 px-4 py-3 text-xs text-emerald-100">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="rounded-xl border border-rose-300/30 bg-rose-500/15 px-4 py-3 text-xs text-rose-100">
-            {{ session('error') }}
-        </div>
-    @endif
-
     @if ($connections->isEmpty())
         <div class="rounded-2xl border border-dashed border-slate-600 bg-slate-900/50 p-10 text-center">
             <svg class="mx-auto mb-3 h-10 w-10 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"

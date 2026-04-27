@@ -735,6 +735,62 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {{-- Centralized flash messages --}}
+    <script>
+        (function() {
+            if (typeof Swal === 'undefined') return;
+
+            const _toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+                didOpen: function(t) {
+                    t.onmouseenter = Swal.stopTimer;
+                    t.onmouseleave = Swal.resumeTimer;
+                }
+            });
+
+            @if (session('success'))
+                _toast.fire({
+                    icon: 'success',
+                    title: @json(session('success'))
+                });
+            @endif
+
+            @if (session('error'))
+                _toast.fire({
+                    icon: 'error',
+                    title: @json(session('error'))
+                });
+            @endif
+
+            @if (session('warning'))
+                _toast.fire({
+                    icon: 'warning',
+                    title: @json(session('warning'))
+                });
+            @endif
+
+            @if ($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    html: '<ul style="text-align:left;padding-left:1.2rem;margin:0.25rem 0">' +
+                        @json($errors->all()).map(function(e) {
+                            return '<li style="margin-bottom:4px">' + e + '</li>';
+                        }).join('') +
+                        '</ul>',
+                    confirmButtonColor: '#22d3ee',
+                    background: '#1e293b',
+                    color: '#f1f5f9',
+                });
+            @endif
+        })();
+    </script>
+
     @yield('scripts')
 </body>
 

@@ -33,18 +33,6 @@
         </div>
     </div>
 
-    @if (session('success'))
-        <div class="mb-4 rounded-xl border border-emerald-300/30 bg-emerald-500/15 px-4 py-3 text-xs text-emerald-100">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="mb-4 rounded-xl border border-red-300/30 bg-red-500/15 px-4 py-3 text-xs text-red-100">
-            {{ session('error') }}
-        </div>
-    @endif
-
     {{-- Page Info Card --}}
     <div class="mb-4 rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5">
         <h2 class="mb-3 text-sm font-semibold text-cyan-300">{{ __('backoffice.pages.website_pages.page_info') }}</h2>

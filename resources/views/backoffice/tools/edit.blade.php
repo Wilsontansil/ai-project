@@ -10,16 +10,6 @@
                 class="font-mono text-cyan-300">{{ $tool->tool_name }}</span></p>
     </div>
 
-    @if ($errors->any())
-        <div class="rounded-2xl border border-rose-300/30 bg-rose-500/15 px-4 py-3 text-sm text-rose-100">
-            <ul class="list-inside list-disc space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
         <form method="POST" action="{{ route('backoffice.tools.update', $tool) }}" class="space-y-5">
             @csrf

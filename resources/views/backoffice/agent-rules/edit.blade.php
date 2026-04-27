@@ -21,16 +21,6 @@
         </a>
     </div>
 
-    @if ($errors->any())
-        <div class="rounded-xl border border-rose-300/30 bg-rose-500/15 px-4 py-3 text-xs text-rose-100">
-            <ul class="list-inside list-disc space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-4 sm:p-5">
         <form method="POST" action="{{ route('backoffice.agent-rules.update', [$chatAgent, $rule]) }}" class="space-y-4">
             @csrf

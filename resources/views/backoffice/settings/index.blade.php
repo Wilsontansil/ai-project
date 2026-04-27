@@ -12,17 +12,6 @@
         </div>
     </div>
 
-    @if (session('success'))
-        <div
-            class="flex items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-200">
-            <svg class="h-4 w-4 shrink-0 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                stroke-width="2" width="16" height="16" style="min-width:16px;max-width:16px;max-height:16px">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {{ session('success') }}
-        </div>
-    @endif
-
     <form method="POST" action="{{ route('backoffice.settings.update') }}" autocomplete="off" class="space-y-5">
         @csrf
 
@@ -187,9 +176,8 @@
                                         'support_whatsapp_phone' => '08120000000',
                                     ];
                                 @endphp
-                                <input id="setting_{{ $setting->id }}" type="text"
-                                    name="setting_{{ $setting->id }}" value="{{ $setting->value }}"
-                                    placeholder="{{ $placeholders[$setting->key] ?? '' }}"
+                                <input id="setting_{{ $setting->id }}" type="text" name="setting_{{ $setting->id }}"
+                                    value="{{ $setting->value }}" placeholder="{{ $placeholders[$setting->key] ?? '' }}"
                                     class="block w-full rounded-lg border border-white/10 bg-slate-950/60 text-xs text-white outline-none transition placeholder:text-slate-600 focus:border-white/30 focus:ring-1 focus:ring-white/10"
                                     style="padding:0.5rem 0.75rem" />
                             @endif

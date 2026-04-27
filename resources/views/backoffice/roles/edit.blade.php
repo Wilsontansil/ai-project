@@ -34,23 +34,6 @@
         </div>
 
         <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-4 sm:p-6">
-            @if ($errors->any())
-                <div class="mb-4 rounded-xl border border-rose-300/30 bg-rose-500/15 px-4 py-3 text-xs text-rose-100">
-                    <ul class="list-disc pl-4 space-y-1">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            @if (session('success'))
-                <div
-                    class="mb-4 rounded-xl border border-emerald-300/30 bg-emerald-500/15 px-4 py-3 text-xs text-emerald-100">
-                    {{ session('success') }}
-                </div>
-            @endif
-
             <form method="POST" action="{{ route('backoffice.roles.update', $role) }}" class="space-y-6">
                 @csrf
                 @method('PUT')

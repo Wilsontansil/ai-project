@@ -18,12 +18,6 @@
     <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-4 sm:p-5">
         <h2 class="mb-4 text-sm font-semibold">AI Agent Info</h2>
 
-        @if (session('success'))
-            <div class="mb-4 rounded-xl border border-emerald-300/30 bg-emerald-500/15 px-4 py-3 text-xs text-emerald-100">
-                {{ session('success') }}
-            </div>
-        @endif
-
         <form method="POST" action="{{ route('backoffice.ai-agent.update') }}">
             @csrf
             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"

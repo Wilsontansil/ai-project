@@ -14,12 +14,6 @@
         </div>
     </div>
 
-    @if (session('success'))
-        <div class="rounded-xl border border-emerald-300/30 bg-emerald-500/15 px-4 py-3 text-xs text-emerald-100">
-            {{ session('success') }}
-        </div>
-    @endif
-
     {{-- Agent Card Grid --}}
     <style>
         .agent-grid {

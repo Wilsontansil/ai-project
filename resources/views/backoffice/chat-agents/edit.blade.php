@@ -520,27 +520,26 @@
             <form method="POST" action="{{ route('backoffice.chat-agents.tools.sync', $agent) }}" class="space-y-4">
                 @csrf
                 <?php
-                    $selectedTools = old('tool_ids', $selectedToolIds ?? []);
-                    $normalizedSelected = [];
-                    foreach ((array) $selectedTools as $tid) {
-                        $normalizedSelected[] = (int) $tid;
-                    }
-                    $selectedTools = $normalizedSelected;
+                $selectedTools = old('tool_ids', $selectedToolIds ?? []);
+                $normalizedSelected = [];
+                foreach ((array) $selectedTools as $tid) {
+                    $normalizedSelected[] = (int) $tid;
+                }
+                $selectedTools = $normalizedSelected;
                 ?>
 
                 @if (($availableTools ?? collect())->isEmpty())
                     <p class="text-xs text-slate-400">No tools available.
                         @can('manage tools')
-                            <a href="{{ route('backoffice.tools.create') }}"
-                                class="text-cyan-400 hover:underline">Create the first tool</a>.
+                            <a href="{{ route('backoffice.tools.create') }}" class="text-cyan-400 hover:underline">Create
+                                the first tool</a>.
                         @endcan
                     </p>
                 @else
                     <div class="overflow-hidden rounded-xl border border-white/10">
                         <div class="overflow-x-auto">
                             <table class="min-w-full text-xs" style="width:100%">
-                                <thead
-                                    class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
+                                <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
                                     <tr>
                                         <th class="px-3 py-2 font-medium text-center">Assigned</th>
                                         <th class="px-3 py-2 font-medium">Name</th>
@@ -556,8 +555,7 @@
                                     @foreach ($availableTools as $tool)
                                         <tr class="transition hover:bg-white/5">
                                             <td class="px-3 py-2 text-center">
-                                                <input type="checkbox" name="tool_ids[]"
-                                                    value="{{ $tool->id }}"
+                                                <input type="checkbox" name="tool_ids[]" value="{{ $tool->id }}"
                                                     {{ in_array((int) $tool->id, $selectedTools, true) ? 'checked' : '' }}
                                                     class="accent-cyan-400" />
                                             </td>
@@ -599,8 +597,7 @@
                                                             onsubmit="return confirm('Delete tool \'{{ addslashes($tool->display_name) }}\'?')">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit"
-                                                                class="bo-btn-danger">Delete</button>
+                                                            <button type="submit" class="bo-btn-danger">Delete</button>
                                                         </form>
                                                     </div>
                                                 </td>

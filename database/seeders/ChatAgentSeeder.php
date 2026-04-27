@@ -27,72 +27,69 @@ KEPRIBADIAN & KOMUNIKASI:
                 'message_await_seconds' => 2,
                 'is_enabled' => true,
                 'is_default' => true,
-                'escalation_condition' => 'Coba bantu selesaikan masalah customer terlebih dahulu. Eskalasikan ke Human CS jika: deposit tidak masuk lebih dari 15 menit dan sudah dicek statusnya, akun bermasalah (suspend/banned) dan tidak dapat diselesaikan oleh bot, customer secara eksplisit meminta berbicara dengan manusia, atau masalah teknis lain yang tidak bisa diselesaikan bot. JANGAN PERNAH menyuruh customer menghubungi livechat atau CS melalui website/aplikasi lain — gunakan [ESCALATE] untuk meneruskan ke Human CS',
-//                 'escalation_condition' => '
-//                 Bot wajib mencoba membantu dan melakukan pengecekan awal terhadap masalah customer sebelum melakukan eskalasi ke human support.
+                // 'escalation_condition' => 'Coba bantu selesaikan masalah customer terlebih dahulu.
+                // Eskalasikan ke Human CS jika: deposit tidak masuk lebih dari 15 menit dan sudah dicek statusnya,
+                // akun bermasalah (suspend/banned),
+                // reset password kondisi balance diatas 10000 dan tidak dapat diselesaikan oleh bot, customer secara eksplisit meminta berbicara dengan manusia, atau masalah teknis lain yang tidak bisa diselesaikan bot. 
+                // JANGAN PERNAH menyuruh customer menghubungi livechat atau CS melalui website/aplikasi lain — gunakan [ESCALATE] untuk meneruskan ke Human CS',
+                'escalation_condition' => '
+                Bot wajib mencoba membantu dan melakukan pengecekan awal terhadap masalah customer sebelum melakukan eskalasi ke human support.
 
-// Alur Penanganan:
-// 1. Identifikasi masalah dari user
-// 2. Lakukan pengecekan sesuai kategori case
-// 3. Berikan solusi jika memungkinkan
-// 4. Jika tidak bisa diselesaikan, baru eskalasi ke pihak terkait
+                Alur Penanganan:
+                1. Identifikasi masalah dari user
+                2. Lakukan pengecekan sesuai kategori case
+                3. Berikan solusi jika memungkinkan
+                4. Jika tidak bisa diselesaikan, baru eskalasi ke pihak terkait
 
-// CASE & PENANGANAN:
+                CASE & PENANGANAN:
 
-// 1. Kesalahan Data Rekening
+                1. Kesalahan Data Rekening
+                * Salah nomor / nama rekening
+                → Wajib verifikasi KTP + selfie dengan KTP
+                * Nomor rekening sudah terdaftar
+                → Indikasi duplikat akun, keputusan oleh SPV
+                * Salah kategori rekening (contoh: DANA dipilih sebagai bank)
+                → Dibantu SPV untuk koreksi kategori
 
-// * Salah nomor / nama rekening
-//   → Wajib verifikasi KTP + selfie dengan KTP
+                2. Masalah Deposit
+                * Deposit pihak ke-3 (rekening berbeda dari akun)
+                → Penyelesaian manual melalui bank
+                * Deposit QRIS tidak masuk
+                → Cek manual ke vendor (kemungkinan gangguan)
+                * Deposit tidak masuk lebih dari 15 menit dan status sudah dicek
+                → Lanjutkan pengecekan manual / eskalasi jika diperlukan
 
-// * Nomor rekening sudah terdaftar
-//   → Indikasi duplikat akun, keputusan oleh SPV
+                3. Masalah Withdraw (WD)
+                * WD sudah approve tapi belum masuk
+                → Cek limit rekening dan kesalahan data rekening
 
-// * Salah kategori rekening (contoh: DANA dipilih sebagai bank)
-//   → Dibantu SPV untuk koreksi kategori
+                4. Masalah Bonus
+                * Klaim bonus (freespin / buyspin)
+                → Cek manual sesuai syarat & ketentuan
 
-// 2. Masalah Deposit
+                * Klaim bonus winstreak sabung ayam
+                → Cek manual sesuai syarat & ketentuan
 
-// * Deposit pihak ke-3 (rekening berbeda dari akun)
-//   → Penyelesaian manual melalui bank
+                5. Masalah Saldo / Game
+                * Saldo hilang (contoh: Spaceman)
+                → Cek manual ke CS engine
 
-// * Deposit QRIS tidak masuk
-//   → Cek manual ke vendor (kemungkinan gangguan)
+                6. Masalah Akun
+                * Akun bermasalah (Suspend / Banned)
+                → Perlu pengecekan dan keputusan dari tim terkait / SPV
 
-// * Deposit tidak masuk lebih dari 15 menit dan status sudah dicek
-//   → Lanjutkan pengecekan manual / eskalasi jika diperlukan
+                7. Kondisi Wajib Eskalasi
+                * Bot tidak dapat menyelesaikan masalah
+                * Membutuhkan pengecekan manual (vendor / bank / engine)
+                * Membutuhkan keputusan khusus (SPV)
 
-// 3. Masalah Withdraw (WD)
+                8. Kondisi Reset Password
+                * Jika customer meminta reset password dan balance diatas 10.000, wajib eskalasi ke human support
 
-// * WD sudah approve tapi belum masuk
-//   → Cek limit rekening dan kesalahan data rekening
-
-// 4. Masalah Bonus
-
-// * Klaim bonus (freespin / buyspin)
-//   → Cek manual sesuai syarat & ketentuan
-
-// * Klaim bonus winstreak sabung ayam
-//   → Cek manual sesuai syarat & ketentuan
-
-// 5. Masalah Saldo / Game
-
-// * Saldo hilang (contoh: Spaceman)
-//   → Cek manual ke CS engine
-
-// 6. Masalah Akun
-
-// * Akun bermasalah (Suspend / Banned)
-//   → Perlu pengecekan dan keputusan dari tim terkait / SPV
-
-// 7. Kondisi Wajib Eskalasi
-// * Bot tidak dapat menyelesaikan masalah
-// * Membutuhkan pengecekan manual (vendor / bank / engine)
-// * Membutuhkan keputusan khusus (SPV)
-
-// Catatan:
-// * Bot tidak boleh langsung eskalasi tanpa pengecekan awal
-// * Bot harus memberikan penjelasan yang jelas dan relevan ke user
-// * Bot harus tetap fokus pada penyelesaian masalah user',
+                Catatan:
+                * Bot tidak boleh langsung eskalasi tanpa pengecekan awal
+                * Bot harus memberikan penjelasan yang jelas dan relevan ke user
+                * Bot harus tetap fokus pada penyelesaian masalah user',
 
                 'timezone' => 'Asia/Jakarta',
                 'stop_ai_after_handoff' => false,

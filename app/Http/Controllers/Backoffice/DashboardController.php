@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\ProjectSetting;
 use App\Services\Agent\ChatAttachmentStorageService;
 use App\Services\Agent\ConversationMemoryService;
+use App\Services\AI\ConversationHistory;
 use App\Support\ResilientHttp;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -177,6 +178,9 @@ class DashboardController extends Controller
         if (($result['blocked'] ?? false) === true) {
             return back()->with('error', __('backoffice.pages.customer_chat.assign_blocked', ['name' => $result['owner_name']]));
         }
+
+        // Clear AI conversation history so the customer can escalate again in a fresh session.
+        app(ConversationHistory::class)->clear($customer->platform_user_id, $customer->platform);
 
         return back()->with('success', __('backoffice.pages.escalation.release_success'));
     }

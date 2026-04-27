@@ -57,6 +57,16 @@ class ConversationHistory
         Cache::put($this->lastActiveKey($chatId, $channel), now()->timestamp, $ttl);
     }
 
+    public function clear(?string $chatId, string $channel = ''): void
+    {
+        if (!$chatId) {
+            return;
+        }
+
+        Cache::forget($this->key($chatId, $channel));
+        Cache::forget($this->lastActiveKey($chatId, $channel));
+    }
+
     public function key(string $chatId, string $channel = ''): string
     {
         $prefix = $channel !== '' ? $channel . ':' : '';

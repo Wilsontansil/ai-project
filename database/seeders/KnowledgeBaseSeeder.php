@@ -151,7 +151,6 @@ Bonus APK adalah bonus yang hanya dapat diklaim melalui aplikasi (APK). Harus Di
 [Setting]
 - Multiplier = 1x
 
-
 6. Welcome Bonus New Member 100% [AKTIF]
 
 [Setting]
@@ -160,9 +159,6 @@ Bonus APK adalah bonus yang hanya dapat diklaim melalui aplikasi (APK). Harus Di
 - Minimal Deposit = 10000
 - Category To = Slot
 
-=======================================================================
-
-
 B. Bonus Cashback
 Bonus Cashback adalah bonus yang diberikan kepada member setiap hari Senin berdasarkan aktivitas deposit dan withdraw minggu lalu (Senin–Minggu).
 
@@ -170,6 +166,12 @@ Syarat kelayakan:
 - Hanya transaksi dengan status accept yang dihitung.
 - Jika Total Deposit > Total Withdraw → member berhak menerima cashback dari selisihnya.
 - Jika Total Withdraw > Total Deposit → member tidak dapat cashback (sudah profit).
+
+C. Bonus Promo
+Bonus yang harus di verifikasi oleh Human Support.
+- Bonus Buy Spin , Bonus Freespin
+- Bonus winstreak sabung ayam
+[Escalate] ke Human Support
 
 Catatan:
 - Tidak ada bonus lain selain bonus diatas.',

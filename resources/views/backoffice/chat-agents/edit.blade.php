@@ -62,16 +62,30 @@
                         <label for="model" class="bo-label">{{ __('backoffice.pages.chat_agents.model') }}</label>
                         <select id="model" name="model">
                             <?php $currentModel = old('model', $agent->model); ?>
-                            <option value="gpt-4.1-mini" {{ $currentModel === 'gpt-4.1-mini' ? 'selected' : '' }}>
-                                gpt-4.1-mini
-                            </option>
-                            <option value="gpt-4.1" {{ $currentModel === 'gpt-4.1' ? 'selected' : '' }}>gpt-4.1</option>
-                            <option value="gpt-4.1-nano" {{ $currentModel === 'gpt-4.1-nano' ? 'selected' : '' }}>
-                                gpt-4.1-nano
-                            </option>
-                            <option value="gpt-4o" {{ $currentModel === 'gpt-4o' ? 'selected' : '' }}>gpt-4o</option>
-                            <option value="gpt-4o-mini" {{ $currentModel === 'gpt-4o-mini' ? 'selected' : '' }}>gpt-4o-mini
-                            </option>
+                            <optgroup label="── GPT-5 Series ──">
+                                <option value="gpt-5" {{ $currentModel === 'gpt-5' ? 'selected' : '' }}>gpt-5 — ★★★★★
+                                    Latest flagship, most intelligent</option>
+                            </optgroup>
+                            <optgroup label="── Reasoning Models ──">
+                                <option value="o4-mini" {{ $currentModel === 'o4-mini' ? 'selected' : '' }}>o4-mini — ★★★★★
+                                    Advanced reasoning, best logic &amp; analysis</option>
+                                <option value="o3-mini" {{ $currentModel === 'o3-mini' ? 'selected' : '' }}>o3-mini — ★★★★★
+                                    Strong reasoning, cost-efficient</option>
+                            </optgroup>
+                            <optgroup label="── GPT-4.1 Series ──">
+                                <option value="gpt-4.1" {{ $currentModel === 'gpt-4.1' ? 'selected' : '' }}>gpt-4.1 — ★★★★★
+                                    Most capable, complex tasks</option>
+                                <option value="gpt-4.1-mini" {{ $currentModel === 'gpt-4.1-mini' ? 'selected' : '' }}>
+                                    gpt-4.1-mini — ★★★★☆ Recommended · balanced speed &amp; quality</option>
+                                <option value="gpt-4.1-nano" {{ $currentModel === 'gpt-4.1-nano' ? 'selected' : '' }}>
+                                    gpt-4.1-nano — ★★★☆☆ Fastest &amp; cheapest</option>
+                            </optgroup>
+                            <optgroup label="── GPT-4o Series ──">
+                                <option value="gpt-4o" {{ $currentModel === 'gpt-4o' ? 'selected' : '' }}>gpt-4o — ★★★★☆
+                                    Multimodal, high quality</option>
+                                <option value="gpt-4o-mini" {{ $currentModel === 'gpt-4o-mini' ? 'selected' : '' }}>
+                                    gpt-4o-mini — ★★★☆☆ Fast &amp; affordable</option>
+                            </optgroup>
                         </select>
                     </div>
                 </div>

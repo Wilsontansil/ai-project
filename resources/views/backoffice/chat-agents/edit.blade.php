@@ -3,12 +3,14 @@
 @section('title', __('backoffice.common.edit') . ' — ' . $agent->name)
 @section('page-title', __('backoffice.pages.chat_agents.page_title'))
 
-@php($boActive = 'chat-agents')
+@php
+    $boActive = 'chat-agents';
+@endphp
 
 @section('content')
-    @php($isGeneralTab = ($activeTab ?? 'general') === 'general')
-    @php($isKnowledgeTab = ($activeTab ?? 'general') === 'knowledge-base')
-    @php($isRulesTab = ($activeTab ?? 'general') === 'rules')
+    <?php $isGeneralTab = ($activeTab ?? 'general') === 'general'; ?>
+    <?php $isKnowledgeTab = ($activeTab ?? 'general') === 'knowledge-base'; ?>
+    <?php $isRulesTab = ($activeTab ?? 'general') === 'rules'; ?>
 
     {{-- Header --}}
     <div style="display:flex;align-items:center;justify-content:space-between"
@@ -70,7 +72,7 @@
                     <div>
                         <label for="model" class="bo-label">{{ __('backoffice.pages.chat_agents.model') }}</label>
                         <select id="model" name="model">
-                            @php($currentModel = old('model', $agent->model))
+                            <?php $currentModel = old('model', $agent->model); ?>
                             <option value="gpt-4.1-mini" {{ $currentModel === 'gpt-4.1-mini' ? 'selected' : '' }}>
                                 gpt-4.1-mini
                             </option>
@@ -153,7 +155,7 @@
                     <div>
                         <label for="timezone" class="bo-label">{{ __('backoffice.pages.chat_agents.timezone') }}</label>
                         <select id="timezone" name="timezone">
-                            @php($selectedTimezone = old('timezone', $agent->timezone ?? config('app.timezone', 'UTC')))
+                            <?php $selectedTimezone = old('timezone', $agent->timezone ?? config('app.timezone', 'UTC')); ?>
                             @foreach ($timezoneOptions as $timezone)
                                 <option value="{{ $timezone }}"
                                     {{ $selectedTimezone === $timezone ? 'selected' : '' }}>

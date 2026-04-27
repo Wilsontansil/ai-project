@@ -7,6 +7,7 @@ use App\Models\ProjectSetting;
 use App\Models\Customer;
 use App\Services\Agent\AgentContextService;
 use App\Services\Agent\ConversationMemoryService;
+use App\Services\AI\ConversationHistory;
 use App\Services\AIService;
 use App\Support\MetricsCollector;
 use App\Support\ResilientHttp;
@@ -310,14 +311,16 @@ class ProcessAiReply implements ShouldQueue
                 return;
             }
 
-            $recent = app(\App\Services\Agent\ConversationMemoryService::class)->getRecent($customer, 15);
-            if ($recent->isEmpty()) {
+            // Use cache-based session history (current session only) instead of DB history
+            // (all-day) so the summary reflects only the current escalation reason.
+            $sessionMessages = app(ConversationHistory::class)->load($this->chatId, $this->channel);
+            if (empty($sessionMessages)) {
                 return;
             }
 
-            $transcript = $recent->map(function ($msg) {
+            $transcript = collect($sessionMessages)->map(function ($msg) {
                 $role = $msg['role'] === 'assistant' ? 'Bot' : 'Customer';
-                return "{$role}: " . ($msg['message'] ?? '');
+                return "{$role}: " . ($msg['content'] ?? '');
             })->implode("\n");
 
             $client = OpenAI::client($apiKey);

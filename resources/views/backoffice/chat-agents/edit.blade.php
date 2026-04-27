@@ -183,7 +183,7 @@
                     <div>
                         <textarea name="escalation_condition" rows="3" maxlength="3000"
                             placeholder="{{ __('backoffice.pages.chat_agents.agent_transfer_placeholder') }}"
-                            class="block w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-xs text-white outline-none transition focus:border-cyan-400 placeholder-slate-500 resize-none"
+                            class="block w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-xs text-white outline-none transition focus:border-cyan-400 placeholder-slate-500 resize-y"
                             style="background-color:rgba(15,23,42,0.7)">{{ old('escalation_condition', $agent->escalation_condition) }}</textarea>
                         <p class="mt-1 text-[11px] text-slate-500">
                             {{ mb_strlen(old('escalation_condition', $agent->escalation_condition ?? '')) }}/3000</p>

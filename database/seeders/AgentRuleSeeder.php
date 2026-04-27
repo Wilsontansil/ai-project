@@ -90,6 +90,14 @@ Data tersebut TIDAK BISA DIGANTI setelah pendaftaran. TOLAK permintaan perubahan
                 'level' => 'danger',
                 'priority' => 100,
             ],
+            [
+                'title' => 'Human Support',
+                'instruction' => 'DILARANG menyebutkan nomor telepon, email, livechat, atau kontak CS eksternal apapun. Platform ini tidak memiliki kontak CS selain sistem eskalasi internal. Jika tidak bisa menyelesaikan masalah, gunakan jalur eskalasi internal — JANGAN arahkan customer ke platform atau channel lain.',
+                'type' => 'forbidden',
+                'category' => 'behavior',
+                'level' => 'danger',
+                'priority' => 5,
+            ],
         ];
 
         foreach ($rules as $rule) {

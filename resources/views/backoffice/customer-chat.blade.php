@@ -374,12 +374,36 @@
 
                 const sendForm = document.getElementById('chat-send-form');
                 const sendTextarea = document.getElementById('chat-send-textarea');
+                const fileInput = document.getElementById('chat-send-attachment');
+                const fileName = document.getElementById('chat-send-attachment-name');
+                const clearButton = document.getElementById('chat-send-attachment-clear');
                 if (sendForm && sendTextarea) {
                     sendTextarea.addEventListener('keydown', function(e) {
                         if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
                             e.preventDefault();
                             sendForm.requestSubmit();
                         }
+                    });
+                }
+
+                if (fileInput && fileName) {
+                    fileInput.addEventListener('change', function() {
+                        const nextName = fileInput.files && fileInput.files[0] ? fileInput.files[0]
+                            .name : '';
+                        fileName.textContent = nextName ||
+                            '{{ __('backoffice.pages.customer_chat.no_file_selected') }}';
+                        if (clearButton) {
+                            clearButton.classList.toggle('hidden', nextName === '');
+                        }
+                    });
+                }
+
+                if (clearButton && fileInput && fileName) {
+                    clearButton.addEventListener('click', function() {
+                        fileInput.value = '';
+                        fileName.textContent =
+                            '{{ __('backoffice.pages.customer_chat.no_file_selected') }}';
+                        clearButton.classList.add('hidden');
                     });
                 }
             });
@@ -407,14 +431,25 @@
     <div id="chat-send-bar" class="rounded-2xl border border-slate-700/70 bg-slate-950 p-4"
         style="position:sticky;bottom:0;z-index:20;">
         @if ($canSend)
-            <form id="chat-send-form" method="POST"
+            <form id="chat-send-form" method="POST" enctype="multipart/form-data"
                 action="{{ route('backoffice.customer.send-message', $customer->id) }}">
                 @csrf
+                <input id="chat-send-attachment" type="file" name="attachment" class="hidden"
+                    accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,text/plain,text/csv,application/zip,application/x-zip-compressed,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,video/mp4,video/webm,audio/mpeg,audio/mp4,audio/ogg,audio/wav" />
                 <div class="flex items-end gap-3">
                     <textarea id="chat-send-textarea" name="message" rows="1"
                         placeholder="{{ __('backoffice.pages.customer_chat.type_message') }}"
                         class="flex-1 resize-none rounded-xl border border-white/10 bg-slate-800 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-cyan-400"
                         style="max-height:140px;overflow-y:auto;"></textarea>
+                    <label for="chat-send-attachment"
+                        class="flex shrink-0 cursor-pointer items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition"
+                        style="background:rgba(255,255,255,0.08);color:#e2e8f0;border:1px solid rgba(255,255,255,0.12);">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                            <path
+                                d="M16.5 6v11.25a4.125 4.125 0 1 1-8.25 0V7.5a2.625 2.625 0 1 1 5.25 0v8.625a1.125 1.125 0 1 1-2.25 0V9.75a.75.75 0 0 0-1.5 0v6.375a2.625 2.625 0 1 0 5.25 0V7.5a4.125 4.125 0 1 0-8.25 0v9.75a5.625 5.625 0 1 0 11.25 0V6a.75.75 0 0 0-1.5 0Z" />
+                        </svg>
+                        {{ __('backoffice.pages.customer_chat.attach_file') }}
+                    </label>
                     <button type="submit"
                         class="flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition"
                         style="background:rgba(34,211,238,0.25);color:#22d3ee;border:1px solid rgba(34,211,238,0.5);">
@@ -423,6 +458,14 @@
                                 d="M3.478 2.405a.75.75 0 0 0-.926.94l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.405Z" />
                         </svg>
                         {{ __('backoffice.pages.customer_chat.send') }}
+                    </button>
+                </div>
+                <div class="mt-2 flex items-center gap-2 text-[11px] text-slate-400">
+                    <span
+                        id="chat-send-attachment-name">{{ __('backoffice.pages.customer_chat.no_file_selected') }}</span>
+                    <button id="chat-send-attachment-clear" type="button"
+                        class="hidden rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-slate-300 transition hover:bg-white/5">
+                        {{ __('backoffice.pages.customer_chat.clear_file') }}
                     </button>
                 </div>
                 <p class="mt-2 text-[11px] text-slate-500">
@@ -434,6 +477,15 @@
                 <textarea rows="1" placeholder="{{ __('backoffice.pages.customer_chat.type_message') }}"
                     class="flex-1 resize-none rounded-xl border border-white/10 bg-slate-800 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none"
                     style="max-height:140px;overflow-y:auto;cursor:not-allowed;opacity:0.4;" disabled></textarea>
+                <button type="button" class="flex shrink-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold"
+                    style="background:rgba(255,255,255,0.08);color:#e2e8f0;border:1px solid rgba(255,255,255,0.12);cursor:not-allowed;opacity:0.4;"
+                    disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                        <path
+                            d="M16.5 6v11.25a4.125 4.125 0 1 1-8.25 0V7.5a2.625 2.625 0 1 1 5.25 0v8.625a1.125 1.125 0 1 1-2.25 0V9.75a.75.75 0 0 0-1.5 0v6.375a2.625 2.625 0 1 0 5.25 0V7.5a4.125 4.125 0 1 0-8.25 0v9.75a5.625 5.625 0 1 0 11.25 0V6a.75.75 0 0 0-1.5 0Z" />
+                    </svg>
+                    {{ __('backoffice.pages.customer_chat.attach_file') }}
+                </button>
                 <button type="button" class="flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold"
                     style="background:rgba(34,211,238,0.15);color:#22d3ee;border:1px solid rgba(34,211,238,0.3);cursor:not-allowed;opacity:0.4;"
                     disabled>

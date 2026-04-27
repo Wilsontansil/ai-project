@@ -6,12 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\Customer;
 use App\Models\ProjectSetting;
+use App\Services\Agent\ChatAttachmentStorageService;
 use App\Services\Agent\ConversationMemoryService;
 use App\Support\ResilientHttp;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
@@ -274,9 +277,21 @@ class DashboardController extends Controller
             return back()->with('send_error', __('backoffice.pages.customer_chat.send_error_platform'));
         }
 
-        $message = trim((string) $request->input('message', ''));
+        $validated = $request->validate([
+            'message' => ['nullable', 'string'],
+            'attachment' => [
+                'nullable',
+                'file',
+                'max:10240',
+                'mimetypes:image/jpeg,image/png,image/gif,image/webp,application/pdf,text/plain,text/csv,application/zip,application/x-zip-compressed,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,video/mp4,video/webm,audio/mpeg,audio/mp4,audio/ogg,audio/wav',
+            ],
+        ]);
 
-        if ($message === '') {
+        $message = trim((string) ($validated['message'] ?? ''));
+        /** @var UploadedFile|null $attachmentFile */
+        $attachmentFile = $request->file('attachment');
+
+        if ($message === '' && $attachmentFile === null) {
             return back()->with('send_error', __('backoffice.pages.customer_chat.send_error_empty'));
         }
 
@@ -291,24 +306,47 @@ class DashboardController extends Controller
         }
 
         try {
+            $attachmentMeta = null;
+            $historyMessage = $message;
+
+            if ($attachmentFile !== null) {
+                $attachmentMeta = $this->storeUploadedAttachment($customer, $attachmentFile);
+                $historyMessage = $historyMessage !== ''
+                    ? $historyMessage
+                    : $this->syntheticAttachmentText($attachmentMeta);
+            }
+
             if ($customer->platform === 'telegram') {
-                $this->sendTelegram($chatId, $message);
+                if ($attachmentFile !== null && $attachmentMeta !== null) {
+                    $this->sendTelegramAttachment($chatId, $attachmentFile, $attachmentMeta, $message);
+                } else {
+                    $this->sendTelegram($chatId, $message);
+                }
             } elseif ($customer->platform === 'whatsapp') {
-                $this->sendWhatsApp($chatId, $message);
+                if ($attachmentMeta !== null) {
+                    $this->sendWhatsAppAttachmentFallback($chatId, $attachmentMeta, $message);
+                } else {
+                    $this->sendWhatsApp($chatId, $message);
+                }
             } else {
                 $threadId = ($customer->tags ?? [])['livechat_thread_id'] ?? null;
-                $this->sendLiveChat($chatId, $message, $threadId);
+                if ($attachmentMeta !== null) {
+                    $this->sendLiveChatAttachmentFallback($chatId, $attachmentMeta, $message, $threadId);
+                } else {
+                    $this->sendLiveChat($chatId, $message, $threadId);
+                }
             }
 
             app(ConversationMemoryService::class)->addMessage(
                 $customer,
                 $customer->platform,
                 'assistant',
-                $message,
+                $historyMessage,
                 [
                     'sent_by' => 'admin',
                     'sent_by_user_id' => $currentUser->id,
                     'sent_by_user_name' => $currentUser->name ?: $currentUser->username,
+                    'attachment' => $attachmentMeta,
                 ]
             );
         } catch (\Throwable $e) {
@@ -322,6 +360,55 @@ class DashboardController extends Controller
         }
 
         return back()->with('send_success', __('backoffice.pages.customer_chat.send_success'));
+    }
+
+    private function storeUploadedAttachment(Customer $customer, UploadedFile $attachmentFile): array
+    {
+        return app(ChatAttachmentStorageService::class)->store(
+            $customer->platform,
+            (string) $customer->platform_user_id,
+            $attachmentFile->getClientOriginalName(),
+            $attachmentFile->getMimeType() ?: 'application/octet-stream',
+            $attachmentFile->get()
+        );
+    }
+
+    private function syntheticAttachmentText(array $attachmentMeta): string
+    {
+        return match ($attachmentMeta['type'] ?? 'document') {
+            'image' => '[image]',
+            'video' => '[video]',
+            'audio' => '[audio]',
+            default => '[document: ' . ($attachmentMeta['original_name'] ?? 'file') . ']',
+        };
+    }
+
+    private function sendTelegramAttachment(string $chatId, UploadedFile $attachmentFile, array $attachmentMeta, string $caption = ''): void
+    {
+        $token = (string) ProjectSetting::getValue('telegram_bot_token', config('services.telegram.bot_token', ''));
+
+        if ($token === '') {
+            throw new \RuntimeException('Telegram bot token is not configured.');
+        }
+
+        $method = ($attachmentMeta['type'] ?? 'document') === 'image' ? 'sendPhoto' : 'sendDocument';
+        $field = $method === 'sendPhoto' ? 'photo' : 'document';
+        $url = "https://api.telegram.org/bot{$token}/{$method}";
+
+        $request = Http::timeout(20)
+            ->attach($field, $attachmentFile->get(), $attachmentFile->getClientOriginalName())
+            ->asMultipart();
+
+        $payload = ['chat_id' => $chatId];
+        if ($caption !== '') {
+            $payload['caption'] = $caption;
+        }
+
+        $response = $request->post($url, $payload);
+
+        if ($response->failed()) {
+            throw new \RuntimeException('Telegram attachment send failed with status: ' . $response->status());
+        }
     }
 
     private function sendTelegram(string $chatId, string $text): void
@@ -363,6 +450,12 @@ class DashboardController extends Controller
         if ($response !== null && $response->failed()) {
             throw new \RuntimeException('WAHA sendText failed with status: ' . $response->status());
         }
+    }
+
+    private function sendWhatsAppAttachmentFallback(string $chatId, array $attachmentMeta, string $caption = ''): void
+    {
+        $message = $this->buildAttachmentFallbackMessage($attachmentMeta, $caption);
+        $this->sendWhatsApp($chatId, $message);
     }
 
     private function sendLiveChat(string $chatId, string $text, ?string $threadId = null): void
@@ -426,5 +519,32 @@ class DashboardController extends Controller
             ]);
             throw new \RuntimeException('LiveChat send_event failed with status: ' . $response->status());
         }
+    }
+
+    private function sendLiveChatAttachmentFallback(string $chatId, array $attachmentMeta, string $caption = '', ?string $threadId = null): void
+    {
+        $message = $this->buildAttachmentFallbackMessage($attachmentMeta, $caption);
+        $this->sendLiveChat($chatId, $message, $threadId);
+    }
+
+    private function buildAttachmentFallbackMessage(array $attachmentMeta, string $caption = ''): string
+    {
+        $attachmentUrl = $this->publicAttachmentUrl((string) ($attachmentMeta['path'] ?? ''));
+        $label = $caption !== ''
+            ? $caption
+            : $this->syntheticAttachmentText($attachmentMeta);
+
+        return trim($label . "\n" . $attachmentUrl);
+    }
+
+    private function publicAttachmentUrl(string $path): string
+    {
+        $baseUrl = rtrim((string) config('filesystems.disks.sftp.url', ''), '/');
+
+        if ($baseUrl === '' || $path === '') {
+            throw new \RuntimeException('Attachment public base URL is not configured.');
+        }
+
+        return $baseUrl . '/' . ltrim($path, '/');
     }
 }

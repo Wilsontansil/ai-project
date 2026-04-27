@@ -121,6 +121,13 @@
             <div id="chat-messages" class="space-y-4">
                 @php $lastDate = null; @endphp
                 @foreach ($messages as $msg)
+                    @php
+                        $messageText = trim((string) ($msg['message'] ?? ''));
+                        $hasAttachment = filled(data_get($msg, 'meta.attachment.path'));
+                    @endphp
+                    @if (!$hasAttachment && $messageText === '')
+                        @continue
+                    @endif
                     @php $msgDate = $msg['date'] ?? null; @endphp
                     @if ($msgDate !== $lastDate)
                         <div class="flex items-center gap-3 py-2">
@@ -257,6 +264,13 @@
         </div>`;
             }
 
+            function hasRenderableContent(msg) {
+                const text = String(msg?.message ?? '').trim();
+                const attachmentPath = String(msg?.meta?.attachment?.path ?? '').trim();
+
+                return text !== '' || attachmentPath !== '';
+            }
+
             function buildUserBubble(msg) {
                 return `<div class="flex justify-start">
             <div class="inline-flex w-auto max-w-[50%] flex-col break-words rounded-2xl rounded-bl-sm border border-white/10 bg-slate-800 px-4 py-3 shadow-lg shadow-black/20" style="max-width:50%;">
@@ -294,7 +308,11 @@
                 const wrap = document.getElementById('chat-messages-wrap');
                 if (!wrap) return;
 
-                if (messages.length === 0) {
+                const visibleMessages = Array.isArray(messages) ?
+                    messages.filter(hasRenderableContent) :
+                    [];
+
+                if (visibleMessages.length === 0) {
                     wrap.innerHTML =
                         `<p class="py-8 text-center text-sm text-slate-400">{{ __('backoffice.pages.customer_chat.empty') }}</p>`;
                     return;
@@ -302,7 +320,7 @@
 
                 let html = '<div id="chat-messages" class="space-y-4">';
                 let lastDate = null;
-                messages.forEach(msg => {
+                visibleMessages.forEach(msg => {
                     const d = msg.date ?? null;
                     if (d !== lastDate) {
                         html += buildDateSep(d);
@@ -319,7 +337,7 @@
                     return '';
                 }
 
-                return messages.map(msg => {
+                return messages.filter(hasRenderableContent).map(msg => {
                     const attachmentPath = msg?.meta?.attachment?.path ?? '';
                     return [
                         msg?.date ?? '',

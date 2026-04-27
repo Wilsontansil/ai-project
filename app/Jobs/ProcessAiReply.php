@@ -137,7 +137,7 @@ class ProcessAiReply implements ShouldQueue
             }
         }
 
-        if ($customer !== null) {
+        if ($customer !== null && trim($reply) !== '') {
             try {
                 app(ConversationMemoryService::class)->addMessage(
                     $customer,

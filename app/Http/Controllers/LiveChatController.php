@@ -198,7 +198,7 @@ class LiveChatController extends Controller
 
         MetricsCollector::recordRequest('livechat', MetricsCollector::elapsed($requestStart));
 
-        if ($customer !== null) {
+        if ($customer !== null && trim($reply) !== '') {
             try {
                 app(ConversationMemoryService::class)->addMessage(
                     $customer,

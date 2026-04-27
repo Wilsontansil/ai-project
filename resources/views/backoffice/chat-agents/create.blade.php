@@ -103,7 +103,7 @@
                 <div>
                     <label for="timezone" class="bo-label">{{ __('backoffice.pages.chat_agents.timezone') }}</label>
                     <select id="timezone" name="timezone">
-                        @php($selectedTimezone = old('timezone', config('app.timezone', 'UTC')))
+                        @php($selectedTimezone = old('timezone', config('app.timezone', 'Asia/Jakarta')))
                         @foreach ($timezoneOptions as $timezone)
                             <option value="{{ $timezone }}" {{ $selectedTimezone === $timezone ? 'selected' : '' }}>
                                 {{ $timezone }}

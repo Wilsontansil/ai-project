@@ -82,22 +82,28 @@
                                     <td class="px-3 py-2 text-slate-400">{{ $user->created_at?->format('d M Y') }}</td>
                                     <td class="px-3 py-2 text-right">
                                         <div class="flex items-center justify-end gap-2">
-                                            <a href="{{ route('backoffice.users.edit', $user) }}"
-                                                class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
-                                                {{ __('backoffice.common.edit') }}
-                                            </a>
-                                            @if ($user->id !== auth()->id())
-                                                <form method="POST"
-                                                    action="{{ route('backoffice.users.destroy', $user) }}"
-                                                    onsubmit="return confirm('{{ __('backoffice.pages.users.delete_confirm', ['name' => $user->name]) }}')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                        class="rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-1.5 text-xs text-red-300 transition hover:bg-red-500/20">
-                                                        {{ __('backoffice.common.delete') }}
-                                                    </button>
-                                                </form>
-                                            @endif
+                                            @can('manage users')
+                                                <a href="{{ route('backoffice.users.edit', $user) }}"
+                                                    class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10">
+                                                    {{ __('backoffice.common.edit') }}
+                                                </a>
+                                                <a href="{{ route('backoffice.users.password.edit', $user) }}"
+                                                    class="rounded-lg border border-amber-400/20 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-300 transition hover:bg-amber-500/20">
+                                                    {{ __('backoffice.pages.users.password') }}
+                                                </a>
+                                                @if ($user->id !== auth()->id())
+                                                    <form method="POST"
+                                                        action="{{ route('backoffice.users.destroy', $user) }}"
+                                                        onsubmit="return confirm('{{ __('backoffice.pages.users.delete_confirm', ['name' => $user->name]) }}')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                            class="rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-1.5 text-xs text-red-300 transition hover:bg-red-500/20">
+                                                            {{ __('backoffice.common.delete') }}
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>

@@ -121,6 +121,8 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
         Route::post('/backoffice/users', [UserController::class, 'store'])->name('backoffice.users.store');
         Route::get('/backoffice/users/{user}/edit', [UserController::class, 'edit'])->name('backoffice.users.edit');
         Route::put('/backoffice/users/{user}', [UserController::class, 'update'])->name('backoffice.users.update');
+        Route::get('/backoffice/users/{user}/password', [UserController::class, 'editPassword'])->name('backoffice.users.password.edit');
+        Route::put('/backoffice/users/{user}/password', [UserController::class, 'updatePassword'])->name('backoffice.users.password.update');
         Route::delete('/backoffice/users/{user}', [UserController::class, 'destroy'])->name('backoffice.users.destroy');
     });
 

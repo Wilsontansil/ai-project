@@ -71,7 +71,6 @@ class UserController extends Controller
             'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')->ignore($user->id), 'regex:/^[a-zA-Z0-9_]+$/'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-            'password' => ['nullable', 'string', Password::min(8), 'confirmed'],
             'role' => ['required', 'string', 'exists:roles,name'],
         ]);
 
@@ -81,14 +80,30 @@ class UserController extends Controller
             'email' => trim($data['email']),
         ]);
 
-        if (! empty($data['password'])) {
-            $user->update(['password' => Hash::make($data['password'])]);
-        }
-
         $user->syncRoles([$data['role']]);
 
         return redirect()->route('backoffice.users.index')
             ->with('success', __('backoffice.pages.users.updated_success'));
+    }
+
+    public function editPassword(User $user): View
+    {
+        return view('backoffice.users.edit-password', [
+            'user' => $user,
+            'boActive' => 'users',
+        ]);
+    }
+
+    public function updatePassword(Request $request, User $user): RedirectResponse
+    {
+        $request->validate([
+            'password' => ['required', 'string', Password::min(8), 'confirmed'],
+        ]);
+
+        $user->update(['password' => Hash::make($request->password)]);
+
+        return redirect()->route('backoffice.users.index')
+            ->with('success', __('backoffice.pages.users.password_updated_success'));
     }
 
     public function destroy(User $user): RedirectResponse

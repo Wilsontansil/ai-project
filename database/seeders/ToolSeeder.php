@@ -75,7 +75,7 @@ class ToolSeeder extends Seeder
                         ],
                     ],
                 ],
-                'keywords' => ['reset password', 'resetpass', 'kata sandi', 'lupa password', 'lupa kata sandi'],
+                'keywords' => ['Reset Password', 'reset pass'],
                 'tool_rules' => "- Terima data user dalam format chat bebas\n- Jika sebagian data sudah ada, cukup minta data yang masih kurang\n- Jangan eksekusi sebelum semua data wajib terkumpul lengkap\n- Setelah berhasil, infokan password direset ke 1234567 dan berikan link ke website untuk login\n- Jika data tidak cocok, minta user periksa kembali atau tawarkan untuk dibantu REGISTER",
                 'information_text' => null,
                 'meta' => null,

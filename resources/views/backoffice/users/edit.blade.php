@@ -59,22 +59,6 @@
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
             </div>
 
-            <div class="grid gap-4 md:grid-cols-2">
-                <div>
-                    <label for="password"
-                        class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.users.password') }}</label>
-                    <input id="password" type="password" name="password" placeholder="••••••••"
-                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
-                    <p class="mt-1 text-xs text-slate-400">{{ __('backoffice.pages.users.password_keep_hint') }}</p>
-                </div>
-                <div>
-                    <label for="password_confirmation"
-                        class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.users.password_confirmation') }}</label>
-                    <input id="password_confirmation" type="password" name="password_confirmation" placeholder="••••••••"
-                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
-                </div>
-            </div>
-
             <div>
                 <label for="role"
                     class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.users.role') }}</label>

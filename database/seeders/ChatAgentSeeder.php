@@ -28,6 +28,7 @@ KEPRIBADIAN & KOMUNIKASI:
                 'is_enabled' => true,
                 'is_default' => true,
                 'escalation_condition' => 'Coba bantu selesaikan masalah customer terlebih dahulu. Eskalasikan ke Human CS jika: deposit tidak masuk lebih dari 15 menit dan sudah dicek statusnya, akun bermasalah (suspend/banned) dan tidak dapat diselesaikan oleh bot, customer secara eksplisit meminta berbicara dengan manusia, atau masalah teknis lain yang tidak bisa diselesaikan bot. JANGAN PERNAH menyuruh customer menghubungi livechat atau CS melalui website/aplikasi lain — gunakan [ESCALATE] untuk meneruskan ke Human CS',
+                'timezone' => 'Asia/Jakarta',
                 'stop_ai_after_handoff' => false,
                 'silent_handoff' => false,
             ]

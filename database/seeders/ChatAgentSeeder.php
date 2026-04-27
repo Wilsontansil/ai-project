@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\ChatAgent;
-use App\Models\Tool;
 use Illuminate\Database\Seeder;
 
 class ChatAgentSeeder extends Seeder
@@ -34,12 +33,5 @@ KEPRIBADIAN & KOMUNIKASI:
             ]
         );
 
-        $toolIds = Tool::query()
-            ->where('tool_name', '!=', '_bot_config')
-            ->where('is_enabled', true)
-            ->pluck('id')
-            ->all();
-
-        $agent->tools()->sync($toolIds);
     }
 }

@@ -43,17 +43,10 @@ class ToolDispatcher
     public function getEnabledTools(?ChatAgent $chatAgent = null): Collection
     {
         try {
-            if ($chatAgent !== null) {
-                return $chatAgent->tools()
-                    ->with('dataModel')
-                    ->where('tool_name', '!=', '_bot_config')
-                    ->orderBy('tools.id')
-                    ->get();
-            }
-
             return Tool::query()
                 ->with('dataModel')
                 ->where('tool_name', '!=', '_bot_config')
+                ->orderBy('id')
                 ->get();
         } catch (\Throwable) {
             return collect();

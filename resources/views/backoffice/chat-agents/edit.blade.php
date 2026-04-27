@@ -406,10 +406,12 @@
                     <h2 class="text-sm font-semibold text-white">{{ __('backoffice.pages.chat_agents.agent_rules') }}</h2>
                     <p class="text-xs text-slate-400">{{ __('backoffice.pages.chat_agents.agent_rules_subtitle') }}</p>
                 </div>
-                <a href="{{ route('backoffice.agent-rules.create', $agent) }}" class="bo-btn-primary"
-                    style="font-size:0.75rem;padding:0.5rem 1rem">
-                    + {{ __('backoffice.pages.chat_agents.new_rule') }}
-                </a>
+                @can('manage agent-rules')
+                    <a href="{{ route('backoffice.agent-rules.create', $agent) }}" class="bo-btn-primary"
+                        style="font-size:0.75rem;padding:0.5rem 1rem">
+                        + {{ __('backoffice.pages.chat_agents.new_rule') }}
+                    </a>
+                @endcan
             </div>
 
             @if ($agentRules->isEmpty())
@@ -480,18 +482,20 @@
                                         <td class="px-3 py-2 text-right">
                                             <div
                                                 style="display:flex;align-items:center;justify-content:flex-end;gap:0.5rem">
-                                                <a href="{{ route('backoffice.agent-rules.edit', [$agent, $rule]) }}"
-                                                    class="bo-btn-sm">
-                                                    {{ __('backoffice.common.edit') }}
-                                                </a>
-                                                <form method="POST"
-                                                    action="{{ route('backoffice.agent-rules.destroy', [$agent, $rule]) }}"
-                                                    onsubmit="return confirm('{{ __('backoffice.pages.chat_agents.delete_confirm_rule', ['title' => $rule->title]) }}')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                        class="bo-btn-danger">{{ __('backoffice.common.delete') }}</button>
-                                                </form>
+                                                @can('manage agent-rules')
+                                                    <a href="{{ route('backoffice.agent-rules.edit', [$agent, $rule]) }}"
+                                                        class="bo-btn-sm">
+                                                        {{ __('backoffice.common.edit') }}
+                                                    </a>
+                                                    <form method="POST"
+                                                        action="{{ route('backoffice.agent-rules.destroy', [$agent, $rule]) }}"
+                                                        onsubmit="return confirm('{{ __('backoffice.pages.chat_agents.delete_confirm_rule', ['title' => $rule->title]) }}')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                            class="bo-btn-danger">{{ __('backoffice.common.delete') }}</button>
+                                                    </form>
+                                                @endcan
                                             </div>
                                         </td>
                                     </tr>
@@ -509,7 +513,7 @@
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
                 <div>
                     <h2 class="text-sm font-semibold text-white">Tools</h2>
-                    <p class="text-xs text-slate-400">Assign tools to this agent and manage tool definitions.</p>
+                    <p class="text-xs text-slate-400">All tools are available to this agent by default.</p>
                 </div>
                 @can('manage tools')
                     <a href="{{ route('backoffice.tools.create') }}" class="bo-btn-primary"
@@ -517,102 +521,81 @@
                 @endcan
             </div>
 
-            <form method="POST" action="{{ route('backoffice.chat-agents.tools.sync', $agent) }}" class="space-y-4">
-                @csrf
-                <?php
-                $selectedTools = old('tool_ids', $selectedToolIds ?? []);
-                $normalizedSelected = [];
-                foreach ((array) $selectedTools as $tid) {
-                    $normalizedSelected[] = (int) $tid;
-                }
-                $selectedTools = $normalizedSelected;
-                ?>
-
-                @if (($availableTools ?? collect())->isEmpty())
-                    <p class="text-xs text-slate-400">No tools available.
-                        @can('manage tools')
-                            <a href="{{ route('backoffice.tools.create') }}" class="text-cyan-400 hover:underline">Create
-                                the first tool</a>.
-                        @endcan
-                    </p>
-                @else
-                    <div class="overflow-hidden rounded-xl border border-white/10">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full text-xs" style="width:100%">
-                                <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
-                                    <tr>
-                                        <th class="px-3 py-2 font-medium text-center">Assigned</th>
-                                        <th class="px-3 py-2 font-medium">Name</th>
-                                        <th class="px-3 py-2 font-medium">Tool Key</th>
-                                        <th class="px-3 py-2 font-medium">Type</th>
-                                        <th class="px-3 py-2 font-medium">Category</th>
+            @if (($availableTools ?? collect())->isEmpty())
+                <p class="text-xs text-slate-400">No tools available.
+                    @can('manage tools')
+                        <a href="{{ route('backoffice.tools.create') }}" class="text-cyan-400 hover:underline">Create
+                            the first tool</a>.
+                    @endcan
+                </p>
+            @else
+                <div class="overflow-hidden rounded-xl border border-white/10">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-xs" style="width:100%">
+                            <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
+                                <tr>
+                                    <th class="px-3 py-2 font-medium">Name</th>
+                                    <th class="px-3 py-2 font-medium">Tool Key</th>
+                                    <th class="px-3 py-2 font-medium">Type</th>
+                                    <th class="px-3 py-2 font-medium">Category</th>
+                                    @can('manage tools')
+                                        <th class="px-3 py-2 font-medium text-right">Actions</th>
+                                    @endcan
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5">
+                                @foreach ($availableTools as $tool)
+                                    <tr class="transition hover:bg-white/5">
+                                        <td class="px-3 py-2">
+                                            <span class="font-medium text-white">{{ $tool->display_name }}</span>
+                                            @if ($tool->description)
+                                                <span
+                                                    class="block text-[11px] text-slate-400">{{ Str::limit($tool->description, 60) }}</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-3 py-2 text-slate-300"
+                                            style="font-family:ui-monospace,monospace;font-size:11px">
+                                            {{ $tool->tool_name }}</td>
+                                        <td class="px-3 py-2">
+                                            <?php $toolType = strtoupper((string) ($tool->type ?: 'api')); ?>
+                                            @if ($tool->type === 'function')
+                                                <span
+                                                    style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(139,92,246,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#c4b5fd">FUNCTION</span>
+                                            @elseif ($tool->type === 'api')
+                                                <span
+                                                    style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(59,130,246,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#93c5fd">API</span>
+                                            @else
+                                                <span
+                                                    style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(100,116,139,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#94a3b8">{{ $toolType }}</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-3 py-2">
+                                            <span
+                                                style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(6,182,212,0.15);padding:2px 10px;font-size:11px;font-weight:600;color:#67e8f9">{{ strtoupper((string) ($tool->category ?: 'general')) }}</span>
+                                        </td>
                                         @can('manage tools')
-                                            <th class="px-3 py-2 font-medium text-right">Actions</th>
+                                            <td class="px-3 py-2 text-right">
+                                                <div
+                                                    style="display:flex;align-items:center;justify-content:flex-end;gap:0.5rem">
+                                                    <a href="{{ route('backoffice.tools.edit', $tool) }}"
+                                                        class="bo-btn-sm">Edit</a>
+                                                    <form method="POST"
+                                                        action="{{ route('backoffice.tools.destroy', $tool) }}"
+                                                        onsubmit="return confirm('Delete tool \'{{ addslashes($tool->display_name) }}\'?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="bo-btn-danger">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </td>
                                         @endcan
                                     </tr>
-                                </thead>
-                                <tbody class="divide-y divide-white/5">
-                                    @foreach ($availableTools as $tool)
-                                        <tr class="transition hover:bg-white/5">
-                                            <td class="px-3 py-2 text-center">
-                                                <input type="checkbox" name="tool_ids[]" value="{{ $tool->id }}"
-                                                    {{ in_array((int) $tool->id, $selectedTools, true) ? 'checked' : '' }}
-                                                    class="accent-cyan-400" />
-                                            </td>
-                                            <td class="px-3 py-2">
-                                                <span class="font-medium text-white">{{ $tool->display_name }}</span>
-                                                @if ($tool->description)
-                                                    <span
-                                                        class="block text-[11px] text-slate-400">{{ Str::limit($tool->description, 60) }}</span>
-                                                @endif
-                                            </td>
-                                            <td class="px-3 py-2 text-slate-300"
-                                                style="font-family:ui-monospace,monospace;font-size:11px">
-                                                {{ $tool->tool_name }}</td>
-                                            <td class="px-3 py-2">
-                                                <?php $toolType = strtoupper((string) ($tool->type ?: 'api')); ?>
-                                                @if ($tool->type === 'function')
-                                                    <span
-                                                        style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(139,92,246,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#c4b5fd">FUNCTION</span>
-                                                @elseif ($tool->type === 'api')
-                                                    <span
-                                                        style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(59,130,246,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#93c5fd">API</span>
-                                                @else
-                                                    <span
-                                                        style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(100,116,139,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#94a3b8">{{ $toolType }}</span>
-                                                @endif
-                                            </td>
-                                            <td class="px-3 py-2">
-                                                <span
-                                                    style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(6,182,212,0.15);padding:2px 10px;font-size:11px;font-weight:600;color:#67e8f9">{{ strtoupper((string) ($tool->category ?: 'general')) }}</span>
-                                            </td>
-                                            @can('manage tools')
-                                                <td class="px-3 py-2 text-right">
-                                                    <div
-                                                        style="display:flex;align-items:center;justify-content:flex-end;gap:0.5rem">
-                                                        <a href="{{ route('backoffice.tools.edit', $tool) }}"
-                                                            class="bo-btn-sm">Edit</a>
-                                                        <form method="POST"
-                                                            action="{{ route('backoffice.tools.destroy', $tool) }}"
-                                                            onsubmit="return confirm('Delete tool \'{{ addslashes($tool->display_name) }}\'?')">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="bo-btn-danger">Delete</button>
-                                                        </form>
-                                                    </div>
-                                                </td>
-                                            @endcan
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                    <div>
-                        <button type="submit" class="bo-btn-primary">Save Assignment</button>
-                    </div>
-                @endif
-            </form>
+                </div>
+            @endif
         </div>
     @endif
 @endsection

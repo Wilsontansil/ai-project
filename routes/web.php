@@ -46,7 +46,6 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
         Route::put('/backoffice/chat-agents/{chatAgent}', [ChatAgentController::class, 'update'])->name('backoffice.chat-agents.update');
         Route::delete('/backoffice/chat-agents/{chatAgent}', [ChatAgentController::class, 'destroy'])->name('backoffice.chat-agents.destroy');
         Route::post('/backoffice/chat-agents/{chatAgent}/duplicate', [ChatAgentController::class, 'duplicate'])->name('backoffice.chat-agents.duplicate');
-        Route::post('/backoffice/chat-agents/{chatAgent}/tools', [ChatAgentController::class, 'syncTools'])->name('backoffice.chat-agents.tools.sync');
 
         Route::post('/backoffice/chat-agents/{chatAgent}/knowledge-base', [ChatAgentController::class, 'storeKnowledgeBase'])->name('backoffice.chat-agents.knowledge-base.store');
         Route::put('/backoffice/chat-agents/{chatAgent}/knowledge-base/{knowledgeBase}', [ChatAgentController::class, 'updateKnowledgeBase'])->name('backoffice.chat-agents.knowledge-base.update');

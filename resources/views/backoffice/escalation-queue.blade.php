@@ -3,10 +3,14 @@
 @section('title', __('backoffice.pages.escalation.title'))
 @section('page-title', __('backoffice.pages.escalation.page_title'))
 
-@php($boActive = 'escalation')
+@php
+    $boActive = 'escalation';
+@endphp
 
 @section('content')
-    @php($currentUserId = auth()->id())
+    @php
+        $currentUserId = auth()->id();
+    @endphp
 
     <div class="flex items-center justify-between rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
         <div>

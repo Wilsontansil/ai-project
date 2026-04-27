@@ -17,7 +17,6 @@ use App\Services\AIService;
 
 class LiveChatController extends Controller
 {
-
     public function handleWebhook(Request $request)
     {
         $payload = $request->all();

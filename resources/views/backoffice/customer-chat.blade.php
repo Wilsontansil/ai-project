@@ -461,8 +461,8 @@
                     </button>
                 </div>
                 <div class="mt-2 flex items-center gap-2 text-[11px] text-slate-400">
-                    <span
-                        id="chat-send-attachment-name">{{ __('backoffice.pages.customer_chat.no_file_selected') }}</span>
+                    <span id="chat-send-attachment-name"
+                        style="max-width:260px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom;">{{ __('backoffice.pages.customer_chat.no_file_selected') }}</span>
                     <button id="chat-send-attachment-clear" type="button"
                         class="hidden rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-slate-300 transition hover:bg-white/5">
                         {{ __('backoffice.pages.customer_chat.clear_file') }}
@@ -505,4 +505,75 @@
             </p>
         @endif
     </div>
+@endsection
+
+@section('scripts')
+    <script>
+        (function() {
+            const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+
+            // ── SweetAlert2 Toast helper ──
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                }
+            });
+
+            // ── Flash messages from server ──
+            @if (session('send_success'))
+                Toast.fire({
+                    icon: 'success',
+                    title: @json(session('send_success'))
+                });
+            @endif
+
+            @if (session('send_error'))
+                Toast.fire({
+                    icon: 'error',
+                    title: @json(session('send_error'))
+                });
+            @endif
+
+            // ── Client-side file size guard ──
+            const fileInput = document.getElementById('chat-send-attachment');
+            const sendForm = document.getElementById('chat-send-form');
+
+            if (fileInput) {
+                fileInput.addEventListener('change', function() {
+                    const file = fileInput.files && fileInput.files[0];
+                    if (file && file.size > MAX_BYTES) {
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'File too large. Maximum size is 10 MB.'
+                        });
+                        fileInput.value = '';
+                        const nameEl = document.getElementById('chat-send-attachment-name');
+                        const clearBtn = document.getElementById('chat-send-attachment-clear');
+                        if (nameEl) nameEl.textContent =
+                            '{{ __('backoffice.pages.customer_chat.no_file_selected') }}';
+                        if (clearBtn) clearBtn.classList.add('hidden');
+                    }
+                });
+            }
+
+            if (sendForm) {
+                sendForm.addEventListener('submit', function(e) {
+                    const file = fileInput && fileInput.files && fileInput.files[0];
+                    if (file && file.size > MAX_BYTES) {
+                        e.preventDefault();
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'File too large. Maximum size is 10 MB.'
+                        });
+                    }
+                });
+            }
+        })();
+    </script>
 @endsection

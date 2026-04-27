@@ -324,7 +324,7 @@ class DashboardController extends Controller
                 }
             } elseif ($customer->platform === 'whatsapp') {
                 if ($attachmentMeta !== null) {
-                    $this->sendWhatsAppAttachment($chatId, $attachmentMeta, $message);
+                    $this->sendWhatsAppAttachment($chatId, $attachmentMeta, $attachmentFile, $message);
                 } else {
                     $this->sendWhatsApp($chatId, $message);
                 }
@@ -452,7 +452,7 @@ class DashboardController extends Controller
         }
     }
 
-    private function sendWhatsAppAttachment(string $chatId, array $attachmentMeta, string $caption = ''): void
+    private function sendWhatsAppAttachment(string $chatId, array $attachmentMeta, UploadedFile $attachmentFile, string $caption = ''): void
     {
         $baseUrl = rtrim((string) ProjectSetting::getValue('whatsapp_base_url', config('services.whatsapp.base_url', '')), '/');
 
@@ -470,6 +470,7 @@ class DashboardController extends Controller
         $fileUrl = $this->publicAttachmentUrl((string) ($attachmentMeta['path'] ?? ''));
         $fileName = (string) ($attachmentMeta['original_name'] ?? 'file');
         $mimeType = (string) ($attachmentMeta['mime_type'] ?? 'application/octet-stream');
+        $fileData = base64_encode($attachmentFile->get());
         $isImage = ($attachmentMeta['type'] ?? '') === 'image';
 
         $attempts = [];
@@ -478,19 +479,31 @@ class DashboardController extends Controller
                 ['/api/sendImage', [
                     'session' => $session,
                     'chatId' => $chatId,
-                    'file' => ['url' => $fileUrl],
+                    'file' => [
+                        'data' => $fileData,
+                        'filename' => $fileName,
+                        'mimetype' => $mimeType,
+                    ],
                     'caption' => $caption,
                 ]],
                 ['/api/sendImage', [
                     'session' => $session,
                     'chatId' => $chatId,
-                    'image' => $fileUrl,
+                    'file' => [
+                        'url' => $fileUrl,
+                        'filename' => $fileName,
+                        'mimetype' => $mimeType,
+                    ],
                     'caption' => $caption,
                 ]],
-                ['/api/sendImage', [
+                ['/api/sendFile', [
                     'session' => $session,
                     'chatId' => $chatId,
-                    'url' => $fileUrl,
+                    'file' => [
+                        'data' => $fileData,
+                        'filename' => $fileName,
+                        'mimetype' => $mimeType,
+                    ],
                     'caption' => $caption,
                 ]],
                 ['/api/sendFile', [
@@ -509,17 +522,7 @@ class DashboardController extends Controller
                     'session' => $session,
                     'chatId' => $chatId,
                     'file' => [
-                        'url' => $fileUrl,
-                        'filename' => $fileName,
-                        'mimetype' => $mimeType,
-                    ],
-                    'caption' => $caption,
-                ]],
-                ['/api/sendDocument', [
-                    'session' => $session,
-                    'chatId' => $chatId,
-                    'file' => [
-                        'url' => $fileUrl,
+                        'data' => $fileData,
                         'filename' => $fileName,
                         'mimetype' => $mimeType,
                     ],
@@ -528,8 +531,11 @@ class DashboardController extends Controller
                 ['/api/sendFile', [
                     'session' => $session,
                     'chatId' => $chatId,
-                    'url' => $fileUrl,
-                    'filename' => $fileName,
+                    'file' => [
+                        'url' => $fileUrl,
+                        'filename' => $fileName,
+                        'mimetype' => $mimeType,
+                    ],
                     'caption' => $caption,
                 ]],
             ];
@@ -541,6 +547,7 @@ class DashboardController extends Controller
                 'endpoint' => $endpoint,
                 'status' => $response?->status(),
                 'ok' => $response !== null && $response->successful(),
+                'body' => $response !== null ? mb_substr((string) $response->body(), 0, 500) : null,
             ];
 
             if ($response !== null && $response->successful()) {

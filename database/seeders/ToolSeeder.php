@@ -828,7 +828,7 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => null,
                 'keywords' => ['hasil togel', 'result togel', 'keluaran togel', 'angka togel', 'nomor togel', 'result pool', 'keluar togel', 'cek togel', 'togel hari ini'],
-                'tool_rules' => "- SELALU MINTA NAMA POOL TERLEBIH DAHULU SEBELUM DISEBUTKAN\n- Terjemahkan nama pool dari user ke pools_id yang benar sesuai mapping di parameter\n- Tampilkan: tanggal, periode, result1\n- Urutkan dari yang terbaru berdasarkan closedt dan ambil hanya 20 data\n- Jika belum ada result (result1 kosong), infokan bahwa result belum tersedia",
+                'tool_rules' => "- SELALU MINTA NAMA POOL TERLEBIH DAHULU SEBELUM DISEBUTKAN\n- Terjemahkan nama pool dari user ke pools_id yang benar sesuai mapping di parameter\n- Tampilkan: tanggal, periode, result1\n- Urutkan dari yang terbaru berdasarkan created_at dan ambil hanya 5 data\n- Jika belum ada result (result1 kosong), infokan bahwa result belum tersedia",
                 'information_text' => null,
                 'meta' => [
                     'query' => [

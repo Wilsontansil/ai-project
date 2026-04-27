@@ -23,6 +23,7 @@ class Customer extends Model
         'mode',
         'assigned_user_id',
         'assigned_at',
+        'escalation_summary',
     ];
 
     protected $casts = [

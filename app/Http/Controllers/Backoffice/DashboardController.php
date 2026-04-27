@@ -168,6 +168,7 @@ class DashboardController extends Controller
                 'mode' => 'bot',
                 'assigned_user_id' => null,
                 'assigned_at' => null,
+                'escalation_summary' => null,
             ]);
 
             return ['blocked' => false];

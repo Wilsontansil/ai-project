@@ -15,6 +15,7 @@ class RolePermissionSeeder extends Seeder
 
         $permissions = [
             'manage users',
+            'manage roles',
             'manage agents',
             'manage tools',
             'manage data-models',
@@ -32,9 +33,17 @@ class RolePermissionSeeder extends Seeder
         // Reset cache after creating permissions so syncPermissions can find them
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Admin: full access
+        // God: all permissions
+        $god = Role::findOrCreate('god', 'web');
+        $god->syncPermissions($permissions);
+
+        // Admin: all permissions except user and role management
+        $adminPermissions = array_values(array_filter($permissions, fn ($p) => ! in_array($p, [
+            'manage users',
+            'manage roles',
+        ])));
         $admin = Role::findOrCreate('admin', 'web');
-        $admin->syncPermissions($permissions);
+        $admin->syncPermissions($adminPermissions);
 
         // Operator: read-only customers + view metrics
         $operator = Role::findOrCreate('operator', 'web');

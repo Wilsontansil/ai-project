@@ -134,6 +134,9 @@ class ProcessAiReply implements ShouldQueue
                         'error' => $e->getMessage(),
                     ]);
                 }
+
+                // Generate escalation summary for backoffice agents.
+                $this->generateEscalationSummary($customer);
             }
         }
 
@@ -296,6 +299,57 @@ class ProcessAiReply implements ShouldQueue
     private function wahaSession(): string
     {
         return (string) ProjectSetting::getValue('whatsapp_session', config('services.whatsapp.session', 'default'));
+    }
+
+    private function generateEscalationSummary(Customer $customer): void
+    {
+        try {
+            $apiKey = (string) ProjectSetting::getValue('openai_api_key', config('services.openai.api_key', ''));
+            if ($apiKey === '') {
+                return;
+            }
+
+            $recent = app(\App\Services\Agent\ConversationMemoryService::class)->getRecent($customer, 15);
+            if ($recent->isEmpty()) {
+                return;
+            }
+
+            $transcript = $recent->map(function ($msg) {
+                $role = $msg['role'] === 'assistant' ? 'Bot' : 'Customer';
+                return "{$role}: " . ($msg['message'] ?? '');
+            })->implode("\n");
+
+            $client = OpenAI::client($apiKey);
+            $agent  = ChatAgent::getDefault();
+            $model  = $agent?->model ?? 'gpt-4.1-mini';
+
+            $response = $client->chat()->create([
+                'model' => $model,
+                'max_tokens' => 80,
+                'temperature' => 0.3,
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'You are a summarizer. In 1-2 short sentences, summarize the customer\'s main issue from the conversation so a human agent can quickly understand why the customer was escalated. Be concise and factual. Reply in the same language as the conversation.',
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => $transcript,
+                    ],
+                ],
+            ]);
+
+            $summary = trim($response->choices[0]->message->content ?? '');
+
+            if ($summary !== '') {
+                $customer->update(['escalation_summary' => $summary]);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Failed to generate escalation summary', [
+                'customer_id' => $customer->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function shouldBlockAiReply(Customer $customer): bool

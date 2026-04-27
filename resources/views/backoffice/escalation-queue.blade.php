@@ -71,7 +71,14 @@
                                 $isAssignedToOther = $customer->assigned_user_id !== null && !$isOwnedByCurrentUser;
                             @endphp
                             <tr class="hover:bg-white/5">
-                                <td class="px-3 py-2 text-white">{{ $customer->name ?: '-' }}</td>
+                                <td class="px-3 py-2 text-white">
+                                    {{ $customer->name ?: '-' }}
+                                    @if ($customer->escalation_summary)
+                                        <p class="mt-0.5 text-[11px] italic text-slate-400"
+                                            style="max-width:260px;white-space:normal">{{ $customer->escalation_summary }}
+                                        </p>
+                                    @endif
+                                </td>
                                 <td class="px-3 py-2 text-slate-300">{{ ucfirst($customer->platform) }}</td>
                                 <td class="px-3 py-2 text-slate-400">{{ $customer->phone_number ?: '-' }}</td>
                                 <td class="px-3 py-2 text-center">

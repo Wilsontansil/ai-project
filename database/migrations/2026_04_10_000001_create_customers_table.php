@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('mode', 20)->default('bot');
             $table->foreignId('assigned_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('assigned_at')->nullable();
+            $table->text('escalation_summary')->nullable();
             $table->timestamps();
 
             $table->unique(['platform', 'platform_user_id']);

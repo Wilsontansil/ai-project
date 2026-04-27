@@ -63,7 +63,8 @@
                         class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
                         <option value="">— None —</option>
                         @foreach ($categories as $cat)
-                            <option value="{{ $cat }}" {{ old('category') === $cat ? 'selected' : '' }}>{{ ucfirst($cat) }}</option>
+                            <option value="{{ $cat }}" {{ old('category') === $cat ? 'selected' : '' }}>
+                                {{ ucfirst($cat) }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -77,7 +78,8 @@
                     placeholder="e.g. reset password, resetpass, kata sandi" maxlength="500"
                     oninput="document.getElementById('kw-count').textContent=this.value.length"
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
-                <p class="mt-1 text-xs text-slate-500"><span id="kw-count">{{ strlen(old('keywords', '')) }}</span>/500</p>
+                <p class="mt-1 text-xs text-slate-500"><span id="kw-count">{{ strlen(old('keywords', '')) }}</span>/500
+                </p>
             </div>
 
             <div>
@@ -88,7 +90,8 @@
                     placeholder="e.g. Reset user password after account data verification" maxlength="100"
                     oninput="document.getElementById('desc-count').textContent=this.value.length"
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
-                <p class="mt-1 text-xs text-slate-500"><span id="desc-count">{{ strlen(old('description', '')) }}</span>/100
+                <p class="mt-1 text-xs text-slate-500"><span
+                        id="desc-count">{{ strlen(old('description', '')) }}</span>/100
                 </p>
             </div>
 

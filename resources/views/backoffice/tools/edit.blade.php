@@ -60,7 +60,9 @@
                         class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
                         <option value="">— None —</option>
                         @foreach ($categories as $cat)
-                            <option value="{{ $cat }}" {{ old('category', $tool->category) === $cat ? 'selected' : '' }}>{{ ucfirst($cat) }}</option>
+                            <option value="{{ $cat }}"
+                                {{ old('category', $tool->category) === $cat ? 'selected' : '' }}>{{ ucfirst($cat) }}
+                            </option>
                         @endforeach
                     </select>
                 </div>

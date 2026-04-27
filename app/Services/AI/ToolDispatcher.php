@@ -450,7 +450,7 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
             $response = $client->chat()->create([
                 'model' => $model,
                 'messages' => $messages,
-                'max_tokens' => 220,
+                'max_completion_tokens' => 220,
             ]);
             $openaiLatency = MetricsCollector::elapsed($openaiStart);
 
@@ -567,7 +567,7 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
                     'type' => 'function',
                     'function' => ['name' => $tool->tool_name],
                 ],
-                'max_tokens' => 120,
+                'max_completion_tokens' => 120,
             ]);
             $openaiLatency = MetricsCollector::elapsed($openaiStart);
 

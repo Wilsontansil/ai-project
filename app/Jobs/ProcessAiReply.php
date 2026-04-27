@@ -326,7 +326,7 @@ class ProcessAiReply implements ShouldQueue
 
             $response = $client->chat()->create([
                 'model' => $model,
-                'max_tokens' => 80,
+                'max_completion_tokens' => 80,
                 'temperature' => 0.3,
                 'messages' => [
                     [

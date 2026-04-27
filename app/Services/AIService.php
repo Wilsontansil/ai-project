@@ -95,7 +95,7 @@ class AIService
             $payload = [
                 'model' => $model,
                 'messages' => $messages,
-                'max_tokens' => $chatAgent->max_tokens ?? 420,
+                'max_completion_tokens' => $chatAgent->max_tokens ?? 420,
             ];
 
             if ($chatAgent->temperature !== null) {

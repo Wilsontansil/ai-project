@@ -3,10 +3,14 @@
 @section('title', __('backoffice.pages.dashboard.title'))
 @section('page-title', __('backoffice.pages.dashboard.page_title'))
 
-@php($boActive = 'customer')
+@php
+    $boActive = 'customer';
+@endphp
 
 @section('content')
-    @php($currentUserId = auth()->id())
+    @php
+        $currentUserId = auth()->id();
+    @endphp
 
     <style>
         .bo-stats-grid {

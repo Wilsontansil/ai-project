@@ -351,7 +351,7 @@ return [
             'edit_subtitle' => 'Perbarui detail pengguna dan penetapan peran.',
             'edit_password' => 'Edit Kata Sandi',
             'edit_password_subtitle' => 'Atur kata sandi baru untuk pengguna ini.',
-            'update_password' => 'Perbarui Kata Sandi',,
+            'update_password' => 'Perbarui Kata Sandi',
             'user_list' => 'Daftar Pengguna',
             'no_users' => 'Belum ada pengguna.',
             'username' => 'Username',

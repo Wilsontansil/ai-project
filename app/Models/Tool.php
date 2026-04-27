@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Models\DataModel;
+use App\Models\ChatAgent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Model;
 
 class Tool extends Model
@@ -129,5 +131,10 @@ class Tool extends Model
     public function dataModel(): BelongsTo
     {
         return $this->belongsTo(DataModel::class);
+    }
+
+    public function chatAgents(): BelongsToMany
+    {
+        return $this->belongsToMany(ChatAgent::class, 'chat_agent_tool');
     }
 }

@@ -27,10 +27,19 @@ return new class extends Migration
             $table->json('meta')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('chat_agent_tool', function (Blueprint $table) {
+            $table->foreignId('chat_agent_id')->constrained('chat_agents')->cascadeOnDelete();
+            $table->foreignId('tool_id')->constrained('tools')->cascadeOnDelete();
+            $table->timestamps();
+
+            $table->unique(['chat_agent_id', 'tool_id']);
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('chat_agent_tool');
         Schema::dropIfExists('chat_agents');
     }
 };

@@ -166,6 +166,41 @@
                     </div>
                 </div>
 
+                <div class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-4 space-y-3">
+                    <div>
+                        <h3 class="text-xs font-semibold text-cyan-400 mb-1">Assigned Tools</h3>
+                        <p class="text-[11px] text-slate-400">Pilih tools yang boleh digunakan oleh agent ini.</p>
+                    </div>
+
+                    @php
+                        $selectedTools = old('tool_ids', $selectedToolIds ?? []);
+                        $selectedTools = collect($selectedTools)->map(fn($id) => (int) $id)->all();
+                    @endphp
+
+                    @if (($availableTools ?? collect())->isEmpty())
+                        <p class="text-xs text-slate-400">Belum ada tool yang tersedia.</p>
+                    @else
+                        <div class="grid gap-2 sm:grid-cols-2">
+                            @foreach ($availableTools as $tool)
+                                <label class="bo-checkbox-label" style="display:flex;align-items:flex-start;gap:0.5rem;">
+                                    <input type="checkbox" name="tool_ids[]" value="{{ $tool->id }}"
+                                        {{ in_array((int) $tool->id, $selectedTools, true) ? 'checked' : '' }} />
+                                    <span>
+                                        <span class="font-medium">{{ $tool->display_name }}</span>
+                                        <span class="block text-[11px] text-slate-400">
+                                            {{ strtoupper((string) ($tool->category ?: 'general')) }} •
+                                            {{ $tool->tool_name }}
+                                            @if (!$tool->is_enabled)
+                                                • DISABLED
+                                            @endif
+                                        </span>
+                                    </span>
+                                </label>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+
                 {{-- Agent Transfer Conditions --}}
                 <div class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-4 space-y-4">
                     <div>

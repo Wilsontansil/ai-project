@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 
 class ChatAgent extends Model
@@ -66,5 +67,10 @@ class ChatAgent extends Model
     public function knowledgeBases()
     {
         return $this->hasMany(KnowledgeBase::class);
+    }
+
+    public function tools(): BelongsToMany
+    {
+        return $this->belongsToMany(Tool::class, 'chat_agent_tool');
     }
 }

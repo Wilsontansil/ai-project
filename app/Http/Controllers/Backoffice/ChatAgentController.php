@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backoffice;
 use App\Http\Controllers\Controller;
 use App\Models\ChatAgent;
 use App\Models\KnowledgeBase;
+use App\Models\Tool;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -43,6 +44,8 @@ class ChatAgentController extends Controller
             'escalation_condition' => ['nullable', 'string', 'max:3000'],
             'stop_ai_after_handoff' => ['nullable'],
             'silent_handoff' => ['nullable'],
+            'tool_ids' => ['nullable', 'array'],
+            'tool_ids.*' => ['integer', 'exists:tools,id'],
         ]);
 
         $data['slug'] = Str::slug($data['name']);
@@ -55,7 +58,17 @@ class ChatAgentController extends Controller
             ChatAgent::query()->where('is_default', true)->update(['is_default' => false]);
         }
 
-        ChatAgent::create($data);
+        $agent = ChatAgent::create($data);
+
+        $toolIds = $request->has('tool_ids')
+            ? (array) $request->input('tool_ids', [])
+            : Tool::query()
+                ->where('tool_name', '!=', '_bot_config')
+                ->where('is_enabled', true)
+                ->pluck('id')
+                ->all();
+
+        $this->syncAgentTools($agent, $toolIds);
 
         return redirect()->route('backoffice.chat-agents.index')
             ->with('success', 'Agent berhasil dibuat.');
@@ -63,6 +76,8 @@ class ChatAgentController extends Controller
 
     public function edit(Request $request, ChatAgent $chatAgent): View
     {
+        $chatAgent->loadMissing('tools:id');
+
         $activeTab = $request->query('tab');
         if (!in_array($activeTab, ['general', 'knowledge-base', 'rules'], true)) {
             $activeTab = 'general';
@@ -97,6 +112,12 @@ class ChatAgentController extends Controller
             'knowledgeMode' => $knowledgeMode,
             'activeTab' => $activeTab,
             'timezoneOptions' => $this->timezoneOptions(),
+            'availableTools' => Tool::query()
+                ->where('tool_name', '!=', '_bot_config')
+                ->orderBy('category')
+                ->orderBy('display_name')
+                ->get(['id', 'display_name', 'tool_name', 'category', 'is_enabled']),
+            'selectedToolIds' => $chatAgent->tools->pluck('id')->all(),
         ]);
     }
 
@@ -116,6 +137,8 @@ class ChatAgentController extends Controller
             'escalation_condition' => ['nullable', 'string', 'max:3000'],
             'stop_ai_after_handoff' => ['nullable'],
             'silent_handoff' => ['nullable'],
+            'tool_ids' => ['nullable', 'array'],
+            'tool_ids.*' => ['integer', 'exists:tools,id'],
         ]);
 
         $data['is_enabled'] = $request->boolean('is_enabled');
@@ -128,6 +151,8 @@ class ChatAgentController extends Controller
         }
 
         $chatAgent->update($data);
+
+        $this->syncAgentTools($chatAgent, $request->input('tool_ids', []));
 
         return back()->with('success', 'Agent berhasil diperbarui.');
     }
@@ -253,5 +278,24 @@ class ChatAgentController extends Controller
     private function timezoneOptions(): array
     {
         return \DateTimeZone::listIdentifiers();
+    }
+
+    /**
+     * @param array<int, mixed> $toolIds
+     */
+    private function syncAgentTools(ChatAgent $agent, array $toolIds): void
+    {
+        $normalizedIds = collect($toolIds)
+            ->map(static fn ($id) => (int) $id)
+            ->filter(static fn ($id) => $id > 0)
+            ->values();
+
+        $validIds = Tool::query()
+            ->whereIn('id', $normalizedIds)
+            ->where('tool_name', '!=', '_bot_config')
+            ->pluck('id')
+            ->all();
+
+        $agent->tools()->sync($validIds);
     }
 }

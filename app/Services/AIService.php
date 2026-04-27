@@ -55,7 +55,7 @@ class AIService
         $model = $chatAgent->model ?? $this->model;
 
         $systemPrompt = $this->promptBuilder->buildSystemPrompt($chatAgent);
-        $toolDefinitions = $this->toolDispatcher->getToolDefinitions();
+        $toolDefinitions = $this->toolDispatcher->getToolDefinitions($chatAgent);
         $history = $this->conversationHistory->load($chatId, $channel);
         $contextPrompt = $this->promptBuilder->buildAgentContextPrompt($agentContext, $channel);
         $activeHistory = $history;
@@ -124,7 +124,7 @@ class AIService
             // Let the dispatcher handle tool calls and intent matching.
             $assistantReply = $this->toolDispatcher->resolve(
                 $client, $msg, $message, $systemPrompt, $contextPrompt, $activeHistory, $model,
-                (string) $chatId, $channel
+                (string) $chatId, $channel, $chatAgent
             );
 
             if ($assistantReply !== null) {

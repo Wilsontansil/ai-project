@@ -2,6 +2,7 @@
 
 namespace App\Services\AI;
 
+use App\Models\ChatAgent;
 use App\Models\Tool;
 use App\Services\AI\ToolEngines\DataModelQueryEngine;
 use App\Services\AI\ToolEngines\HttpToolEngine;
@@ -39,9 +40,18 @@ class ToolDispatcher
      *
      * @return Collection<int, Tool>
      */
-    public function getEnabledTools(): Collection
+    public function getEnabledTools(?ChatAgent $chatAgent = null): Collection
     {
         try {
+            if ($chatAgent !== null) {
+                return $chatAgent->tools()
+                    ->with('dataModel')
+                    ->where('is_enabled', true)
+                    ->where('tool_name', '!=', '_bot_config')
+                    ->orderBy('tools.id')
+                    ->get();
+            }
+
             return Tool::query()
                 ->with('dataModel')
                 ->where('is_enabled', true)
@@ -57,9 +67,9 @@ class ToolDispatcher
      *
      * @return array<int, array<string, mixed>>
      */
-    public function getToolDefinitions(): array
+    public function getToolDefinitions(?ChatAgent $chatAgent = null): array
     {
-        return $this->getEnabledTools()
+        return $this->getEnabledTools($chatAgent)
             ->map(fn (Tool $tool) => $tool->getDefinition())
             ->filter()
             ->values()
@@ -84,9 +94,10 @@ class ToolDispatcher
         array $history,
         string $model,
         string $chatId = '',
-        string $channel = ''
+        string $channel = '',
+        ?ChatAgent $chatAgent = null
     ): ?string {
-        $tools = $this->getEnabledTools();
+        $tools = $this->getEnabledTools($chatAgent);
         $pendingKey = $this->pendingToolKey($chatId, $channel);
 
         // 1. OpenAI explicit tool call — highest priority.

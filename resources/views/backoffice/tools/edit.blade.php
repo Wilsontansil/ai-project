@@ -77,11 +77,11 @@
                     class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.description') }}</label>
                 <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.description_help') }}</p>
                 <input id="description" type="text" name="description"
-                    value="{{ old('description', $tool->description) }}" maxlength="100"
+                    value="{{ old('description', $tool->description) }}" maxlength="500"
                     oninput="document.getElementById('desc-count').textContent=this.value.length"
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
                 <p class="mt-1 text-xs text-slate-500"><span
-                        id="desc-count">{{ strlen(old('description', $tool->description) ?? '') }}</span>/100</p>
+                        id="desc-count">{{ strlen(old('description', $tool->description) ?? '') }}</span>/500</p>
             </div>
 
             {{-- ─── GET type: Data Model + Parameters ─── --}}
@@ -243,11 +243,11 @@
                 <label for="tool_rules"
                     class="mb-2 block text-sm text-slate-200">{{ __('backoffice.pages.tools.tool_rules') }}</label>
                 <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.tool_rules_help') }}</p>
-                <textarea id="tool_rules" name="tool_rules" rows="4" maxlength="500"
+                <textarea id="tool_rules" name="tool_rules" rows="4" maxlength="1000"
                     oninput="document.getElementById('rules-count').textContent=this.value.length"
                     class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('tool_rules', $tool->tool_rules) }}</textarea>
                 <p class="mt-1 text-xs text-slate-500"><span
-                        id="rules-count">{{ strlen(old('tool_rules', $tool->tool_rules) ?? '') }}</span>/500</p>
+                        id="rules-count">{{ strlen(old('tool_rules', $tool->tool_rules) ?? '') }}</span>/1000</p>
             </div>
 
             {{-- ─── INFO type: Information Texts ─── --}}

@@ -91,7 +91,7 @@ class ToolController extends Controller
         return redirect()->route('backoffice.tools.index')->with('success', $tool->display_name . ' berhasil diperbarui.');
     }
 
-    public function destroy(Tool $tool): RedirectResponse
+    public function destroy(Request $request, Tool $tool): RedirectResponse
     {
         $name = $tool->display_name;
         $fromAgent = $request->input('from_agent');

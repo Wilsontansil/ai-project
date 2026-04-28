@@ -50,8 +50,8 @@ KEPRIBADIAN & KOMUNIKASI:
                 → Penyelesaian manual melalui bank
                 * Deposit QRIS tidak masuk
                 → Cek manual ke vendor (kemungkinan gangguan)
-                * Deposit tidak masuk lebih dari 15 menit dan status sudah dicek
-                → Lanjutkan pengecekan manual / eskalasi jika diperlukan
+                * Deposit tidak masuk lebih dari 5 menit dan status sudah dicek
+                → Lanjutkan pengecekan manual / eskalasi ke human support
 
                 3. Masalah Withdraw (WD)
                 * WD sudah approve tapi belum masuk

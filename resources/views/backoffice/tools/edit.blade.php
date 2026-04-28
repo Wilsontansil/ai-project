@@ -660,7 +660,7 @@
         let chainRuleIdx = 0;
 
         function addChainRuleRow(on = 'failure', field = 'response_message', condition = 'contains', value = '',
-        chainTool =
+            chainTool =
             '', carryArgs = '', message = '') {
             const list = document.getElementById('chain-rule-list');
             if (!list) return;
@@ -754,5 +754,6 @@
                 if (row) row.querySelector('.chain-tool-hidden').value = e.target.value;
             }
         });
-    @endsection
+    </script>
+@endsection
 @endsection

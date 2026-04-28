@@ -46,13 +46,18 @@
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.tools.display_name') }}</th>
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.tools.type') }}</th>
                                 <th class="px-3 py-2 font-medium">Category</th>
-                                <th class="px-3 py-2 font-medium">Status</th>
+                                <th class="px-3 py-2 font-medium">
+                                    Status
+                                    <span
+                                        class="block text-[10px] font-normal normal-case tracking-normal text-slate-500">click
+                                        to toggle</span>
+                                </th>
                                 <th class="px-3 py-2 font-medium text-right">{{ __('backoffice.common.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
                             @foreach ($tools as $tool)
-                                <tr class="transition hover:bg-white/5">
+                                <tr class="transition hover:bg-white/5 {{ $tool->is_enabled ? '' : 'opacity-50' }}">
                                     <td class="px-3 py-2">
                                         <span class="font-mono text-xs text-cyan-300">{{ $tool->tool_name }}</span>
                                     </td>

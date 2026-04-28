@@ -9,6 +9,7 @@ use App\Http\Controllers\Backoffice\DatabaseConnectionController;
 use App\Http\Controllers\Backoffice\LocaleController;
 use App\Http\Controllers\Backoffice\MetricsController;
 use App\Http\Controllers\Backoffice\SettingController;
+use App\Http\Controllers\Backoffice\TechnicalController;
 use App\Http\Controllers\Backoffice\ToolController;
 use App\Http\Controllers\Backoffice\RoleController;
 use App\Http\Controllers\Backoffice\UserController;
@@ -102,6 +103,11 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
     // Metrics
     Route::middleware('permission:view metrics')->group(function () {
         Route::get('/backoffice/metrics', [MetricsController::class, 'index'])->name('backoffice.metrics.index');
+    });
+
+    // System Logs (Technical)
+    Route::middleware('permission:view metrics')->group(function () {
+        Route::get('/backoffice/technical/request-logs', [TechnicalController::class, 'requestLogs'])->name('backoffice.technical.request-logs');
     });
 
     // Role management

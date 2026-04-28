@@ -3,6 +3,7 @@
 namespace App\Services\AI\ToolEngines;
 
 use App\Models\Tool;
+use App\Models\ToolRequestLog;
 use App\Services\AI\Concerns\BuildsMissingDataMessage;
 use App\Support\LogSanitizer;
 use App\Support\ResilientHttp;
@@ -83,6 +84,8 @@ class HttpToolEngine
             'request_keys' => array_keys($requestBody),
         ]);
 
+        $callStart = microtime(true);
+
         try {
             $response = ResilientHttp::post(
                 service: 'tool-endpoint:' . $tool->tool_name,
@@ -91,7 +94,10 @@ class HttpToolEngine
                 timeoutSeconds: 10
             );
 
+            $latencyMs = round((microtime(true) - $callStart) * 1000, 2);
+
             if ($response === null) {
+                $this->writeRequestLog($tool, $fullUrl, $requestBody, null, null, $latencyMs, false, 'circuit_open_or_timeout');
                 return ['mode' => 'direct', 'reply' => self::USER_FACING_ERROR];
             }
 
@@ -111,6 +117,8 @@ class HttpToolEngine
                         'response_message' => $responseBody['message'],
                     ]);
 
+                    $this->writeRequestLog($tool, $fullUrl, $requestBody, $statusCode, $responseBody, $latencyMs, false);
+
                     return [
                         'mode' => 'model',
                         'tool_context' => [
@@ -129,8 +137,11 @@ class HttpToolEngine
                     ];
                 }
 
+                $this->writeRequestLog($tool, $fullUrl, $requestBody, $statusCode, $responseBody, $latencyMs, false);
                 return ['mode' => 'direct', 'reply' => self::USER_FACING_ERROR];
             }
+
+            $this->writeRequestLog($tool, $fullUrl, $requestBody, $statusCode, $responseBody, $latencyMs, true);
 
             return [
                 'mode' => 'model',
@@ -149,23 +160,61 @@ class HttpToolEngine
                 ],
             ];
         } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            $latencyMs = round((microtime(true) - $callStart) * 1000, 2);
             Log::error('HTTP endpoint connection failed', [
                 'tool_name' => $tool->tool_name,
                 'url' => $fullUrl,
                 'request' => LogSanitizer::redactArguments($requestBody),
                 'error' => $e->getMessage(),
             ]);
+            $this->writeRequestLog($tool, $fullUrl, $requestBody, null, null, $latencyMs, false, mb_substr($e->getMessage(), 0, 300));
 
             return ['mode' => 'direct', 'reply' => self::USER_FACING_ERROR];
         } catch (\Throwable $e) {
+            $latencyMs = round((microtime(true) - $callStart) * 1000, 2);
             Log::error('HTTP endpoint execution failed', [
                 'tool_name' => $tool->tool_name,
                 'url' => $fullUrl,
                 'request' => LogSanitizer::redactArguments($requestBody),
                 'error' => $e->getMessage(),
             ]);
+            $this->writeRequestLog($tool, $fullUrl, $requestBody, null, null, $latencyMs, false, mb_substr($e->getMessage(), 0, 300));
 
             return ['mode' => 'direct', 'reply' => self::USER_FACING_ERROR];
+        }
+    }
+
+    /**
+     * Persist a ToolRequestLog row. Fire-and-forget — never throws.
+     *
+     * @param array<string, mixed>      $requestPayload
+     * @param array<string, mixed>|null $responseBody
+     */
+    private function writeRequestLog(
+        Tool $tool,
+        string $endpointUrl,
+        array $requestPayload,
+        ?int $responseStatus,
+        ?array $responseBody,
+        float $latencyMs,
+        bool $success,
+        ?string $error = null
+    ): void {
+        try {
+            ToolRequestLog::query()->create([
+                'tool_name'       => $tool->tool_name,
+                'display_name'    => $tool->display_name,
+                'endpoint_url'    => $endpointUrl,
+                'request_payload' => LogSanitizer::redactArguments($requestPayload),
+                'response_status' => $responseStatus,
+                'response_body'   => $responseBody,
+                'latency_ms'      => $latencyMs,
+                'success'         => $success,
+                'error'           => $error,
+                'created_at'      => now(),
+            ]);
+        } catch (\Throwable $e) {
+            Log::debug('ToolRequestLog write failed', ['error' => $e->getMessage()]);
         }
     }
 

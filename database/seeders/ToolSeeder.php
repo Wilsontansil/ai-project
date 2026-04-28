@@ -52,7 +52,7 @@ class ToolSeeder extends Seeder
                     'type' => 'object',
                     'properties' => [
                         // 'username' => ['type' => 'string', 'description' => 'Username akun'],
-                        'namarek' => ['type' => 'string', 'description' => 'Nama pemilik rekening (bisa nama asli atau username/nickname yang terdaftar di bank, terima apa adanya)'],
+                        'namarek' => ['type' => 'string', 'description' => 'Nama pemilik rekening'],
                         'norek' => ['type' => 'string', 'description' => 'Nomor rekening'],
                         'bank' => ['type' => 'string', 'description' => 'Nama bank'],
                     ],

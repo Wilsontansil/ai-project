@@ -357,6 +357,23 @@
                     </a>
                 @endcan
 
+                {{-- Request Log --}}
+                @can('view metrics')
+                    <a href="{{ route('backoffice.technical.request-logs') }}" class="bo-nav-item group"
+                        style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'request-logs' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
+                        onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'request-logs' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'request-logs' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
+                        <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'request-logs' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" width="18"
+                            height="18">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M8.25 6.75h7.5M8.25 12h7.5m-7.5 5.25H12M3.75 3h16.5A.75.75 0 0121 3.75v16.5a.75.75 0 01-.75.75H3.75A.75.75 0 013 20.25V3.75A.75.75 0 013.75 3z" />
+                        </svg>
+                        <span class="bo-label">Request Log</span>
+                        <span class="bo-tooltip">Request Log</span>
+                    </a>
+                @endcan
+
             </div>
         </div>
 

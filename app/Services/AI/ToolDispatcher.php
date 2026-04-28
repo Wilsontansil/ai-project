@@ -189,7 +189,8 @@ class ToolDispatcher
 
                         if ($arguments !== null) {
                             return $this->dispatch(
-                                $client, $pendingTool, $arguments, $systemPrompt, $contextPrompt, $history, $userMessage, $model
+                                $client, $pendingTool, $arguments, $systemPrompt, $contextPrompt, $history, $userMessage, $model,
+                                $pendingKey, $pendingToolName
                             );
                         }
 
@@ -305,7 +306,9 @@ class ToolDispatcher
         ?string $contextPrompt,
         array $history,
         string $userMessage,
-        string $model
+        string $model,
+        ?string $pendingKey = null,
+        ?string $pendingToolName = null
     ): ?string {
         $engineStart = MetricsCollector::startTimer();
         $engineError = null;
@@ -335,6 +338,12 @@ class ToolDispatcher
             $rules = trim((string) ($tool->tool_rules ?? ''));
             if ($rules !== '') {
                 $toolContext['tool_rules'] = $rules;
+            }
+
+            // If the HTTP tool returned a failure, re-arm the pending key so the
+            // customer can re-send corrected data without repeating the keyword.
+            if ($pendingKey !== null && ($toolContext['success'] ?? true) === false) {
+                Cache::put($pendingKey, $pendingToolName ?? $tool->tool_name, now()->addMinutes(5));
             }
 
             return $this->generateReplyFromToolResult(

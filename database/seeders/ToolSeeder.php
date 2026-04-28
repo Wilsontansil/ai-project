@@ -56,7 +56,7 @@ class ToolSeeder extends Seeder
                         'norek' => ['type' => 'string', 'description' => 'Nomor rekening'],
                         'bank' => ['type' => 'string', 'description' => 'Nama bank'],
                     ],
-                    'required' => ['username', 'namarek', 'norek', 'bank'],
+                    'required' => ['namarek', 'norek', 'bank'],
                 ],
                 'endpoints' => [
                     'endpoint' => [

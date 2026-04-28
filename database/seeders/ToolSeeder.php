@@ -79,7 +79,6 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => null,
             ],
-
             // ─── VERIFY DEPOSIT (triggered from resetPassword on balance error) ───
             [
                 'tool_name' => 'verifyDeposit',

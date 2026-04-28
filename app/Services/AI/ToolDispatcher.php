@@ -117,6 +117,18 @@ class ToolDispatcher
                     }
                 }
 
+                // If this tool is the currently pending one, merge carry args BEFORE
+                // checking for missing required fields — forwarded values may fill the gaps.
+                if ($pendingKey !== null && Cache::get($pendingKey) === $tool->tool_name) {
+                    $carryArgsKey = $this->carryArgsKey($chatId, $channel);
+                    $carryArgs = (array) Cache::get($carryArgsKey, []);
+                    foreach ($carryArgs as $key => $val) {
+                        if (trim((string) ($arguments[$key] ?? '')) === '') {
+                            $arguments[$key] = $val;
+                        }
+                    }
+                }
+
                 // If required fields are missing, arm the pending state so the next
                 // message resumes this tool instead of starting fresh.
                 if ($tool->needsArguments() && $this->hasMissingRequiredArgs($tool, $arguments)) {
@@ -131,17 +143,8 @@ class ToolDispatcher
                     Cache::forget($pendingKey);
                 }
 
-                // Merge any carry args forwarded by a previous tool's chain rule.
-                $carryArgsKey = $this->carryArgsKey($chatId, $channel);
-                $carryArgs = (array) Cache::get($carryArgsKey, []);
-                if (!empty($carryArgs)) {
-                    Cache::forget($carryArgsKey);
-                    foreach ($carryArgs as $key => $val) {
-                        if (trim((string) ($arguments[$key] ?? '')) === '') {
-                            $arguments[$key] = $val;
-                        }
-                    }
-                }
+                // Clear carry args now that we are proceeding to dispatch.
+                Cache::forget($this->carryArgsKey($chatId, $channel));
 
                 return $this->dispatch(
                     $client, $tool, $arguments, $systemPrompt, $contextPrompt, $history, $userMessage, $model,

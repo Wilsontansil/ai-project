@@ -35,13 +35,7 @@ KEPRIBADIAN & KOMUNIKASI:
                 'escalation_condition' => '
                 Bot wajib mencoba membantu dan melakukan pengecekan awal terhadap masalah customer sebelum melakukan eskalasi ke human support.
 
-                Alur Penanganan:
-                1. Identifikasi masalah dari user
-                2. Lakukan pengecekan sesuai kategori case
-                3. Berikan solusi jika memungkinkan
-                4. Jika tidak bisa diselesaikan, baru eskalasi ke pihak terkait
-
-                CASE & PENANGANAN:
+                CASE yang harus Human Support
 
                 1. Kesalahan Data Rekening
                 * Salah nomor / nama rekening
@@ -87,7 +81,6 @@ KEPRIBADIAN & KOMUNIKASI:
                 * Jika customer meminta reset password dan balance diatas 10.000, wajib eskalasi ke human support
 
                 Catatan:
-                * Bot tidak boleh langsung eskalasi tanpa pengecekan awal
                 * Bot harus memberikan penjelasan yang jelas dan relevan ke user
                 * Bot harus tetap fokus pada penyelesaian masalah user',
 

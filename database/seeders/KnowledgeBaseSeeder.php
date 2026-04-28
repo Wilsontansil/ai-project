@@ -420,6 +420,74 @@ Catatan:
                 'file_name' => null,
                 'is_active' => true,
             ],
+            [
+                'title' => 'Link & Pola',
+                'content' => 'Link RTP
+https://rtpcmbet95.xyz/
+
+Link APK
+https://apk.hi11office.com/CMBET(2.0.6).apk
+
+Game Gacor / Slot Gacor / Bocoran Gacor
+🔥🔥 Bocoran Slot Hari Ini 🔥🔥
+#pastiamanpastihoki
+#semogaberuntung
+
+🎰 PGSOFT
+- Mahjong Ways 2
+- Anubis Wrath
+- Candy Bonanza
+- Wild Bandito
+- Wild Bounty Showdown
+
+🎰 Pragmatic Play
+- Fortune of Olympus
+- Gates of Olympus Dice
+- Sweet Bonanza Super Scatter
+- Starlight Archer 1000
+- 5 Lions Megaways
+
+🎰 Fastspin
+- Mahjong Princess
+- Caribbean Riches
+- Golden Moon Empire
+- Jungle Quest
+- Pai Gow Ways
+
+Pola Gacor / Pola Vip/Vvip / Pola
+𝐏𝐎𝐋𝐀 𝐕𝐈𝐏  𝐓𝐄𝐑𝐔𝐏𝐃𝐀𝐓𝐄 𝐇𝐀𝐑𝐈 𝐈𝐍𝐈!
+POLA MAHJONG WAYS 1
+Turbo ✅– MANUAL Spin 10x
+Turbo ✅- AUTO Spin 10x
+Turbo ❌– MANUAL Spin 15x
+📌𝐑𝐄𝐊𝐎𝐌𝐄𝐍𝐃𝐀𝐒𝐈 𝐁𝐄𝐓: 400 - 8.000
+
+POLA WILD BANDITO
+Turbo ✅ – Auto 30
+Turbo ✅ – Manual 18
+Turbo ❌ – Auto 30
+Turbo ✅ – Manual 12
+📌𝐑𝐄𝐊𝐎𝐌𝐄𝐍𝐃𝐀𝐒𝐈 𝐁𝐄𝐓: 400
+
+POLA Mahjong Ways 2
+Turbo ✅– MANUAL Spin 14x
+Turbo ✅- AUTO Spin 30x
+Turbo ❌– MANUAL Spin 10x
+📌𝐑𝐄𝐊𝐎𝐌𝐄𝐍𝐃𝐀𝐒𝐈 𝐁𝐄𝐓: 400 - 8.000
+
+📌𝐏𝐎𝐋𝐀 𝐓𝐄𝐑𝐁𝐀𝐈𝐊
+📈 𝐆𝐚𝐭𝐞 𝐎𝐟 𝐎𝐥𝐲𝐦𝐩𝐮𝐬 𝟏.𝟎𝟎𝟎⚡️
+-----------------------
+✅❌✅ - 20 AUTO DC ON
+❌✅✅ - 10 MANUAL DC OFF
+❌✅✅ - 30 AUTO DC OFF
+❌❌✅ - 50 MANUAL DC ON
+🔔𝐁𝐔𝐘 𝐒𝐏𝐈𝐍 𝐘𝐀𝐍𝐆 𝐃𝐈𝐒𝐀𝐑𝐀𝐍𝐊𝐀𝐍 𝟐𝟎 𝐑𝐈𝐁𝐔 𝐗5
+🔔𝐁𝐔𝐘 𝐒𝐏𝐈𝐍 𝐘𝐀𝐍𝐆 𝐃𝐈𝐒𝐀𝐑𝐀𝐍𝐊𝐀𝐍 6𝟎 𝐑𝐈𝐁𝐔 𝐗3',
+                'source' => 'manual',
+                'file_name' => null,
+                'is_active' => true,
+            ],
         ];
 
         foreach ($entries as $entry) {

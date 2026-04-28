@@ -133,6 +133,14 @@ class ToolController extends Controller
             'error_responses' => ['nullable', 'array'],
             'error_responses.*.status' => ['required_with:error_responses', 'integer'],
             'error_responses.*.message' => ['required_with:error_responses', 'string', 'max:255'],
+            'chain_rules' => ['nullable', 'array'],
+            'chain_rules.*.on' => ['required_with:chain_rules', 'string', 'in:failure,success'],
+            'chain_rules.*.condition' => ['required_with:chain_rules', 'string', 'in:contains,equals'],
+            'chain_rules.*.field' => ['required_with:chain_rules', 'string', 'max:80'],
+            'chain_rules.*.value' => ['required_with:chain_rules', 'string', 'max:255'],
+            'chain_rules.*.chain_tool' => ['required_with:chain_rules', 'string', 'max:80'],
+            'chain_rules.*.carry_args' => ['nullable', 'string', 'max:500'],
+            'chain_rules.*.message' => ['nullable', 'string', 'max:500'],
             'category' => ['nullable', 'string', 'in:' . implode(',', self::CATEGORIES)],
         ];
 
@@ -274,6 +282,7 @@ class ToolController extends Controller
                 'expected_response' => $this->buildExpectedResponseFromInput('endpoint', $request),
                 'error_responses' => $this->buildErrorResponsesFromInput($request),
             ],
+            'chain_rules' => $this->buildChainRulesFromInput($request),
         ];
     }
 
@@ -367,6 +376,44 @@ class ToolController extends Controller
         }
 
         return $errors;
+    }
+
+    /**
+     * Build chain rules array from form input.
+     * carry_args is accepted as a comma-separated string from the form.
+     */
+    private function buildChainRulesFromInput(Request $request): array
+    {
+        $rows = (array) $request->input('chain_rules', []);
+        $rules = [];
+
+        foreach ($rows as $row) {
+            $chainTool = trim((string) ($row['chain_tool'] ?? ''));
+            $field     = trim((string) ($row['field'] ?? ''));
+            $value     = trim((string) ($row['value'] ?? ''));
+
+            if ($chainTool === '' || $field === '' || $value === '') {
+                continue;
+            }
+
+            // carry_args arrives as a comma-separated string from the form input.
+            $carryRaw  = trim((string) ($row['carry_args'] ?? ''));
+            $carryArgs = $carryRaw !== ''
+                ? array_values(array_filter(array_map('trim', explode(',', $carryRaw))))
+                : [];
+
+            $rules[] = [
+                'on'         => in_array($row['on'] ?? '', ['failure', 'success'], true) ? $row['on'] : 'failure',
+                'condition'  => in_array($row['condition'] ?? '', ['contains', 'equals'], true) ? $row['condition'] : 'contains',
+                'field'      => $field,
+                'value'      => $value,
+                'chain_tool' => $chainTool,
+                'carry_args' => $carryArgs,
+                'message'    => trim((string) ($row['message'] ?? '')),
+            ];
+        }
+
+        return $rules;
     }
 
     /**

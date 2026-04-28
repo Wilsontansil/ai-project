@@ -238,6 +238,20 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- ─── Chain Rules ─── --}}
+                <div class="rounded-2xl border border-amber-400/20 bg-amber-500/5 p-4 space-y-3">
+                    <div>
+                        <h3 class="text-sm font-semibold text-amber-300">Chain Rules</h3>
+                        <p class="mt-1 text-xs text-slate-400">Trigger another tool automatically based on this tool's
+                            response. Carry args are forwarded silently to the chained tool.</p>
+                    </div>
+                    <div id="chain-rule-list" class="space-y-3"></div>
+                    <button type="button" onclick="addChainRuleRow()"
+                        class="rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-300 transition hover:bg-amber-500/20">
+                        + Add Chain Rule
+                    </button>
+                </div>
             </div>
 
             <div>
@@ -623,6 +637,73 @@
                     class="shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20">✕</button>
             `;
             wrapper.appendChild(row);
+        }
+
+        /* ── Chain Rules ── */
+        let chainRuleIdx = 0;
+
+        function addChainRuleRow(on = 'failure', field = 'response_message', condition = 'contains', value = '', chainTool =
+            '', carryArgs = '', message = '') {
+            const list = document.getElementById('chain-rule-list');
+            if (!list) return;
+            const row = document.createElement('div');
+            row.className = 'chain-rule-row rounded-xl border border-white/10 bg-slate-900/50 p-3 space-y-2';
+            row.innerHTML = `
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="mb-1 block text-xs text-slate-400">Trigger On</label>
+                        <select name="chain_rules[${chainRuleIdx}][on]" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
+                            <option value="failure" ${on === 'failure' ? 'selected' : ''}>Failure</option>
+                            <option value="success" ${on === 'success' ? 'selected' : ''}>Success</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-xs text-slate-400">Field</label>
+                        <select name="chain_rules[${chainRuleIdx}][field]" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
+                            <option value="response_message" ${field === 'response_message' ? 'selected' : ''}>response_message</option>
+                            <option value="response_status" ${field === 'response_status' ? 'selected' : ''}>response_status</option>
+                            <option value="http_status_code" ${field === 'http_status_code' ? 'selected' : ''}>http_status_code</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-xs text-slate-400">Condition</label>
+                        <select name="chain_rules[${chainRuleIdx}][condition]" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
+                            <option value="contains" ${condition === 'contains' ? 'selected' : ''}>contains</option>
+                            <option value="equals" ${condition === 'equals' ? 'selected' : ''}>equals</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="mb-1 block text-xs text-slate-400">Match Value</label>
+                        <input type="text" name="chain_rules[${chainRuleIdx}][value]" value="${value}" placeholder="e.g. balance"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-xs text-slate-400">Chain Tool (tool_name)</label>
+                        <input type="text" name="chain_rules[${chainRuleIdx}][chain_tool]" value="${chainTool}" placeholder="e.g. verifyDeposit"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="mb-1 block text-xs text-slate-400">Carry Args (comma-separated param names)</label>
+                        <input type="text" name="chain_rules[${chainRuleIdx}][carry_args]" value="${carryArgs}" placeholder="e.g. namarek, norek, bank"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-xs text-slate-400">Custom Message (optional)</label>
+                        <input type="text" name="chain_rules[${chainRuleIdx}][message]" value="${message}" placeholder="Leave blank to use chained tool's prompt"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" onclick="this.closest('.chain-rule-row').remove()"
+                        class="rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-1.5 text-xs text-red-300 hover:bg-red-500/20">Remove Rule</button>
+                </div>
+            `;
+            list.appendChild(row);
+            chainRuleIdx++;
         }
     </script>
 @endsection

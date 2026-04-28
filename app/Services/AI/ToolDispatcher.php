@@ -132,7 +132,8 @@ class ToolDispatcher
                 }
 
                 return $this->dispatch(
-                    $client, $tool, $arguments, $systemPrompt, $contextPrompt, $history, $userMessage, $model
+                    $client, $tool, $arguments, $systemPrompt, $contextPrompt, $history, $userMessage, $model,
+                    $chatId, $channel
                 );
             }
         }
@@ -183,14 +184,26 @@ class ToolDispatcher
                     } else {
                         Cache::forget($pendingKey);
 
+                        // Load any carry args set by a previous tool's chain rule.
+                        $carryArgsKey = $this->carryArgsKey($chatId, $channel);
+                        $carryArgs = (array) Cache::get($carryArgsKey, []);
+                        Cache::forget($carryArgsKey);
+
                         $arguments = $this->forceExtractArguments(
                             $client, $pendingTool, $contextPrompt, $history, $userMessage, $model
                         );
 
                         if ($arguments !== null) {
+                            // Merge carry args: pre-fill fields the AI left empty.
+                            foreach ($carryArgs as $key => $val) {
+                                if (trim((string) ($arguments[$key] ?? '')) === '') {
+                                    $arguments[$key] = $val;
+                                }
+                            }
+
                             return $this->dispatch(
                                 $client, $pendingTool, $arguments, $systemPrompt, $contextPrompt, $history, $userMessage, $model,
-                                $pendingKey, $pendingToolName
+                                $chatId, $channel, $pendingKey, $pendingToolName
                             );
                         }
 
@@ -233,7 +246,8 @@ class ToolDispatcher
             }
 
             return $this->dispatch(
-                $client, $bestTool, $arguments ?? [], $systemPrompt, $contextPrompt, $history, $userMessage, $model
+                $client, $bestTool, $arguments ?? [], $systemPrompt, $contextPrompt, $history, $userMessage, $model,
+                $chatId, $channel
             );
         }
 
@@ -307,6 +321,8 @@ class ToolDispatcher
         array $history,
         string $userMessage,
         string $model,
+        string $chatId = '',
+        string $channel = '',
         ?string $pendingKey = null,
         ?string $pendingToolName = null
     ): ?string {
@@ -338,6 +354,12 @@ class ToolDispatcher
             $rules = trim((string) ($tool->tool_rules ?? ''));
             if ($rules !== '') {
                 $toolContext['tool_rules'] = $rules;
+            }
+
+            // Evaluate chain rules — if a rule fires, arm the next tool and return its prompt.
+            $chainReply = $this->evaluateChainRules($tool, $toolContext, $arguments, $chatId, $channel);
+            if ($chainReply !== null) {
+                return $chainReply;
             }
 
             // If the HTTP tool returned a failure, re-arm the pending key so the
@@ -630,6 +652,122 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
         $legacyCall = $msg->functionCall ?? null;
         if (($legacyCall->name ?? null) === $toolName) {
             return $this->normalizeArguments($legacyCall->arguments ?? '{}');
+        }
+
+        return null;
+    }
+
+    /**
+     * Cache key for carry args stored by a chain rule.
+     */
+    private function carryArgsKey(string $chatId, string $channel): string
+    {
+        $prefix = $channel !== '' ? $channel . ':' : '';
+        return "chain_carry:{$prefix}{$chatId}";
+    }
+
+    /**
+     * Evaluate chain_rules from tool endpoints config.
+     * If a rule matches the tool_context, arm the chained tool as pending,
+     * cache any carry args, and return the prompt/message for the user.
+     *
+     * @param array<string, mixed> $toolContext
+     * @param array<string, mixed> $arguments
+     */
+    private function evaluateChainRules(
+        Tool $tool,
+        array $toolContext,
+        array $arguments,
+        string $chatId,
+        string $channel
+    ): ?string {
+        $chainRules = (array) ($tool->endpoints['chain_rules'] ?? []);
+
+        if (empty($chainRules) || $chatId === '') {
+            return null;
+        }
+
+        $success = (bool) ($toolContext['success'] ?? true);
+
+        foreach ($chainRules as $rule) {
+            if (!is_array($rule)) {
+                continue;
+            }
+
+            $on = $rule['on'] ?? 'failure';
+            if ($on === 'failure' && $success) {
+                continue;
+            }
+            if ($on === 'success' && !$success) {
+                continue;
+            }
+
+            $conditionField = $rule['field'] ?? 'response_message';
+            $condition      = $rule['condition'] ?? 'contains';
+            $matchValue     = strtolower(trim((string) ($rule['value'] ?? '')));
+            $fieldValue     = strtolower(trim((string) ($toolContext[$conditionField] ?? '')));
+
+            $matched = match ($condition) {
+                'contains' => $matchValue !== '' && str_contains($fieldValue, $matchValue),
+                'equals'   => $fieldValue === $matchValue,
+                default    => false,
+            };
+
+            if (!$matched) {
+                continue;
+            }
+
+            $chainToolName = trim((string) ($rule['chain_tool'] ?? ''));
+            if ($chainToolName === '') {
+                continue;
+            }
+
+            // Arm the chained tool as the next pending.
+            $pendingKey = $this->pendingToolKey($chatId, $channel);
+            if ($pendingKey !== null) {
+                Cache::put($pendingKey, $chainToolName, now()->addMinutes(10));
+            }
+
+            // Cache carry args so the pending resume flow can inject them.
+            $carryArgKeys = (array) ($rule['carry_args'] ?? []);
+            if (!empty($carryArgKeys)) {
+                $carry = [];
+                foreach ($carryArgKeys as $argKey) {
+                    $val = trim((string) ($arguments[$argKey] ?? ''));
+                    if ($val !== '') {
+                        $carry[(string) $argKey] = $arguments[$argKey];
+                    }
+                }
+                if (!empty($carry)) {
+                    Cache::put($this->carryArgsKey($chatId, $channel), $carry, now()->addMinutes(10));
+                }
+            }
+
+            Log::info('Tool chain rule triggered', [
+                'source_tool' => $tool->tool_name,
+                'chain_tool'  => $chainToolName,
+                'on'          => $on,
+                'field'       => $conditionField,
+                'matched'     => $rule['value'] ?? '',
+            ]);
+
+            // Return custom message if configured.
+            $customMessage = trim((string) ($rule['message'] ?? ''));
+            if ($customMessage !== '') {
+                return $customMessage;
+            }
+
+            // Otherwise use the chained tool's missing-data prompt.
+            try {
+                $chainTool = Tool::query()->where('tool_name', $chainToolName)->first();
+                if ($chainTool !== null) {
+                    return $this->buildMissingDataMessage($chainTool);
+                }
+            } catch (\Throwable) {
+                // Fallthrough to generic message.
+            }
+
+            return 'Mohon lengkapi data yang diperlukan untuk langkah berikutnya.';
         }
 
         return null;

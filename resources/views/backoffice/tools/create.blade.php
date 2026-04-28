@@ -311,7 +311,7 @@
             document.getElementById('section-get').style.display = type === 'get' ? '' : 'none';
             document.getElementById('section-get-multiple').style.display = type === 'get_multiple' ? '' : 'none';
             document.getElementById('section-update').style.display = (type === 'update' || type === 'verify') ? '' :
-            'none';
+                'none';
         }
 
         document.getElementById('type').addEventListener('change', toggleTypeSections);
@@ -623,15 +623,6 @@
                     class="shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20">✕</button>
             `;
             wrapper.appendChild(row);
-        }
-        placeholder = "Teks informasi..." > < /textarea> <
-        button type = "button"
-        onclick = "this.closest('.info-text-row').remove()"
-        class =
-        "shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20" > ✕
-        <
-        /button>`;
-        wrapper.appendChild(row);
         }
     </script>
 @endsection

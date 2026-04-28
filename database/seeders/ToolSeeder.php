@@ -75,7 +75,51 @@ class ToolSeeder extends Seeder
                     ],
                 ],
                 // 'keywords' => ['Reset Password', 'reset pass'],
-                'tool_rules' => "- Terima data user dalam format chat bebas\n- Format data yang dibutuhkan: namarek, norek, bank\n- Jika sebagian data sudah ada, cukup minta data yang masih kurang\n- Jangan eksekusi sebelum semua data wajib terkumpul lengkap\n- Setelah berhasil, infokan bahwa password berhasil direset ke 1234567 dan berikan link website untuk login\n- Jika data tidak cocok, minta player periksa kembali atau tawarkan untuk dibantu REGISTER",
+                'tool_rules' => "- Terima data user dalam format chat bebas\n- Format data yang dibutuhkan: namarek, norek, bank\n- norek = nomor HP, cukup informasikan kepada user untuk memberikan nomor HP mereka\n- Jika sebagian data sudah ada, cukup minta data yang masih kurang\n- Jangan eksekusi sebelum semua data wajib terkumpul lengkap\n- Setelah berhasil, infokan bahwa password berhasil direset ke 1234567 dan berikan link website untuk login\n- Jika data tidak cocok, minta player periksa kembali atau tawarkan untuk dibantu REGISTER\n- Jika response gagal karena balance melebihi ketentuan (balance > 10000), segera panggil tool verifyDeposit secara langsung — teruskan data namarek, norek, bank yang sudah ada, lalu minta user upload screenshot bukti transfer deposit",
+                'information_text' => null,
+                'meta' => null,
+            ],
+
+            // ─── VERIFY DEPOSIT (triggered from resetPassword on balance error) ───
+            [
+                'tool_name' => 'verifyDeposit',
+                'category' => 'account',
+                'display_name' => 'Verify Deposit',
+                'description' => 'Verifikasi deposit saat reset password gagal karena balance melebihi ketentuan. AI menganalisa screenshot bukti transfer untuk mengekstrak jumlah (depoamount) dan waktu transfer (time), lalu mengirim data ke endpoint untuk diverifikasi.',
+                'slug' => 'verify-deposit',
+                'type' => 'update',
+                'is_enabled' => true,
+                'data_model_id' => null,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'namarek'    => ['type' => 'string', 'description' => 'Nama pemilik rekening, diambil dari sesi resetPassword sebelumnya'],
+                        'norek'      => ['type' => 'string', 'description' => 'Nomor HP / rekening, diambil dari sesi resetPassword sebelumnya'],
+                        'bank'       => ['type' => 'string', 'description' => 'Nama bank, diambil dari sesi resetPassword sebelumnya'],
+                        'depoamount' => ['type' => 'string', 'description' => 'Jumlah transfer deposit yang diekstrak dari gambar screenshot bukti transfer'],
+                        'time'       => ['type' => 'string', 'description' => 'Waktu transfer yang diekstrak dari gambar screenshot bukti transfer'],
+                    ],
+                    'required' => ['namarek', 'norek', 'bank', 'depoamount', 'time'],
+                ],
+                'endpoints' => [
+                    'endpoint' => [
+                        'route' => 'https://api-stg.pilartestengine.com/aiservice/api/deposit/resetpassword',
+                        'body' => [
+                            'namarek'    => '\$arg->namarek',
+                            'norek'      => '\$arg->norek',
+                            'bank'       => '\$arg->bank',
+                            'agent'      => config('services.agent.kode'),
+                            'depoamount' => '\$arg->depoamount',
+                            'time'       => '\$arg->time',
+                        ],
+                        'expected_response' => [
+                            'status'  => 200,
+                            'message' => 'Success',
+                            'data'    => (object) [],
+                        ],
+                    ],
+                ],
+                'tool_rules' => "- Tool ini dipanggil otomatis dari resetPassword ketika response gagal karena balance melebihi ketentuan (balance > 10000)\n- Data namarek, norek, bank sudah tersedia dari sesi resetPassword sebelumnya — jangan tanya ulang\n- Minta user mengirimkan screenshot bukti transfer deposit\n- Analisa gambar dan ekstrak: jumlah transfer (depoamount) dan waktu transfer (time)\n- Konfirmasi hasil ekstraksi kepada user sebelum eksekusi: 'Saya membaca transfer sebesar [depoamount] pada [time], apakah benar?'\n- Jangan eksekusi sebelum semua 5 data lengkap (namarek, norek, bank, depoamount, time)\n- Setelah sukses, informasikan bahwa verifikasi deposit berhasil dan proses reset password akan segera dilanjutkan",
                 'information_text' => null,
                 'meta' => null,
             ],

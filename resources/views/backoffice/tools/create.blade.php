@@ -45,6 +45,8 @@
                             {{ __('backoffice.pages.tools.type_get_multiple') }}</option>
                         <option value="update" {{ old('type') === 'update' ? 'selected' : '' }}>
                             {{ __('backoffice.pages.tools.type_update') }}</option>
+                        <option value="verify" {{ old('type') === 'verify' ? 'selected' : '' }}>
+                            {{ __('backoffice.pages.tools.type_verify') }}</option>
                     </select>
                 </div>
                 <div>
@@ -308,7 +310,8 @@
             document.getElementById('section-info').style.display = type === 'info' ? '' : 'none';
             document.getElementById('section-get').style.display = type === 'get' ? '' : 'none';
             document.getElementById('section-get-multiple').style.display = type === 'get_multiple' ? '' : 'none';
-            document.getElementById('section-update').style.display = type === 'update' ? '' : 'none';
+            document.getElementById('section-update').style.display = (type === 'update' || type === 'verify') ? '' :
+            'none';
         }
 
         document.getElementById('type').addEventListener('change', toggleTypeSections);

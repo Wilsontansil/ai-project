@@ -198,6 +198,7 @@ return [
             'type_get' => 'Get — DataModel lookup',
             'type_get_multiple' => 'Get Multiple — Multi DataModel lookup',
             'type_update' => 'Update — API endpoint',
+            'type_verify' => 'Verify — Multi-step verification + endpoint',
             'keywords' => 'Keywords (comma-separated)',
             'keywords_help' => 'Keywords for intent matching fallback, separate with commas.',
             'description' => 'Description',

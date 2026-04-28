@@ -131,6 +131,18 @@ class ToolDispatcher
                     Cache::forget($pendingKey);
                 }
 
+                // Merge any carry args forwarded by a previous tool's chain rule.
+                $carryArgsKey = $this->carryArgsKey($chatId, $channel);
+                $carryArgs = (array) Cache::get($carryArgsKey, []);
+                if (!empty($carryArgs)) {
+                    Cache::forget($carryArgsKey);
+                    foreach ($carryArgs as $key => $val) {
+                        if (trim((string) ($arguments[$key] ?? '')) === '') {
+                            $arguments[$key] = $val;
+                        }
+                    }
+                }
+
                 return $this->dispatch(
                     $client, $tool, $arguments, $systemPrompt, $contextPrompt, $history, $userMessage, $model,
                     $chatId, $channel
@@ -187,7 +199,6 @@ class ToolDispatcher
                         // Load any carry args set by a previous tool's chain rule.
                         $carryArgsKey = $this->carryArgsKey($chatId, $channel);
                         $carryArgs = (array) Cache::get($carryArgsKey, []);
-                        Cache::forget($carryArgsKey);
 
                         $arguments = $this->forceExtractArguments(
                             $client, $pendingTool, $contextPrompt, $history, $userMessage, $model
@@ -200,6 +211,7 @@ class ToolDispatcher
                                     $arguments[$key] = $val;
                                 }
                             }
+                            Cache::forget($carryArgsKey);
 
                             return $this->dispatch(
                                 $client, $pendingTool, $arguments, $systemPrompt, $contextPrompt, $history, $userMessage, $model,
@@ -208,6 +220,7 @@ class ToolDispatcher
                         }
 
                         // Extraction still failed — re-store pending and ask again.
+                        // Carry args are intentionally kept in cache so the next attempt can use them.
                         Cache::put($pendingKey, $pendingToolName, now()->addMinutes(5));
 
                         return $this->buildMissingDataMessage($pendingTool);

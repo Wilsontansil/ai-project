@@ -115,12 +115,12 @@ class ToolSeeder extends Seeder
                     'endpoint' => [
                         'route' => 'https://api-stg.pilartestengine.com/aiservice/api/deposit/resetpassword',
                         'body' => [
-                            'namarek'    => '\$arg->namarek',
-                            'norek'      => '\$arg->norek',
-                            'bank'       => '\$arg->bank',
+                            'namarek'    => '$arg->namarek',
+                            'norek'      => '$arg->norek',
+                            'bank'       => '$arg->bank',
                             'agent'      => config('services.agent.kode'),
-                            'depoamount' => '\$arg->depoamount',
-                            'time'       => '\$arg->time',
+                            'depoamount' => '$arg->depoamount',
+                            'time'       => '$arg->time',
                         ],
                         'expected_response' => [
                             'status'  => 200,

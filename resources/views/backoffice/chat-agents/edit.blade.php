@@ -536,6 +536,12 @@
                                     <th class="px-3 py-2 font-medium">Tool Key</th>
                                     <th class="px-3 py-2 font-medium">Type</th>
                                     <th class="px-3 py-2 font-medium">Category</th>
+                                    <th class="px-3 py-2 font-medium">
+                                        Status
+                                        <span
+                                            style="display:block;font-size:10px;font-weight:400;text-transform:none;letter-spacing:normal;color:#64748b">click
+                                            to toggle</span>
+                                    </th>
                                     @can('manage tools')
                                         <th class="px-3 py-2 font-medium text-right">Actions</th>
                                     @endcan
@@ -543,7 +549,7 @@
                             </thead>
                             <tbody class="divide-y divide-white/5">
                                 @foreach ($availableTools as $tool)
-                                    <tr class="transition hover:bg-white/5">
+                                    <tr class="transition hover:bg-white/5 {{ $tool->is_enabled ? '' : 'opacity-50' }}">
                                         <td class="px-3 py-2">
                                             <span class="font-medium text-white">{{ $tool->display_name }}</span>
                                             @if ($tool->description)
@@ -570,6 +576,21 @@
                                         <td class="px-3 py-2">
                                             <span
                                                 style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(6,182,212,0.15);padding:2px 10px;font-size:11px;font-weight:600;color:#67e8f9">{{ strtoupper((string) ($tool->category ?: 'general')) }}</span>
+                                        </td>
+                                        <td class="px-3 py-2">
+                                            <form method="POST"
+                                                action="{{ route('backoffice.tools.toggleEnabled', $tool) }}">
+                                                @csrf
+                                                @if ($tool->is_enabled)
+                                                    <button type="submit"
+                                                        style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(16,185,129,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#6ee7b7;border:1px solid rgba(52,211,153,0.3);cursor:pointer"
+                                                        title="Klik untuk nonaktifkan">Active</button>
+                                                @else
+                                                    <button type="submit"
+                                                        style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(239,68,68,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#fca5a5;border:1px solid rgba(248,113,113,0.3);cursor:pointer"
+                                                        title="Klik untuk aktifkan">Inactive</button>
+                                                @endif
+                                            </form>
                                         </td>
                                         @can('manage tools')
                                             <td class="px-3 py-2 text-right">

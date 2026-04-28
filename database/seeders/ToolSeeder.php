@@ -81,7 +81,7 @@ class ToolSeeder extends Seeder
                             'value'      => 'balance',
                             'chain_tool' => 'verifyDeposit',
                             'carry_args' => ['namarek', 'norek', 'bank'],
-                            'message'    => '',
+                            'message'    => 'Balance Anda diatas 10.000 demi keamanan tolong kirimkan bukti transfer deposit terakhir anda untuk verifikasi sebelum kami reset passwordnya',
                         ],
                     ],
                 ],

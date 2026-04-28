@@ -10,6 +10,7 @@ use App\Services\AI\ToolEngines\HttpToolEngine;
 use App\Services\AI\ToolEngines\InfoToolEngine;
 use App\Services\AI\ToolEngines\WebScraperToolEngine;
 use App\Support\MetricsCollector;
+use App\Services\AI\EscalationSummaryService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -756,6 +757,9 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
                             'channel'     => $channel,
                             'chat_id'     => $chatId,
                         ]);
+
+                        // Generate summary so backoffice agents see the escalation context.
+                        app(EscalationSummaryService::class)->generate($customer, $chatId, $channel);
                     }
                 } catch (\Throwable $e) {
                     Log::error('Failed to escalate customer via chain rule', [

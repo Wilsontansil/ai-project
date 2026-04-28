@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Services\Agent\AgentContextService;
 use App\Services\Agent\ConversationMemoryService;
 use App\Services\AI\ConversationHistory;
+use App\Services\AI\EscalationSummaryService;
 use App\Services\AIService;
 use App\Support\MetricsCollector;
 use App\Support\ResilientHttp;
@@ -138,7 +139,7 @@ class ProcessAiReply implements ShouldQueue
                 }
 
                 // Generate escalation summary for backoffice agents.
-                $this->generateEscalationSummary($customer);
+                app(EscalationSummaryService::class)->generate($customer, $this->chatId, $this->channel);
             }
         }
 
@@ -303,6 +304,7 @@ class ProcessAiReply implements ShouldQueue
         return (string) ProjectSetting::getValue('whatsapp_session', config('services.whatsapp.session', 'default'));
     }
 
+    /** @deprecated Use App\Services\AI\EscalationSummaryService instead. */
     private function generateEscalationSummary(Customer $customer): void
     {
         try {

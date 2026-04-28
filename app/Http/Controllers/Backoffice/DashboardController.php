@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -181,6 +182,11 @@ class DashboardController extends Controller
 
         // Clear AI conversation history so the customer can escalate again in a fresh session.
         app(ConversationHistory::class)->clear($customer->platform_user_id, $customer->platform);
+
+        // Clear any stale pending-tool / chain-carry state so the bot resumes cleanly.
+        $cachePrefix = $customer->platform !== '' ? $customer->platform . ':' : '';
+        Cache::forget("pending_tool:{$cachePrefix}{$customer->platform_user_id}");
+        Cache::forget("chain_carry:{$cachePrefix}{$customer->platform_user_id}");
 
         return back()->with('success', __('backoffice.pages.escalation.release_success'));
     }

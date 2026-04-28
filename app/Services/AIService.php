@@ -57,12 +57,17 @@ class AIService
         $systemPrompt = $this->promptBuilder->buildSystemPrompt($chatAgent);
         $toolDefinitions = $this->toolDispatcher->getToolDefinitions($chatAgent);
         $history = $this->conversationHistory->load($chatId, $channel);
+        $isNewSession = empty($history);
         $contextPrompt = $this->promptBuilder->buildAgentContextPrompt($agentContext, $channel);
         $activeHistory = $history;
 
         $messages = [['role' => 'system', 'content' => $systemPrompt]];
         if ($contextPrompt !== null) {
             $messages[] = ['role' => 'system', 'content' => $contextPrompt];
+        }
+
+        if ($isNewSession) {
+            $messages[] = ['role' => 'system', 'content' => 'STATUS SESI: percakapan BARU — tidak ada konteks percakapan sebelumnya. Sambut user secara natural dan tangani permintaannya dari awal.'];
         }
 
         // Estimate token usage and trim history if payload is too large.

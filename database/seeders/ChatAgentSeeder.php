@@ -77,9 +77,6 @@ KEPRIBADIAN & KOMUNIKASI:
                 * Membutuhkan pengecekan manual (vendor / bank / engine)
                 * Membutuhkan keputusan khusus (SPV)
 
-                8. Kondisi Reset Password
-                * Jika customer meminta reset password dan balance diatas 10.000, wajib eskalasi ke human support
-
                 Catatan:
                 * Bot harus memberikan penjelasan yang jelas dan relevan ke user
                 * Bot harus tetap fokus pada penyelesaian masalah user',

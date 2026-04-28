@@ -129,7 +129,7 @@ class ToolSeeder extends Seeder
                         ],
                     ],
                 ],
-                'tool_rules' => "- Tool ini dipanggil otomatis dari resetPassword ketika response gagal karena balance melebihi ketentuan (balance > 10000)\n- Data namarek, norek, bank sudah tersedia dari sesi resetPassword sebelumnya — jangan tanya ulang\n- Minta user mengirimkan screenshot bukti transfer deposit\n- Analisa gambar dan ekstrak: jumlah transfer (depoamount) dan waktu transfer (time)\n- Konfirmasi hasil ekstraksi kepada user sebelum eksekusi: 'Saya membaca transfer sebesar [depoamount] pada [time], apakah benar?'\n- Jangan eksekusi sebelum semua 5 data lengkap (namarek, norek, bank, depoamount, time)\n- Setelah sukses, informasikan bahwa verifikasi deposit berhasil dan proses reset password akan segera dilanjutkan",
+                'tool_rules' => "- Tool ini dipanggil otomatis dari resetPassword ketika response gagal karena balance melebihi ketentuan (balance > 10000)\n- Data namarek, norek, bank sudah tersedia dari sesi resetPassword sebelumnya — jangan tanya ulang\n- Minta user mengirimkan screenshot bukti transfer deposit\n- Analisa gambar dan ekstrak: jumlah transfer (depoamount) dan waktu transfer (time)'\n- Jangan eksekusi sebelum semua 5 data lengkap (namarek, norek, bank, depoamount, time)\n-Setelah berhasil, infokan bahwa password berhasil direset ke 1234567 dan berikan link website untuk login",
                 'information_text' => null,
                 'meta' => null,
             ],

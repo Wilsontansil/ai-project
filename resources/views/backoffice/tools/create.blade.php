@@ -363,24 +363,24 @@
             const row = document.createElement('div');
             row.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
-                <div class="w-2/5">
-                    <select name="params[${paramIndex}][name]"
-                        class="param-name-select w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
-                        ${buildFieldOptions(name)}
-                    </select>
-                </div>
-                <div class="flex-1">
-                    <input type="text" name="params[${paramIndex}][description]" value="${desc}" placeholder="{{ __('backoffice.pages.tools.parameter_description') }}"
-                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                </div>
-                <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer">
-                    <input type="checkbox" name="params[${paramIndex}][required]" value="1" ${required ? 'checked' : ''}
-                        class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
-                    {{ __('backoffice.pages.tools.required') }}
-                </label>
-                <button type="button" onclick="this.closest('div').remove()"
-                    class="flex-none rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 hover:bg-red-500/20">&times;</button>
-            `;
+                    <div class="w-2/5">
+                        <select name="params[${paramIndex}][name]"
+                            class="param-name-select w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
+                            ${buildFieldOptions(name)}
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <input type="text" name="params[${paramIndex}][description]" value="${desc}" placeholder="{{ __('backoffice.pages.tools.parameter_description') }}"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    </div>
+                    <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer">
+                        <input type="checkbox" name="params[${paramIndex}][required]" value="1" ${required ? 'checked' : ''}
+                            class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
+                        {{ __('backoffice.pages.tools.required') }}
+                    </label>
+                    <button type="button" onclick="this.closest('div').remove()"
+                        class="flex-none rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 hover:bg-red-500/20">&times;</button>
+                `;
             list.appendChild(row);
             paramIndex++;
         }
@@ -393,22 +393,22 @@
             const row = document.createElement('div');
             row.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
-                <div class="w-2/5">
-                    <input type="text" name="params[${getMultiParamIndex}][name]" value="${name}" placeholder="{{ __('backoffice.pages.tools.parameter_name') }}"
-                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                </div>
-                <div class="flex-1">
-                    <input type="text" name="params[${getMultiParamIndex}][description]" value="${desc}" placeholder="{{ __('backoffice.pages.tools.parameter_description') }}"
-                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                </div>
-                <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer">
-                    <input type="checkbox" name="params[${getMultiParamIndex}][required]" value="1" ${required ? 'checked' : ''}
-                        class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
-                    {{ __('backoffice.pages.tools.required') }}
-                </label>
-                <button type="button" onclick="this.closest('div').remove()"
-                    class="flex-none rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 hover:bg-red-500/20">&times;</button>
-            `;
+                    <div class="w-2/5">
+                        <input type="text" name="params[${getMultiParamIndex}][name]" value="${name}" placeholder="{{ __('backoffice.pages.tools.parameter_name') }}"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    </div>
+                    <div class="flex-1">
+                        <input type="text" name="params[${getMultiParamIndex}][description]" value="${desc}" placeholder="{{ __('backoffice.pages.tools.parameter_description') }}"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    </div>
+                    <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer">
+                        <input type="checkbox" name="params[${getMultiParamIndex}][required]" value="1" ${required ? 'checked' : ''}
+                            class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
+                        {{ __('backoffice.pages.tools.required') }}
+                    </label>
+                    <button type="button" onclick="this.closest('div').remove()"
+                        class="flex-none rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 hover:bg-red-500/20">&times;</button>
+                `;
             list.appendChild(row);
             getMultiParamIndex++;
         }
@@ -418,22 +418,22 @@
             const row = document.createElement('div');
             row.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-3';
             row.innerHTML = `
-                <div class="w-2/5">
-                    <input type="text" name="params[${updateParamIndex}][name]" value="${name}" placeholder="{{ __('backoffice.pages.tools.parameter_name') }}"
-                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                </div>
-                <div class="flex-1">
-                    <input type="text" name="params[${updateParamIndex}][description]" value="${desc}" placeholder="{{ __('backoffice.pages.tools.parameter_description') }}"
-                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                </div>
-                <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer">
-                    <input type="checkbox" name="params[${updateParamIndex}][required]" value="1" ${required ? 'checked' : ''}
-                        class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
-                    {{ __('backoffice.pages.tools.required') }}
-                </label>
-                <button type="button" onclick="this.closest('div').remove()"
-                    class="flex-none rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 hover:bg-red-500/20">&times;</button>
-            `;
+                    <div class="w-2/5">
+                        <input type="text" name="params[${updateParamIndex}][name]" value="${name}" placeholder="{{ __('backoffice.pages.tools.parameter_name') }}"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    </div>
+                    <div class="flex-1">
+                        <input type="text" name="params[${updateParamIndex}][description]" value="${desc}" placeholder="{{ __('backoffice.pages.tools.parameter_description') }}"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    </div>
+                    <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer">
+                        <input type="checkbox" name="params[${updateParamIndex}][required]" value="1" ${required ? 'checked' : ''}
+                            class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
+                        {{ __('backoffice.pages.tools.required') }}
+                    </label>
+                    <button type="button" onclick="this.closest('div').remove()"
+                        class="flex-none rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 hover:bg-red-500/20">&times;</button>
+                `;
             list.appendChild(row);
             updateParamIndex++;
         }
@@ -464,17 +464,17 @@
             const row = document.createElement('div');
             row.className = 'endpoint-body-row flex items-center gap-2';
             row.innerHTML = `
-                <div class="w-2/5">
-                    <input type="text" name="endpoint_body[${bodyIdx}][key]" value="${key}" placeholder="{{ __('backoffice.pages.tools.key_placeholder') }}"
-                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                </div>
-                <div class="flex-1">
-                    <input type="text" name="endpoint_body[${bodyIdx}][value]" value="${val}" placeholder="{{ __('backoffice.pages.tools.value_placeholder') }}"
-                        class="body-value-input w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                </div>
-                <button type="button" onclick="this.closest('.endpoint-body-row').remove()"
-                    class="flex-none rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 hover:bg-red-500/20">&times;</button>
-            `;
+                    <div class="w-2/5">
+                        <input type="text" name="endpoint_body[${bodyIdx}][key]" value="${key}" placeholder="{{ __('backoffice.pages.tools.key_placeholder') }}"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    </div>
+                    <div class="flex-1">
+                        <input type="text" name="endpoint_body[${bodyIdx}][value]" value="${val}" placeholder="{{ __('backoffice.pages.tools.value_placeholder') }}"
+                            class="body-value-input w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    </div>
+                    <button type="button" onclick="this.closest('.endpoint-body-row').remove()"
+                        class="flex-none rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 hover:bg-red-500/20">&times;</button>
+                `;
             list.appendChild(row);
             bodyIdx++;
         }
@@ -504,16 +504,16 @@
             const row = document.createElement('div');
             row.className = 'flex items-center gap-2';
             row.innerHTML = `
-                <div class="w-2/5">
-                    <input type="text" name="endpoint_expected_data[${expectedDataIdx}][key]" value="${key}" placeholder="{{ __('backoffice.pages.tools.key_placeholder') }}"
-                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400 expected-data-input" />
-                </div>
-                <div class="flex-1">
-                    <input type="text" name="endpoint_expected_data[${expectedDataIdx}][value]" value="${val}" placeholder="{{ __('backoffice.pages.tools.value_data_placeholder') }}"
-                        class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400 expected-data-input" />
-                </div>
-                <button type="button" class="flex-none rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 hover:bg-red-500/20 remove-expected">&times;</button>
-            `;
+                    <div class="w-2/5">
+                        <input type="text" name="endpoint_expected_data[${expectedDataIdx}][key]" value="${key}" placeholder="{{ __('backoffice.pages.tools.key_placeholder') }}"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400 expected-data-input" />
+                    </div>
+                    <div class="flex-1">
+                        <input type="text" name="endpoint_expected_data[${expectedDataIdx}][value]" value="${val}" placeholder="{{ __('backoffice.pages.tools.value_data_placeholder') }}"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400 expected-data-input" />
+                    </div>
+                    <button type="button" class="flex-none rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 hover:bg-red-500/20 remove-expected">&times;</button>
+                `;
             row.querySelectorAll('.expected-data-input').forEach(input => input.addEventListener('input',
                 updateExpectedResponsePreview));
             row.querySelector('.remove-expected').addEventListener('click', function() {
@@ -552,16 +552,16 @@
             const row = document.createElement('div');
             row.className = 'error-response-row flex items-center gap-2';
             row.innerHTML = `
-                <div class="w-24">
-                    <input type="number" name="error_responses[${errorResponseIdx}][status]" value="${status}" placeholder="{{ __('backoffice.pages.tools.status_placeholder') }}"
-                        class="err-status w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
-                </div>
-                <div class="flex-1">
-                    <input type="text" name="error_responses[${errorResponseIdx}][message]" value="${message}" placeholder="{{ __('backoffice.pages.tools.message_placeholder') }}"
-                        class="err-message w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
-                </div>
-                <button type="button" class="flex-none rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 hover:bg-red-500/20 remove-error">&times;</button>
-            `;
+                    <div class="w-24">
+                        <input type="number" name="error_responses[${errorResponseIdx}][status]" value="${status}" placeholder="{{ __('backoffice.pages.tools.status_placeholder') }}"
+                            class="err-status w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
+                    </div>
+                    <div class="flex-1">
+                        <input type="text" name="error_responses[${errorResponseIdx}][message]" value="${message}" placeholder="{{ __('backoffice.pages.tools.message_placeholder') }}"
+                            class="err-message w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
+                    </div>
+                    <button type="button" class="flex-none rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 hover:bg-red-500/20 remove-error">&times;</button>
+                `;
             row.querySelectorAll('input').forEach(input => input.addEventListener('input', updateErrorResponsePreview));
             row.querySelector('.remove-error').addEventListener('click', function() {
                 row.remove();
@@ -631,80 +631,113 @@
             row.className = 'info-text-row flex gap-2';
             row.innerHTML =
                 `<textarea name="information_texts[]" rows="3" maxlength="500"
-                class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-                style="background-color:rgba(15,23,42,0.7);color:#e2e8f0" placeholder="{{ __('backoffice.pages.tools.information_text_placeholder') }}"></textarea>
-                <button type="button" onclick="this.closest('.info-text-row').remove()"
-                    class="shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20">✕</button>
-            `;
+                    class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                    style="background-color:rgba(15,23,42,0.7);color:#e2e8f0"
+                    placeholder="{{ __('backoffice.pages.tools.information_text_placeholder') }}"></textarea>
+                    <button type="button" onclick="this.closest('.info-text-row').remove()"
+                        class="shrink-0 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs text-red-300 hover:bg-red-500/20">✕</button>
+                `;
             wrapper.appendChild(row);
         }
 
         /* ── Chain Rules ── */
         let chainRuleIdx = 0;
 
-        function addChainRuleRow(on = 'failure', field = 'response_message', condition = 'contains', value = '', chainTool =
+        function addChainRuleRow(on = 'failure', field = 'response_message', condition = 'contains', value = '',
+        chainTool =
             '', carryArgs = '', message = '') {
             const list = document.getElementById('chain-rule-list');
             if (!list) return;
+            const isHuman = chainTool === 'human_support';
             const row = document.createElement('div');
             row.className = 'chain-rule-row rounded-xl border border-white/10 bg-slate-900/50 p-3 space-y-2';
             row.innerHTML = `
-                <div class="grid grid-cols-3 gap-2">
-                    <div>
-                        <label class="mb-1 block text-xs text-slate-400">Trigger On</label>
-                        <select name="chain_rules[${chainRuleIdx}][on]" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
-                            <option value="failure" ${on === 'failure' ? 'selected' : ''}>Failure</option>
-                            <option value="success" ${on === 'success' ? 'selected' : ''}>Success</option>
-                        </select>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="mb-1 block text-xs text-slate-400">Trigger On</label>
+                            <select name="chain_rules[${chainRuleIdx}][on]" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
+                                <option value="failure" ${on === 'failure' ? 'selected' : ''}>Failure</option>
+                                <option value="success" ${on === 'success' ? 'selected' : ''}>Success</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs text-slate-400">Field</label>
+                            <select name="chain_rules[${chainRuleIdx}][field]" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
+                                <option value="response_message" ${field === 'response_message' ? 'selected' : ''}>response_message</option>
+                                <option value="response_status" ${field === 'response_status' ? 'selected' : ''}>response_status</option>
+                                <option value="http_status_code" ${field === 'http_status_code' ? 'selected' : ''}>http_status_code</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs text-slate-400">Condition</label>
+                            <select name="chain_rules[${chainRuleIdx}][condition]" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
+                                <option value="contains" ${condition === 'contains' ? 'selected' : ''}>contains</option>
+                                <option value="equals" ${condition === 'equals' ? 'selected' : ''}>equals</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label class="mb-1 block text-xs text-slate-400">Field</label>
-                        <select name="chain_rules[${chainRuleIdx}][field]" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
-                            <option value="response_message" ${field === 'response_message' ? 'selected' : ''}>response_message</option>
-                            <option value="response_status" ${field === 'response_status' ? 'selected' : ''}>response_status</option>
-                            <option value="http_status_code" ${field === 'http_status_code' ? 'selected' : ''}>http_status_code</option>
-                        </select>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="mb-1 block text-xs text-slate-400">Match Value</label>
+                            <input type="text" name="chain_rules[${chainRuleIdx}][value]" value="${value}" placeholder="e.g. balance"
+                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs text-slate-400">Action</label>
+                            <select class="chain-action-select w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400"
+                                onchange="toggleChainActionFields(this)">
+                                <option value="tool" ${!isHuman ? 'selected' : ''}>Chain Tool</option>
+                                <option value="human_support" ${isHuman ? 'selected' : ''}>Human Support (Escalate)</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label class="mb-1 block text-xs text-slate-400">Condition</label>
-                        <select name="chain_rules[${chainRuleIdx}][condition]" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
-                            <option value="contains" ${condition === 'contains' ? 'selected' : ''}>contains</option>
-                            <option value="equals" ${condition === 'equals' ? 'selected' : ''}>equals</option>
-                        </select>
+                    <div class="chain-tool-fields grid grid-cols-2 gap-2" style="${isHuman ? 'display:none' : ''}">
+                        <div>
+                            <label class="mb-1 block text-xs text-slate-400">Tool Name (tool_name)</label>
+                            <input type="text" class="chain-tool-input w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400"
+                                placeholder="e.g. verifyDeposit" value="${isHuman ? '' : chainTool}" />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs text-slate-400">Carry Args (comma-separated param names)</label>
+                            <input type="text" name="chain_rules[${chainRuleIdx}][carry_args]" value="${isHuman ? '' : carryArgs}" placeholder="e.g. namarek, norek, bank"
+                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
+                        </div>
                     </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="mb-1 block text-xs text-slate-400">Match Value</label>
-                        <input type="text" name="chain_rules[${chainRuleIdx}][value]" value="${value}" placeholder="e.g. balance"
-                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
-                    </div>
-                    <div>
-                        <label class="mb-1 block text-xs text-slate-400">Chain Tool (tool_name)</label>
-                        <input type="text" name="chain_rules[${chainRuleIdx}][chain_tool]" value="${chainTool}" placeholder="e.g. verifyDeposit"
-                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="mb-1 block text-xs text-slate-400">Carry Args (comma-separated param names)</label>
-                        <input type="text" name="chain_rules[${chainRuleIdx}][carry_args]" value="${carryArgs}" placeholder="e.g. namarek, norek, bank"
-                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
-                    </div>
+                    <input type="hidden" name="chain_rules[${chainRuleIdx}][chain_tool]" class="chain-tool-hidden" value="${isHuman ? 'human_support' : chainTool}" />
                     <div>
                         <label class="mb-1 block text-xs text-slate-400">Custom Message (optional)</label>
-                        <input type="text" name="chain_rules[${chainRuleIdx}][message]" value="${message}" placeholder="Leave blank to use chained tool's prompt"
+                        <input type="text" name="chain_rules[${chainRuleIdx}][message]" value="${message}" placeholder="Leave blank to use default message"
                             class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-amber-400" />
                     </div>
-                </div>
-                <div class="flex justify-end">
-                    <button type="button" onclick="this.closest('.chain-rule-row').remove()"
-                        class="rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-1.5 text-xs text-red-300 hover:bg-red-500/20">Remove Rule</button>
-                </div>
-            `;
+                    <div class="flex justify-end">
+                        <button type="button" onclick="this.closest('.chain-rule-row').remove()"
+                            class="rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-1.5 text-xs text-red-300 hover:bg-red-500/20">Remove Rule</button>
+                    </div>
+                `;
             list.appendChild(row);
             chainRuleIdx++;
         }
-    </script>
-@endsection
+
+        function toggleChainActionFields(select) {
+            const row = select.closest('.chain-rule-row');
+            const isHuman = select.value === 'human_support';
+            row.querySelector('.chain-tool-fields').style.display = isHuman ? 'none' : '';
+            row.querySelector('.chain-tool-hidden').value = isHuman ? 'human_support' : (row.querySelector(
+                '.chain-tool-input')?.value || '');
+            if (!isHuman) {
+                // Sync hidden field when tool name is typed
+                row.querySelector('.chain-tool-input').oninput = function() {
+                    row.querySelector('.chain-tool-hidden').value = this.value;
+                };
+            }
+        }
+
+        // Sync tool name input → hidden field on initial load for existing rows
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('chain-tool-input')) {
+                const row = e.target.closest('.chain-rule-row');
+                if (row) row.querySelector('.chain-tool-hidden').value = e.target.value;
+            }
+        });
+    @endsection
 @endsection

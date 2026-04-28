@@ -3,6 +3,7 @@
 namespace App\Services\AI;
 
 use App\Models\ChatAgent;
+use App\Models\Customer;
 use App\Models\Tool;
 use App\Services\AI\ToolEngines\DataModelQueryEngine;
 use App\Services\AI\ToolEngines\HttpToolEngine;
@@ -738,7 +739,39 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
                 continue;
             }
 
-            // Arm the chained tool as the next pending.
+            // ── Human support escalation ────────────────────────────────────
+            if ($chainToolName === 'human_support') {
+                // Move the customer to the waiting queue.
+                try {
+                    $customer = Customer::query()
+                        ->where('platform_user_id', $chatId)
+                        ->where('platform', $channel)
+                        ->first();
+
+                    if ($customer !== null) {
+                        $customer->update(['mode' => 'waiting']);
+                        Log::info('Customer escalated to waiting queue via chain rule', [
+                            'source_tool' => $tool->tool_name,
+                            'customer_id' => $customer->id,
+                            'channel'     => $channel,
+                            'chat_id'     => $chatId,
+                        ]);
+                    }
+                } catch (\Throwable $e) {
+                    Log::error('Failed to escalate customer via chain rule', [
+                        'source_tool' => $tool->tool_name,
+                        'chat_id'     => $chatId,
+                        'error'       => $e->getMessage(),
+                    ]);
+                }
+
+                $customMessage = trim((string) ($rule['message'] ?? ''));
+                return $customMessage !== ''
+                    ? $customMessage
+                    : 'Permintaan Anda sedang diteruskan ke agen kami. Mohon tunggu sebentar 🙏';
+            }
+
+            // ── Chain to another tool ───────────────────────────────────────
             $pendingKey = $this->pendingToolKey($chatId, $channel);
             if ($pendingKey !== null) {
                 Cache::put($pendingKey, $chainToolName, now()->addMinutes(10));

@@ -70,6 +70,7 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
         Route::get('/backoffice/tools/{tool}/edit', [ToolController::class, 'edit'])->name('backoffice.tools.edit');
         Route::put('/backoffice/tools/{tool}', [ToolController::class, 'update'])->name('backoffice.tools.update');
         Route::delete('/backoffice/tools/{tool}', [ToolController::class, 'destroy'])->name('backoffice.tools.destroy');
+        Route::post('/backoffice/tools/{tool}/toggle-enabled', [ToolController::class, 'toggleEnabled'])->name('backoffice.tools.toggleEnabled');
         Route::post('/backoffice/tools/test-endpoint', [ToolController::class, 'testEndpoint'])->name('backoffice.tools.testEndpoint');
     });
 

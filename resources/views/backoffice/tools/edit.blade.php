@@ -299,6 +299,16 @@
             </div>{{-- end #section-info --}}
 
             <div class="flex items-center gap-4 pt-2">
+                <label class="flex cursor-pointer items-center gap-3">
+                    <input type="hidden" name="is_enabled" value="0">
+                    <input type="checkbox" name="is_enabled" value="1" {{ $tool->is_enabled ? 'checked' : '' }}
+                        class="h-4 w-4 rounded border-white/20 bg-slate-900 text-cyan-400 focus:ring-cyan-400">
+                    <span class="text-sm text-slate-200">Enable Tool</span>
+                    <span class="text-xs text-slate-400">(uncheck to disable this tool from the AI)</span>
+                </label>
+            </div>
+
+            <div class="flex items-center gap-4 pt-2">
                 <button type="submit" onclick="return validateForm()"
                     class="rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
                     {{ __('backoffice.pages.tools.save_changes') }}

@@ -48,6 +48,7 @@ class ToolDispatcher
             return Tool::query()
                 ->with('dataModel')
                 ->where('tool_name', '!=', '_bot_config')
+                ->where('is_enabled', true)
                 ->orderBy('id')
                 ->get();
         } catch (\Throwable) {
@@ -160,7 +161,10 @@ class ToolDispatcher
             $pendingToolName = Cache::get($pendingKey);
 
             if ($pendingToolName !== null) {
-                $pendingTool = $tools->firstWhere('tool_name', $pendingToolName);
+                // Bypass is_enabled for chain/pending targets — the tool was
+                // already chosen by a chain rule, so we must still execute it.
+                $pendingTool = $tools->firstWhere('tool_name', $pendingToolName)
+                    ?? $this->findToolByName($pendingToolName);
 
                 if ($pendingTool !== null) {
                     // If the user negates ANY of the pending tool's keywords, abandon it.
@@ -287,6 +291,15 @@ class ToolDispatcher
         }
 
         return false;
+    }
+
+    /**
+     * Fetch a single tool by name regardless of is_enabled — used when resuming
+     * a pending or chain-triggered tool that may itself be disabled in the list.
+     */
+    private function findToolByName(string $toolName): ?Tool
+    {
+        return Tool::query()->with('dataModel')->where('tool_name', $toolName)->first();
     }
 
     /**

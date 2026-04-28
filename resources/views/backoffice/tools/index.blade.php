@@ -46,6 +46,7 @@
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.tools.display_name') }}</th>
                                 <th class="px-3 py-2 font-medium">{{ __('backoffice.pages.tools.type') }}</th>
                                 <th class="px-3 py-2 font-medium">Category</th>
+                                <th class="px-3 py-2 font-medium">Status</th>
                                 <th class="px-3 py-2 font-medium text-right">{{ __('backoffice.common.actions') }}</th>
                             </tr>
                         </thead>
@@ -102,6 +103,20 @@
                                         @else
                                             <span class="text-slate-500">—</span>
                                         @endif
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        <form method="POST" action="{{ route('backoffice.tools.toggleEnabled', $tool) }}">
+                                            @csrf
+                                            @if ($tool->is_enabled)
+                                                <button type="submit"
+                                                    class="inline-flex items-center rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-400/30 transition hover:bg-emerald-500/40"
+                                                    title="Klik untuk nonaktifkan">Active</button>
+                                            @else
+                                                <button type="submit"
+                                                    class="inline-flex items-center rounded-full bg-rose-500/20 px-2.5 py-0.5 text-xs font-semibold text-rose-300 ring-1 ring-rose-400/30 transition hover:bg-rose-500/40"
+                                                    title="Klik untuk aktifkan">Inactive</button>
+                                            @endif
+                                        </form>
                                     </td>
                                     <td class="px-3 py-2 text-right">
                                         <div class="flex items-center justify-end gap-2">

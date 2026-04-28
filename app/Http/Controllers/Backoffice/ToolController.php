@@ -91,6 +91,15 @@ class ToolController extends Controller
         return redirect()->route('backoffice.tools.index')->with('success', $tool->display_name . ' berhasil diperbarui.');
     }
 
+    public function toggleEnabled(Tool $tool): RedirectResponse
+    {
+        $tool->update(['is_enabled' => !$tool->is_enabled]);
+
+        $status = $tool->is_enabled ? 'diaktifkan' : 'dinonaktifkan';
+
+        return redirect()->back()->with('success', "{$tool->display_name} berhasil {$status}.");
+    }
+
     public function destroy(Request $request, Tool $tool): RedirectResponse
     {
         $name = $tool->display_name;
@@ -142,6 +151,7 @@ class ToolController extends Controller
             'chain_rules.*.carry_args' => ['nullable', 'string', 'max:500'],
             'chain_rules.*.message' => ['nullable', 'string', 'max:500'],
             'category' => ['nullable', 'string', 'in:' . implode(',', self::CATEGORIES)],
+            'is_enabled' => ['nullable', 'boolean'],
         ];
 
         if ($isCreate) {
@@ -167,6 +177,7 @@ class ToolController extends Controller
             'information_text' => $this->buildInformationTexts($request),
             'meta'             => $this->buildToolMeta($request, $tool, $type),
             'category'         => $data['category'] ?? null,
+            'is_enabled'       => $request->boolean('is_enabled', true),
         ];
 
         if ($tool === null) {

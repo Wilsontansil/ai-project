@@ -791,17 +791,22 @@
                                     <td class="px-3 py-2 text-slate-300" style="word-break:break-all">{{ $sc->value }}
                                     </td>
                                     <td class="px-3 py-2 text-right">
-                                        <div style="display:flex;align-items:center;justify-content:flex-end;gap:0.4rem">
+                                        <div style="display:inline-flex;align-items:center;gap:0.375rem">
                                             <button type="button"
                                                 onclick="scOpenEdit({{ $sc->id }}, '{{ addslashes($sc->key) }}', {{ json_encode($sc->value) }})"
-                                                class="bo-btn-sm">Edit</button>
+                                                class="bo-btn-sm" style="white-space:nowrap">
+                                                ✏ Edit
+                                            </button>
                                             <form method="POST"
                                                 action="{{ route('backoffice.system-config.destroy', $sc) }}"
-                                                onsubmit="return confirm('Delete config \'{{ addslashes($sc->key) }}\'?')">
+                                                onsubmit="return confirm('Delete config \'{{ addslashes($sc->key) }}\'?')"
+                                                style="margin:0">
                                                 @csrf
                                                 @method('DELETE')
                                                 <input type="hidden" name="from_agent" value="{{ $agent->id }}">
-                                                <button type="submit" class="bo-btn-danger">Delete</button>
+                                                <button type="submit" class="bo-btn-danger" style="white-space:nowrap">
+                                                    🗑 Delete
+                                                </button>
                                             </form>
                                         </div>
                                     </td>

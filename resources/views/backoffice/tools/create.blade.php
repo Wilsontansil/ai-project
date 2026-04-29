@@ -128,7 +128,7 @@
                     <div>
                         <p class="mb-1 text-sm text-slate-200">Select Fields <span class="text-xs text-slate-400">(leave all
                                 unchecked = return all fields)</span></p>
-                        <div id="query-select-list" class="flex flex-nowrap gap-2 overflow-x-auto pb-1">
+                        <div id="query-select-list" class="flex flex-wrap gap-2">
                             {{-- Populated by JS when DataModel changes --}}
                         </div>
                     </div>

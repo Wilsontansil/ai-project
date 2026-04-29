@@ -117,7 +117,7 @@ class ToolSeeder extends Seeder
                 'description' => 'Verifikasi deposit saat reset password gagal karena balance melebihi ketentuan. AI menganalisa screenshot bukti transfer untuk mengekstrak jumlah (depoamount) dan waktu transfer (time), lalu mengirim data ke endpoint untuk diverifikasi.',
                 'slug' => 'verify-deposit',
                 'type' => 'update',
-                'is_enabled' => true,
+                'is_enabled' => false,
                 'data_model_id' => null,
                 'parameters' => [
                     'type' => 'object',
@@ -293,11 +293,11 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['game', 'slot', 'casino', 'provider', 'cek game', 'ada game', 'game aktif', 'cari game', 'game apa', 'live casino', 'sportbook', 'togel', 'arcade', 'fishing'],
-                'tool_rules' => "- Cari game berdasarkan field name, provider, category, atau keyword\n- Tampilkan: name, provider, category\n- Jika ditemukan banyak hasil, tampilkan maksimal 10 dan infokan masih ada lainnya\n- Jika tidak ditemukan, sampaikan game tidak tersedia",
+                'tool_rules' => "- Cari game berdasarkan field name, provider, category, atau keyword\n- Tampilkan: name, provider, category\n- Jika ditemukan banyak hasil, tampilkan maksimal 10 dan infokan masih ada lainnya\n- Jika tidak ditemukan, sampaikan game tidak tersedia\n- Tampilkan gambar hanya jika diminta: gunakan URL https://devasset.pilartestengine.com/assets + nilai field image, kirim dalam bentuk file image",
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['name', 'provider', 'category', 'keyword'],
+                        'select' => [],
                         // Conditions: all rows must have isshow=1 (static),
                         // then match the customer's search term across name/keyword/provider/category (OR group).
                         'conditions' => [
@@ -308,31 +308,7 @@ class ToolSeeder extends Seeder
                                 'value'    => 1,
                             ],
                             [
-                                'field'          => 'name',
-                                'operator'       => 'LIKE%%',
-                                'source'         => 'arg',
-                                'arg'            => 'name',
-                                'group'          => 1,
-                                'skip_if_empty'  => true,
-                            ],
-                            [
                                 'field'          => 'keyword',
-                                'operator'       => 'LIKE%%',
-                                'source'         => 'arg',
-                                'arg'            => 'name',
-                                'group'          => 1,
-                                'skip_if_empty'  => true,
-                            ],
-                            [
-                                'field'          => 'provider',
-                                'operator'       => 'LIKE%%',
-                                'source'         => 'arg',
-                                'arg'            => 'name',
-                                'group'          => 1,
-                                'skip_if_empty'  => true,
-                            ],
-                            [
-                                'field'          => 'category',
                                 'operator'       => 'LIKE%%',
                                 'source'         => 'arg',
                                 'arg'            => 'name',

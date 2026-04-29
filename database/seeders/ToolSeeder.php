@@ -310,7 +310,7 @@ class ToolSeeder extends Seeder
                                 'field'          => 'keyword',
                                 'operator'       => 'LIKE%%',
                                 'source'         => 'arg',
-                                'arg'            => 'name',
+                                'arg'            => 'keyword',
                                 'group'          => 1,
                                 'skip_if_empty'  => true,
                             ],

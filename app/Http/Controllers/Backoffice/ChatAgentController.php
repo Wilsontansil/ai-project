@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
 use App\Models\ChatAgent;
+use App\Models\DataModel;
 use App\Models\KnowledgeBase;
 use App\Models\Tool;
 use Illuminate\Http\RedirectResponse;
@@ -98,6 +99,7 @@ class ChatAgentController extends Controller
             'knowledgeMode' => $knowledgeMode,
             'activeTab' => $activeTab,
             'timezoneOptions' => $this->timezoneOptions(),
+            'dataModels' => DataModel::query()->orderBy('model_name')->get(['id', 'model_name', 'slug']),
             'availableTools' => Tool::query()
                 ->where('tool_name', '!=', '_bot_config')
                 ->orderBy('category')
@@ -161,36 +163,57 @@ class ChatAgentController extends Controller
 
     public function storeKnowledgeBase(Request $request, ChatAgent $chatAgent): RedirectResponse
     {
-        $data = $request->validate([
-            'title' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('knowledge_base', 'title')->where(fn ($query) => $query->where('chat_agent_id', $chatAgent->id)),
-            ],
-            'content' => ['nullable', 'string'],
-            'file' => ['nullable', 'file', 'mimes:txt', 'max:2048'],
-        ]);
+        $sourceType = $request->input('source_type', 'manual');
 
-        $content = $data['content'] ?? '';
-        $source = 'manual';
-        $fileName = null;
+        if ($sourceType === 'datamodel') {
+            $data = $request->validate([
+                'title' => [
+                    'required', 'string', 'max:255',
+                    Rule::unique('knowledge_base', 'title')->where(fn ($q) => $q->where('chat_agent_id', $chatAgent->id)),
+                ],
+                'data_model_id' => ['required', 'exists:data_models,id'],
+                'query_sql'     => ['required', 'string'],
+            ]);
 
-        if ($request->hasFile('file') && $request->file('file')->isValid()) {
-            $file = $request->file('file');
-            $content = (string) file_get_contents($file->getRealPath());
-            $source = 'file';
-            $fileName = $file->getClientOriginalName();
+            KnowledgeBase::query()->create([
+                'chat_agent_id' => $chatAgent->id,
+                'title'         => $data['title'],
+                'content'       => null,
+                'source'        => 'datamodel',
+                'data_model_id' => $data['data_model_id'],
+                'query_sql'     => $data['query_sql'],
+                'is_active'     => $request->boolean('is_active', true),
+            ]);
+        } else {
+            $data = $request->validate([
+                'title' => [
+                    'required', 'string', 'max:255',
+                    Rule::unique('knowledge_base', 'title')->where(fn ($q) => $q->where('chat_agent_id', $chatAgent->id)),
+                ],
+                'content' => ['nullable', 'string'],
+                'file'    => ['nullable', 'file', 'mimes:txt', 'max:2048'],
+            ]);
+
+            $content  = $data['content'] ?? '';
+            $source   = 'manual';
+            $fileName = null;
+
+            if ($request->hasFile('file') && $request->file('file')->isValid()) {
+                $file     = $request->file('file');
+                $content  = (string) file_get_contents($file->getRealPath());
+                $source   = 'file';
+                $fileName = $file->getClientOriginalName();
+            }
+
+            KnowledgeBase::query()->create([
+                'chat_agent_id' => $chatAgent->id,
+                'title'         => $data['title'],
+                'content'       => $content,
+                'source'        => $source,
+                'file_name'     => $fileName,
+                'is_active'     => $request->boolean('is_active', true),
+            ]);
         }
-
-        KnowledgeBase::query()->create([
-            'chat_agent_id' => $chatAgent->id,
-            'title' => $data['title'],
-            'content' => $content,
-            'source' => $source,
-            'file_name' => $fileName,
-            'is_active' => $request->boolean('is_active', true),
-        ]);
 
         return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'knowledge-base'])
             ->with('success', 'Knowledge base entry created.');
@@ -200,37 +223,62 @@ class ChatAgentController extends Controller
     {
         $this->ensureKnowledgeOwnership($chatAgent, $knowledgeBase);
 
-        $data = $request->validate([
-            'title' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('knowledge_base', 'title')
-                    ->where(fn ($query) => $query->where('chat_agent_id', $chatAgent->id))
-                    ->ignore($knowledgeBase->id),
-            ],
-            'content' => ['nullable', 'string'],
-            'file' => ['nullable', 'file', 'mimes:txt', 'max:2048'],
-        ]);
+        $sourceType = $request->input('source_type', $knowledgeBase->source);
 
-        $content = $data['content'] ?? $knowledgeBase->content;
-        $source = $knowledgeBase->source;
-        $fileName = $knowledgeBase->file_name;
+        if ($sourceType === 'datamodel') {
+            $data = $request->validate([
+                'title' => [
+                    'required', 'string', 'max:255',
+                    Rule::unique('knowledge_base', 'title')
+                        ->where(fn ($q) => $q->where('chat_agent_id', $chatAgent->id))
+                        ->ignore($knowledgeBase->id),
+                ],
+                'data_model_id' => ['required', 'exists:data_models,id'],
+                'query_sql'     => ['required', 'string'],
+            ]);
 
-        if ($request->hasFile('file') && $request->file('file')->isValid()) {
-            $file = $request->file('file');
-            $content = (string) file_get_contents($file->getRealPath());
-            $source = 'file';
-            $fileName = $file->getClientOriginalName();
+            $knowledgeBase->update([
+                'title'         => $data['title'],
+                'content'       => null,
+                'source'        => 'datamodel',
+                'file_name'     => null,
+                'data_model_id' => $data['data_model_id'],
+                'query_sql'     => $data['query_sql'],
+                'is_active'     => $request->boolean('is_active'),
+            ]);
+        } else {
+            $data = $request->validate([
+                'title' => [
+                    'required', 'string', 'max:255',
+                    Rule::unique('knowledge_base', 'title')
+                        ->where(fn ($q) => $q->where('chat_agent_id', $chatAgent->id))
+                        ->ignore($knowledgeBase->id),
+                ],
+                'content' => ['nullable', 'string'],
+                'file'    => ['nullable', 'file', 'mimes:txt', 'max:2048'],
+            ]);
+
+            $content  = $data['content'] ?? $knowledgeBase->content;
+            $source   = $knowledgeBase->source === 'datamodel' ? 'manual' : $knowledgeBase->source;
+            $fileName = $knowledgeBase->file_name;
+
+            if ($request->hasFile('file') && $request->file('file')->isValid()) {
+                $file     = $request->file('file');
+                $content  = (string) file_get_contents($file->getRealPath());
+                $source   = 'file';
+                $fileName = $file->getClientOriginalName();
+            }
+
+            $knowledgeBase->update([
+                'title'         => $data['title'],
+                'content'       => $content,
+                'source'        => $source,
+                'file_name'     => $fileName,
+                'data_model_id' => null,
+                'query_sql'     => null,
+                'is_active'     => $request->boolean('is_active'),
+            ]);
         }
-
-        $knowledgeBase->update([
-            'title' => $data['title'],
-            'content' => $content,
-            'source' => $source,
-            'file_name' => $fileName,
-            'is_active' => $request->boolean('is_active'),
-        ]);
 
         return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'knowledge-base'])
             ->with('success', 'Knowledge base entry updated.');

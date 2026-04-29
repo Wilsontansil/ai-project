@@ -300,32 +300,68 @@
                         enctype="multipart/form-data" class="space-y-3">
                         @csrf
                         @method('PUT')
-                        <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem">
-                            <div>
-                                <label for="kb_edit_title" class="bo-label">Title</label>
-                                <input id="kb_edit_title" type="text" name="title"
-                                    value="{{ $selectedKnowledge->title }}" />
-                            </div>
-                            <div>
-                                <label for="kb_edit_file" class="bo-label">Re-upload .txt</label>
-                                <input id="kb_edit_file" type="file" name="file" accept=".txt" />
-                            </div>
-                        </div>
+                        @php $editSource = old('source_type', $selectedKnowledge->source); @endphp
                         <div>
-                            <label for="kb_edit_content" class="bo-label">Content</label>
-                            <textarea id="kb_edit_content" name="content" rows="8">{{ $selectedKnowledge->content }}</textarea>
+                            <label for="kb_edit_title" class="bo-label">Title</label>
+                            <input id="kb_edit_title" type="text" name="title"
+                                value="{{ old('title', $selectedKnowledge->title) }}" />
                         </div>
+
+                        {{-- Source type selector --}}
+                        <div>
+                            <label class="bo-label">Source Type</label>
+                            <div class="flex flex-wrap gap-2 mt-1">
+                                @foreach (['manual' => 'Manual Text', 'file' => 'Upload .txt', 'datamodel' => 'DataModel Query'] as $val => $label)
+                                    <label
+                                        class="flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-slate-200 transition has-[:checked]:border-cyan-400 has-[:checked]:text-cyan-300">
+                                        <input type="radio" name="source_type" value="{{ $val }}"
+                                            {{ $editSource === $val ? 'checked' : '' }}
+                                            class="kb-edit-source-radio accent-cyan-400" />
+                                        {{ $label }}
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div id="kb-edit-panel-manual">
+                            <label for="kb_edit_content" class="bo-label">Content</label>
+                            <textarea id="kb_edit_content" name="content" rows="8">{{ old('content', $selectedKnowledge->source !== 'datamodel' ? $selectedKnowledge->content : '') }}</textarea>
+                        </div>
+
+                        <div id="kb-edit-panel-file" class="hidden">
+                            <label for="kb_edit_file" class="bo-label">Re-upload .txt</label>
+                            <input id="kb_edit_file" type="file" name="file" accept=".txt" />
+                        </div>
+
+                        <div id="kb-edit-panel-datamodel" class="hidden space-y-3">
+                            <div>
+                                <label for="kb_edit_data_model_id" class="bo-label">DataModel</label>
+                                <select id="kb_edit_data_model_id" name="data_model_id"
+                                    class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400">
+                                    <option value="">— select a data model —</option>
+                                    @foreach ($dataModels as $dm)
+                                        <option value="{{ $dm->id }}"
+                                            {{ old('data_model_id', $selectedKnowledge->data_model_id) == $dm->id ? 'selected' : '' }}>
+                                            {{ $dm->model_name }} ({{ $dm->slug }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label for="kb_edit_query_sql" class="bo-label">SQL Query</label>
+                                <textarea id="kb_edit_query_sql" name="query_sql" rows="5"
+                                    placeholder="SELECT name, alias FROM providers WHERE active = 1"
+                                    class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 font-mono text-sm text-white outline-none transition focus:border-cyan-400">{{ old('query_sql', $selectedKnowledge->query_sql) }}</textarea>
+                            </div>
+                        </div>
+
                         <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
-                            <span>Source: {{ $selectedKnowledge->source }}</span>
-                            @if ($selectedKnowledge->file_name)
-                                <span>File: {{ $selectedKnowledge->file_name }}</span>
-                            @endif
                             <span>Updated: {{ $selectedKnowledge->updated_at->format('d M Y H:i') }}</span>
                         </div>
                         <div class="flex flex-wrap items-center gap-3">
                             <label class="bo-checkbox-label" style="max-width:max-content">
                                 <input type="checkbox" name="is_active" value="1"
-                                    {{ $selectedKnowledge->is_active ? 'checked' : '' }} />
+                                    {{ old('is_active', $selectedKnowledge->is_active) ? 'checked' : '' }} />
                                 <span>{{ __('backoffice.common.active') }}</span>
                             </label>
                             <button type="submit"
@@ -340,6 +376,24 @@
                         @method('DELETE')
                         <button type="submit" class="bo-btn-danger">{{ __('backoffice.common.delete') }}</button>
                     </form>
+
+                    <script>
+                        (function() {
+                            const radios = document.querySelectorAll('.kb-edit-source-radio');
+                            const panels = {
+                                manual: document.getElementById('kb-edit-panel-manual'),
+                                file: document.getElementById('kb-edit-panel-file'),
+                                datamodel: document.getElementById('kb-edit-panel-datamodel'),
+                            };
+
+                            function show(val) {
+                                Object.entries(panels).forEach(([k, el]) => el.classList.toggle('hidden', k !== val));
+                            }
+                            radios.forEach(r => r.addEventListener('change', () => show(r.value)));
+                            const checked = document.querySelector('.kb-edit-source-radio:checked');
+                            if (checked) show(checked.value);
+                        })();
+                    </script>
                 </div>
             @elseif (($knowledgeMode ?? 'view') === 'view' && ($selectedKnowledge ?? null) !== null)
                 <div class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-4">
@@ -349,11 +403,24 @@
                             <p class="text-xs text-slate-400">Title</p>
                             <p>{{ $selectedKnowledge->title }}</p>
                         </div>
-                        <div>
-                            <p class="text-xs text-slate-400">Content</p>
-                            <div class="whitespace-pre-wrap rounded-lg border border-white/10 bg-slate-900/70 p-3">
-                                {{ $selectedKnowledge->content }}</div>
-                        </div>
+                        @if ($selectedKnowledge->source === 'datamodel')
+                            <div>
+                                <p class="text-xs text-slate-400">DataModel</p>
+                                <p>{{ $selectedKnowledge->dataModel?->model_name ?? '(not set)' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400">SQL Query</p>
+                                <div
+                                    class="whitespace-pre-wrap rounded-lg border border-white/10 bg-slate-900/70 p-3 font-mono text-xs">
+                                    {{ $selectedKnowledge->query_sql }}</div>
+                            </div>
+                        @else
+                            <div>
+                                <p class="text-xs text-slate-400">Content</p>
+                                <div class="whitespace-pre-wrap rounded-lg border border-white/10 bg-slate-900/70 p-3">
+                                    {{ $selectedKnowledge->content }}</div>
+                            </div>
+                        @endif
                         <div class="flex flex-wrap gap-4 text-xs text-slate-400">
                             <span>Source: {{ $selectedKnowledge->source }}</span>
                             @if ($selectedKnowledge->file_name)
@@ -371,21 +438,60 @@
                 <form method="POST" action="{{ route('backoffice.chat-agents.knowledge-base.store', $agent) }}"
                     enctype="multipart/form-data" class="space-y-4">
                     @csrf
-                    <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem">
-                        <div>
-                            <label for="kb_title" class="bo-label">Title</label>
-                            <input id="kb_title" type="text" name="title" value="{{ old('title') }}"
-                                placeholder="e.g. Cara klaim bonus" />
-                        </div>
-                        <div>
-                            <label for="kb_file" class="bo-label">Upload .txt (optional)</label>
-                            <input id="kb_file" type="file" name="file" accept=".txt" />
+                    <div>
+                        <label for="kb_title" class="bo-label">Title</label>
+                        <input id="kb_title" type="text" name="title" value="{{ old('title') }}"
+                            placeholder="e.g. Cara klaim bonus" />
+                    </div>
+
+                    {{-- Source type selector --}}
+                    <div>
+                        <label class="bo-label">Source Type</label>
+                        <div class="flex flex-wrap gap-2 mt-1">
+                            @foreach (['manual' => 'Manual Text', 'file' => 'Upload .txt', 'datamodel' => 'DataModel Query'] as $val => $label)
+                                <label
+                                    class="flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-slate-200 transition has-[:checked]:border-cyan-400 has-[:checked]:text-cyan-300">
+                                    <input type="radio" name="source_type" value="{{ $val }}"
+                                        {{ old('source_type', 'manual') === $val ? 'checked' : '' }}
+                                        class="kb-add-source-radio accent-cyan-400" />
+                                    {{ $label }}
+                                </label>
+                            @endforeach
                         </div>
                     </div>
-                    <div>
+
+                    <div id="kb-add-panel-manual">
                         <label for="kb_content" class="bo-label">Content</label>
                         <textarea id="kb_content" name="content" rows="6" placeholder="Knowledge text...">{{ old('content') }}</textarea>
                     </div>
+
+                    <div id="kb-add-panel-file" class="hidden">
+                        <label for="kb_file" class="bo-label">Upload .txt file</label>
+                        <input id="kb_file" type="file" name="file" accept=".txt" />
+                    </div>
+
+                    <div id="kb-add-panel-datamodel" class="hidden space-y-3">
+                        <div>
+                            <label for="kb_data_model_id" class="bo-label">DataModel</label>
+                            <select id="kb_data_model_id" name="data_model_id"
+                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-400">
+                                <option value="">— select a data model —</option>
+                                @foreach ($dataModels as $dm)
+                                    <option value="{{ $dm->id }}"
+                                        {{ old('data_model_id') == $dm->id ? 'selected' : '' }}>
+                                        {{ $dm->model_name }} ({{ $dm->slug }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label for="kb_query_sql" class="bo-label">SQL Query</label>
+                            <textarea id="kb_query_sql" name="query_sql" rows="5"
+                                placeholder="SELECT name, alias FROM providers WHERE active = 1"
+                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 font-mono text-sm text-white outline-none transition focus:border-cyan-400">{{ old('query_sql') }}</textarea>
+                        </div>
+                    </div>
+
                     <label class="bo-checkbox-label" style="max-width:max-content">
                         <input type="checkbox" name="is_active" value="1"
                             {{ old('is_active', true) ? 'checked' : '' }} />
@@ -393,6 +499,24 @@
                     </label>
                     <button type="submit" class="bo-btn-primary">+ Add Knowledge</button>
                 </form>
+
+                <script>
+                    (function() {
+                        const radios = document.querySelectorAll('.kb-add-source-radio');
+                        const panels = {
+                            manual: document.getElementById('kb-add-panel-manual'),
+                            file: document.getElementById('kb-add-panel-file'),
+                            datamodel: document.getElementById('kb-add-panel-datamodel'),
+                        };
+
+                        function show(val) {
+                            Object.entries(panels).forEach(([k, el]) => el.classList.toggle('hidden', k !== val));
+                        }
+                        radios.forEach(r => r.addEventListener('change', () => show(r.value)));
+                        const checked = document.querySelector('.kb-add-source-radio:checked');
+                        if (checked) show(checked.value);
+                    })();
+                </script>
             </div>
         </div>
     @endif
@@ -401,7 +525,8 @@
         <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
                 <div>
-                    <h2 class="text-sm font-semibold text-white">{{ __('backoffice.pages.chat_agents.agent_rules') }}</h2>
+                    <h2 class="text-sm font-semibold text-white">{{ __('backoffice.pages.chat_agents.agent_rules') }}
+                    </h2>
                     <p class="text-xs text-slate-400">{{ __('backoffice.pages.chat_agents.agent_rules_subtitle') }}</p>
                 </div>
                 @can('manage agent-rules')

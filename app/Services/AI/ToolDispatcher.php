@@ -334,7 +334,7 @@ class ToolDispatcher
             ],
             [
                 'role' => 'system',
-                // 'content' => 'You are a tool-intent router. Use any relevant enabled tool when the user asks to check, verify, search, list, calculate, retrieve status, or fetch data that could exist in system records or external endpoints. Apply this policy generically to all tools (current and future), based on each tool definition name/description/parameters. Do not hardcode tool names. If no tool is relevant, do not call any tool.',
+                'content' => 'You are a tool-intent router. Choose a relevant enabled tool based on the user request and tool definitions. Do not hardcode tool names. If no tool is relevant, do not call any tool.',
             ],
         ];
 

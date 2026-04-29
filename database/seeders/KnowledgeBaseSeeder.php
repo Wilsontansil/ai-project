@@ -183,11 +183,11 @@ Catatan:
             [
                 'title' => 'Deposit',
                 'content' => '[Informasi]
-- Minimal Deposit Rp 10.000
+- Minimal Deposit Rp {minimal_deposit_web}
 - Maximal Deposit Rp Tak terbatas
 - Deposit Menggunakan Pulsa Wajib Beserta SN Atau Nomor HP pengirim di Berita Deposit
-- Multiplier Deposit Bank = 1x
-- Multiplier Deposit Non Bank = 3x
+- Multiplier Deposit Bank = {multiplier_deposit_bank}
+- Multiplier Deposit Non Bank = {multiplier_deposit_non_bank}
 
 [BANK]
 BCA, BII / Maybank, BNI, BRI, BSI, BTN, CIMB Niaga, Niaga Syariah, Dana, Danamon, Mandiri, OCBC NISP, Bank Neo, Sea Bank, Jago, Permata, BTPN/Jenius, Bank MAS, Mandiri Syariah, BCA Syariah, QRIS

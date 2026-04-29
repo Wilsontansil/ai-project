@@ -6,6 +6,7 @@ use Database\Seeders\DataModelSeeder;
 use Database\Seeders\AgentRuleSeeder;
 use Database\Seeders\KnowledgeBaseSeeder;
 use Database\Seeders\ProjectSettingSeeder;
+use Database\Seeders\SystemConfigSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -28,6 +29,7 @@ class DatabaseSeeder extends Seeder
             AgentRuleSeeder::class,
             DatabaseConnectionSeeder::class,
             KnowledgeBaseSeeder::class,
+            SystemConfigSeeder::class,
         ]);
     }
 }

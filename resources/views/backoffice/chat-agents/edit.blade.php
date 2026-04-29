@@ -12,6 +12,7 @@
     <?php $isKnowledgeTab = ($activeTab ?? 'general') === 'knowledge-base'; ?>
     <?php $isRulesTab = ($activeTab ?? 'general') === 'rules'; ?>
     <?php $isToolsTab = ($activeTab ?? 'general') === 'tools'; ?>
+    <?php $isSystemConfigTab = ($activeTab ?? 'general') === 'system-config'; ?>
 
     {{-- Header --}}
     <div style="display:flex;align-items:center;justify-content:space-between"
@@ -44,6 +45,12 @@
                 class="rounded-lg px-4 py-2 text-xs font-semibold transition {{ $isToolsTab ? 'bg-cyan-400 text-slate-950' : 'bg-white/5 text-slate-200 hover:bg-white/10' }}">
                 Tools
             </a>
+            @can('manage settings')
+                <a href="{{ route('backoffice.chat-agents.edit', ['chatAgent' => $agent, 'tab' => 'system-config']) }}"
+                    class="rounded-lg px-4 py-2 text-xs font-semibold transition {{ $isSystemConfigTab ? 'bg-cyan-400 text-slate-950' : 'bg-white/5 text-slate-200 hover:bg-white/10' }}">
+                    System Config
+                </a>
+            @endcan
         </div>
     </div>
 
@@ -750,4 +757,132 @@
             @endif
         </div>
     @endif
+
+    @if ($isSystemConfigTab)
+        @can('manage settings')
+            <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 space-y-5">
+                <div>
+                    <h2 class="text-sm font-semibold text-white">System Config</h2>
+                    <p class="text-xs text-slate-400">Global key / value configuration entries. Accessible via <code
+                            style="color:#22d3ee">SystemConfig::getValue('key')</code>.</p>
+                </div>
+
+                @if (session('success'))
+                    <div
+                        style="background:rgba(16,185,129,0.15);border:1px solid rgba(52,211,153,0.3);border-radius:0.75rem;padding:0.75rem 1rem;font-size:0.75rem;color:#6ee7b7">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                {{-- Existing rows --}}
+                <div class="overflow-hidden rounded-xl border border-white/10">
+                    <table class="min-w-full text-xs" style="width:100%">
+                        <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
+                            <tr>
+                                <th class="px-3 py-2 font-medium" style="width:35%">Key</th>
+                                <th class="px-3 py-2 font-medium">Value</th>
+                                <th class="px-3 py-2 font-medium text-right" style="width:120px">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5" id="sc-table-body">
+                            @forelse ($systemConfigs as $sc)
+                                <tr class="transition hover:bg-white/5" id="sc-row-{{ $sc->id }}">
+                                    <td class="px-3 py-2 font-mono text-slate-200">{{ $sc->key }}</td>
+                                    <td class="px-3 py-2 text-slate-300" style="word-break:break-all">{{ $sc->value }}
+                                    </td>
+                                    <td class="px-3 py-2 text-right">
+                                        <div style="display:flex;align-items:center;justify-content:flex-end;gap:0.4rem">
+                                            <button type="button"
+                                                onclick="scOpenEdit({{ $sc->id }}, '{{ addslashes($sc->key) }}', {{ json_encode($sc->value) }})"
+                                                class="bo-btn-sm">Edit</button>
+                                            <form method="POST"
+                                                action="{{ route('backoffice.system-config.destroy', $sc) }}"
+                                                onsubmit="return confirm('Delete config \'{{ addslashes($sc->key) }}\'?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <input type="hidden" name="from_agent" value="{{ $agent->id }}">
+                                                <button type="submit" class="bo-btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="px-4 py-6 text-center text-slate-400">No system config entries
+                                        yet.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Edit inline form (hidden until Edit clicked) --}}
+                <div id="sc-edit-panel" style="display:none"
+                    class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-4 space-y-3">
+                    <h3 class="text-sm font-semibold text-white">Edit Entry</h3>
+                    <form id="sc-edit-form" method="POST" action="" class="space-y-3">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="from_agent" value="{{ $agent->id }}">
+                        <div style="display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;align-items:start">
+                            <div>
+                                <label class="bo-label">Key</label>
+                                <input type="text" name="key" id="sc-edit-key" required maxlength="191" />
+                            </div>
+                            <div>
+                                <label class="bo-label">Value</label>
+                                <textarea name="value" id="sc-edit-value" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:0.5rem">
+                            <button type="submit" class="bo-btn-primary">Save</button>
+                            <button type="button" onclick="document.getElementById('sc-edit-panel').style.display='none'"
+                                class="bo-btn-secondary">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                {{-- Add new --}}
+                <div class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-4 space-y-3">
+                    <h3 class="text-sm font-semibold text-white">Add New Entry</h3>
+                    <form method="POST" action="{{ route('backoffice.system-config.store') }}" class="space-y-3">
+                        @csrf
+                        <input type="hidden" name="from_agent" value="{{ $agent->id }}">
+                        <div style="display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;align-items:start">
+                            <div>
+                                <label class="bo-label">Key</label>
+                                <input type="text" name="key" required maxlength="191"
+                                    placeholder="e.g. welcome_message" />
+                                @error('key')
+                                    <p style="margin-top:0.25rem;font-size:0.7rem;color:#f87171">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label class="bo-label">Value</label>
+                                <textarea name="value" rows="3" placeholder="Config value...">{{ old('value') }}</textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="bo-btn-primary">+ Add</button>
+                    </form>
+                </div>
+            </div>
+        @endcan
+    @endif
 @endsection
+
+@if ($isSystemConfigTab)
+    <script>
+        function scOpenEdit(id, key, value) {
+            const panel = document.getElementById('sc-edit-panel');
+            const form = document.getElementById('sc-edit-form');
+            form.action = '/backoffice/system-config/' + id;
+            document.getElementById('sc-edit-key').value = key;
+            document.getElementById('sc-edit-value').value = value ?? '';
+            panel.style.display = '';
+            panel.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+            });
+        }
+    </script>
+@endif

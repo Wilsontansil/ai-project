@@ -13,6 +13,7 @@ use App\Http\Controllers\Backoffice\TechnicalController;
 use App\Http\Controllers\Backoffice\ToolController;
 use App\Http\Controllers\Backoffice\RoleController;
 use App\Http\Controllers\Backoffice\UserController;
+use App\Http\Controllers\Backoffice\SystemConfigController;
 use App\Http\Controllers\Backoffice\WebsitePageController;
 use Illuminate\Support\Facades\Route;
 
@@ -88,6 +89,11 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
     Route::middleware('permission:manage settings')->group(function () {
         Route::get('/backoffice/settings', [SettingController::class, 'index'])->name('backoffice.settings.index');
         Route::post('/backoffice/settings', [SettingController::class, 'update'])->name('backoffice.settings.update');
+
+        // System Config
+        Route::post('/backoffice/system-config', [SystemConfigController::class, 'store'])->name('backoffice.system-config.store');
+        Route::put('/backoffice/system-config/{systemConfig}', [SystemConfigController::class, 'update'])->name('backoffice.system-config.update');
+        Route::delete('/backoffice/system-config/{systemConfig}', [SystemConfigController::class, 'destroy'])->name('backoffice.system-config.destroy');
     });
 
     // Database connections (admin only)

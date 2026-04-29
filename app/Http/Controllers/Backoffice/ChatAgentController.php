@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ChatAgent;
 use App\Models\DataModel;
 use App\Models\KnowledgeBase;
+use App\Models\SystemConfig;
 use App\Models\Tool;
 use App\Services\AI\KnowledgeBaseQueryGuard;
 use Illuminate\Http\RedirectResponse;
@@ -67,7 +68,7 @@ class ChatAgentController extends Controller
     public function edit(Request $request, ChatAgent $chatAgent): View
     {
         $activeTab = $request->query('tab');
-        if (!in_array($activeTab, ['general', 'knowledge-base', 'rules', 'tools'], true)) {
+        if (!in_array($activeTab, ['general', 'knowledge-base', 'rules', 'tools', 'system-config'], true)) {
             $activeTab = 'general';
         }
 
@@ -106,6 +107,7 @@ class ChatAgentController extends Controller
                 ->orderBy('category')
                 ->orderBy('display_name')
                 ->get(),
+            'systemConfigs' => SystemConfig::orderBy('key')->get(),
         ]);
     }
 

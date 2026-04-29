@@ -761,10 +761,20 @@
     @if ($isSystemConfigTab)
         @can('manage settings')
             <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 space-y-5">
-                <div>
-                    <h2 class="text-sm font-semibold text-white">System Config</h2>
-                    <p class="text-xs text-slate-400">Global key / value configuration entries. Accessible via <code
-                            style="color:#22d3ee">SystemConfig::getValue('key')</code>.</p>
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem">
+                    <div>
+                        <h2 class="text-sm font-semibold text-white">System Config</h2>
+                        <p class="text-xs text-slate-400">Global key / value configuration entries. Accessible via <code
+                                style="color:#22d3ee">SystemConfig::getValue('key')</code>.</p>
+                    </div>
+                    <form method="POST" action="{{ route('backoffice.system-config.sync-all') }}" style="flex-shrink:0">
+                        @csrf
+                        <input type="hidden" name="from_agent" value="{{ $agent->id }}">
+                        <button type="submit" class="bo-btn-sm"
+                            title="Re-resolve all DataModel lookup entries and store the snapshot value">
+                            ↻ Sync All
+                        </button>
+                    </form>
                 </div>
 
                 @if (session('success'))
@@ -792,8 +802,12 @@
                                     <td class="px-3 py-2 font-mono text-slate-200">{{ $sc->key }}</td>
                                     <td class="px-3 py-2 text-slate-300" style="word-break:break-all">
                                         @if (($sc->source_type ?? 'manual') === 'datamodel_lookup')
-                                            <span class="text-cyan-300">(dynamic)</span>
-                                            <span class="text-slate-500">{{ $sc->lookup_field }}={{ $sc->lookup_value }} ->
+                                            @if ($sc->value !== null && $sc->value !== '')
+                                                <span class="text-emerald-300">{{ $sc->value }}</span>
+                                                <br>
+                                            @endif
+                                            <span class="text-slate-500"
+                                                style="font-size:10px">{{ $sc->lookup_field }}={{ $sc->lookup_value }} →
                                                 {{ $sc->result_field }}</span>
                                         @else
                                             {{ $sc->value }}
@@ -875,7 +889,8 @@
                                         <option value="">-- Select DataModel --</option>
                                         @foreach ($systemConfigDataModels as $dm)
                                             <option value="{{ $dm->id }}">{{ $dm->model_name }}
-                                                ({{ $dm->table_name }})</option>
+                                                ({{ $dm->table_name }})
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>

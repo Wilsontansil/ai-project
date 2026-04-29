@@ -28,7 +28,7 @@ class SystemConfigController extends Controller
 
         $this->validateLookupFields($data);
 
-        SystemConfig::create([
+        $record = SystemConfig::create([
             'key' => $data['key'],
             'value' => $data['source_type'] === 'manual' ? ($data['value'] ?? null) : null,
             'description' => $data['description'] ?? null,
@@ -38,6 +38,13 @@ class SystemConfigController extends Controller
             'lookup_value' => $data['source_type'] === 'datamodel_lookup' ? ($data['lookup_value'] ?? null) : null,
             'result_field' => $data['source_type'] === 'datamodel_lookup' ? ($data['result_field'] ?? null) : null,
         ]);
+
+        if ($record->source_type === 'datamodel_lookup') {
+            $resolved = $record->resolveEffectiveValue();
+            if ($resolved !== null) {
+                $record->updateQuietly(['value' => $resolved]);
+            }
+        }
 
         return $this->redirectBack($request);
     }
@@ -68,7 +75,29 @@ class SystemConfigController extends Controller
             'result_field' => $data['source_type'] === 'datamodel_lookup' ? ($data['result_field'] ?? null) : null,
         ]);
 
+        if ($systemConfig->source_type === 'datamodel_lookup') {
+            $systemConfig->refresh();
+            $resolved = $systemConfig->resolveEffectiveValue();
+            if ($resolved !== null) {
+                $systemConfig->updateQuietly(['value' => $resolved]);
+            }
+        }
+
         return $this->redirectBack($request);
+    }
+
+    public function syncAll(Request $request): RedirectResponse
+    {
+        $configs = SystemConfig::where('source_type', 'datamodel_lookup')->get();
+        foreach ($configs as $config) {
+            $resolved = $config->resolveEffectiveValue();
+            if ($resolved !== null) {
+                $config->updateQuietly(['value' => $resolved]);
+            }
+        }
+        SystemConfig::bumpCacheVersion();
+
+        return $this->redirectBack($request)->with('success', 'All datamodel configs synced successfully.');
     }
 
     public function destroy(Request $request, SystemConfig $systemConfig): RedirectResponse

@@ -68,13 +68,13 @@ class SystemConfig extends Model
         });
     }
 
-    private static function bumpCacheVersion(): void
+    public static function bumpCacheVersion(): void
     {
         $current = (int) Cache::get('system_configs_version', 1);
         Cache::forever('system_configs_version', $current + 1);
     }
 
-    private function resolveEffectiveValue(): ?string
+    public function resolveEffectiveValue(): ?string
     {
         if (($this->source_type ?? 'manual') !== 'datamodel_lookup') {
             return $this->value;

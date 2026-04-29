@@ -87,7 +87,7 @@ class KnowledgeBaseSeeder extends Seeder
             [
                 'title' => 'Bonus',
                 'content' => 'A. BONUS KLAIM
-1. Bonus Ajak Teman (Referral Bonus) [{event_bonus_beruntun}]
+1. Bonus Ajak Teman (Referral Bonus) [{event_bonus_ajakteman}]
 Program Referral Bonus adalah program yang memungkinkan pengguna mendapatkan bonus dengan mengajak teman untuk bergabung dan bermain. Harus Di Claim di menu Reward.
 
 Cara mengikuti program ini:
@@ -103,17 +103,16 @@ Cara mengikuti program ini:
 - Teman Deposit > {bonus_ajak_teman_to_depo} Dapat Bonus {bonus_ajak_teman_greater_bonus}
 
 
-2. Bonus Deposit Beruntun (Daily Streak Bonus) [AKTIF]
+2. Bonus Deposit Beruntun (Daily Streak Bonus) [{event_bonus_beruntun}]
 Bonus Deposit Beruntun adalah bonus spesial yang bisa didapatkan dengan melakukan deposit setiap hari secara berturut-turut. Pastikan Balance dibawah 1000 untuk dihitung sebagai deposit beruntun.
 Harus Di Claim di menu Reward.
 
 [Setting]
-- Multiplier = 1x
-- Minimal Deposit = 50000
-- Max Bonus = 50000
-- Jumlah Beruntun = 8x
-- Termasuk Non Bank = false
-
+- Multiplier = {bonus_depo_continue_multiplier}
+- Minimal Deposit = {bonus_depo_continue_min_amount}
+- Max Bonus = {bonus_depo_continue_max_amount}
+- Jumlah Beruntun = {bonus_depo_continue_count}
+- Termasuk Non Bank = {bonus_depo_continue_non_bank_include}
 
 3. Bonus Freespin [AKTIF]
 Bonus Freespin adalah bonus yang diberikan setelah pengguna melakukan deposit harian.

@@ -273,6 +273,153 @@ class ToolDispatcher
             );
         }
 
+        // 4. AI intent-router fallback (no keyword dependency).
+        $intentRoutedReply = $this->routeToolByIntent(
+            $client,
+            $tools,
+            $systemPrompt,
+            $contextPrompt,
+            $history,
+            $userMessage,
+            $model,
+            $chatId,
+            $channel,
+            $pendingKey
+        );
+
+        if ($intentRoutedReply !== null) {
+            return $intentRoutedReply;
+        }
+
+        return null;
+    }
+
+    /**
+     * Final fallback router that selects a tool by intent using OpenAI tool_choice,
+     * without relying on local keyword matching.
+     *
+     * @param Collection<int, Tool> $tools
+     * @param array<int, array<string, string>> $history
+     */
+    private function routeToolByIntent(
+        mixed $client,
+        Collection $tools,
+        string $systemPrompt,
+        ?string $contextPrompt,
+        array $history,
+        string $userMessage,
+        string $model,
+        string $chatId,
+        string $channel,
+        ?string $pendingKey
+    ): ?string {
+        if ($tools->isEmpty()) {
+            return null;
+        }
+
+        $toolDefinitions = $tools
+            ->map(fn (Tool $tool) => $tool->getDefinition())
+            ->filter()
+            ->values()
+            ->all();
+
+        if ($toolDefinitions === []) {
+            return null;
+        }
+
+        $messages = [
+            [
+                'role' => 'system',
+                'content' => $systemPrompt,
+            ],
+            [
+                'role' => 'system',
+                'content' => 'You are a tool-intent router. Prefer tool usage for customer requests that require live/check/status/availability data (especially game availability by name/provider/category). If no tool is relevant, do not call any tool.',
+            ],
+        ];
+
+        if ($contextPrompt !== null) {
+            $messages[] = ['role' => 'system', 'content' => $contextPrompt];
+        }
+
+        foreach (array_slice($history, -6) as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $role = $item['role'] ?? null;
+            $content = $item['content'] ?? null;
+
+            if (!in_array($role, ['user', 'assistant'], true) || !is_string($content) || trim($content) === '') {
+                continue;
+            }
+
+            $messages[] = ['role' => $role, 'content' => $content];
+        }
+
+        $messages[] = ['role' => 'user', 'content' => $userMessage];
+
+        try {
+            $openaiStart = MetricsCollector::startTimer();
+            $response = $client->chat()->create([
+                'model' => $model,
+                'messages' => $messages,
+                'tools' => $toolDefinitions,
+                'tool_choice' => 'auto',
+                'max_completion_tokens' => 120,
+            ]);
+            $openaiLatency = MetricsCollector::elapsed($openaiStart);
+
+            $usage = [
+                'prompt_tokens' => $response->usage->promptTokens ?? 0,
+                'completion_tokens' => $response->usage->completionTokens ?? 0,
+                'total_tokens' => $response->usage->totalTokens ?? 0,
+            ];
+            MetricsCollector::recordOpenAiCall('system', $model, 'intent_route', $openaiLatency, $usage);
+
+            $message = $response->choices[0]->message ?? null;
+            if ($message === null) {
+                return null;
+            }
+
+            foreach ($tools as $tool) {
+                $arguments = $this->extractArguments($message, $tool->tool_name);
+                if ($arguments === null) {
+                    continue;
+                }
+
+                if ($tool->needsArguments() && $this->hasMissingRequiredArgs($tool, $arguments)) {
+                    if ($pendingKey !== null) {
+                        Cache::put($pendingKey, $tool->tool_name, now()->addMinutes(5));
+                    }
+
+                    return $this->buildMissingDataMessage($tool);
+                }
+
+                if ($pendingKey !== null) {
+                    Cache::forget($pendingKey);
+                }
+
+                return $this->dispatch(
+                    $client,
+                    $tool,
+                    $arguments,
+                    $systemPrompt,
+                    $contextPrompt,
+                    $history,
+                    $userMessage,
+                    $model,
+                    $chatId,
+                    $channel
+                );
+            }
+        } catch (\Throwable $e) {
+            MetricsCollector::recordOpenAiCall('system', $model, 'intent_route', 0, null, false);
+            Log::warning('AI intent-router fallback failed', [
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         return null;
     }
 

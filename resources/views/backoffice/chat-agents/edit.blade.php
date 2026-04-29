@@ -880,7 +880,8 @@
         function scOpenEdit(id, key, value) {
             const panel = document.getElementById('sc-edit-panel');
             const form = document.getElementById('sc-edit-form');
-            form.action = '/backoffice/system-config/' + id;
+            const actionTemplate = @json(route('backoffice.system-config.update', ['systemConfig' => '__ID__']));
+            form.action = actionTemplate.replace('__ID__', String(id));
             document.getElementById('sc-edit-key').value = key;
             document.getElementById('sc-edit-value').value = value ?? '';
             panel.style.display = '';

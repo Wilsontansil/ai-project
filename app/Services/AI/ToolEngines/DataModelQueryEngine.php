@@ -863,14 +863,13 @@ class DataModelQueryEngine
         }
     }
 
-    /**
-     * Normalise a value for IN / NOT IN operators.
     private function escapeLike(string $value): string
     {
         return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
     }
 
     /**
+     * Normalise a value for IN / NOT IN operators.
      * Accepts an array, or a comma-separated string.
      *
      * @return array<int, mixed>

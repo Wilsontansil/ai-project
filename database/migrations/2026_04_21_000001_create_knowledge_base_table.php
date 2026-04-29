@@ -12,9 +12,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('chat_agent_id')->constrained('chat_agents')->cascadeOnDelete();
             $table->string('title');
-            $table->longText('content');
-            $table->string('source')->default('manual'); // 'manual' or 'file'
+            $table->longText('content')->nullable();
+            $table->string('source')->default('manual'); // 'manual', 'file', or 'datamodel'
             $table->string('file_name')->nullable();
+            $table->foreignId('data_model_id')->nullable()->constrained('data_models')->nullOnDelete();
+            $table->text('query_sql')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

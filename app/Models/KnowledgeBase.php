@@ -14,6 +14,8 @@ class KnowledgeBase extends Model
         'content',
         'source',
         'file_name',
+        'data_model_id',
+        'query_sql',
         'is_active',
     ];
 
@@ -24,5 +26,10 @@ class KnowledgeBase extends Model
     public function chatAgent()
     {
         return $this->belongsTo(ChatAgent::class);
+    }
+
+    public function dataModel()
+    {
+        return $this->belongsTo(DataModel::class);
     }
 }

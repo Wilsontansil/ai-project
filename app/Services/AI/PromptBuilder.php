@@ -7,6 +7,9 @@ use App\Models\AgentRule;
 use App\Models\KnowledgeBase;
 use App\Models\Tool;
 use App\Models\WebsitePage;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Builds system prompts and agent context injections for OpenAI requests.
@@ -170,13 +173,66 @@ PROMPT;
             }
             $lines = ['KNOWLEDGE BASE (gunakan sebagai referensi tambahan):'];
             foreach ($entries as $entry) {
-                $lines[] = "### {$entry->title}\n{$entry->content}";
+                if ($entry->source === 'datamodel') {
+                    $content = $this->resolveDataModelKbContent($entry);
+                } else {
+                    $content = (string) $entry->content;
+                }
+                $lines[] = "### {$entry->title}\n{$content}";
             }
 
             return implode("\n\n", $lines);
         } catch (\Throwable) {
             return '';
         }
+    }
+
+    /**
+     * Execute the stored SQL query for a datamodel KB entry and return formatted result.
+     * Result is cached for 5 minutes per entry to avoid hitting the external DB on every message.
+     */
+    private function resolveDataModelKbContent(KnowledgeBase $entry): string
+    {
+        if (empty($entry->query_sql)) {
+            return '(no query configured)';
+        }
+
+        $cacheKey = "kb_datamodel:{$entry->id}:" . md5((string) $entry->query_sql);
+
+        return Cache::remember($cacheKey, 300, function () use ($entry): string {
+            try {
+                $dataModel = $entry->dataModel;
+                if ($dataModel === null) {
+                    return '(data model not found)';
+                }
+
+                $connectionName = $dataModel->connection_name ?: 'mysqlgame';
+                $rows = DB::connection($connectionName)->select($entry->query_sql);
+
+                if (empty($rows)) {
+                    return '(no results)';
+                }
+
+                // Format as a readable list: one row per line, key: value pairs.
+                $lines = [];
+                foreach ($rows as $row) {
+                    $parts = [];
+                    foreach ((array) $row as $col => $val) {
+                        $parts[] = "{$col}: {$val}";
+                    }
+                    $lines[] = implode(' | ', $parts);
+                }
+
+                return implode("\n", $lines);
+            } catch (\Throwable $e) {
+                Log::warning('KB datamodel query failed', [
+                    'kb_id' => $entry->id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return '(query error — check configuration)';
+            }
+        });
     }
 
     private function getAgentRulesPrompt(?ChatAgent $chatAgent): string

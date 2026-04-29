@@ -134,7 +134,8 @@
                     </div>
 
                     {{-- Order By + Limit --}}
-                    <div class="grid grid-cols-3 gap-3">
+                    <div class="grid grid-cols-3 gap-3"
+                        style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0.75rem">
                         <div>
                             <label class="mb-1 block text-xs text-slate-300">Order By Field</label>
                             <input type="text" name="query_order_by_field"

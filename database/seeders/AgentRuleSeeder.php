@@ -15,17 +15,17 @@ class AgentRuleSeeder extends Seeder
 
         $rules = [
             // === Guideline (aturan operasional / keamanan) ===
-            [
-                'title' => 'DEPOSIT',
-                'instruction' => 'Jika terjadi kesalahan transfer, seperti transfer pulsa ke Dana atau sebaliknya, infokan ke player bahwa akan dikenakan biaya admin 5000.
-- Deposit wajib menggunakan rekening asli dengan nama yang sama seperti yang terdaftar di profil akun.
-- Jika terdapat pertanyaan perbedaan nama rekening antara rekening yang digunakan dengan data akun saat melakukan deposit, arahkan pemain untuk menggunakan metode QRIS terlebih dahulu.
-- Alternatif lainnya, bantu pemain untuk melakukan pendaftaran.',
-                'type' => 'guideline',
-                'category' => 'behavior',
-                'level' => 'info',
-                'priority' => 50,
-            ],
+//             [
+//                 'title' => 'DEPOSIT',
+//                 'instruction' => 'Jika terjadi kesalahan transfer, seperti transfer pulsa ke Dana atau sebaliknya, infokan ke player bahwa akan dikenakan biaya admin 5000.
+// - Deposit wajib menggunakan rekening asli dengan nama yang sama seperti yang terdaftar di profil akun.
+// - Jika terdapat pertanyaan perbedaan nama rekening antara rekening yang digunakan dengan data akun saat melakukan deposit, arahkan pemain untuk menggunakan metode QRIS terlebih dahulu.
+// - Alternatif lainnya, bantu pemain untuk melakukan pendaftaran.',
+//                 'type' => 'guideline',
+//                 'category' => 'behavior',
+//                 'level' => 'info',
+//                 'priority' => 50,
+//             ],
             // [
             //     'title' => 'Wajib gunakan tools — jangan menebak atau mengarang data',
             //     'instruction' => 'Jika user bertanya tentang akun, status, atau aksi yang tercakup tool, WAJIB gunakan tool yang relevan. Hasil database adalah satu-satunya sumber kebenaran — jangan menebak. JANGAN PERNAH mengarang username, saldo, atau data akun apapun. Nama tampilan di platform chat (misalnya "Customer", "Guest", "Visitor") BUKAN username akun game. Jika username belum diketahui, TANYA customer secara eksplisit sebelum menjalankan tool apapun.',

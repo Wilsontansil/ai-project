@@ -185,16 +185,16 @@ Catatan:
                 'content' => '[Informasi]
 - Minimal Deposit Rp 10.000
 - Maximal Deposit Rp Tak terbatas
-- Wajib deposit menggunakan rekening asli dengan nama yang sama sesuai dengan profil
 - Deposit Menggunakan Pulsa Wajib Beserta SN Atau Nomor HP pengirim di Berita Deposit
 - Multiplier Deposit Bank = 1x
 - Multiplier Deposit Non Bank = 3x
 
 [BANK]
-BCA, BII / Maybank, BNI, BRI, BSI, BTN, CIMB Niaga, Niaga Syariah, Dana, Danamon, Gopay, LINK AJA, Mandiri, OCBC NISP, Ovo, Sakuku, Shopee, Bank Neo, Sea Bank, Jago, Permata, BTPN/Jenius, Bank MAS, Mandiri Syariah, BCA Syariah, QRIS
+BCA, BII / Maybank, BNI, BRI, BSI, BTN, CIMB Niaga, Niaga Syariah, Dana, Danamon, Mandiri, OCBC NISP, Bank Neo, Sea Bank, Jago, Permata, BTPN/Jenius, Bank MAS, Mandiri Syariah, BCA Syariah, QRIS
+(E-Wallet) = Ovo, Shopee , Gopay , LINK AJA , Dana
 
 [NON BANK]
-Pulsa XL, Telkomsel
+(Pulsa) = XL, Telkomsel
 
 Cara Deposit Melalui Pulsa:
 Buka website kami, lalu masuk ke menu Form Deposit.
@@ -214,6 +214,11 @@ PENTING: Nominal di form deposit harus sama persis dengan nominal permintaan dep
 Contoh 1: jika permintaan deposit 20.000, isi form deposit 20.000.
 Contoh 2: jika permintaan deposit 12.000, isi form deposit 12.000.
 Biaya antar bank 6.500 atau 2.500 (BI-Fast) adalah biaya tambahan dari bank dan ditanggung user di luar nominal deposit.
+Wajib menggunakan rekening pribadi dengan nama yang sama persis seperti yang terdaftar di profil akun.
+
+Deposit QRIS:
+Deposit QRIS tidak wajib mengunakan rekening yang asli dengan nama yang sama seperti terdaftar di profil akun.
+Bisa jadi alternatif jika terjadi masalah perbedaan nama rekening saat deposit bank.
 
 Deposit Beberapa Kali Transfer (Multiple Transfer):
 Jika Kakak sudah melakukan beberapa kali transfer untuk 1 tujuan deposit, cukup isi 1x form deposit saja 😊

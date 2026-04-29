@@ -833,8 +833,13 @@
                                                 </form>
                                             @endif
                                             <button type="button"
-                                                onclick="scOpenEdit({{ $sc->id }}, '{{ addslashes($sc->key) }}', {{ json_encode($sc->value) }}, '{{ $sc->source ?? 'manual' }}', {{ $sc->data_model_id ?? 'null' }}, {{ json_encode($sc->query_sql) }})"
-                                                class="bo-btn-sm" style="white-space:nowrap">
+                                                data-sc-url="{{ route('backoffice.system-config.update', $sc) }}"
+                                                data-sc-key="{{ addslashes($sc->key) }}"
+                                                data-sc-value="{{ addslashes($sc->value ?? '') }}"
+                                                data-sc-source="{{ $sc->source ?? 'manual' }}"
+                                                data-sc-dmid="{{ $sc->data_model_id ?? '' }}"
+                                                data-sc-sql="{{ addslashes($sc->query_sql ?? '') }}"
+                                                onclick="scOpenEdit(this)" class="bo-btn-sm" style="white-space:nowrap">
                                                 Edit
                                             </button>
                                             <form method="POST"
@@ -1015,10 +1020,17 @@
             }
         }
 
-        function scOpenEdit(id, key, value, source, dataModelId, querySql) {
+        function scOpenEdit(btn) {
+            const url = btn.dataset.scUrl;
+            const key = btn.dataset.scKey;
+            const value = btn.dataset.scValue;
+            const source = btn.dataset.scSource || 'manual';
+            const dataModelId = btn.dataset.scDmid;
+            const querySql = btn.dataset.scSql;
+
             const panel = document.getElementById('sc-edit-panel');
             const form = document.getElementById('sc-edit-form');
-            form.action = '/backoffice/system-config/' + id;
+            form.action = url;
             document.getElementById('sc-edit-key').value = key;
             document.getElementById('sc-edit-value').value = value ?? '';
             document.getElementById('sc-edit-query-sql').value = querySql ?? '';

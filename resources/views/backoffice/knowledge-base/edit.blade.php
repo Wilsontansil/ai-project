@@ -46,6 +46,19 @@
                             <strong>{{ $entry->file_name }}</strong>. You can edit the content directly or re-upload a file.
                         </p>
                     @endif
+                    @if ($systemConfigs->isNotEmpty())
+                        <div
+                            style="margin-bottom:0.6rem;padding:0.6rem 0.75rem;border-radius:0.75rem;border:1px solid rgba(34,211,238,0.2);background:rgba(8,145,178,0.08);font-size:0.7rem;color:#94a3b8">
+                            <span style="color:#22d3ee;font-weight:600">Tip:</span> Use <code
+                                style="color:#22d3ee">{key}</code> placeholders to inject SystemConfig values dynamically.
+                            <span style="margin-left:0.5rem;color:#64748b">Available keys:</span>
+                            @foreach ($systemConfigs as $sc)
+                                <code onclick="scInsertPlaceholder('{{ $sc->key }}')"
+                                    title="Current: {{ $sc->value }}"
+                                    style="cursor:pointer;margin-left:0.3rem;padding:0.1rem 0.35rem;border-radius:0.35rem;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.1);color:#7dd3fc">{{ '{' }}{{ $sc->key }}{{ '}' }}</code>
+                            @endforeach
+                        </div>
+                    @endif
                     <textarea id="content" name="content" rows="10"
                         class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">{{ old('content', $entry->source !== 'datamodel' ? $entry->content : '') }}</textarea>
                 </div>
@@ -112,6 +125,16 @@
     </div>
 
     <script>
+        function scInsertPlaceholder(key) {
+            const ta = document.getElementById('content');
+            if (!ta) return;
+            const placeholder = '{' + key + '}';
+            const start = ta.selectionStart;
+            const end = ta.selectionEnd;
+            ta.value = ta.value.slice(0, start) + placeholder + ta.value.slice(end);
+            ta.selectionStart = ta.selectionEnd = start + placeholder.length;
+            ta.focus();
+        }
         (function() {
             const radios = document.querySelectorAll('.source-type-radio');
             const panels = {

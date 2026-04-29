@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backoffice;
 use App\Http\Controllers\Controller;
 use App\Models\DataModel;
 use App\Models\KnowledgeBase;
+use App\Models\SystemConfig;
 use App\Services\AI\KnowledgeBaseQueryGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,8 +28,9 @@ class KnowledgeBaseController extends Controller
         $dataModels = DataModel::query()->orderBy('model_name')->get(['id', 'model_name', 'slug']);
 
         return view('backoffice.knowledge-base.create', [
-            'dataModels' => $dataModels,
-            'boActive'   => 'knowledge-base',
+            'dataModels'    => $dataModels,
+            'systemConfigs' => SystemConfig::orderBy('key')->get(['key', 'value']),
+            'boActive'      => 'knowledge-base',
         ]);
     }
 
@@ -102,9 +104,10 @@ class KnowledgeBaseController extends Controller
         $dataModels = DataModel::query()->orderBy('model_name')->get(['id', 'model_name', 'slug']);
 
         return view('backoffice.knowledge-base.edit', [
-            'entry'      => $knowledgeBase,
-            'dataModels' => $dataModels,
-            'boActive'   => 'knowledge-base',
+            'entry'         => $knowledgeBase,
+            'dataModels'    => $dataModels,
+            'systemConfigs' => SystemConfig::orderBy('key')->get(['key', 'value']),
+            'boActive'      => 'knowledge-base',
         ]);
     }
 

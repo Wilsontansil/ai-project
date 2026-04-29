@@ -5,6 +5,7 @@ namespace App\Services\AI;
 use App\Models\ChatAgent;
 use App\Models\AgentRule;
 use App\Models\KnowledgeBase;
+use App\Models\SystemConfig;
 use App\Models\Tool;
 use App\Models\WebsitePage;
 use App\Services\AI\KnowledgeBaseQueryGuard;
@@ -177,7 +178,7 @@ PROMPT;
                 if ($entry->source === 'datamodel') {
                     $content = $this->resolveDataModelKbContent($entry);
                 } else {
-                    $content = (string) $entry->content;
+                    $content = $this->resolveConfigPlaceholders((string) $entry->content);
                 }
                 $lines[] = "### {$entry->title}\n{$content}";
             }
@@ -186,6 +187,18 @@ PROMPT;
         } catch (\Throwable) {
             return '';
         }
+    }
+
+    /**
+     * Replace {key} placeholders in KB content with values from SystemConfig.
+     * Unknown keys are left as-is (no crash, no empty string substitution).
+     */
+    private function resolveConfigPlaceholders(string $content): string
+    {
+        return preg_replace_callback('/\{([a-zA-Z0-9_]+)\}/', function (array $m): string {
+            $value = SystemConfig::getValue($m[1]);
+            return $value !== null ? $value : $m[0];
+        }, $content) ?? $content;
     }
 
     /**

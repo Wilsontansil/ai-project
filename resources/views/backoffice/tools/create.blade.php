@@ -118,64 +118,77 @@
 
                 {{-- ─── Query Config ─── --}}
                 <div class="rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-4 space-y-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-cyan-300">Query Config</h3>
-                        <p class="mt-1 text-xs text-slate-400">Configure how data is fetched: select fields, order, limit,
-                            and WHERE conditions.</p>
-                    </div>
-
-                    {{-- Select fields --}}
-                    <div>
-                        <p class="mb-1 text-sm text-slate-200">Select Fields <span class="text-xs text-slate-400">(leave all
-                                unchecked = return all fields)</span></p>
-                        <div id="query-select-list" class="flex flex-wrap gap-2">
-                            {{-- Populated by JS when DataModel changes --}}
-                        </div>
-                    </div>
-
-                    {{-- Order By + Limit --}}
-                    <div class="grid grid-cols-3 gap-3"
-                        style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0.75rem">
+                    <div class="flex items-center justify-between cursor-pointer select-none"
+                        onclick="toggleQueryConfig(this)">
                         <div>
-                            <label class="mb-1 block text-xs text-slate-300">Order By Field</label>
-                            <input type="text" name="query_order_by_field"
-                                value="{{ old('query_order_by_field', '') }}" placeholder="e.g. urutan"
-                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                            <h3 class="text-sm font-semibold text-cyan-300">Query Config</h3>
+                            <p class="mt-1 text-xs text-slate-400">Configure how data is fetched: select fields, order,
+                                limit,
+                                and WHERE conditions.</p>
                         </div>
-                        <div>
-                            <label class="mb-1 block text-xs text-slate-300">Direction</label>
-                            <select name="query_order_by_direction"
-                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
-                                <option value="asc"
-                                    {{ old('query_order_by_direction', 'asc') === 'asc' ? 'selected' : '' }}>ASC</option>
-                                <option value="desc" {{ old('query_order_by_direction') === 'desc' ? 'selected' : '' }}>
-                                    DESC</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="mb-1 block text-xs text-slate-300">Limit (max rows, 1–100)</label>
-                            <input type="number" name="query_limit" min="1" max="100"
-                                value="{{ old('query_limit', '') }}" placeholder="e.g. 10"
-                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
-                        </div>
+                        <span class="qc-chevron text-cyan-400 text-lg transition-transform"
+                            style="line-height:1">&#x25BE;</span>
                     </div>
+                    <div id="query-config-body">
 
-                    {{-- Conditions --}}
-                    <div>
-                        <p class="mb-1 text-sm text-slate-200">WHERE Conditions</p>
-                        <p class="mb-2 text-xs text-slate-400">
-                            Each row = one WHERE clause. Use <span class="text-cyan-300 font-mono">source=static</span> for
-                            fixed values,
-                            <span class="text-cyan-300 font-mono">source=arg</span> to use a parameter the AI provides.
-                            Rows sharing the same <span class="text-cyan-300 font-mono">group</span> number are combined
-                            with OR (the groups themselves are ANDed).
-                        </p>
-                        <div id="conditions-list" class="space-y-2"></div>
-                        <button type="button" onclick="addConditionRow()"
-                            class="mt-3 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs text-cyan-300 transition hover:bg-cyan-500/20">
-                            + Add Condition
-                        </button>
-                    </div>
+                        {{-- Select fields --}}
+                        <div>
+                            <p class="mb-1 text-sm text-slate-200">Select Fields <span
+                                    class="text-xs text-slate-400">(leave all
+                                    unchecked = return all fields)</span></p>
+                            <div id="query-select-list" class="flex flex-wrap gap-2">
+                                {{-- Populated by JS when DataModel changes --}}
+                            </div>
+                        </div>
+
+                        {{-- Order By + Limit --}}
+                        <div class="grid grid-cols-3 gap-3"
+                            style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0.75rem">
+                            <div>
+                                <label class="mb-1 block text-xs text-slate-300">Order By Field</label>
+                                <input type="text" name="query_order_by_field"
+                                    value="{{ old('query_order_by_field', '') }}" placeholder="e.g. urutan"
+                                    class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-xs text-slate-300">Direction</label>
+                                <select name="query_order_by_direction"
+                                    class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
+                                    <option value="asc"
+                                        {{ old('query_order_by_direction', 'asc') === 'asc' ? 'selected' : '' }}>ASC
+                                    </option>
+                                    <option value="desc"
+                                        {{ old('query_order_by_direction') === 'desc' ? 'selected' : '' }}>
+                                        DESC</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-xs text-slate-300">Limit (max rows, 1–100)</label>
+                                <input type="number" name="query_limit" min="1" max="100"
+                                    value="{{ old('query_limit', '') }}" placeholder="e.g. 10"
+                                    class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                            </div>
+                        </div>
+
+                        {{-- Conditions --}}
+                        <div>
+                            <p class="mb-1 text-sm text-slate-200">WHERE Conditions</p>
+                            <p class="mb-2 text-xs text-slate-400">
+                                Each row = one WHERE clause. Use <span class="text-cyan-300 font-mono">source=static</span>
+                                for
+                                fixed values,
+                                <span class="text-cyan-300 font-mono">source=arg</span> to use a parameter the AI provides.
+                                Rows sharing the same <span class="text-cyan-300 font-mono">group</span> number are
+                                combined
+                                with OR (the groups themselves are ANDed).
+                            </p>
+                            <div id="conditions-list" class="space-y-2"></div>
+                            <button type="button" onclick="addConditionRow()"
+                                class="mt-3 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs text-cyan-300 transition hover:bg-cyan-500/20">
+                                + Add Condition
+                            </button>
+                        </div>
+                    </div>{{-- end query-config-body --}}
                 </div>{{-- end Query Config --}}
             </div>
 
@@ -389,6 +402,15 @@
         const dataModels = @json($dataModels->map(fn($dm) => ['id' => $dm->id, 'fields' => array_keys($dm->fields ?? [])])->values());
         let paramIndex = 0;
         let updateParamIndex = 0;
+
+        /* ── Query Config: Toggle collapse ── */
+        function toggleQueryConfig(header) {
+            const body = document.getElementById('query-config-body');
+            const chevron = header.querySelector('.qc-chevron');
+            const hidden = body.style.display === 'none';
+            body.style.display = hidden ? '' : 'none';
+            chevron.style.transform = hidden ? '' : 'rotate(-90deg)';
+        }
 
         /* ── Query Config: Condition Operators ── */
         const CONDITION_OPERATORS = [

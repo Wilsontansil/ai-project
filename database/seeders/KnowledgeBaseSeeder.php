@@ -161,6 +161,7 @@ Bonus APK adalah bonus yang hanya dapat diklaim melalui aplikasi (APK). Harus Di
 
 B. Bonus Cashback
 Bonus Cashback adalah bonus yang diberikan kepada member setiap hari Senin berdasarkan aktivitas deposit dan withdraw minggu lalu (Senin–Minggu).
+Bonus Cashback tidak di Claim di menu Reward, tetapi masuk otomatis.
 
 Syarat kelayakan:
 - Hanya transaksi dengan status accept yang dihitung.
@@ -193,7 +194,7 @@ Catatan:
 BCA, BII / Maybank, BNI, BRI, BSI, BTN, CIMB Niaga, Niaga Syariah, Dana, Danamon, Gopay, LINK AJA, Mandiri, OCBC NISP, Ovo, Sakuku, Shopee, Bank Neo, Sea Bank, Jago, Permata, BTPN/Jenius, Bank MAS, Mandiri Syariah, BCA Syariah, QRIS
 
 [NON BANK]
-Pulsa XL, Telkomsel, Tri
+Pulsa XL, Telkomsel
 
 Cara Deposit Melalui Pulsa:
 Buka website kami, lalu masuk ke menu Form Deposit.

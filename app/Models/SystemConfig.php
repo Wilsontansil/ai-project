@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
 
 class SystemConfig extends Model
 {
-    protected $fillable = ['key', 'value'];
+    protected $fillable = ['key', 'value', 'description'];
 
     public static function getValue(string $key, ?string $default = null): ?string
     {

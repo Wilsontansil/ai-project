@@ -779,8 +779,9 @@
                     <table class="min-w-full text-xs" style="width:100%">
                         <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
                             <tr>
-                                <th class="px-3 py-2 font-medium" style="width:35%">Key</th>
+                                <th class="px-3 py-2 font-medium" style="width:25%">Key</th>
                                 <th class="px-3 py-2 font-medium">Value</th>
+                                <th class="px-3 py-2 font-medium">Description</th>
                                 <th class="px-3 py-2 font-medium text-right" style="width:120px">Actions</th>
                             </tr>
                         </thead>
@@ -790,10 +791,13 @@
                                     <td class="px-3 py-2 font-mono text-slate-200">{{ $sc->key }}</td>
                                     <td class="px-3 py-2 text-slate-300" style="word-break:break-all">{{ $sc->value }}
                                     </td>
+                                    <td class="px-3 py-2 text-slate-400" style="word-break:break-word">
+                                        {{ $sc->description ?: '-' }}
+                                    </td>
                                     <td class="px-3 py-2 text-right">
                                         <div style="display:inline-flex;align-items:center;gap:0.375rem">
                                             <button type="button"
-                                                onclick="scOpenEdit({{ $sc->id }}, '{{ addslashes($sc->key) }}', {{ json_encode($sc->value) }})"
+                                                onclick="scOpenEdit({{ $sc->id }}, {{ json_encode($sc->key) }}, {{ json_encode($sc->value) }}, {{ json_encode($sc->description) }})"
                                                 class="bo-btn-sm" style="white-space:nowrap">
                                                 Edit
                                             </button>
@@ -813,7 +817,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-4 py-6 text-center text-slate-400">No system config entries
+                                    <td colspan="4" class="px-4 py-6 text-center text-slate-400">No system config entries
                                         yet.</td>
                                 </tr>
                             @endforelse
@@ -831,13 +835,18 @@
                         <input type="hidden" name="from_agent" value="{{ $agent->id }}">
                         <div style="display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;align-items:start">
                             <div>
-                                <label class="bo-label">Key</label>
+                                <label class="bo-label" for="sc-edit-key">Key</label>
                                 <input type="text" name="key" id="sc-edit-key" required maxlength="191" />
                             </div>
                             <div>
-                                <label class="bo-label">Value</label>
+                                <label class="bo-label" for="sc-edit-value">Value</label>
                                 <textarea name="value" id="sc-edit-value" rows="3"></textarea>
                             </div>
+                        </div>
+                        <div>
+                            <label class="bo-label" for="sc-edit-description">Description</label>
+                            <textarea name="description" id="sc-edit-description" rows="2" maxlength="1000"
+                                placeholder="Short explanation of what this key is used for..."></textarea>
                         </div>
                         <div style="display:flex;gap:0.5rem">
                             <button type="submit" class="bo-btn-primary">Save</button>
@@ -855,17 +864,25 @@
                         <input type="hidden" name="from_agent" value="{{ $agent->id }}">
                         <div style="display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;align-items:start">
                             <div>
-                                <label class="bo-label">Key</label>
-                                <input type="text" name="key" required maxlength="191"
+                                <label class="bo-label" for="sc-create-key">Key</label>
+                                <input id="sc-create-key" type="text" name="key" required maxlength="191"
                                     placeholder="e.g. welcome_message" />
                                 @error('key')
                                     <p style="margin-top:0.25rem;font-size:0.7rem;color:#f87171">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
-                                <label class="bo-label">Value</label>
-                                <textarea name="value" rows="3" placeholder="Config value...">{{ old('value') }}</textarea>
+                                <label class="bo-label" for="sc-create-value">Value</label>
+                                <textarea id="sc-create-value" name="value" rows="3" placeholder="Config value...">{{ old('value') }}</textarea>
                             </div>
+                        </div>
+                        <div>
+                            <label class="bo-label" for="sc-create-description">Description</label>
+                            <textarea id="sc-create-description" name="description" rows="2" maxlength="1000"
+                                placeholder="Short explanation of what this key is used for...">{{ old('description') }}</textarea>
+                            @error('description')
+                                <p style="margin-top:0.25rem;font-size:0.7rem;color:#f87171">{{ $message }}</p>
+                            @enderror
                         </div>
                         <button type="submit" class="bo-btn-primary">+ Add</button>
                     </form>
@@ -877,13 +894,14 @@
 
 @if ($isSystemConfigTab)
     <script>
-        function scOpenEdit(id, key, value) {
+        function scOpenEdit(id, key, value, description) {
             const panel = document.getElementById('sc-edit-panel');
             const form = document.getElementById('sc-edit-form');
             const actionTemplate = @json(route('backoffice.system-config.update', ['systemConfig' => '__ID__']));
             form.action = actionTemplate.replace('__ID__', String(id));
             document.getElementById('sc-edit-key').value = key;
             document.getElementById('sc-edit-value').value = value ?? '';
+            document.getElementById('sc-edit-description').value = description ?? '';
             panel.style.display = '';
             panel.scrollIntoView({
                 behavior: 'smooth',

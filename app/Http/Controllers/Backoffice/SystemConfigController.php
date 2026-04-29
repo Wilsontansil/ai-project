@@ -14,10 +14,15 @@ class SystemConfigController extends Controller
         $data = $request->validate([
             'key'      => ['required', 'string', 'max:191', 'unique:system_configs,key'],
             'value'    => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:1000'],
             'from_agent' => ['nullable', 'integer'],
         ]);
 
-        SystemConfig::create(['key' => $data['key'], 'value' => $data['value'] ?? null]);
+        SystemConfig::create([
+            'key' => $data['key'],
+            'value' => $data['value'] ?? null,
+            'description' => $data['description'] ?? null,
+        ]);
 
         return $this->redirectBack($request);
     }
@@ -27,9 +32,14 @@ class SystemConfigController extends Controller
         $data = $request->validate([
             'key'   => ['required', 'string', 'max:191', 'unique:system_configs,key,' . $systemConfig->id],
             'value' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $systemConfig->update(['key' => $data['key'], 'value' => $data['value'] ?? null]);
+        $systemConfig->update([
+            'key' => $data['key'],
+            'value' => $data['value'] ?? null,
+            'description' => $data['description'] ?? null,
+        ]);
 
         return $this->redirectBack($request);
     }

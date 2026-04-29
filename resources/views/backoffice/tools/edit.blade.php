@@ -131,39 +131,41 @@
                         </div>
                     </div>
 
-                    {{-- Order By + Limit (single line) --}}
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span class="text-xs text-slate-400 shrink-0">Order By</span>
-                        <input type="text" name="query_order_by_field"
-                            value="{{ old('query_order_by_field', data_get($tool->meta, 'query.order_by.field', '')) }}"
-                            placeholder="field"
-                            class="w-32 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-1.5 text-sm text-white outline-none focus:border-cyan-400" />
-                        <select name="query_order_by_direction"
-                            class="rounded-xl border border-white/10 bg-slate-900/70 px-2 py-1.5 text-sm text-white outline-none focus:border-cyan-400">
-                            <option value="asc"
-                                {{ old('query_order_by_direction', data_get($tool->meta, 'query.order_by.direction', 'asc')) === 'asc' ? 'selected' : '' }}>
-                                ASC</option>
-                            <option value="desc"
-                                {{ old('query_order_by_direction', data_get($tool->meta, 'query.order_by.direction', 'asc')) === 'desc' ? 'selected' : '' }}>
-                                DESC</option>
-                        </select>
-                        <span class="text-xs text-slate-400 shrink-0 ml-2">Limit</span>
-                        <input type="number" name="query_limit" min="1" max="100"
-                            value="{{ old('query_limit', data_get($tool->meta, 'query.limit', '')) }}" placeholder="10"
-                            class="w-20 rounded-xl border border-white/10 bg-slate-900/70 px-3 py-1.5 text-sm text-white outline-none focus:border-cyan-400" />
+                    {{-- Order By + Limit --}}
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="mb-1 block text-xs text-slate-300">Order By Field</label>
+                            <input type="text" name="query_order_by_field"
+                                value="{{ old('query_order_by_field', data_get($tool->meta, 'query.order_by.field', '')) }}"
+                                placeholder="e.g. urutan"
+                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs text-slate-300">Direction</label>
+                            <select name="query_order_by_direction"
+                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
+                                <option value="asc"
+                                    {{ old('query_order_by_direction', data_get($tool->meta, 'query.order_by.direction', 'asc')) === 'asc' ? 'selected' : '' }}>
+                                    ASC</option>
+                                <option value="desc"
+                                    {{ old('query_order_by_direction', data_get($tool->meta, 'query.order_by.direction', 'asc')) === 'desc' ? 'selected' : '' }}>
+                                    DESC</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs text-slate-300">Limit (max rows, 1–100)</label>
+                            <input type="number" name="query_limit" min="1" max="100"
+                                value="{{ old('query_limit', data_get($tool->meta, 'query.limit', '')) }}"
+                                placeholder="e.g. 10"
+                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                        </div>
                     </div>
 
                     {{-- Conditions --}}
                     <div>
-                        <p class="mb-1 text-sm text-slate-200">WHERE Conditions</p>
-                        <p class="mb-2 text-xs text-slate-400">
-                            Each row = one WHERE clause. Use <span class="text-cyan-300 font-mono">source=static</span> for
-                            fixed values,
-                            <span class="text-cyan-300 font-mono">source=arg</span> to use a parameter the AI provides.
-                            Rows sharing the same <span class="text-cyan-300 font-mono">group</span> number are combined
-                            with OR (the groups themselves are ANDed).
-                        </p>
-                        <div id="conditions-list" class="space-y-2"></div>
+                        <p class="mb-1 text-sm text-slate-200">WHERE Conditions <span class="text-xs text-slate-400">—
+                                field · operator · source · value · arg · grp · skip · req</span></p>
+                        <div id="conditions-list" class="space-y-1"></div>
                         <button type="button" onclick="addConditionRow()"
                             class="mt-3 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs text-cyan-300 transition hover:bg-cyan-500/20">
                             + Add Condition
@@ -436,46 +438,44 @@
             const idx = conditionIdx++;
             const isArg = source === 'arg';
             const row = document.createElement('div');
-            row.className =
-                'condition-row flex flex-wrap items-center gap-1.5 rounded-xl border border-white/10 bg-slate-900/50 px-3 py-2';
+            row.className = 'condition-row flex items-center gap-1 flex-wrap';
             row.innerHTML = `
                 <input list="condition-fields-list-${idx}" type="text" name="query_conditions[${idx}][field]" value="${field}"
-                    placeholder="field"
-                    class="condition-field-input w-28 rounded-lg border border-white/10 bg-slate-900/70 px-2 py-1 text-xs text-white outline-none focus:border-cyan-400" />
+                    placeholder="field" title="Field"
+                    class="condition-field-input w-28 rounded-lg border border-white/10 bg-slate-900/70 px-2 py-1.5 text-xs text-white outline-none focus:border-cyan-400" />
                 <datalist id="condition-fields-list-${idx}">${buildConditionFieldDatalistOptions()}</datalist>
-                <select name="query_conditions[${idx}][operator]"
-                    class="rounded-lg border border-white/10 bg-slate-900/70 px-1.5 py-1 text-xs text-white outline-none focus:border-cyan-400">
+                <select name="query_conditions[${idx}][operator]" title="Operator"
+                    class="w-24 rounded-lg border border-white/10 bg-slate-900/70 px-1 py-1.5 text-xs text-white outline-none focus:border-cyan-400">
                     ${buildConditionOperatorOptions(operator)}
                 </select>
-                <select name="query_conditions[${idx}][source]"
-                    class="condition-source-select rounded-lg border border-white/10 bg-slate-900/70 px-1.5 py-1 text-xs text-white outline-none focus:border-cyan-400"
+                <select name="query_conditions[${idx}][source]" title="Source"
+                    class="condition-source-select w-16 rounded-lg border border-white/10 bg-slate-900/70 px-1 py-1.5 text-xs text-white outline-none focus:border-cyan-400"
                     onchange="toggleConditionValueArg(this)">
                     <option value="static" ${source !== 'arg' ? 'selected' : ''}>static</option>
                     <option value="arg" ${source === 'arg' ? 'selected' : ''}>arg</option>
                 </select>
                 <input type="text" name="query_conditions[${idx}][value]" value="${value}"
-                    placeholder="value"
-                    class="condition-value-cell w-24 rounded-lg border border-white/10 bg-slate-900/70 px-2 py-1 text-xs text-white outline-none focus:border-cyan-400" />
+                    placeholder="value" title="Value (static) or fallback"
+                    class="condition-value-cell w-24 rounded-lg border border-white/10 bg-slate-900/70 px-2 py-1.5 text-xs text-white outline-none focus:border-cyan-400" />
                 <input type="text" name="query_conditions[${idx}][arg]" value="${arg}"
-                    placeholder="arg"
-                    class="condition-arg-cell w-24 rounded-lg border border-white/10 bg-slate-900/70 px-2 py-1 text-xs text-white outline-none focus:border-cyan-400"
-                    style="${!isArg ? 'opacity:0.4;pointer-events:none' : ''}" />
-                <span class="text-xs text-slate-500">grp</span>
+                    placeholder="arg" title="Arg param name (when source=arg)"
+                    class="condition-arg-cell w-20 rounded-lg border border-white/10 bg-slate-900/70 px-2 py-1.5 text-xs text-white outline-none focus:border-cyan-400"
+                    style="${!isArg ? 'opacity:0.35;pointer-events:none' : ''}" />
                 <input type="text" name="query_conditions[${idx}][group]" value="${group}"
-                    placeholder="1"
-                    class="w-10 rounded-lg border border-white/10 bg-slate-900/70 px-1.5 py-1 text-xs text-white outline-none focus:border-cyan-400" />
-                <label class="flex items-center gap-1 text-xs text-slate-400 cursor-pointer" title="skip if arg is empty">
+                    placeholder="grp" title="Group number (same group = OR)"
+                    class="w-10 rounded-lg border border-white/10 bg-slate-900/70 px-2 py-1.5 text-xs text-white outline-none focus:border-cyan-400" />
+                <label class="flex items-center gap-1 text-xs text-slate-400 cursor-pointer" title="Skip condition when arg is empty">
                     <input type="checkbox" name="query_conditions[${idx}][skip_if_empty]" value="1" ${skipIfEmpty ? 'checked' : ''}
                         class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
                     skip
                 </label>
-                <label class="flex items-center gap-1 text-xs text-slate-400 cursor-pointer" title="required field">
+                <label class="flex items-center gap-1 text-xs text-slate-400 cursor-pointer" title="Return error when arg is missing">
                     <input type="checkbox" name="query_conditions[${idx}][required]" value="1" ${requiredFlag ? 'checked' : ''}
                         class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
                     req
                 </label>
                 <button type="button" onclick="this.closest('.condition-row').remove()"
-                    class="ml-auto rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                    class="rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
             `;
             list.appendChild(row);
         }
@@ -487,8 +487,7 @@
         function toggleConditionValueArg(select) {
             const row = select.closest('.condition-row');
             const isArg = select.value === 'arg';
-            const argCell = row.querySelector('.condition-arg-cell');
-            if (argCell) argCell.style.cssText = isArg ? '' : 'opacity:0.4;pointer-events:none';
+            row.querySelector('.condition-arg-cell').style.cssText = isArg ? '' : 'opacity:0.4;pointer-events:none';
         }
 
         function refreshConditionDatalistOptions() {

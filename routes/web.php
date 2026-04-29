@@ -94,7 +94,6 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
         Route::post('/backoffice/system-config', [SystemConfigController::class, 'store'])->name('backoffice.system-config.store');
         Route::put('/backoffice/system-config/{systemConfig}', [SystemConfigController::class, 'update'])->name('backoffice.system-config.update');
         Route::delete('/backoffice/system-config/{systemConfig}', [SystemConfigController::class, 'destroy'])->name('backoffice.system-config.destroy');
-        Route::post('/backoffice/system-config/{systemConfig}/sync', [SystemConfigController::class, 'sync'])->name('backoffice.system-config.sync');
     });
 
     // Database connections (admin only)

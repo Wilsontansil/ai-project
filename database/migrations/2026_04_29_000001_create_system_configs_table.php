@@ -12,6 +12,10 @@ return new class extends Migration
             $table->id();
             $table->string('key')->unique();
             $table->text('value')->nullable();
+            $table->string('source')->default('manual');           // 'manual' | 'datamodel'
+            $table->foreignId('data_model_id')->nullable()->constrained('data_models')->nullOnDelete();
+            $table->text('query_sql')->nullable();
+            $table->timestamp('synced_at')->nullable();
             $table->timestamps();
         });
     }

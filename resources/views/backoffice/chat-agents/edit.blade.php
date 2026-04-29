@@ -763,8 +763,12 @@
             <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 space-y-5">
                 <div>
                     <h2 class="text-sm font-semibold text-white">System Config</h2>
-                    <p class="text-xs text-slate-400">Global key / value configuration entries. Accessible via <code
-                            style="color:#22d3ee">SystemConfig::getValue('key')</code>.</p>
+                    <p class="text-xs text-slate-400">Global key / value entries. Accessible via <code
+                            style="color:#22d3ee">SystemConfig::getValue('key')</code>.
+                        Source <span
+                            style="display:inline-block;padding:0 0.35rem;border-radius:9999px;background:rgba(6,182,212,0.15);color:#22d3ee;font-size:0.65rem;font-weight:600">datamodel</span>
+                        rows sync on demand — the <em>value</em> column always holds the last synced result.
+                    </p>
                 </div>
 
                 @if (session('success'))
@@ -773,27 +777,63 @@
                         {{ session('success') }}
                     </div>
                 @endif
+                @if (session('error'))
+                    <div
+                        style="background:rgba(239,68,68,0.12);border:1px solid rgba(248,113,113,0.3);border-radius:0.75rem;padding:0.75rem 1rem;font-size:0.75rem;color:#fca5a5">
+                        {{ session('error') }}
+                    </div>
+                @endif
 
                 {{-- Existing rows --}}
                 <div class="overflow-hidden rounded-xl border border-white/10">
                     <table class="min-w-full text-xs" style="width:100%">
                         <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
                             <tr>
-                                <th class="px-3 py-2 font-medium" style="width:35%">Key</th>
+                                <th class="px-3 py-2 font-medium" style="width:25%">Key</th>
+                                <th class="px-3 py-2 font-medium" style="width:10%">Source</th>
                                 <th class="px-3 py-2 font-medium">Value</th>
-                                <th class="px-3 py-2 font-medium text-right" style="width:120px">Actions</th>
+                                <th class="px-3 py-2 font-medium text-right" style="width:160px">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5" id="sc-table-body">
                             @forelse ($systemConfigs as $sc)
                                 <tr class="transition hover:bg-white/5" id="sc-row-{{ $sc->id }}">
                                     <td class="px-3 py-2 font-mono text-slate-200">{{ $sc->key }}</td>
-                                    <td class="px-3 py-2 text-slate-300" style="word-break:break-all">{{ $sc->value }}
+                                    <td class="px-3 py-2">
+                                        @if (($sc->source ?? 'manual') === 'datamodel')
+                                            <span
+                                                style="display:inline-block;padding:0.1rem 0.45rem;border-radius:9999px;background:rgba(6,182,212,0.15);color:#22d3ee;font-size:0.65rem;font-weight:600">datamodel</span>
+                                        @else
+                                            <span
+                                                style="display:inline-block;padding:0.1rem 0.45rem;border-radius:9999px;background:rgba(100,116,139,0.2);color:#94a3b8;font-size:0.65rem;font-weight:600">manual</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-3 py-2 text-slate-300" style="word-break:break-all">
+                                        {{ $sc->value }}
+                                        @if (($sc->source ?? 'manual') === 'datamodel' && $sc->synced_at)
+                                            <div style="margin-top:0.2rem;font-size:0.65rem;color:#64748b">
+                                                Last synced: {{ $sc->synced_at->diffForHumans() }}
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="px-3 py-2 text-right">
-                                        <div style="display:inline-flex;align-items:center;gap:0.375rem">
+                                        <div
+                                            style="display:inline-flex;align-items:center;gap:0.375rem;flex-wrap:wrap;justify-content:flex-end">
+                                            @if (($sc->source ?? 'manual') === 'datamodel')
+                                                <form method="POST"
+                                                    action="{{ route('backoffice.system-config.sync', $sc) }}"
+                                                    style="margin:0">
+                                                    @csrf
+                                                    <input type="hidden" name="from_agent" value="{{ $agent->id }}">
+                                                    <button type="submit" class="bo-btn-sm"
+                                                        style="white-space:nowrap;color:#22d3ee"
+                                                        onclick="return confirm('Sync \'{{ addslashes($sc->key) }}\' now?')">
+                                                        Sync Now
+                                                    </button>
+                                                </form>
+                                            @endif
                                             <button type="button"
-                                                onclick="scOpenEdit({{ $sc->id }}, '{{ addslashes($sc->key) }}', {{ json_encode($sc->value) }})"
+                                                onclick="scOpenEdit({{ $sc->id }}, '{{ addslashes($sc->key) }}', {{ json_encode($sc->value) }}, '{{ $sc->source ?? 'manual' }}', {{ $sc->data_model_id ?? 'null' }}, {{ json_encode($sc->query_sql) }})"
                                                 class="bo-btn-sm" style="white-space:nowrap">
                                                 Edit
                                             </button>
@@ -813,7 +853,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-4 py-6 text-center text-slate-400">No system config entries
+                                    <td colspan="4" class="px-4 py-6 text-center text-slate-400">No system config entries
                                         yet.</td>
                                 </tr>
                             @endforelse
@@ -829,16 +869,60 @@
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="from_agent" value="{{ $agent->id }}">
+
+                        {{-- Source toggle --}}
+                        <div>
+                            <label class="bo-label">Source</label>
+                            <div style="display:flex;gap:0.75rem;margin-top:0.25rem">
+                                <label
+                                    style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.75rem;color:#cbd5e1">
+                                    <input type="radio" name="source" id="sc-edit-src-manual" value="manual"
+                                        onchange="scToggleSource('edit','manual')" checked />
+                                    Manual
+                                </label>
+                                <label
+                                    style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.75rem;color:#22d3ee">
+                                    <input type="radio" name="source" id="sc-edit-src-datamodel" value="datamodel"
+                                        onchange="scToggleSource('edit','datamodel')" />
+                                    DataModel Query
+                                </label>
+                            </div>
+                        </div>
+
                         <div style="display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;align-items:start">
                             <div>
                                 <label class="bo-label">Key</label>
                                 <input type="text" name="key" id="sc-edit-key" required maxlength="191" />
                             </div>
-                            <div>
+                            {{-- Manual value --}}
+                            <div id="sc-edit-manual-wrap">
                                 <label class="bo-label">Value</label>
                                 <textarea name="value" id="sc-edit-value" rows="3"></textarea>
                             </div>
                         </div>
+
+                        {{-- DataModel fields --}}
+                        <div id="sc-edit-dm-wrap" style="display:none;gap:0.75rem"
+                            style="display:grid;grid-template-columns:1fr 2fr">
+                            <div style="display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;align-items:start">
+                                <div>
+                                    <label class="bo-label">DataModel</label>
+                                    <select name="data_model_id" id="sc-edit-dm-id">
+                                        <option value="">— select —</option>
+                                        @foreach ($dataModels as $dm)
+                                            <option value="{{ $dm->id }}">{{ $dm->model_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="bo-label">SQL Query <span style="font-size:0.65rem;color:#64748b">(first
+                                            cell of first row used)</span></label>
+                                    <textarea name="query_sql" id="sc-edit-query-sql" rows="3"
+                                        placeholder="SELECT value FROM config WHERE name = 'x' LIMIT 1"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
                         <div style="display:flex;gap:0.5rem">
                             <button type="submit" class="bo-btn-primary">Save</button>
                             <button type="button" onclick="document.getElementById('sc-edit-panel').style.display='none'"
@@ -853,6 +937,26 @@
                     <form method="POST" action="{{ route('backoffice.system-config.store') }}" class="space-y-3">
                         @csrf
                         <input type="hidden" name="from_agent" value="{{ $agent->id }}">
+
+                        {{-- Source toggle --}}
+                        <div>
+                            <label class="bo-label">Source</label>
+                            <div style="display:flex;gap:0.75rem;margin-top:0.25rem">
+                                <label
+                                    style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.75rem;color:#cbd5e1">
+                                    <input type="radio" name="source" id="sc-add-src-manual" value="manual"
+                                        onchange="scToggleSource('add','manual')" checked />
+                                    Manual
+                                </label>
+                                <label
+                                    style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.75rem;color:#22d3ee">
+                                    <input type="radio" name="source" id="sc-add-src-datamodel" value="datamodel"
+                                        onchange="scToggleSource('add','datamodel')" />
+                                    DataModel Query
+                                </label>
+                            </div>
+                        </div>
+
                         <div style="display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;align-items:start">
                             <div>
                                 <label class="bo-label">Key</label>
@@ -862,11 +966,33 @@
                                     <p style="margin-top:0.25rem;font-size:0.7rem;color:#f87171">{{ $message }}</p>
                                 @enderror
                             </div>
-                            <div>
+                            {{-- Manual value --}}
+                            <div id="sc-add-manual-wrap">
                                 <label class="bo-label">Value</label>
                                 <textarea name="value" rows="3" placeholder="Config value...">{{ old('value') }}</textarea>
                             </div>
                         </div>
+
+                        {{-- DataModel fields --}}
+                        <div id="sc-add-dm-wrap" style="display:none">
+                            <div style="display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;align-items:start">
+                                <div>
+                                    <label class="bo-label">DataModel</label>
+                                    <select name="data_model_id" id="sc-add-dm-id">
+                                        <option value="">— select —</option>
+                                        @foreach ($dataModels as $dm)
+                                            <option value="{{ $dm->id }}">{{ $dm->model_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="bo-label">SQL Query <span style="font-size:0.65rem;color:#64748b">(first
+                                            cell of first row used)</span></label>
+                                    <textarea name="query_sql" rows="3" placeholder="SELECT value FROM config WHERE name = 'x' LIMIT 1"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
                         <button type="submit" class="bo-btn-primary">+ Add</button>
                     </form>
                 </div>
@@ -877,12 +1003,44 @@
 
 @if ($isSystemConfigTab)
     <script>
-        function scOpenEdit(id, key, value) {
+        function scToggleSource(prefix, source) {
+            const manualWrap = document.getElementById('sc-' + prefix + '-manual-wrap');
+            const dmWrap = document.getElementById('sc-' + prefix + '-dm-wrap');
+            if (source === 'datamodel') {
+                manualWrap.style.display = 'none';
+                dmWrap.style.display = '';
+            } else {
+                manualWrap.style.display = '';
+                dmWrap.style.display = 'none';
+            }
+        }
+
+        function scOpenEdit(id, key, value, source, dataModelId, querySql) {
             const panel = document.getElementById('sc-edit-panel');
             const form = document.getElementById('sc-edit-form');
             form.action = '/backoffice/system-config/' + id;
             document.getElementById('sc-edit-key').value = key;
             document.getElementById('sc-edit-value').value = value ?? '';
+            document.getElementById('sc-edit-query-sql').value = querySql ?? '';
+
+            const srcManual = document.getElementById('sc-edit-src-manual');
+            const srcDm = document.getElementById('sc-edit-src-datamodel');
+            const dmSelect = document.getElementById('sc-edit-dm-id');
+
+            if (source === 'datamodel') {
+                srcDm.checked = true;
+                srcManual.checked = false;
+                scToggleSource('edit', 'datamodel');
+            } else {
+                srcManual.checked = true;
+                srcDm.checked = false;
+                scToggleSource('edit', 'manual');
+            }
+
+            if (dataModelId && dmSelect) {
+                dmSelect.value = dataModelId;
+            }
+
             panel.style.display = '';
             panel.scrollIntoView({
                 behavior: 'smooth',

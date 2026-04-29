@@ -87,7 +87,7 @@ class KnowledgeBaseSeeder extends Seeder
             [
                 'title' => 'Bonus',
                 'content' => 'A. BONUS KLAIM
-1. Bonus Ajak Teman (Referral Bonus) [NONAKTIF]
+1. Bonus Ajak Teman (Referral Bonus) [{event_bonus_beruntun}]
 Program Referral Bonus adalah program yang memungkinkan pengguna mendapatkan bonus dengan mengajak teman untuk bergabung dan bermain. Harus Di Claim di menu Reward.
 
 Cara mengikuti program ini:
@@ -97,10 +97,10 @@ Cara mengikuti program ini:
 - [Penting] Player yang mendapatkan Bonus Harus melakukan 1 kali deposit sukses sebelum Teman yang diajak melakukan Deposit.
 
 [Setting]
-- Multiplier = 1x
-- Minimal Deposit = 20000-30000
-- Teman Deposit 20000-30000 Dapat Bonus 20000
-- Teman Deposit > 30000 Dapat Bonus 30000
+- Multiplier = {bonus_ajak_teman_multiplier}
+- Minimal Deposit = {bonus_ajak_teman_min_depo}-{bonus_ajak_teman_to_depo}
+- Teman Deposit {bonus_ajak_teman_min_depo}-{bonus_ajak_teman_to_depo} Dapat Bonus {bonus_ajak_teman_between_bonus}
+- Teman Deposit > {bonus_ajak_teman_to_depo} Dapat Bonus {bonus_ajak_teman_greater_bonus}
 
 
 2. Bonus Deposit Beruntun (Daily Streak Bonus) [AKTIF]

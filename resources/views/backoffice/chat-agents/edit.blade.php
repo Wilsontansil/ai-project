@@ -1021,7 +1021,10 @@
         }
 
         function scOpenEdit(btn) {
-            const url = btn.dataset.scUrl;
+            const rawUrl = btn.dataset.scUrl;
+            // Use path only so the form posts to the same origin/protocol as the page
+            // (prevents http:// → https:// mixed-content browser warning)
+            const url = new URL(rawUrl, window.location.href).pathname;
             const key = btn.dataset.scKey;
             const value = btn.dataset.scValue;
             const source = btn.dataset.scSource || 'manual';

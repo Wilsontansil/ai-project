@@ -116,44 +116,21 @@ class PromptBuilder
     private function getToolUsagePolicyPrompt(): string
     {
         return <<<'PROMPT'
-PANDUAN PENGGUNAAN TOOLS (ikuti dengan ketat):
-Kamu memiliki akses ke KNOWLEDGE BASE dan TOOLS. Ikuti urutan ini sebelum memutuskan:
+PANDUAN PENGGUNAAN TOOLS:
+Kamu punya akses ke KNOWLEDGE BASE dan TOOLS. Gunakan aturan prioritas berikut:
 
-1. JAWAB DARI KNOWLEDGE BASE terlebih dahulu jika pertanyaan bersifat umum/informatif.
-   Contoh: "apa itu cashback?", "kapan cashback dibagikan?", "bagaimana cara hitung cashback?"
-   → Jawab langsung dari Knowledge Base. JANGAN panggil tool.
-   → Ikuti juga panduan nada dan call-to-action yang ada di dalam entri Knowledge Base yang digunakan.
+1. Pertanyaan umum/informatif: jawab dari Knowledge Base, jangan panggil tool.
+2. Permintaan data spesifik milik customer: panggil tool yang relevan.
+3. Pertanyaan gabungan (umum + data user): jawab singkat dari Knowledge Base dulu, lalu panggil tool.
+4. Jika customer memulai permintaan baru yang tidak terkait konteks sebelumnya, anggap konteks lama selesai dan tangani permintaan baru.
 
-2. PANGGIL TOOL hanya jika customer membutuhkan DATA SPESIFIK miliknya sendiri.
-   Contoh: "cek cashback saya", "berapa cashback saya minggu ini?", "lihat histori deposit saya"
-   → Ini memerlukan data real-time dari sistem. Panggil tool yang sesuai.
+ALUR MULTI-TURN:
+- Fase intent awal: jika ada intent jelas untuk aksi tool, segera panggil tool meskipun data belum lengkap. Sistem akan meminta data yang kurang.
+- Fase setelah minta data: jika customer sedang melengkapi data yang diminta, jangan panggil tool lagi dari pesan itu; sistem akan mengeksekusi otomatis.
 
-3. KOMBINASI: Jika customer bertanya umum DAN ingin cek datanya sekaligus,
-   jawab penjelasan singkat dari Knowledge Base DULU, lalu panggil tool untuk datanya.
-
-4. GANTI TOPIK: Jika customer memulai permintaan BARU (menggunakan kata seperti "mau",
-   "minta", "ingin", "cek", "info tentang", "tolong bantu", dll.) yang TIDAK berkaitan
-   dengan tool atau data yang sedang diproses sebelumnya, JAWAB permintaan baru tersebut.
-   Anggap alur percakapan sebelumnya sudah selesai dan mulai dari konteks baru.
-
-PENTING — ALUR DATA MULTI-TURN:
-
-FASE 1 — PEMICU AWAL:
-Jika customer menyebutkan intent untuk menggunakan tool (contoh: "mau reset password",
-"minta withdraw", "daftar akun"), SEGERA panggil tool yang sesuai — meskipun data belum
-lengkap. Sistem akan otomatis mendeteksi data yang kurang dan meminta ke customer.
-JANGAN jawab hanya dengan teks jika ada tool yang cocok dengan intent customer.
-
-FASE 2 — SETELAH MEMINTA DATA:
-Jika kamu sudah meminta data spesifik ke customer (misal: nama rekening, nomor rekening,
-nama bank) dan customer membalas dengan data tersebut, JANGAN panggil tool lagi.
-Sistem akan mengambil data itu dan menjalankan tool secara otomatis.
-Tugasmu hanya menjaga percakapan tetap fokus jika customer keluar topik.
-
-PRINSIP UTAMA:
-- Jangan panggil tool hanya karena pertanyaan menyebut kata kunci tool.
-- Pertimbangkan konteks: apakah customer butuh PENJELASAN atau butuh DATA?
-- Jika ragu apakah customer menjawab pertanyaanmu atau membuat permintaan baru, lihat apakah pesan mereka mengandung kata permintaan ("mau", "minta", "tolong") atau hanya data murni (nama, angka, dll.).
+PRINSIP:
+- Jangan memilih tool hanya karena keyword; nilai kebutuhan user: penjelasan atau data.
+- Jika ragu antara "jawaban data" vs "permintaan baru", anggap permintaan baru hanya bila user jelas meminta aksi/topik baru.
 PROMPT;
     }
 

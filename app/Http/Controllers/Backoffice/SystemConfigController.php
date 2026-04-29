@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Models\DataModel;
 use App\Models\SystemConfig;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class SystemConfigController extends Controller
 {
@@ -15,13 +18,25 @@ class SystemConfigController extends Controller
             'key'      => ['required', 'string', 'max:191', 'unique:system_configs,key'],
             'value'    => ['nullable', 'string'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'source_type' => ['required', Rule::in(['manual', 'datamodel_lookup'])],
+            'data_model_id' => ['nullable', 'integer', 'exists:data_models,id'],
+            'lookup_field' => ['nullable', 'string', 'max:191'],
+            'lookup_value' => ['nullable', 'string'],
+            'result_field' => ['nullable', 'string', 'max:191'],
             'from_agent' => ['nullable', 'integer'],
         ]);
 
+        $this->validateLookupFields($data);
+
         SystemConfig::create([
             'key' => $data['key'],
-            'value' => $data['value'] ?? null,
+            'value' => $data['source_type'] === 'manual' ? ($data['value'] ?? null) : null,
             'description' => $data['description'] ?? null,
+            'source_type' => $data['source_type'],
+            'data_model_id' => $data['source_type'] === 'datamodel_lookup' ? ($data['data_model_id'] ?? null) : null,
+            'lookup_field' => $data['source_type'] === 'datamodel_lookup' ? ($data['lookup_field'] ?? null) : null,
+            'lookup_value' => $data['source_type'] === 'datamodel_lookup' ? ($data['lookup_value'] ?? null) : null,
+            'result_field' => $data['source_type'] === 'datamodel_lookup' ? ($data['result_field'] ?? null) : null,
         ]);
 
         return $this->redirectBack($request);
@@ -33,12 +48,24 @@ class SystemConfigController extends Controller
             'key'   => ['required', 'string', 'max:191', 'unique:system_configs,key,' . $systemConfig->id],
             'value' => ['nullable', 'string'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'source_type' => ['required', Rule::in(['manual', 'datamodel_lookup'])],
+            'data_model_id' => ['nullable', 'integer', 'exists:data_models,id'],
+            'lookup_field' => ['nullable', 'string', 'max:191'],
+            'lookup_value' => ['nullable', 'string'],
+            'result_field' => ['nullable', 'string', 'max:191'],
         ]);
+
+        $this->validateLookupFields($data);
 
         $systemConfig->update([
             'key' => $data['key'],
-            'value' => $data['value'] ?? null,
+            'value' => $data['source_type'] === 'manual' ? ($data['value'] ?? null) : null,
             'description' => $data['description'] ?? null,
+            'source_type' => $data['source_type'],
+            'data_model_id' => $data['source_type'] === 'datamodel_lookup' ? ($data['data_model_id'] ?? null) : null,
+            'lookup_field' => $data['source_type'] === 'datamodel_lookup' ? ($data['lookup_field'] ?? null) : null,
+            'lookup_value' => $data['source_type'] === 'datamodel_lookup' ? ($data['lookup_value'] ?? null) : null,
+            'result_field' => $data['source_type'] === 'datamodel_lookup' ? ($data['result_field'] ?? null) : null,
         ]);
 
         return $this->redirectBack($request);
@@ -63,5 +90,35 @@ class SystemConfigController extends Controller
         }
 
         return redirect()->back()->with('success', 'System config saved.');
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function validateLookupFields(array $data): void
+    {
+        if (($data['source_type'] ?? 'manual') !== 'datamodel_lookup') {
+            return;
+        }
+
+        $dataModelId = (int) ($data['data_model_id'] ?? 0);
+        $lookupField = trim((string) ($data['lookup_field'] ?? ''));
+        $lookupValue = trim((string) ($data['lookup_value'] ?? ''));
+        $resultField = trim((string) ($data['result_field'] ?? ''));
+
+        if ($dataModelId <= 0 || $lookupField === '' || $lookupValue === '' || $resultField === '') {
+            throw ValidationException::withMessages([
+                'source_type' => 'DataModel, lookup field, lookup value, and result field are required for datamodel source.',
+            ]);
+        }
+
+        $dataModel = DataModel::query()->find($dataModelId);
+        $allowedFields = array_keys((array) ($dataModel?->fields ?? []));
+
+        if (!in_array($lookupField, $allowedFields, true) || !in_array($resultField, $allowedFields, true)) {
+            throw ValidationException::withMessages([
+                'source_type' => 'Selected lookup/result fields are not available in the selected DataModel.',
+            ]);
+        }
     }
 }

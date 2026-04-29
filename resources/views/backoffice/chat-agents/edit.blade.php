@@ -779,9 +779,10 @@
                     <table class="min-w-full text-xs" style="width:100%">
                         <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
                             <tr>
-                                <th class="px-3 py-2 font-medium" style="width:25%">Key</th>
+                                <th class="px-3 py-2 font-medium" style="width:22%">Key</th>
                                 <th class="px-3 py-2 font-medium">Value</th>
                                 <th class="px-3 py-2 font-medium">Description</th>
+                                <th class="px-3 py-2 font-medium">Source</th>
                                 <th class="px-3 py-2 font-medium text-right" style="width:120px">Actions</th>
                             </tr>
                         </thead>
@@ -789,15 +790,29 @@
                             @forelse ($systemConfigs as $sc)
                                 <tr class="transition hover:bg-white/5" id="sc-row-{{ $sc->id }}">
                                     <td class="px-3 py-2 font-mono text-slate-200">{{ $sc->key }}</td>
-                                    <td class="px-3 py-2 text-slate-300" style="word-break:break-all">{{ $sc->value }}
+                                    <td class="px-3 py-2 text-slate-300" style="word-break:break-all">
+                                        @if (($sc->source_type ?? 'manual') === 'datamodel_lookup')
+                                            <span class="text-cyan-300">(dynamic)</span>
+                                            <span class="text-slate-500">{{ $sc->lookup_field }}={{ $sc->lookup_value }} ->
+                                                {{ $sc->result_field }}</span>
+                                        @else
+                                            {{ $sc->value }}
+                                        @endif
                                     </td>
                                     <td class="px-3 py-2 text-slate-400" style="word-break:break-word">
                                         {{ $sc->description ?: '-' }}
                                     </td>
+                                    <td class="px-3 py-2 text-slate-400">
+                                        @if (($sc->source_type ?? 'manual') === 'datamodel_lookup')
+                                            DM #{{ $sc->data_model_id }}
+                                        @else
+                                            Manual
+                                        @endif
+                                    </td>
                                     <td class="px-3 py-2 text-right">
                                         <div style="display:inline-flex;align-items:center;gap:0.375rem">
                                             <button type="button"
-                                                onclick="scOpenEdit({{ $sc->id }}, {{ json_encode($sc->key) }}, {{ json_encode($sc->value) }}, {{ json_encode($sc->description) }})"
+                                                onclick="scOpenEdit({{ $sc->id }}, {{ json_encode($sc->key) }}, {{ json_encode($sc->value) }}, {{ json_encode($sc->description) }}, {{ json_encode($sc->source_type ?? 'manual') }}, {{ json_encode($sc->data_model_id) }}, {{ json_encode($sc->lookup_field) }}, {{ json_encode($sc->lookup_value) }}, {{ json_encode($sc->result_field) }})"
                                                 class="bo-btn-sm" style="white-space:nowrap">
                                                 Edit
                                             </button>
@@ -817,7 +832,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-4 py-6 text-center text-slate-400">No system config entries
+                                    <td colspan="5" class="px-4 py-6 text-center text-slate-400">No system config entries
                                         yet.</td>
                                 </tr>
                             @endforelse
@@ -833,14 +848,54 @@
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="from_agent" value="{{ $agent->id }}">
+                        <div>
+                            <label class="bo-label" for="sc-edit-source-type">Source Type</label>
+                            <select id="sc-edit-source-type" name="source_type" onchange="scSyncEditSourceType()">
+                                <option value="manual">Manual</option>
+                                <option value="datamodel_lookup">DataModel Lookup</option>
+                            </select>
+                        </div>
                         <div style="display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;align-items:start">
                             <div>
                                 <label class="bo-label" for="sc-edit-key">Key</label>
                                 <input type="text" name="key" id="sc-edit-key" required maxlength="191" />
                             </div>
-                            <div>
+                            <div id="sc-edit-manual-wrap">
                                 <label class="bo-label" for="sc-edit-value">Value</label>
                                 <textarea name="value" id="sc-edit-value" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div id="sc-edit-dm-wrap" class="rounded-lg border border-white/10 bg-slate-900/50 p-3"
+                            style="display:none">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;align-items:start">
+                                <div>
+                                    <label class="bo-label" for="sc-edit-data-model-id">DataModel</label>
+                                    <select id="sc-edit-data-model-id" name="data_model_id"
+                                        onchange="scPopulateEditFields()">
+                                        <option value="">-- Select DataModel --</option>
+                                        @foreach ($systemConfigDataModels as $dm)
+                                            <option value="{{ $dm->id }}">{{ $dm->model_name }}
+                                                ({{ $dm->table_name }})</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="bo-label" for="sc-edit-lookup-value">Lookup Value</label>
+                                    <input id="sc-edit-lookup-value" type="text" name="lookup_value"
+                                        placeholder="e.g. mindeposit" />
+                                </div>
+                                <div>
+                                    <label class="bo-label" for="sc-edit-lookup-field">Lookup Field</label>
+                                    <select id="sc-edit-lookup-field" name="lookup_field">
+                                        <option value="">-- Select Field --</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="bo-label" for="sc-edit-result-field">Result Field</label>
+                                    <select id="sc-edit-result-field" name="result_field">
+                                        <option value="">-- Select Field --</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <div>
@@ -862,6 +917,16 @@
                     <form method="POST" action="{{ route('backoffice.system-config.store') }}" class="space-y-3">
                         @csrf
                         <input type="hidden" name="from_agent" value="{{ $agent->id }}">
+                        <div>
+                            <label class="bo-label" for="sc-create-source-type">Source Type</label>
+                            <select id="sc-create-source-type" name="source_type" onchange="scSyncCreateSourceType()">
+                                <option value="manual" {{ old('source_type', 'manual') === 'manual' ? 'selected' : '' }}>
+                                    Manual</option>
+                                <option value="datamodel_lookup"
+                                    {{ old('source_type') === 'datamodel_lookup' ? 'selected' : '' }}>DataModel Lookup
+                                </option>
+                            </select>
+                        </div>
                         <div style="display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;align-items:start">
                             <div>
                                 <label class="bo-label" for="sc-create-key">Key</label>
@@ -871,9 +936,56 @@
                                     <p style="margin-top:0.25rem;font-size:0.7rem;color:#f87171">{{ $message }}</p>
                                 @enderror
                             </div>
-                            <div>
+                            <div id="sc-create-manual-wrap">
                                 <label class="bo-label" for="sc-create-value">Value</label>
                                 <textarea id="sc-create-value" name="value" rows="3" placeholder="Config value...">{{ old('value') }}</textarea>
+                            </div>
+                        </div>
+                        <div id="sc-create-dm-wrap" class="rounded-lg border border-white/10 bg-slate-900/50 p-3"
+                            style="display:none">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;align-items:start">
+                                <div>
+                                    <label class="bo-label" for="sc-create-data-model-id">DataModel</label>
+                                    <select id="sc-create-data-model-id" name="data_model_id"
+                                        onchange="scPopulateCreateFields()">
+                                        <option value="">-- Select DataModel --</option>
+                                        @foreach ($systemConfigDataModels as $dm)
+                                            <option value="{{ $dm->id }}"
+                                                {{ (string) old('data_model_id') === (string) $dm->id ? 'selected' : '' }}>
+                                                {{ $dm->model_name }} ({{ $dm->table_name }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('data_model_id')
+                                        <p style="margin-top:0.25rem;font-size:0.7rem;color:#f87171">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="bo-label" for="sc-create-lookup-value">Lookup Value</label>
+                                    <input id="sc-create-lookup-value" type="text" name="lookup_value"
+                                        value="{{ old('lookup_value') }}" placeholder="e.g. mindeposit" />
+                                    @error('lookup_value')
+                                        <p style="margin-top:0.25rem;font-size:0.7rem;color:#f87171">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="bo-label" for="sc-create-lookup-field">Lookup Field</label>
+                                    <select id="sc-create-lookup-field" name="lookup_field">
+                                        <option value="">-- Select Field --</option>
+                                    </select>
+                                    @error('lookup_field')
+                                        <p style="margin-top:0.25rem;font-size:0.7rem;color:#f87171">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="bo-label" for="sc-create-result-field">Result Field</label>
+                                    <select id="sc-create-result-field" name="result_field">
+                                        <option value="">-- Select Field --</option>
+                                    </select>
+                                    @error('result_field')
+                                        <p style="margin-top:0.25rem;font-size:0.7rem;color:#f87171">{{ $message }}</p>
+                                    @enderror
+                                </div>
                             </div>
                         </div>
                         <div>
@@ -894,7 +1006,59 @@
 
 @if ($isSystemConfigTab)
     <script>
-        function scOpenEdit(id, key, value, description) {
+        const scDataModels = @json(
+            $systemConfigDataModels->mapWithKeys(function ($dm) {
+                return [
+                    (string) $dm->id => [
+                        'fields' => array_keys((array) ($dm->fields ?? [])),
+                    ],
+                ];
+            }));
+
+        function scSetFieldOptions(selectEl, fields, selectedValue = '') {
+            if (!selectEl) return;
+            const opts = ['<option value="">-- Select Field --</option>'];
+            fields.forEach((f) => {
+                const sel = String(f) === String(selectedValue) ? ' selected' : '';
+                opts.push(`<option value="${f}"${sel}>${f}</option>`);
+            });
+            selectEl.innerHTML = opts.join('');
+        }
+
+        function scPopulateCreateFields() {
+            const dmId = document.getElementById('sc-create-data-model-id')?.value ?? '';
+            const fields = scDataModels[String(dmId)]?.fields ?? [];
+            scSetFieldOptions(document.getElementById('sc-create-lookup-field'), fields,
+                @json(old('lookup_field')));
+            scSetFieldOptions(document.getElementById('sc-create-result-field'), fields,
+                @json(old('result_field')));
+        }
+
+        function scPopulateEditFields(selectedLookup = '', selectedResult = '') {
+            const dmId = document.getElementById('sc-edit-data-model-id')?.value ?? '';
+            const fields = scDataModels[String(dmId)]?.fields ?? [];
+            scSetFieldOptions(document.getElementById('sc-edit-lookup-field'), fields, selectedLookup);
+            scSetFieldOptions(document.getElementById('sc-edit-result-field'), fields, selectedResult);
+        }
+
+        function scSyncCreateSourceType() {
+            const sourceType = document.getElementById('sc-create-source-type')?.value ?? 'manual';
+            document.getElementById('sc-create-manual-wrap').style.display = sourceType === 'manual' ? '' : 'none';
+            document.getElementById('sc-create-dm-wrap').style.display = sourceType === 'datamodel_lookup' ? '' : 'none';
+            if (sourceType === 'datamodel_lookup') scPopulateCreateFields();
+        }
+
+        function scSyncEditSourceType() {
+            const sourceType = document.getElementById('sc-edit-source-type')?.value ?? 'manual';
+            document.getElementById('sc-edit-manual-wrap').style.display = sourceType === 'manual' ? '' : 'none';
+            document.getElementById('sc-edit-dm-wrap').style.display = sourceType === 'datamodel_lookup' ? '' : 'none';
+            if (sourceType === 'datamodel_lookup') scPopulateEditFields(
+                document.getElementById('sc-edit-lookup-field')?.value ?? '',
+                document.getElementById('sc-edit-result-field')?.value ?? ''
+            );
+        }
+
+        function scOpenEdit(id, key, value, description, sourceType, dataModelId, lookupField, lookupValue, resultField) {
             const panel = document.getElementById('sc-edit-panel');
             const form = document.getElementById('sc-edit-form');
             const actionTemplate = @json(route('backoffice.system-config.update', ['systemConfig' => '__ID__']));
@@ -902,11 +1066,20 @@
             document.getElementById('sc-edit-key').value = key;
             document.getElementById('sc-edit-value').value = value ?? '';
             document.getElementById('sc-edit-description').value = description ?? '';
+            document.getElementById('sc-edit-source-type').value = sourceType ?? 'manual';
+            document.getElementById('sc-edit-data-model-id').value = dataModelId ?? '';
+            document.getElementById('sc-edit-lookup-value').value = lookupValue ?? '';
+            scPopulateEditFields(lookupField ?? '', resultField ?? '');
+            scSyncEditSourceType();
             panel.style.display = '';
             panel.scrollIntoView({
                 behavior: 'smooth',
                 block: 'nearest'
             });
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            scSyncCreateSourceType();
+        });
     </script>
 @endif

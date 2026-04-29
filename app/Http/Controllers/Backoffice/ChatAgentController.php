@@ -108,6 +108,9 @@ class ChatAgentController extends Controller
                 ->orderBy('display_name')
                 ->get(),
             'systemConfigs' => SystemConfig::orderBy('key')->get(),
+            'systemConfigDataModels' => DataModel::query()
+                ->orderBy('model_name')
+                ->get(['id', 'model_name', 'table_name', 'connection_name', 'fields']),
         ]);
     }
 

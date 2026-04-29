@@ -795,7 +795,7 @@
                                             <button type="button"
                                                 onclick="scOpenEdit({{ $sc->id }}, '{{ addslashes($sc->key) }}', {{ json_encode($sc->value) }})"
                                                 class="bo-btn-sm" style="white-space:nowrap">
-                                                ✏ Edit
+                                                Edit
                                             </button>
                                             <form method="POST"
                                                 action="{{ route('backoffice.system-config.destroy', $sc) }}"
@@ -805,7 +805,7 @@
                                                 @method('DELETE')
                                                 <input type="hidden" name="from_agent" value="{{ $agent->id }}">
                                                 <button type="submit" class="bo-btn-danger" style="white-space:nowrap">
-                                                    🗑 Delete
+                                                    Delete
                                                 </button>
                                             </form>
                                         </div>

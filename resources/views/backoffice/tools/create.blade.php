@@ -115,6 +115,67 @@
                         {{ __('backoffice.pages.tools.add_parameter') }}
                     </button>
                 </div>
+
+                {{-- ─── Query Config ─── --}}
+                <div class="rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-4 space-y-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-cyan-300">Query Config</h3>
+                        <p class="mt-1 text-xs text-slate-400">Configure how data is fetched: select fields, order, limit,
+                            and WHERE conditions.</p>
+                    </div>
+
+                    {{-- Select fields --}}
+                    <div>
+                        <p class="mb-1 text-sm text-slate-200">Select Fields <span class="text-xs text-slate-400">(leave all
+                                unchecked = return all fields)</span></p>
+                        <div id="query-select-list" class="flex flex-wrap gap-2">
+                            {{-- Populated by JS when DataModel changes --}}
+                        </div>
+                    </div>
+
+                    {{-- Order By + Limit --}}
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="mb-1 block text-xs text-slate-300">Order By Field</label>
+                            <input type="text" name="query_order_by_field"
+                                value="{{ old('query_order_by_field', '') }}" placeholder="e.g. urutan"
+                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs text-slate-300">Direction</label>
+                            <select name="query_order_by_direction"
+                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
+                                <option value="asc"
+                                    {{ old('query_order_by_direction', 'asc') === 'asc' ? 'selected' : '' }}>ASC</option>
+                                <option value="desc" {{ old('query_order_by_direction') === 'desc' ? 'selected' : '' }}>
+                                    DESC</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs text-slate-300">Limit (max rows, 1–100)</label>
+                            <input type="number" name="query_limit" min="1" max="100"
+                                value="{{ old('query_limit', '') }}" placeholder="e.g. 10"
+                                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                        </div>
+                    </div>
+
+                    {{-- Conditions --}}
+                    <div>
+                        <p class="mb-1 text-sm text-slate-200">WHERE Conditions</p>
+                        <p class="mb-2 text-xs text-slate-400">
+                            Each row = one WHERE clause. Use <span class="text-cyan-300 font-mono">source=static</span> for
+                            fixed values,
+                            <span class="text-cyan-300 font-mono">source=arg</span> to use a parameter the AI provides.
+                            Rows sharing the same <span class="text-cyan-300 font-mono">group</span> number are combined
+                            with OR (the groups themselves are ANDed).
+                        </p>
+                        <div id="conditions-list" class="space-y-2"></div>
+                        <button type="button" onclick="addConditionRow()"
+                            class="mt-3 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs text-cyan-300 transition hover:bg-cyan-500/20">
+                            + Add Condition
+                        </button>
+                    </div>
+                </div>{{-- end Query Config --}}
             </div>
 
             {{-- ─── GET MULTIPLE type: Multiple Data Models + Custom Parameters ─── --}}
@@ -328,6 +389,134 @@
         let paramIndex = 0;
         let updateParamIndex = 0;
 
+        /* ── Query Config: Condition Operators ── */
+        const CONDITION_OPERATORS = [
+            '=', '!=', '<>', '>', '<', '>=', '<=',
+            'LIKE', 'LIKE%%', 'NOT LIKE',
+            'ILIKE', 'ILIKE%%',
+            'IN', 'NOT IN',
+            'IS NULL', 'IS NOT NULL',
+            '~', '!~'
+        ];
+
+        /* ── Query Config: Select Fields checkboxes ── */
+        const existingQuerySelect = [];
+
+        function refreshQuerySelectList() {
+            const fields = getSelectedDataModelFields();
+            const list = document.getElementById('query-select-list');
+            if (!list) return;
+            const currentlyChecked = Array.from(list.querySelectorAll('input[type=checkbox]:checked')).map(cb => cb.value);
+            list.innerHTML = '';
+            fields.forEach(f => {
+                const checked = currentlyChecked.includes(f) || existingQuerySelect.includes(f) ? 'checked' : '';
+                const label = document.createElement('label');
+                label.className =
+                    'flex items-center gap-1.5 rounded-lg border border-white/10 bg-slate-900/50 px-2.5 py-1.5 text-xs text-slate-200 cursor-pointer hover:bg-slate-900/70 transition';
+                label.innerHTML =
+                    `<input type="checkbox" name="query_select[]" value="${f}" ${checked} class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />${f}`;
+                list.appendChild(label);
+            });
+        }
+
+        /* ── Query Config: Conditions builder ── */
+        let conditionIdx = 0;
+
+        function buildConditionOperatorOptions(selected) {
+            return CONDITION_OPERATORS.map(op =>
+                `<option value="${op}" ${op === selected ? 'selected' : ''}>${op}</option>`
+            ).join('');
+        }
+
+        function buildConditionFieldDatalistOptions() {
+            return getSelectedDataModelFields().map(f => `<option value="${f}">`).join('');
+        }
+
+        function addConditionRow(field = '', operator = '=', source = 'static', value = '', arg = '', group = '',
+            skipIfEmpty = false, requiredFlag = false) {
+            const list = document.getElementById('conditions-list');
+            const idx = conditionIdx++;
+            const isArg = source === 'arg';
+            const row = document.createElement('div');
+            row.className = 'condition-row rounded-xl border border-white/10 bg-slate-900/50 p-3 space-y-2';
+            row.innerHTML = `
+                <div class="grid grid-cols-12 gap-2 items-end">
+                    <div class="col-span-3">
+                        <label class="mb-1 block text-xs text-slate-400">Field</label>
+                        <input list="condition-fields-list-${idx}" type="text" name="query_conditions[${idx}][field]" value="${field}"
+                            placeholder="e.g. name"
+                            class="condition-field-input w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                        <datalist id="condition-fields-list-${idx}">${buildConditionFieldDatalistOptions()}</datalist>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="mb-1 block text-xs text-slate-400">Operator</label>
+                        <select name="query_conditions[${idx}][operator]"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-2 py-2 text-sm text-white outline-none focus:border-cyan-400">
+                            ${buildConditionOperatorOptions(operator)}
+                        </select>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="mb-1 block text-xs text-slate-400">Source</label>
+                        <select name="query_conditions[${idx}][source]"
+                            class="condition-source-select w-full rounded-xl border border-white/10 bg-slate-900/70 px-2 py-2 text-sm text-white outline-none focus:border-cyan-400"
+                            onchange="toggleConditionValueArg(this)">
+                            <option value="static" ${source !== 'arg' ? 'selected' : ''}>static</option>
+                            <option value="arg" ${source === 'arg' ? 'selected' : ''}>arg</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2 condition-value-cell">
+                        <label class="mb-1 block text-xs text-slate-400">Value</label>
+                        <input type="text" name="query_conditions[${idx}][value]" value="${value}"
+                            placeholder="fixed value"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    </div>
+                    <div class="col-span-2 condition-arg-cell" style="${!isArg ? 'opacity:0.4;pointer-events:none' : ''}">
+                        <label class="mb-1 block text-xs text-slate-400">Arg (param name)</label>
+                        <input type="text" name="query_conditions[${idx}][arg]" value="${arg}"
+                            placeholder="e.g. name"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    </div>
+                    <div class="col-span-1 flex justify-end">
+                        <button type="button" onclick="this.closest('.condition-row').remove()"
+                            class="rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-sm text-red-300 hover:bg-red-500/20">&times;</button>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-1.5">
+                        <label class="text-xs text-slate-400">Group</label>
+                        <input type="text" name="query_conditions[${idx}][group]" value="${group}"
+                            placeholder="e.g. 1"
+                            class="w-16 rounded-lg border border-white/10 bg-slate-900/70 px-2 py-1 text-xs text-white outline-none focus:border-cyan-400" />
+                        <span class="text-xs text-slate-500">(same group = OR)</span>
+                    </div>
+                    <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+                        <input type="checkbox" name="query_conditions[${idx}][skip_if_empty]" value="1" ${skipIfEmpty ? 'checked' : ''}
+                            class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
+                        skip_if_empty
+                    </label>
+                    <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+                        <input type="checkbox" name="query_conditions[${idx}][required]" value="1" ${requiredFlag ? 'checked' : ''}
+                            class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
+                        required
+                    </label>
+                </div>
+            `;
+            list.appendChild(row);
+        }
+
+        function toggleConditionValueArg(select) {
+            const row = select.closest('.condition-row');
+            const isArg = select.value === 'arg';
+            row.querySelector('.condition-arg-cell').style.cssText = isArg ? '' : 'opacity:0.4;pointer-events:none';
+        }
+
+        function refreshConditionDatalistOptions() {
+            const opts = buildConditionFieldDatalistOptions();
+            document.querySelectorAll('[id^="condition-fields-list-"]').forEach(dl => {
+                dl.innerHTML = opts;
+            });
+        }
+
         /* ── Type section toggling ── */
         function toggleTypeSections() {
             const type = document.getElementById('type').value;
@@ -363,6 +552,8 @@
                 select.innerHTML = buildFieldOptions(current);
                 if (!Array.from(select.options).some(opt => opt.value === current)) select.value = '';
             });
+            refreshQuerySelectList();
+            refreshConditionDatalistOptions();
         }
 
         document.getElementById('data_model_id')?.addEventListener('change', refreshParameterFieldOptions);

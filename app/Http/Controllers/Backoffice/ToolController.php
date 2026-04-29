@@ -152,6 +152,21 @@ class ToolController extends Controller
             'chain_rules.*.message' => ['nullable', 'string', 'max:500'],
             'category' => ['nullable', 'string', 'in:' . implode(',', self::CATEGORIES)],
             'is_enabled' => ['nullable', 'boolean'],
+            // query config (get type)
+            'query_conditions'                 => ['nullable', 'array'],
+            'query_conditions.*.field'         => ['required_with:query_conditions', 'string', 'max:80'],
+            'query_conditions.*.operator'      => ['required_with:query_conditions', 'string', 'max:20'],
+            'query_conditions.*.source'        => ['nullable', 'string', 'in:static,arg'],
+            'query_conditions.*.value'         => ['nullable', 'string', 'max:500'],
+            'query_conditions.*.arg'           => ['nullable', 'string', 'max:80'],
+            'query_conditions.*.group'         => ['nullable', 'string', 'max:20'],
+            'query_conditions.*.skip_if_empty' => ['nullable'],
+            'query_conditions.*.required'      => ['nullable'],
+            'query_select'                     => ['nullable', 'array'],
+            'query_select.*'                   => ['string', 'max:80'],
+            'query_order_by_field'             => ['nullable', 'string', 'max:80'],
+            'query_order_by_direction'         => ['nullable', 'string', 'in:asc,desc'],
+            'query_limit'                      => ['nullable', 'integer', 'min:1', 'max:100'],
         ];
 
         if ($isCreate) {
@@ -213,13 +228,111 @@ class ToolController extends Controller
             $ids = array_filter(array_map('intval', (array) $request->input('data_model_ids', [])));
             $meta['data_model_ids'] = array_values($ids);
 
-            // Preserve meta.query config (filters, date_range, aggregate, order_by, etc.)
-            // Query config is managed via seeder / direct DB; the form does not overwrite it.
+            // Preserve meta.query config for get_multiple; not editable via this form.
+        } elseif ($type === 'get') {
+            unset($meta['data_model_ids']);
+            // For get type: update query config from form, preserve unrelated keys.
+            $newQuery = $this->buildQueryConfigFromInput($request, (array) ($meta['query'] ?? []));
+            if ($newQuery !== []) {
+                $meta['query'] = $newQuery;
+            } else {
+                unset($meta['query']);
+            }
         } else {
             unset($meta['data_model_ids'], $meta['query']);
         }
 
         return $meta;
+    }
+
+    private function buildQueryConfigFromInput(Request $request, array $existing): array
+    {
+        $query = $existing;
+
+        // Conditions
+        $conditions = $this->buildConditionsFromInput((array) $request->input('query_conditions', []));
+        if ($conditions !== []) {
+            $query['conditions'] = $conditions;
+        } else {
+            unset($query['conditions']);
+        }
+
+        // Select fields
+        $select = array_values(array_filter(array_map('trim', (array) $request->input('query_select', []))));
+        if ($select !== []) {
+            $query['select'] = $select;
+        } else {
+            unset($query['select']);
+        }
+
+        // Order by
+        $orderField = trim((string) $request->input('query_order_by_field', ''));
+        if ($orderField !== '') {
+            $query['order_by'] = [
+                'field'     => $orderField,
+                'direction' => $request->input('query_order_by_direction', 'asc') === 'desc' ? 'desc' : 'asc',
+            ];
+        } else {
+            unset($query['order_by']);
+        }
+
+        // Limit
+        $limitRaw = $request->input('query_limit');
+        if ($limitRaw !== null && $limitRaw !== '') {
+            $limit = (int) $limitRaw;
+            if ($limit > 0) {
+                $query['limit'] = min($limit, 100);
+            } else {
+                unset($query['limit']);
+            }
+        } else {
+            unset($query['limit']);
+        }
+
+        return $query;
+    }
+
+    private function buildConditionsFromInput(array $input): array
+    {
+        $conditions = [];
+        foreach ($input as $row) {
+            $field    = trim((string) ($row['field'] ?? ''));
+            $operator = trim((string) ($row['operator'] ?? ''));
+            if ($field === '' || $operator === '') {
+                continue;
+            }
+
+            $cond = [
+                'field'    => $field,
+                'operator' => $operator,
+                'source'   => ($row['source'] ?? 'static') === 'arg' ? 'arg' : 'static',
+            ];
+
+            $rawValue = $row['value'] ?? null;
+            if ($rawValue !== null && (string) $rawValue !== '') {
+                $cond['value'] = is_numeric($rawValue) ? ($rawValue + 0) : $rawValue;
+            }
+
+            $arg = trim((string) ($row['arg'] ?? ''));
+            if ($arg !== '') {
+                $cond['arg'] = $arg;
+            }
+
+            $group = trim((string) ($row['group'] ?? ''));
+            if ($group !== '') {
+                $cond['group'] = is_numeric($group) ? (int) $group : $group;
+            }
+
+            if (!empty($row['skip_if_empty'])) {
+                $cond['skip_if_empty'] = true;
+            }
+            if (!empty($row['required'])) {
+                $cond['required'] = true;
+            }
+
+            $conditions[] = $cond;
+        }
+        return $conditions;
     }
 
     private function buildInformationTexts(Request $request): ?array

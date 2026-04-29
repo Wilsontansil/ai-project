@@ -21,8 +21,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // The app sits behind an nginx reverse proxy that terminates SSL.
-        // Force https so route() and url() always generate https:// URLs.
-        if (config('app.env') !== 'local') {
+        // Force https so route() and url() always generate https:// URLs
+        // whenever APP_URL itself is configured with https://.
+        if (str_starts_with(config('app.url', ''), 'https://')) {
             URL::forceScheme('https');
         }
     }

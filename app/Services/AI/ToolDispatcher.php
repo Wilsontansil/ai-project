@@ -477,15 +477,6 @@ class ToolDispatcher
             $resultInstruction .= ' If the resolved result is empty, say the data was not found and ask the user to re-check their input.';
         }
 
-        $messages[] = [
-            'role' => 'system',
-            'content' => "Internal tool result already fetched. Write the final reply to the user now. {$resultInstruction} Do not copy data literally as JSON.{$toolRulesInstruction}
-
-Original user request:\n{$userMessage}
-
-Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
-        ];
-
         foreach (array_slice($history, -6) as $item) {
             if (!is_array($item)) {
                 continue;
@@ -500,6 +491,17 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
 
             $messages[] = ['role' => $role, 'content' => $content];
         }
+
+        // Tool context is injected AFTER history so GPT anchors on the fresh result,
+        // not the most recent history turn (which may be a different previous query).
+        $messages[] = [
+            'role' => 'system',
+            'content' => "Internal tool result already fetched. Write the final reply to the user now. {$resultInstruction} Do not copy data literally as JSON.{$toolRulesInstruction}
+
+Original user request:\n{$userMessage}
+
+Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+        ];
 
         $messages[] = [
             'role' => 'user',

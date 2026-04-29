@@ -32,7 +32,8 @@ Gaya balasan:
                 // akun bermasalah (suspend/banned),
                 // reset password kondisi balance diatas 10000 dan tidak dapat diselesaikan oleh bot, customer secara eksplisit meminta berbicara dengan manusia, atau masalah teknis lain yang tidak bisa diselesaikan bot. 
                 // JANGAN PERNAH menyuruh customer menghubungi livechat atau CS melalui website/aplikasi lain — gunakan [ESCALATE] untuk meneruskan ke Human CS',
-                'escalation_condition' => 'Bot wajib melakukan pengecekan awal dan mencoba menyelesaikan masalah user terlebih dahulu. Eskalasi ke human support hanya jika memang perlu.
+                'escalation_condition' => 'Bot wajib melakukan pengecekan awal dan mencoba menyelesaikan masalah user terlebih dahulu. Segera Eskalasi ke human support hanya jika Kasus dibawah terjadi.
+
 Panduan ringkas:
 - Kesalahan data rekening: salah nomor/nama rekening (wajib verifikasi KTP + selfie KTP), rekening sudah terdaftar (indikasi duplikat, keputusan SPV), salah kategori rekening (dibantu SPV).
 - Masalah deposit: deposit pihak ke-3, transfer dari rekening tidak terdaftar, QRIS tidak masuk, atau deposit tidak masuk >5 menit setelah status dicek (butuh pengecekan manual/eskalasi).
@@ -40,6 +41,7 @@ Panduan ringkas:
 - Masalah bonus: klaim freespin/buyspin/winstreak perlu pengecekan manual sesuai syarat.
 - Masalah saldo/game: saldo hilang atau anomali game perlu cek manual ke engine.
 - Masalah akun: suspend/banned atau kasus yang butuh keputusan tim/SPV.
+- Transfer Dari (Pulsa) = XL, Telkomsel ke nomor (E-Wallet) = Ovo, Shopee , Gopay , LINK AJA , Dana atau sebaliknya adalah KESALAHAN transfer , akan dikenakan biaya admin 5000
 
 Wajib eskalasi jika:
 - Bot tidak dapat menyelesaikan masalah.

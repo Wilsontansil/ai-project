@@ -17,6 +17,7 @@ class ToolSeeder extends Seeder
         $withdrawModel = DataModel::query()->where('slug', 'withdraw')->first();
         $promoModel = DataModel::query()->where('slug', 'promo')->first();
         $gameModel = DataModel::query()->where('slug', 'game')->first();
+        $providerModel = DataModel::query()->where('slug', 'providers')->first();
         $poolsPeriodeModel = DataModel::query()->where('slug', 'pools-periode')->first();
 
         $tools = [
@@ -306,6 +307,40 @@ class ToolSeeder extends Seeder
                             'direction' => 'asc',
                         ],
                         'limit' => 10,
+                    ],
+                ],
+            ],
+            [
+                'tool_name' => 'listProviders',
+                'category' => 'games',
+                'display_name' => 'List Provider',
+                'description' => 'Menampilkan daftar provider game yang tersedia. Bisa filter berdasarkan nama atau alias provider.',
+                'slug' => 'list-providers',
+                'type' => 'get_multiple',
+                'is_enabled' => true,
+                'data_model_id' => $providerModel?->id,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'name' => ['type' => 'string', 'description' => 'Kata kunci nama atau alias provider. Boleh sebagian: "pg", "pragmatic", "micro", dll. Kosongkan untuk tampilkan semua provider aktif.'],
+                    ],
+                    'required' => [],
+                ],
+                'endpoints' => null,
+                'tool_rules' => "- Kirim kata kunci apa adanya dari user, jangan ubah atau perluas\n- Contoh: user bilang \"pg\" → kirim name=\"pg\"; user bilang \"pragmatic\" → kirim name=\"pragmatic\"\n- Jika user hanya tanya \"ada provider apa\" atau \"list provider\" tanpa kata kunci → panggil tanpa parameter\n- Pencarian berlaku di field name dan alias secara bersamaan\n- Tampilkan: name, alias, category\n- Jika tidak ditemukan, sampaikan provider tidak tersedia",
+                'information_text' => null,
+                'keywords' => null,
+                'meta' => [
+                    'query' => [
+                        'select' => ['name', 'alias', 'category'],
+                        'filters' => [
+                            ['field' => 'active', 'operator' => '=', 'value' => 1],
+                        ],
+                        'search_fields' => ['name', 'alias'],
+                        'order_by' => [
+                            'field' => 'urutan',
+                            'direction' => 'asc',
+                        ],
                     ],
                 ],
             ],

@@ -33,7 +33,6 @@ Gaya balasan:
                 // reset password kondisi balance diatas 10000 dan tidak dapat diselesaikan oleh bot, customer secara eksplisit meminta berbicara dengan manusia, atau masalah teknis lain yang tidak bisa diselesaikan bot. 
                 // JANGAN PERNAH menyuruh customer menghubungi livechat atau CS melalui website/aplikasi lain — gunakan [ESCALATE] untuk meneruskan ke Human CS',
                 'escalation_condition' => 'Bot wajib melakukan pengecekan awal dan mencoba menyelesaikan masalah user terlebih dahulu. Eskalasi ke human support hanya jika memang perlu.
-
 Panduan ringkas:
 - Kesalahan data rekening: salah nomor/nama rekening (wajib verifikasi KTP + selfie KTP), rekening sudah terdaftar (indikasi duplikat, keputusan SPV), salah kategori rekening (dibantu SPV).
 - Masalah deposit: deposit pihak ke-3, transfer dari rekening tidak terdaftar, QRIS tidak masuk, atau deposit tidak masuk >5 menit setelah status dicek (butuh pengecekan manual/eskalasi).

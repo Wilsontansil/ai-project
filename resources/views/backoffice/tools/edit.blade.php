@@ -447,23 +447,23 @@
             const row = document.createElement('div');
             row.className = 'condition-row rounded-xl border border-white/10 bg-slate-900/50 p-3 space-y-2';
             row.innerHTML = `
-                <div class="grid grid-cols-12 gap-2 items-end">
-                    <div class="col-span-3">
-                        <label class="mb-1 block text-xs text-slate-400">Field</label>
+                <div style="display:grid;grid-template-columns:2fr 1.4fr 1fr 1.4fr 1.4fr auto;gap:0.5rem;align-items:end">
+                    <div>
+                        <label style="display:block;font-size:0.7rem;color:#94a3b8;margin-bottom:0.25rem">Field</label>
                         <input list="condition-fields-list-${idx}" type="text" name="query_conditions[${idx}][field]" value="${field}"
                             placeholder="e.g. name"
                             class="condition-field-input w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
                         <datalist id="condition-fields-list-${idx}">${buildConditionFieldDatalistOptions()}</datalist>
                     </div>
-                    <div class="col-span-2">
-                        <label class="mb-1 block text-xs text-slate-400">Operator</label>
+                    <div>
+                        <label style="display:block;font-size:0.7rem;color:#94a3b8;margin-bottom:0.25rem">Operator</label>
                         <select name="query_conditions[${idx}][operator]"
                             class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-2 py-2 text-sm text-white outline-none focus:border-cyan-400">
                             ${buildConditionOperatorOptions(operator)}
                         </select>
                     </div>
-                    <div class="col-span-2">
-                        <label class="mb-1 block text-xs text-slate-400">Source</label>
+                    <div>
+                        <label style="display:block;font-size:0.7rem;color:#94a3b8;margin-bottom:0.25rem">Source</label>
                         <select name="query_conditions[${idx}][source]"
                             class="condition-source-select w-full rounded-xl border border-white/10 bg-slate-900/70 px-2 py-2 text-sm text-white outline-none focus:border-cyan-400"
                             onchange="toggleConditionValueArg(this)">
@@ -471,37 +471,37 @@
                             <option value="arg" ${source === 'arg' ? 'selected' : ''}>arg</option>
                         </select>
                     </div>
-                    <div class="col-span-2 condition-value-cell">
-                        <label class="mb-1 block text-xs text-slate-400">Value</label>
+                    <div class="condition-value-cell">
+                        <label style="display:block;font-size:0.7rem;color:#94a3b8;margin-bottom:0.25rem">Value</label>
                         <input type="text" name="query_conditions[${idx}][value]" value="${value}"
                             placeholder="fixed value"
                             class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
                     </div>
-                    <div class="col-span-2 condition-arg-cell" style="${!isArg ? 'opacity:0.4;pointer-events:none' : ''}">
-                        <label class="mb-1 block text-xs text-slate-400">Arg (param name)</label>
+                    <div class="condition-arg-cell" style="${!isArg ? 'opacity:0.4;pointer-events:none' : ''}">
+                        <label style="display:block;font-size:0.7rem;color:#94a3b8;margin-bottom:0.25rem">Arg (param name)</label>
                         <input type="text" name="query_conditions[${idx}][arg]" value="${arg}"
                             placeholder="e.g. name"
                             class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
                     </div>
-                    <div class="col-span-1 flex justify-end">
+                    <div style="display:flex;align-items:flex-end">
                         <button type="button" onclick="this.closest('.condition-row').remove()"
                             class="rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-sm text-red-300 hover:bg-red-500/20">&times;</button>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-1.5">
-                        <label class="text-xs text-slate-400">Group</label>
+                <div style="display:flex;align-items:center;gap:1rem;margin-top:0.5rem;flex-wrap:wrap">
+                    <div style="display:flex;align-items:center;gap:0.375rem">
+                        <label style="font-size:0.7rem;color:#94a3b8">Group</label>
                         <input type="text" name="query_conditions[${idx}][group]" value="${group}"
                             placeholder="e.g. 1"
                             class="w-16 rounded-lg border border-white/10 bg-slate-900/70 px-2 py-1 text-xs text-white outline-none focus:border-cyan-400" />
-                        <span class="text-xs text-slate-500">(same group = OR)</span>
+                        <span style="font-size:0.7rem;color:#64748b">(same group = OR)</span>
                     </div>
-                    <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+                    <label style="display:flex;align-items:center;gap:0.375rem;font-size:0.7rem;color:#cbd5e1;cursor:pointer">
                         <input type="checkbox" name="query_conditions[${idx}][skip_if_empty]" value="1" ${skipIfEmpty ? 'checked' : ''}
                             class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
                         skip_if_empty
                     </label>
-                    <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+                    <label style="display:flex;align-items:center;gap:0.375rem;font-size:0.7rem;color:#cbd5e1;cursor:pointer">
                         <input type="checkbox" name="query_conditions[${idx}][required]" value="1" ${requiredFlag ? 'checked' : ''}
                             class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
                         required

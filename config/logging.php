@@ -38,6 +38,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | AI DataModel Query Logging
+    |--------------------------------------------------------------------------
+    |
+    | Toggle detailed SQL logging for DataModel query tools (get/get_multiple).
+    | Set AI_DATAMODEL_QUERY_LOG=true in .env when investigating tool behavior.
+    |
+    */
+
+    'ai_datamodel_query_log' => env('AI_DATAMODEL_QUERY_LOG', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Log Channels
     |--------------------------------------------------------------------------
     |

@@ -109,6 +109,8 @@ class DataModelQueryEngine
         $cfgLimit = (int) ($queryConfig['limit'] ?? 0);
 
         $dateRange = $this->resolveDateRange((string) ($cfgDateRange['range'] ?? ''));
+        $query = null;
+        $queryStartedAt = null;
 
         try {
             $aggFunc = strtolower(trim((string) ($cfgAggregate['function'] ?? '')));
@@ -187,7 +189,25 @@ class DataModelQueryEngine
 
             // Execute.
             if ($isAggregate) {
+                $queryStartedAt = microtime(true);
                 $aggResult = $query->{$aggFunc}($aggField);
+
+                $this->logDataModelQueryExecution(
+                    tool: $tool,
+                    dataModel: $dataModel,
+                    query: $query,
+                    context: [
+                        'connection_name' => $connectionName,
+                        'table_name' => $tableName,
+                        'started_at' => $queryStartedAt,
+                        'success' => true,
+                        'engine_mode' => 'single',
+                        'query_type' => 'aggregate',
+                        'aggregate_function' => $aggFunc,
+                        'aggregate_field' => $aggField,
+                        'rows_count' => 1,
+                    ]
+                );
 
                 return [
                     'mode' => 'model',
@@ -206,12 +226,30 @@ class DataModelQueryEngine
             }
 
             if ($cfgLimit > 0) {
+                $queryStartedAt = microtime(true);
                 $rows = $query->limit(min($cfgLimit, self::MAX_ROWS))->get();
             } elseif ($queryConfig !== []) {
+                $queryStartedAt = microtime(true);
                 $rows = $query->limit(self::MAX_ROWS)->get();
             } else {
                 // Legacy default: single row.
+                $queryStartedAt = microtime(true);
                 $row = $query->first();
+
+                $this->logDataModelQueryExecution(
+                    tool: $tool,
+                    dataModel: $dataModel,
+                    query: $query,
+                    context: [
+                        'connection_name' => $connectionName,
+                        'table_name' => $tableName,
+                        'started_at' => $queryStartedAt,
+                        'success' => true,
+                        'engine_mode' => 'single',
+                        'query_type' => 'first',
+                        'rows_count' => $row === null ? 0 : 1,
+                    ]
+                );
 
                 if ($row === null) {
                     return [
@@ -238,6 +276,21 @@ class DataModelQueryEngine
                     ],
                 ];
             }
+
+            $this->logDataModelQueryExecution(
+                tool: $tool,
+                dataModel: $dataModel,
+                query: $query,
+                context: [
+                    'connection_name' => $connectionName,
+                    'table_name' => $tableName,
+                    'started_at' => $queryStartedAt,
+                    'success' => true,
+                    'engine_mode' => 'single',
+                    'query_type' => 'many',
+                    'rows_count' => $rows->count(),
+                ]
+            );
 
             if ($rows->isEmpty()) {
                 return [
@@ -266,6 +319,21 @@ class DataModelQueryEngine
                 ],
             ];
         } catch (\Throwable $e) {
+            $this->logDataModelQueryExecution(
+                tool: $tool,
+                dataModel: $dataModel,
+                query: $query,
+                context: [
+                    'connection_name' => $connectionName,
+                    'table_name' => $tableName,
+                    'started_at' => $queryStartedAt,
+                    'success' => false,
+                    'engine_mode' => 'single',
+                    'query_type' => $isAggregate ?? false ? 'aggregate' : 'read',
+                ],
+                error: $e
+            );
+
             Log::error('AI data model lookup failed', [
                 'tool_name' => $tool->tool_name,
                 'table_name' => $tableName,
@@ -335,6 +403,8 @@ class DataModelQueryEngine
             $connectionName = $this->resolveConnection((string) ($dataModel->connection_name ?? ''));
             $fieldsRaw = (array) ($dataModel->fields ?? []);
             $allowedFields = array_keys($fieldsRaw);
+            $query = null;
+            $queryStartedAt = null;
 
             if ($tableName === '' || $allowedFields === []) {
                 continue;
@@ -436,7 +506,25 @@ class DataModelQueryEngine
 
                 // Execute.
                 if ($isAggregate && $cfgGroupBy === []) {
+                    $queryStartedAt = microtime(true);
                     $aggResult = $query->{$aggFunc}($aggField);
+
+                    $this->logDataModelQueryExecution(
+                        tool: $tool,
+                        dataModel: $dataModel,
+                        query: $query,
+                        context: [
+                            'connection_name' => $connectionName,
+                            'table_name' => $tableName,
+                            'started_at' => $queryStartedAt,
+                            'success' => true,
+                            'engine_mode' => 'multi',
+                            'query_type' => 'aggregate',
+                            'aggregate_function' => $aggFunc,
+                            'aggregate_field' => $aggField,
+                            'rows_count' => 1,
+                        ]
+                    );
 
                     $allResults[] = [
                         'filters' => $lookupFilters,
@@ -452,10 +540,28 @@ class DataModelQueryEngine
                     $wrappedField = $grammar->wrap($aggField);
                     $wrappedAlias = $grammar->wrap("{$aggFunc}_{$aggField}");
                     $query->selectRaw("{$aggFunc}({$wrappedField}) as {$wrappedAlias}");
+                    $queryStartedAt = microtime(true);
                     $rows = $query->limit($cfgLimit > 0 ? min($cfgLimit, self::MAX_ROWS) : self::MAX_ROWS)
                         ->get()
                         ->map(fn ($r) => (array) $r)
                         ->toArray();
+
+                    $this->logDataModelQueryExecution(
+                        tool: $tool,
+                        dataModel: $dataModel,
+                        query: $query,
+                        context: [
+                            'connection_name' => $connectionName,
+                            'table_name' => $tableName,
+                            'started_at' => $queryStartedAt,
+                            'success' => true,
+                            'engine_mode' => 'multi',
+                            'query_type' => 'aggregate_grouped',
+                            'aggregate_function' => $aggFunc,
+                            'aggregate_field' => $aggField,
+                            'rows_count' => count($rows),
+                        ]
+                    );
 
                     $allResults[] = [
                         'filters' => $lookupFilters,
@@ -463,14 +569,31 @@ class DataModelQueryEngine
                     ];
                 } else {
                     if ($cfgLimit > 0) {
+                        $queryStartedAt = microtime(true);
                         $rows = $query->limit(min($cfgLimit, self::MAX_ROWS))
                             ->get()
                             ->map(fn ($r) => $this->normalizeData((array) $r))
                             ->toArray();
                     } else {
+                        $queryStartedAt = microtime(true);
                         $row = $query->first();
                         $rows = $row !== null ? [$this->normalizeData((array) $row)] : [];
                     }
+
+                    $this->logDataModelQueryExecution(
+                        tool: $tool,
+                        dataModel: $dataModel,
+                        query: $query,
+                        context: [
+                            'connection_name' => $connectionName,
+                            'table_name' => $tableName,
+                            'started_at' => $queryStartedAt,
+                            'success' => true,
+                            'engine_mode' => 'multi',
+                            'query_type' => $cfgLimit > 0 ? 'many' : 'first',
+                            'rows_count' => count($rows),
+                        ]
+                    );
 
                     $allResults[] = [
                         'filters' => $lookupFilters,
@@ -478,6 +601,21 @@ class DataModelQueryEngine
                     ];
                 }
             } catch (\Throwable $e) {
+                $this->logDataModelQueryExecution(
+                    tool: $tool,
+                    dataModel: $dataModel,
+                    query: $query,
+                    context: [
+                        'connection_name' => $connectionName,
+                        'table_name' => $tableName,
+                        'started_at' => $queryStartedAt,
+                        'success' => false,
+                        'engine_mode' => 'multi',
+                        'query_type' => 'read',
+                    ],
+                    error: $e
+                );
+
                 Log::error('AI multi-model lookup failed for model', [
                     'tool_name' => $tool->tool_name,
                     'model_name' => $dataModel->model_name,
@@ -963,5 +1101,72 @@ class DataModelQueryEngine
         }
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * Emit structured logs for every executed DataModel query.
+     *
+     * @param array<string, mixed> $context
+     */
+    private function logDataModelQueryExecution(
+        Tool $tool,
+        DataModel $dataModel,
+        mixed $query,
+        array $context = [],
+        ?\Throwable $error = null
+    ): void {
+        if (!config('logging.ai_datamodel_query_log', false)) {
+            return;
+        }
+
+        $connectionName = (string) ($context['connection_name'] ?? $dataModel->connection_name ?? '');
+        $tableName = (string) ($context['table_name'] ?? $dataModel->table_name ?? '');
+        $startedAt = isset($context['started_at']) ? (float) $context['started_at'] : null;
+        $success = (bool) ($context['success'] ?? ($error === null));
+        unset($context['connection_name'], $context['table_name'], $context['started_at'], $context['success']);
+
+        if (!$query instanceof \Illuminate\Database\Query\Builder) {
+            $payload = [
+                'tool_name' => $tool->tool_name,
+                'tool_type' => $tool->type,
+                'data_model_id' => $dataModel->id,
+                'data_model_slug' => $dataModel->slug,
+                'data_model_name' => $dataModel->model_name,
+                'connection_name' => $connectionName,
+                'table_name' => $tableName,
+                'success' => $success,
+                'latency_ms' => $startedAt !== null ? round((microtime(true) - $startedAt) * 1000, 2) : null,
+            ] + $context;
+
+            if ($error !== null) {
+                $payload['error'] = $error->getMessage();
+            }
+
+            Log::info('AI datamodel query execution', $payload);
+            return;
+        }
+
+        $bindings = $query->getBindings();
+
+        $payload = [
+            'tool_name' => $tool->tool_name,
+            'tool_type' => $tool->type,
+            'data_model_id' => $dataModel->id,
+            'data_model_slug' => $dataModel->slug,
+            'data_model_name' => $dataModel->model_name,
+            'connection_name' => $connectionName,
+            'table_name' => $tableName,
+            'sql' => $query->toSql(),
+            'bindings' => LogSanitizer::redactBindings($bindings),
+            'bindings_count' => count($bindings),
+            'success' => $success,
+            'latency_ms' => $startedAt !== null ? round((microtime(true) - $startedAt) * 1000, 2) : null,
+        ] + $context;
+
+        if ($error !== null) {
+            $payload['error'] = $error->getMessage();
+        }
+
+        Log::info('AI datamodel query execution', $payload);
     }
 }

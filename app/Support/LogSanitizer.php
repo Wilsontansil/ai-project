@@ -80,6 +80,46 @@ class LogSanitizer
     }
 
     /**
+     * Return a safe copy of SQL bindings for logs.
+     *
+     * Positional bindings do not have semantic keys, so string/object values are
+     * summarized by type/size while numeric and boolean scalars are preserved.
+     *
+     * @param  array<int|string, mixed>  $bindings
+     * @return array<int, mixed>
+     */
+    public static function redactBindings(array $bindings): array
+    {
+        $safe = [];
+
+        foreach (array_values($bindings) as $value) {
+            if ($value === null || is_bool($value) || is_int($value) || is_float($value)) {
+                $safe[] = $value;
+                continue;
+            }
+
+            if (is_string($value)) {
+                $safe[] = '[string:' . mb_strlen($value) . ']';
+                continue;
+            }
+
+            if (is_array($value)) {
+                $safe[] = '[array(' . count($value) . ')]';
+                continue;
+            }
+
+            if ($value instanceof \DateTimeInterface) {
+                $safe[] = '[datetime]';
+                continue;
+            }
+
+            $safe[] = '[object]';
+        }
+
+        return $safe;
+    }
+
+    /**
      * Ensure a value is safe to write as a scalar log context entry.
      *
      * @param  mixed  $value

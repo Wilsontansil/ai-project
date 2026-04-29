@@ -297,7 +297,7 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['name', 'provider', 'category', 'gameid'],
+                        'select' => ['name', 'provider', 'category', 'keyword'],
                         // Conditions: all rows must have isshow=1 (static),
                         // then match the customer's search term across name/keyword/provider/category (OR group).
                         'conditions' => [

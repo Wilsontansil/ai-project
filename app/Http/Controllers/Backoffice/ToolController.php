@@ -583,11 +583,11 @@ class ToolController extends Controller
             return;
         }
 
-        if ($type === 'update' || $type === 'verify') {
+        if ($type === 'update') {
             $route = trim((string) ($data['endpoint_route'] ?? ''));
             if ($route === '') {
                 throw ValidationException::withMessages([
-                    'endpoint_route' => 'Tool bertipe Update/Verify harus memiliki endpoint route.',
+                    'endpoint_route' => 'Tool bertipe Update harus memiliki endpoint route.',
                 ]);
             }
             return;

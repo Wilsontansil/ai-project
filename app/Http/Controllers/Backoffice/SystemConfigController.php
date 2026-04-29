@@ -57,16 +57,14 @@ class SystemConfigController extends Controller
     {
         try {
             $systemConfig->syncFromDatamodel();
-            $msg = 'Synced "' . $systemConfig->key . '" successfully.';
+            $flash = ['success' => 'Synced "' . $systemConfig->key . '" successfully.'];
         } catch (\RuntimeException $e) {
-            $msg = 'Sync failed: ' . $e->getMessage();
-            return $this->redirectBack($request)->with('error', $msg);
+            $flash = ['error' => 'Sync failed: ' . $e->getMessage()];
         } catch (\Throwable $e) {
-            $msg = 'Sync error: ' . $e->getMessage();
-            return $this->redirectBack($request)->with('error', $msg);
+            $flash = ['error' => 'Sync error: ' . $e->getMessage()];
         }
 
-        return $this->redirectBack($request)->with('success', $msg);
+        return $this->redirectToAgent($request)->with($flash);
     }
 
     public function destroy(Request $request, SystemConfig $systemConfig): RedirectResponse
@@ -78,15 +76,21 @@ class SystemConfigController extends Controller
 
     private function redirectBack(Request $request): RedirectResponse
     {
+        return $this->redirectToAgent($request)
+            ->with('success', 'System config saved.');
+    }
+
+    private function redirectToAgent(Request $request): RedirectResponse
+    {
         $agentId = (int) $request->input('from_agent', $request->query('from_agent', 0));
 
         if ($agentId > 0) {
             return redirect()->route('backoffice.chat-agents.edit', [
                 'chatAgent' => $agentId,
                 'tab'       => 'system-config',
-            ])->with('success', 'System config saved.');
+            ]);
         }
 
-        return redirect()->back()->with('success', 'System config saved.');
+        return redirect()->route('backoffice.chat-agents.index');
     }
 }

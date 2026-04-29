@@ -298,12 +298,50 @@ class ToolSeeder extends Seeder
                 'meta' => [
                     'query' => [
                         'select' => ['name', 'provider', 'category', 'gameid'],
-                        'filters' => [
-                            ['field' => 'isshow', 'operator' => '=', 'value' => 1],
+                        // Conditions: all rows must have isshow=1 (static),
+                        // then match the customer's search term across name/keyword/provider/category (OR group).
+                        'conditions' => [
+                            [
+                                'field'    => 'isshow',
+                                'operator' => '=',
+                                'source'   => 'static',
+                                'value'    => 1,
+                            ],
+                            [
+                                'field'          => 'name',
+                                'operator'       => 'LIKE%%',
+                                'source'         => 'arg',
+                                'arg'            => 'name',
+                                'group'          => 1,
+                                'skip_if_empty'  => true,
+                            ],
+                            [
+                                'field'          => 'keyword',
+                                'operator'       => 'LIKE%%',
+                                'source'         => 'arg',
+                                'arg'            => 'name',
+                                'group'          => 1,
+                                'skip_if_empty'  => true,
+                            ],
+                            [
+                                'field'          => 'provider',
+                                'operator'       => 'LIKE%%',
+                                'source'         => 'arg',
+                                'arg'            => 'name',
+                                'group'          => 1,
+                                'skip_if_empty'  => true,
+                            ],
+                            [
+                                'field'          => 'category',
+                                'operator'       => 'LIKE%%',
+                                'source'         => 'arg',
+                                'arg'            => 'name',
+                                'group'          => 1,
+                                'skip_if_empty'  => true,
+                            ],
                         ],
-                        'search_fields' => ['name', 'provider', 'category', 'keyword'],
                         'order_by' => [
-                            'field' => 'urutan',
+                            'field'     => 'urutan',
                             'direction' => 'asc',
                         ],
                         'limit' => 10,

@@ -33,6 +33,16 @@ class DataModelQueryEngine
 
     private const SAFE_OPERATORS = ['=', '!=', '<>', '>', '<', '>=', '<=', 'like', 'not like'];
 
+    /** Operators supported by query.conditions */
+    private const CONDITION_OPERATORS = [
+        '=', '!=', '<>', '>', '<', '>=', '<=',
+        'LIKE', 'LIKE%%', 'NOT LIKE',
+        'ILIKE', 'ILIKE%%',
+        'IN', 'NOT IN',
+        'IS NULL', 'IS NOT NULL',
+        '~', '!~',
+    ];
+
     // ─── Public entry points ────────────────────────────────────────────────
 
     /**
@@ -92,6 +102,7 @@ class DataModelQueryEngine
         $queryConfig = (array) data_get($tool->meta, 'query', []);
         $cfgSelect = (array) ($queryConfig['select'] ?? []);
         $cfgFilters = (array) ($queryConfig['filters'] ?? []);
+        $cfgConditions = (array) ($queryConfig['conditions'] ?? []);
         $cfgDateRange = (array) ($queryConfig['date_range'] ?? []);
         $cfgAggregate = (array) ($queryConfig['aggregate'] ?? []);
         $cfgOrderBy = (array) ($queryConfig['order_by'] ?? []);
@@ -117,10 +128,19 @@ class DataModelQueryEngine
 
             $lookupFilters = [];
 
-            // Argument-based WHERE (only DataModel allowed fields).
+            // Fields managed by conditions — skip generic exact-match for these.
+            $conditionFields = array_unique(array_filter(array_map(
+                fn ($c) => trim((string) ($c['field'] ?? '')),
+                $cfgConditions
+            )));
+
+            // Argument-based WHERE (exact match for fields NOT covered by conditions).
             foreach ($arguments as $field => $value) {
                 if (!in_array($field, $allowedFields, true)) {
                     continue;
+                }
+                if (in_array($field, $conditionFields, true)) {
+                    continue; // handled by conditions block
                 }
                 $normalizedValue = is_string($value) ? trim($value) : $value;
                 if ($normalizedValue === '' || $normalizedValue === null) {
@@ -128,6 +148,14 @@ class DataModelQueryEngine
                 }
                 $query->where($field, $normalizedValue);
                 $lookupFilters[$field] = $normalizedValue;
+            }
+
+            // meta.query.conditions — flexible per-column conditions.
+            if ($cfgConditions !== []) {
+                $condError = $this->applyConditions($query, $cfgConditions, $allowedFields, $arguments, $lookupFilters);
+                if ($condError !== null) {
+                    return ['mode' => 'direct', 'reply' => $condError];
+                }
             }
 
             // Static meta.query.filters.
@@ -291,6 +319,7 @@ class DataModelQueryEngine
         $queryConfig = (array) data_get($tool->meta, 'query', []);
         $cfgSelect = (array) ($queryConfig['select'] ?? []);
         $cfgFilters = (array) ($queryConfig['filters'] ?? []);
+        $cfgConditions = (array) ($queryConfig['conditions'] ?? []);
         $cfgDateRange = (array) ($queryConfig['date_range'] ?? []);
         $cfgAggregate = (array) ($queryConfig['aggregate'] ?? []);
         $cfgGroupBy = (array) ($queryConfig['group_by'] ?? []);
@@ -339,10 +368,19 @@ class DataModelQueryEngine
                     $query = DB::connection($connectionName)->table($tableName)->select($selectFields);
                 }
 
-                // Argument-based WHERE (only DataModel allowed fields).
+                // Fields managed by conditions — skip generic exact-match for these.
+                $conditionFields = array_unique(array_filter(array_map(
+                    fn ($c) => trim((string) ($c['field'] ?? '')),
+                    $cfgConditions
+                )));
+
+                // Argument-based WHERE (exact match for fields NOT covered by conditions).
                 foreach ($localArguments as $field => $value) {
                     if (!in_array($field, $allowedFields, true)) {
                         continue;
+                    }
+                    if (in_array($field, $conditionFields, true)) {
+                        continue; // handled by conditions block
                     }
                     $normalizedValue = is_string($value) ? trim($value) : $value;
                     if ($normalizedValue === '' || $normalizedValue === null) {
@@ -350,6 +388,15 @@ class DataModelQueryEngine
                     }
                     $query->where($field, $normalizedValue);
                     $lookupFilters[$field] = $normalizedValue;
+                }
+
+                // meta.query.conditions — flexible per-column conditions.
+                if ($cfgConditions !== []) {
+                    $condError = $this->applyConditions($query, $cfgConditions, $allowedFields, $localArguments, $lookupFilters);
+                    if ($condError !== null) {
+                        $allResults[] = ['filters' => [], 'data' => null, 'error' => $condError];
+                        continue;
+                    }
                 }
 
                 // Static filters.
@@ -597,6 +644,243 @@ class DataModelQueryEngine
                 $query->orderBy($orderField, $orderDir === 'asc' ? 'asc' : 'desc');
             }
         }
+    }
+
+    /**
+     * Apply meta.query.conditions — flexible per-column conditions driven by
+     * static config values or live customer chat arguments.
+     *
+     * Each condition entry:
+     *   field          — column name (must be in DataModel allowed fields)
+     *   operator       — =, !=, <>, >, <, >=, <=, LIKE, LIKE%%, NOT LIKE,
+     *                    ILIKE, ILIKE%%, IN, NOT IN, IS NULL, IS NOT NULL, ~, !~
+     *   source         — "static" (default) | "arg"
+     *   value          — used for static source or as fallback when arg is empty
+     *   arg            — argument key to read from customer chat (source=arg)
+     *   skip_if_empty  — true: silently skip when arg is empty; false (default): use value fallback
+     *   required       — true: return error reply when arg is empty and no value fallback
+     *   group          — int|string: conditions sharing the same group key are combined as
+     *                    AND (... OR ... OR ...) — first item AND, rest OR inside the group
+     *
+     * @param \Illuminate\Database\Query\Builder         $query
+     * @param array<int, array<string, mixed>>           $cfgConditions
+     * @param string[]                                   $allowedFields
+     * @param array<string, mixed>                       $arguments
+     * @param array<string, mixed>                       $lookupFilters  mutated in place
+     * @return string|null  null = ok; string = error reply for the customer
+     */
+    private function applyConditions(
+        \Illuminate\Database\Query\Builder $query,
+        array $cfgConditions,
+        array $allowedFields,
+        array $arguments,
+        array &$lookupFilters
+    ): ?string {
+        // Separate ungrouped (standalone AND) from grouped (OR inside AND wrapper).
+        /** @var array<int, array<string, mixed>> $ungrouped */
+        $ungrouped = [];
+        /** @var array<string, list<array<string, mixed>>> $grouped */
+        $grouped = [];
+
+        foreach ($cfgConditions as $cond) {
+            $groupKey = isset($cond['group']) && $cond['group'] !== '' && $cond['group'] !== null
+                ? (string) $cond['group']
+                : null;
+            if ($groupKey === null) {
+                $ungrouped[] = $cond;
+            } else {
+                $grouped[$groupKey][] = $cond;
+            }
+        }
+
+        /** Resolve a condition to [field, operator, resolvedValue] or error/skip signal. */
+        $resolve = function (array $cond) use ($allowedFields, $arguments): mixed {
+            $field    = trim((string) ($cond['field'] ?? ''));
+            $operator = strtoupper(trim((string) ($cond['operator'] ?? '=')));
+            $source   = strtolower(trim((string) ($cond['source'] ?? 'static')));
+
+            if ($field === '' || !in_array($field, $allowedFields, true)) {
+                return null;
+            }
+
+            // Null-check operators need no value.
+            if (in_array($operator, ['IS NULL', 'IS NOT NULL'], true)) {
+                return [$field, $operator, null];
+            }
+
+            if ($source === 'arg') {
+                $argKey  = trim((string) ($cond['arg'] ?? $field));
+                $rawArg  = $arguments[$argKey] ?? null;
+                $isEmpty = ($rawArg === null || (is_string($rawArg) && trim($rawArg) === ''));
+
+                if ($isEmpty) {
+                    if (!empty($cond['required'])) {
+                        return '__error__:Field "' . $field . '" diperlukan untuk melanjutkan.';
+                    }
+                    if (!empty($cond['skip_if_empty'])) {
+                        return null;
+                    }
+                    if (!array_key_exists('value', $cond)) {
+                        return null;
+                    }
+                    return [$field, $operator, $cond['value']];
+                }
+
+                return [$field, $operator, is_string($rawArg) ? trim($rawArg) : $rawArg];
+            }
+
+            // Static source.
+            if (!array_key_exists('value', $cond)) {
+                return null;
+            }
+
+            return [$field, $operator, $cond['value']];
+        };
+
+        // Process ungrouped (each ANDed directly).
+        foreach ($ungrouped as $cond) {
+            $result = $resolve($cond);
+            if ($result === null) {
+                continue;
+            }
+            if (is_string($result) && str_starts_with($result, '__error__:')) {
+                return substr($result, 10);
+            }
+            /** @var array{0: string, 1: string, 2: mixed} $result */
+            [$field, $operator, $value] = $result;
+            $this->applySingleCondition($query, false, $field, $operator, $value);
+            $lookupFilters["cond_{$field}"] = $value !== null
+                ? "{$operator} " . (is_array($value) ? implode(',', $value) : (string) $value)
+                : $operator;
+        }
+
+        // Process groups (each group is a single AND clause with OR inside).
+        foreach ($grouped as $groupKey => $conditions) {
+            $resolved = [];
+            foreach ($conditions as $cond) {
+                $result = $resolve($cond);
+                if ($result === null) {
+                    continue;
+                }
+                if (is_string($result) && str_starts_with($result, '__error__:')) {
+                    return substr($result, 10);
+                }
+                /** @var array{0: string, 1: string, 2: mixed} $result */
+                $resolved[] = $result;
+            }
+
+            if ($resolved === []) {
+                continue;
+            }
+
+            $resolvedCopy = $resolved;
+            $query->where(function (\Illuminate\Database\Query\Builder $inner) use ($resolvedCopy): void {
+                foreach ($resolvedCopy as $idx => [$field, $operator, $value]) {
+                    $this->applySingleCondition($inner, $idx > 0, $field, $operator, $value);
+                }
+            });
+
+            $logParts = array_map(
+                fn ($r) => $r[2] !== null
+                    ? "{$r[0]} {$r[1]} " . (is_array($r[2]) ? implode(',', $r[2]) : (string) $r[2])
+                    : "{$r[0]} {$r[1]}",
+                $resolved
+            );
+            $lookupFilters["cond_group_{$groupKey}"] = '(' . implode(' OR ', $logParts) . ')';
+        }
+
+        return null;
+    }
+
+    /**
+     * Apply a single condition to the query builder (AND or OR variant).
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     */
+    private function applySingleCondition(
+        \Illuminate\Database\Query\Builder $query,
+        bool $useOr,
+        string $field,
+        string $operator,
+        mixed $value
+    ): void {
+        switch ($operator) {
+            case 'IS NULL':
+                $useOr ? $query->orWhereNull($field) : $query->whereNull($field);
+                return;
+
+            case 'IS NOT NULL':
+                $useOr ? $query->orWhereNotNull($field) : $query->whereNotNull($field);
+                return;
+
+            case 'LIKE%%':
+                $escaped = '%' . $this->escapeLike((string) $value) . '%';
+                $useOr
+                    ? $query->orWhere($field, 'like', $escaped)
+                    : $query->where($field, 'like', $escaped);
+                return;
+
+            case 'ILIKE':
+                $useOr
+                    ? $query->orWhereRaw("{$field} ilike ?", [(string) $value])
+                    : $query->whereRaw("{$field} ilike ?", [(string) $value]);
+                return;
+
+            case 'ILIKE%%':
+                $useOr
+                    ? $query->orWhereRaw("{$field} ilike ?", ['%' . $value . '%'])
+                    : $query->whereRaw("{$field} ilike ?", ['%' . $value . '%']);
+                return;
+
+            case '~':
+                $useOr
+                    ? $query->orWhereRaw("{$field} ~ ?", [(string) $value])
+                    : $query->whereRaw("{$field} ~ ?", [(string) $value]);
+                return;
+
+            case '!~':
+                $useOr
+                    ? $query->orWhereRaw("{$field} !~ ?", [(string) $value])
+                    : $query->whereRaw("{$field} !~ ?", [(string) $value]);
+                return;
+
+            case 'IN':
+                $vals = $this->normalizeInValue($value);
+                $useOr ? $query->orWhereIn($field, $vals) : $query->whereIn($field, $vals);
+                return;
+
+            case 'NOT IN':
+                $vals = $this->normalizeInValue($value);
+                $useOr ? $query->orWhereNotIn($field, $vals) : $query->whereNotIn($field, $vals);
+                return;
+
+            default:
+                // =, !=, <>, >, <, >=, <=, LIKE, NOT LIKE, etc.
+                $sqlOp = strtolower($operator);
+                $useOr
+                    ? $query->orWhere($field, $sqlOp, $value)
+                    : $query->where($field, $sqlOp, $value);
+        }
+    }
+
+    /**
+     * Normalise a value for IN / NOT IN operators.
+     * Accepts an array, or a comma-separated string.
+     *
+     * @return array<int, mixed>
+     */
+    private function normalizeInValue(mixed $value): array
+    {
+        if (is_array($value)) {
+            return array_values($value);
+        }
+        if (is_string($value)) {
+            return array_values(array_filter(
+                array_map('trim', explode(',', $value)),
+                fn ($v) => $v !== ''
+            ));
+        }
+        return [$value];
     }
 
     private function resolveConnection(string $connectionName): string

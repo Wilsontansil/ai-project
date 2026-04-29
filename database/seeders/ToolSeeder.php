@@ -279,7 +279,7 @@ class ToolSeeder extends Seeder
                 'tool_name' => 'checkGame',
                 'category' => 'games',
                 'display_name' => 'Cek Game',
-                'description' => 'Cek ketersediaan dan info game berdasarkan nama, provider, atau kategori',
+                'description' => 'Cek ketersediaan dan info game berdasarkan nama, provider, keyword atau kategori.',
                 'slug' => 'check-game',
                 'type' => 'get',
                 'is_enabled' => true,
@@ -287,13 +287,13 @@ class ToolSeeder extends Seeder
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
-                        'name' => ['type' => 'string', 'description' => 'Nama game, provider, atau kategori yang dicari'],
+                        'name' => ['type' => 'string', 'description' => 'Nama game, provider, keyword, atau kategori yang dicari'],
                     ],
                     'required' => ['name'],
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['game', 'slot', 'casino', 'provider', 'cek game', 'ada game', 'game aktif', 'cari game', 'game apa', 'live casino', 'sportbook', 'togel', 'arcade', 'fishing'],
-                'tool_rules' => "- Cari game berdasarkan field name, provider, category, atau keyword\n- Hanya tampilkan game aktif (isshow = 1)\n- Tampilkan: name, provider, category\n- Jika ditemukan banyak hasil, tampilkan maksimal 10 dan infokan masih ada lainnya\n- Jika tidak ditemukan, sampaikan game tidak tersedia",
+                'tool_rules' => "- Cari game berdasarkan field name, provider, category, atau keyword\n- Tampilkan: name, provider, category\n- Jika ditemukan banyak hasil, tampilkan maksimal 10 dan infokan masih ada lainnya\n- Jika tidak ditemukan, sampaikan game tidak tersedia",
                 'information_text' => null,
                 'meta' => [
                     'query' => [

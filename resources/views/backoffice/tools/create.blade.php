@@ -161,9 +161,15 @@
 
                     {{-- Conditions --}}
                     <div>
-                        <p class="mb-1 text-sm text-slate-200">WHERE Conditions <span class="text-xs text-slate-400">—
-                                field · operator · source · value · arg · grp · skip · req</span></p>
-                        <div id="conditions-list" class="space-y-1"></div>
+                        <p class="mb-1 text-sm text-slate-200">WHERE Conditions</p>
+                        <p class="mb-2 text-xs text-slate-400">
+                            Each row = one WHERE clause. Use <span class="text-cyan-300 font-mono">source=static</span> for
+                            fixed values,
+                            <span class="text-cyan-300 font-mono">source=arg</span> to use a parameter the AI provides.
+                            Rows sharing the same <span class="text-cyan-300 font-mono">group</span> number are combined
+                            with OR (the groups themselves are ANDed).
+                        </p>
+                        <div id="conditions-list" class="space-y-2"></div>
                         <button type="button" onclick="addConditionRow()"
                             class="mt-3 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs text-cyan-300 transition hover:bg-cyan-500/20">
                             + Add Condition
@@ -432,44 +438,68 @@
             const idx = conditionIdx++;
             const isArg = source === 'arg';
             const row = document.createElement('div');
-            row.className = 'condition-row flex items-center gap-1 flex-wrap';
+            row.className = 'condition-row rounded-xl border border-white/10 bg-slate-900/50 p-3 space-y-2';
             row.innerHTML = `
-                <input list="condition-fields-list-${idx}" type="text" name="query_conditions[${idx}][field]" value="${field}"
-                    placeholder="field" title="Field"
-                    class="condition-field-input w-28 rounded-lg border border-white/10 bg-slate-900/70 px-2 py-1.5 text-xs text-white outline-none focus:border-cyan-400" />
-                <datalist id="condition-fields-list-${idx}">${buildConditionFieldDatalistOptions()}</datalist>
-                <select name="query_conditions[${idx}][operator]" title="Operator"
-                    class="w-24 rounded-lg border border-white/10 bg-slate-900/70 px-1 py-1.5 text-xs text-white outline-none focus:border-cyan-400">
-                    ${buildConditionOperatorOptions(operator)}
-                </select>
-                <select name="query_conditions[${idx}][source]" title="Source"
-                    class="condition-source-select w-16 rounded-lg border border-white/10 bg-slate-900/70 px-1 py-1.5 text-xs text-white outline-none focus:border-cyan-400"
-                    onchange="toggleConditionValueArg(this)">
-                    <option value="static" ${source !== 'arg' ? 'selected' : ''}>static</option>
-                    <option value="arg" ${source === 'arg' ? 'selected' : ''}>arg</option>
-                </select>
-                <input type="text" name="query_conditions[${idx}][value]" value="${value}"
-                    placeholder="value" title="Value (static) or fallback"
-                    class="condition-value-cell w-24 rounded-lg border border-white/10 bg-slate-900/70 px-2 py-1.5 text-xs text-white outline-none focus:border-cyan-400" />
-                <input type="text" name="query_conditions[${idx}][arg]" value="${arg}"
-                    placeholder="arg" title="Arg param name (when source=arg)"
-                    class="condition-arg-cell w-20 rounded-lg border border-white/10 bg-slate-900/70 px-2 py-1.5 text-xs text-white outline-none focus:border-cyan-400"
-                    style="${!isArg ? 'opacity:0.35;pointer-events:none' : ''}" />
-                <input type="text" name="query_conditions[${idx}][group]" value="${group}"
-                    placeholder="grp" title="Group number (same group = OR)"
-                    class="w-10 rounded-lg border border-white/10 bg-slate-900/70 px-2 py-1.5 text-xs text-white outline-none focus:border-cyan-400" />
-                <label class="flex items-center gap-1 text-xs text-slate-400 cursor-pointer" title="Skip condition when arg is empty">
-                    <input type="checkbox" name="query_conditions[${idx}][skip_if_empty]" value="1" ${skipIfEmpty ? 'checked' : ''}
-                        class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
-                    skip
-                </label>
-                <label class="flex items-center gap-1 text-xs text-slate-400 cursor-pointer" title="Return error when arg is missing">
-                    <input type="checkbox" name="query_conditions[${idx}][required]" value="1" ${requiredFlag ? 'checked' : ''}
-                        class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
-                    req
-                </label>
-                <button type="button" onclick="this.closest('.condition-row').remove()"
-                    class="rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-1.5 text-xs text-red-300 hover:bg-red-500/20">&times;</button>
+                <div class="grid grid-cols-12 gap-2 items-end">
+                    <div class="col-span-3">
+                        <label class="mb-1 block text-xs text-slate-400">Field</label>
+                        <input list="condition-fields-list-${idx}" type="text" name="query_conditions[${idx}][field]" value="${field}"
+                            placeholder="e.g. name"
+                            class="condition-field-input w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                        <datalist id="condition-fields-list-${idx}">${buildConditionFieldDatalistOptions()}</datalist>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="mb-1 block text-xs text-slate-400">Operator</label>
+                        <select name="query_conditions[${idx}][operator]"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-2 py-2 text-sm text-white outline-none focus:border-cyan-400">
+                            ${buildConditionOperatorOptions(operator)}
+                        </select>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="mb-1 block text-xs text-slate-400">Source</label>
+                        <select name="query_conditions[${idx}][source]"
+                            class="condition-source-select w-full rounded-xl border border-white/10 bg-slate-900/70 px-2 py-2 text-sm text-white outline-none focus:border-cyan-400"
+                            onchange="toggleConditionValueArg(this)">
+                            <option value="static" ${source !== 'arg' ? 'selected' : ''}>static</option>
+                            <option value="arg" ${source === 'arg' ? 'selected' : ''}>arg</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2 condition-value-cell">
+                        <label class="mb-1 block text-xs text-slate-400">Value</label>
+                        <input type="text" name="query_conditions[${idx}][value]" value="${value}"
+                            placeholder="fixed value"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    </div>
+                    <div class="col-span-2 condition-arg-cell" style="${!isArg ? 'opacity:0.4;pointer-events:none' : ''}">
+                        <label class="mb-1 block text-xs text-slate-400">Arg (param name)</label>
+                        <input type="text" name="query_conditions[${idx}][arg]" value="${arg}"
+                            placeholder="e.g. name"
+                            class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400" />
+                    </div>
+                    <div class="col-span-1 flex justify-end">
+                        <button type="button" onclick="this.closest('.condition-row').remove()"
+                            class="rounded-lg border border-red-400/20 bg-red-500/10 px-2.5 py-2 text-sm text-red-300 hover:bg-red-500/20">&times;</button>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-1.5">
+                        <label class="text-xs text-slate-400">Group</label>
+                        <input type="text" name="query_conditions[${idx}][group]" value="${group}"
+                            placeholder="e.g. 1"
+                            class="w-16 rounded-lg border border-white/10 bg-slate-900/70 px-2 py-1 text-xs text-white outline-none focus:border-cyan-400" />
+                        <span class="text-xs text-slate-500">(same group = OR)</span>
+                    </div>
+                    <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+                        <input type="checkbox" name="query_conditions[${idx}][skip_if_empty]" value="1" ${skipIfEmpty ? 'checked' : ''}
+                            class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
+                        skip_if_empty
+                    </label>
+                    <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+                        <input type="checkbox" name="query_conditions[${idx}][required]" value="1" ${requiredFlag ? 'checked' : ''}
+                            class="rounded border-white/20 bg-slate-800 text-cyan-400 focus:ring-cyan-400" />
+                        required
+                    </label>
+                </div>
             `;
             list.appendChild(row);
         }

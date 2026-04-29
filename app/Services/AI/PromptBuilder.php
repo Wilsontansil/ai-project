@@ -7,6 +7,7 @@ use App\Models\AgentRule;
 use App\Models\KnowledgeBase;
 use App\Models\Tool;
 use App\Models\WebsitePage;
+use App\Services\AI\KnowledgeBaseQueryGuard;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -208,6 +209,15 @@ PROMPT;
 
                 $connectionName = $dataModel->connection_name ?: 'mysqlgame';
                 $rows = DB::connection($connectionName)->select($entry->query_sql);
+
+                if (count($rows) > KnowledgeBaseQueryGuard::MAX_ROWS) {
+                    Log::warning('KB datamodel query exceeded row limit, result truncated', [
+                        'kb_id'     => $entry->id,
+                        'row_count' => count($rows),
+                        'limit'     => KnowledgeBaseQueryGuard::MAX_ROWS,
+                    ]);
+                    $rows = array_slice($rows, 0, KnowledgeBaseQueryGuard::MAX_ROWS);
+                }
 
                 if (empty($rows)) {
                     return '(no results)';

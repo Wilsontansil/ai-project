@@ -352,6 +352,9 @@
                                 <textarea id="kb_edit_query_sql" name="query_sql" rows="5"
                                     placeholder="SELECT name, alias FROM providers WHERE active = 1"
                                     class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 font-mono text-sm text-white outline-none transition focus:border-cyan-400">{{ old('query_sql', $selectedKnowledge->query_sql) }}</textarea>
+                                @error('query_sql')
+                                    <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
@@ -489,6 +492,9 @@
                             <textarea id="kb_query_sql" name="query_sql" rows="5"
                                 placeholder="SELECT name, alias FROM providers WHERE active = 1"
                                 class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 font-mono text-sm text-white outline-none transition focus:border-cyan-400">{{ old('query_sql') }}</textarea>
+                            @error('query_sql')
+                                <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 

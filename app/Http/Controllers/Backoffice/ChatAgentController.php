@@ -7,6 +7,7 @@ use App\Models\ChatAgent;
 use App\Models\DataModel;
 use App\Models\KnowledgeBase;
 use App\Models\Tool;
+use App\Services\AI\KnowledgeBaseQueryGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -175,13 +176,27 @@ class ChatAgentController extends Controller
                 'query_sql'     => ['required', 'string'],
             ]);
 
+            $querySql  = trim($data['query_sql']);
+            $dataModel = DataModel::findOrFail((int) $data['data_model_id']);
+            try {
+                KnowledgeBaseQueryGuard::validateSql($querySql);
+                $rowCount = KnowledgeBaseQueryGuard::countRows($dataModel->connection_name ?: 'mysqlgame', $querySql);
+                if ($rowCount > KnowledgeBaseQueryGuard::MAX_ROWS) {
+                    return back()->withInput()->withErrors(['query_sql' => "Query mengembalikan {$rowCount} baris (maks " . KnowledgeBaseQueryGuard::MAX_ROWS . "). Tambahkan klausa WHERE atau LIMIT."]);
+                }
+            } catch (\InvalidArgumentException $e) {
+                return back()->withInput()->withErrors(['query_sql' => $e->getMessage()]);
+            } catch (\Throwable $e) {
+                return back()->withInput()->withErrors(['query_sql' => 'Query gagal dieksekusi: ' . $e->getMessage()]);
+            }
+
             KnowledgeBase::query()->create([
                 'chat_agent_id' => $chatAgent->id,
                 'title'         => $data['title'],
                 'content'       => null,
                 'source'        => 'datamodel',
                 'data_model_id' => $data['data_model_id'],
-                'query_sql'     => $data['query_sql'],
+                'query_sql'     => $querySql,
                 'is_active'     => $request->boolean('is_active', true),
             ]);
         } else {
@@ -237,13 +252,27 @@ class ChatAgentController extends Controller
                 'query_sql'     => ['required', 'string'],
             ]);
 
+            $querySql  = trim($data['query_sql']);
+            $dataModel = DataModel::findOrFail((int) $data['data_model_id']);
+            try {
+                KnowledgeBaseQueryGuard::validateSql($querySql);
+                $rowCount = KnowledgeBaseQueryGuard::countRows($dataModel->connection_name ?: 'mysqlgame', $querySql);
+                if ($rowCount > KnowledgeBaseQueryGuard::MAX_ROWS) {
+                    return back()->withInput()->withErrors(['query_sql' => "Query mengembalikan {$rowCount} baris (maks " . KnowledgeBaseQueryGuard::MAX_ROWS . "). Tambahkan klausa WHERE atau LIMIT."]);
+                }
+            } catch (\InvalidArgumentException $e) {
+                return back()->withInput()->withErrors(['query_sql' => $e->getMessage()]);
+            } catch (\Throwable $e) {
+                return back()->withInput()->withErrors(['query_sql' => 'Query gagal dieksekusi: ' . $e->getMessage()]);
+            }
+
             $knowledgeBase->update([
                 'title'         => $data['title'],
                 'content'       => null,
                 'source'        => 'datamodel',
                 'file_name'     => null,
                 'data_model_id' => $data['data_model_id'],
-                'query_sql'     => $data['query_sql'],
+                'query_sql'     => $querySql,
                 'is_active'     => $request->boolean('is_active'),
             ]);
         } else {

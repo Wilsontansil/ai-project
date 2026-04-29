@@ -85,6 +85,9 @@
                     <textarea id="query_sql" name="query_sql" rows="6"
                         placeholder="SELECT name, alias, category FROM providers WHERE active = 1 ORDER BY urutan ASC"
                         class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 font-mono text-sm text-white outline-none transition focus:border-cyan-400">{{ old('query_sql', $entry->query_sql) }}</textarea>
+                    @error('query_sql')
+                        <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 

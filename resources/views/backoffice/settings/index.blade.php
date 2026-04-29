@@ -14,6 +14,9 @@
 
     <form method="POST" action="{{ route('backoffice.settings.update') }}" autocomplete="off" class="space-y-5">
         @csrf
+        {{-- Dummy fields to prevent browser password-save dialog --}}
+        <input type="text" name="_dummy_user" style="display:none" tabindex="-1" autocomplete="username">
+        <input type="password" name="_dummy_pass" style="display:none" tabindex="-1" autocomplete="new-password">
 
         @php
             $groupMeta = [
@@ -176,8 +179,9 @@
                                         'support_whatsapp_phone' => '08120000000',
                                     ];
                                 @endphp
-                                <input id="setting_{{ $setting->id }}" type="text" name="setting_{{ $setting->id }}"
-                                    value="{{ $setting->value }}" placeholder="{{ $placeholders[$setting->key] ?? '' }}"
+                                <input id="setting_{{ $setting->id }}" type="text"
+                                    name="setting_{{ $setting->id }}" value="{{ $setting->value }}"
+                                    placeholder="{{ $placeholders[$setting->key] ?? '' }}"
                                     class="block w-full rounded-lg border border-white/10 bg-slate-950/60 text-xs text-white outline-none transition placeholder:text-slate-600 focus:border-white/30 focus:ring-1 focus:ring-white/10"
                                     style="padding:0.5rem 0.75rem" />
                             @endif

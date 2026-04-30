@@ -30,6 +30,8 @@ return new class extends Migration
             $table->unique(['platform', 'platform_user_id']);
             $table->index('phone_number');
             $table->index('last_seen_at');
+            $table->index('mode');
+            $table->index(['mode', 'updated_at']);
             $table->index('assigned_user_id');
         });
     }

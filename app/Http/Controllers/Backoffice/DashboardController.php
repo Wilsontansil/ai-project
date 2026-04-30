@@ -41,15 +41,24 @@ class DashboardController extends Controller
             ->paginate(20)
             ->withQueryString();
 
+        $statsRow = Customer::query()
+            ->selectRaw('COUNT(*) as total_customers')
+            ->selectRaw("SUM(CASE WHEN platform = 'telegram' THEN 1 ELSE 0 END) as telegram_customers")
+            ->selectRaw("SUM(CASE WHEN platform = 'whatsapp' THEN 1 ELSE 0 END) as whatsapp_customers")
+            ->selectRaw("SUM(CASE WHEN platform = 'livechat' THEN 1 ELSE 0 END) as livechat_customers")
+            ->first();
+
+        $stats = [
+            'total_customers' => (int) ($statsRow->total_customers ?? 0),
+            'telegram_customers' => (int) ($statsRow->telegram_customers ?? 0),
+            'whatsapp_customers' => (int) ($statsRow->whatsapp_customers ?? 0),
+            'livechat_customers' => (int) ($statsRow->livechat_customers ?? 0),
+        ];
+
         return view('backoffice.dashboard', [
             'customers' => $customers,
             'search' => $search,
-            'stats' => [
-                'total_customers' => Customer::query()->count(),
-                'telegram_customers' => Customer::query()->where('platform', 'telegram')->count(),
-                'whatsapp_customers' => Customer::query()->where('platform', 'whatsapp')->count(),
-                'livechat_customers' => Customer::query()->where('platform', 'livechat')->count(),
-            ],
+            'stats' => $stats,
         ]);
     }
 
@@ -72,20 +81,31 @@ class DashboardController extends Controller
             ->paginate(20)
             ->withQueryString();
 
+        $statsRow = Customer::query()
+            ->selectRaw("SUM(CASE WHEN mode = 'waiting' THEN 1 ELSE 0 END) as waiting")
+            ->selectRaw("SUM(CASE WHEN mode = 'human' THEN 1 ELSE 0 END) as human")
+            ->first();
+
+        $stats = [
+            'waiting' => (int) ($statsRow->waiting ?? 0),
+            'human' => (int) ($statsRow->human ?? 0),
+        ];
+
         return view('backoffice.escalation-queue', [
             'customers' => $customers,
             'search' => $search,
-            'stats' => [
-                'waiting' => Customer::query()->where('mode', 'waiting')->count(),
-                'human' => Customer::query()->where('mode', 'human')->count(),
-            ],
+            'stats' => $stats,
         ]);
     }
 
     public function escalationCount(): JsonResponse
     {
+        $statsRow = Customer::query()
+            ->selectRaw("SUM(CASE WHEN mode = 'waiting' THEN 1 ELSE 0 END) as waiting")
+            ->first();
+
         return response()->json([
-            'count' => Customer::query()->where('mode', 'waiting')->count(),
+            'count' => (int) ($statsRow->waiting ?? 0),
         ]);
     }
 

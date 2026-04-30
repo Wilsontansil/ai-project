@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\ChatAgent;
+use App\Models\DataModel;
 use App\Models\KnowledgeBase;
 use Illuminate\Database\Seeder;
 
@@ -14,6 +15,10 @@ class KnowledgeBaseSeeder extends Seeder
       if ($defaultAgent === null) {
          return;
       }
+
+      $providersDataModelId = DataModel::query()
+          ->where('slug', 'providers')
+          ->value('id');
 
         $entries = [
             [
@@ -159,13 +164,25 @@ Bonus APK adalah bonus yang hanya dapat diklaim melalui aplikasi (APK). Harus Di
 - Category To = Slot
 
 B. Bonus Cashback
-Bonus Cashback adalah bonus yang diberikan kepada member setiap hari Senin berdasarkan aktivitas deposit dan withdraw minggu lalu (Senin–Minggu).
+Bonus Cashback adalah bonus yang diberikan kepada member setiap hari {bonus_cashback_day}.
 Bonus Cashback tidak di Claim di menu Reward, tetapi masuk otomatis.
 
-Syarat kelayakan:
-- Hanya transaksi dengan status accept yang dihitung.
-- Jika Total Deposit > Total Withdraw → member berhak menerima cashback dari selisihnya.
-- Jika Total Withdraw > Total Deposit → member tidak dapat cashback (sudah profit).
+[Setting]
+- Type = {weekly_bonus_cashback}
+By Total: 
+(mininum = {weekly_bonus_cashback_total_min_amount}) | (rate = {weekly_bonus_cashback_total_rate}%)
+
+By Game:
+Dindong = (mininum = {weekly_bonus_cashback_dd_min_amount}) - (rate = {weekly_bonus_cashback_dd_rate}%)
+Togel = (minimum = {weekly_bonus_cashback_togel_min_amount}) - (rate = {weekly_bonus_cashback_togel_rate}%)
+Tangkas = (minimum = {weekly_bonus_cashback_tangkas_min_amount}) - (rate = {weekly_bonus_cashback_tangkas_rate}%)
+Slot = (minimum = {weekly_bonus_cashback_slot_min_amount}) - (rate = {weekly_bonus_cashback_slot_rate}%)
+Live Casino = (minimum = {weekly_bonus_cashback_livecasino_min_amount}) - (rate = {weekly_bonus_cashback_livecasino_rate}%)
+Sabung Ayam = (minimum = {weekly_bonus_cashback_sabungayam_min_amount}) - (rate = {weekly_bonus_cashback_sabungayam_rate}%)
+Arcade = (minimum = {weekly_bonus_cashback_arcade_min_amount}) - (rate = {weekly_bonus_cashback_arcade_rate}%)
+Table Game = (minimum = {weekly_bonus_cashback_tablegame_min_amount}) - (rate = {weekly_bonus_cashback_tablegame_rate}%)
+Sports = (minimum = {weekly_bonus_cashback_sports_min_amount}) - (rate = {weekly_bonus_cashback_sports_rate}%)
+E-Sports = (minimum = {weekly_bonus_cashback_esports_min_amount}) - (rate = {weekly_bonus_cashback_esports_rate}%)
 
 C. Bonus Promo
 Bonus yang harus di verifikasi oleh Human Support.
@@ -493,6 +510,15 @@ Turbo ❌– MANUAL Spin 10x
                 'file_name' => null,
                 'is_active' => true,
             ],
+            [
+               'title' => 'Provider',
+               'content' => null,
+               'source' => 'datamodel',
+               'file_name' => null,
+               'data_model_id' => $providersDataModelId,
+               'query_sql' => 'SELECT * FROM providers WHERE active = 1',
+               'is_active' => true,
+            ],
         ];
 
         foreach ($entries as $entry) {
@@ -506,6 +532,8 @@ Turbo ❌– MANUAL Spin 10x
                'content' => $entry['content'],
                'source' => $entry['source'],
                'file_name' => $entry['file_name'],
+               'data_model_id' => $entry['data_model_id'] ?? null,
+               'query_sql' => $entry['query_sql'] ?? null,
                'is_active' => $entry['is_active'],
             ]
             );

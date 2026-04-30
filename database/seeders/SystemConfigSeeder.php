@@ -28,7 +28,7 @@ class SystemConfigSeeder extends Seeder
 
         $rows = [
             [
-                'key' => 'minimal_deposit_web',
+                'key' => 'dep_min',
                 'value' => '50000',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -37,7 +37,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'multiplier_deposit_bank',
+                'key' => 'dep_mul_bank',
                 'value' => '10',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -46,7 +46,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'multiplier_deposit_non_bank',
+                'key' => 'dep_mul_nonbank',
                 'value' => '5',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -55,7 +55,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'event_bonus_beruntun',
+                'key' => 'ev_brt',
                 'value' => 'ACTIVE',
                 'source_type' => 'manual',
                 'data_model_id' => null,
@@ -64,7 +64,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => null,
             ],
             [
-                'key' => 'bonus_ajak_teman_min_depo',
+                'key' => 'ref_min',
                 'value' => '20000',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -73,7 +73,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'bonus_ajak_teman_to_depo',
+                'key' => 'ref_to',
                 'value' => '30000',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -82,7 +82,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'bonus_ajak_teman_multiplier',
+                'key' => 'ref_mul',
                 'value' => '1',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -91,7 +91,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'bonus_ajak_teman_between_bonus',
+                'key' => 'ref_bet',
                 'value' => '20000',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -100,7 +100,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'bonus_ajak_teman_greater_bonus',
+                'key' => 'ref_gt',
                 'value' => '50000',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -109,7 +109,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'event_bonus_ajakteman',
+                'key' => 'ev_ref',
                 'value' => 'ACTIVE',
                 'source_type' => 'manual',
                 'data_model_id' => null,
@@ -118,7 +118,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => null,
             ],
             [
-                'key' => 'bonus_depo_continue_min_amount',
+                'key' => 'brt_min',
                 'value' => '50000',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -127,7 +127,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'bonus_depo_continue_multiplier',
+                'key' => 'brt_mul',
                 'value' => '1',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -136,7 +136,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'bonus_depo_continue_max_amount',
+                'key' => 'brt_max',
                 'value' => '50000',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -145,7 +145,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'bonus_depo_continue_count',
+                'key' => 'brt_cnt',
                 'value' => '8',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -154,7 +154,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'bonus_depo_continue_non_bank_include',
+                'key' => 'brt_nonbank',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -163,7 +163,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'bonus_cashback_day',
+                'key' => 'cb_day',
                 'value' => '1',
                 'description' => '1=Senin, 2=Selasa, 3=Rabu, 4=Kamis, 5=Jumat, 6=Sabtu, 7=Minggu',
                 'source_type' => 'datamodel_lookup',
@@ -173,7 +173,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback',
+                'key' => 'cb_type',
                 'value' => 'game',
                 'description' => 'game=By Game Loss, total=By Total Loss',
                 'source_type' => 'datamodel_lookup',
@@ -183,7 +183,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_arcade_min_amount',
+                'key' => 'cb_arc_min',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -192,7 +192,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_arcade_rate',
+                'key' => 'cb_arc_rate',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -201,7 +201,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_dd_min_amount',
+                'key' => 'cb_dd_min',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -210,7 +210,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_dd_rate',
+                'key' => 'cb_dd_rate',
                 'value' => '5',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -219,7 +219,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_livecasino_min_amount',
+                'key' => 'cb_lc_min',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -228,7 +228,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_livecasino_rate',
+                'key' => 'cb_lc_rate',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -237,7 +237,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_sabungayam_min_amount',
+                'key' => 'cb_sa_min',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -246,7 +246,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_sabungayam_rate',
+                'key' => 'cb_sa_rate',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -255,7 +255,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_slot_min_amount',
+                'key' => 'cb_slot_min',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -264,7 +264,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_slot_rate',
+                'key' => 'cb_slot_rate',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -273,7 +273,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_sports_min_amount',
+                'key' => 'cb_spt_min',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -282,7 +282,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_sports_rate',
+                'key' => 'cb_spt_rate',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -291,7 +291,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_esports_min_amount',
+                'key' => 'cb_esp_min',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -300,7 +300,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_esports_rate',
+                'key' => 'cb_esp_rate',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -309,7 +309,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_tablegame_min_amount',
+                'key' => 'cb_tbl_min',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -318,7 +318,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_tablegame_rate',
+                'key' => 'cb_tbl_rate',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -327,7 +327,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_tangkas_min_amount',
+                'key' => 'cb_tgk_min',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -336,7 +336,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_tangkas_rate',
+                'key' => 'cb_tgk_rate',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -345,7 +345,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_togel_min_amount',
+                'key' => 'cb_tgl_min',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -354,7 +354,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_togel_rate',
+                'key' => 'cb_tgl_rate',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -363,7 +363,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_total_min_amount',
+                'key' => 'cb_tot_min',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,
@@ -372,7 +372,7 @@ class SystemConfigSeeder extends Seeder
                 'result_field' => 'value',
             ],
             [
-                'key' => 'weekly_bonus_cashback_total_rate',
+                'key' => 'cb_tot_rate',
                 'value' => '0',
                 'source_type' => 'datamodel_lookup',
                 'data_model_id' => $settingsDataModelId,

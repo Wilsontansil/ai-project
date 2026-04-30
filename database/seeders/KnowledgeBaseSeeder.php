@@ -92,7 +92,7 @@ class KnowledgeBaseSeeder extends Seeder
             [
                 'title' => 'Bonus',
                 'content' => 'A. BONUS KLAIM
-1. Bonus Ajak Teman (Referral Bonus) [{event_bonus_ajakteman}]
+1. Bonus Ajak Teman (Referral Bonus) [{ev_ref}]
 Program Referral Bonus adalah program yang memungkinkan pengguna mendapatkan bonus dengan mengajak teman untuk bergabung dan bermain. Harus Di Claim di menu Reward.
 
 Cara mengikuti program ini:
@@ -102,22 +102,22 @@ Cara mengikuti program ini:
 - [Penting] Player yang mendapatkan Bonus Harus melakukan 1 kali deposit sukses sebelum Teman yang diajak melakukan Deposit.
 
 [Setting]
-- Multiplier = {bonus_ajak_teman_multiplier}
-- Minimal Deposit = {bonus_ajak_teman_min_depo}-{bonus_ajak_teman_to_depo}
-- Teman Deposit {bonus_ajak_teman_min_depo}-{bonus_ajak_teman_to_depo} Dapat Bonus {bonus_ajak_teman_between_bonus}
-- Teman Deposit > {bonus_ajak_teman_to_depo} Dapat Bonus {bonus_ajak_teman_greater_bonus}
+- Multiplier = {ref_mul}
+- Minimal Deposit = {ref_min}-{ref_to}
+- Teman Deposit {ref_min}-{ref_to} Dapat Bonus {ref_bet}
+- Teman Deposit > {ref_to} Dapat Bonus {ref_gt}
 
 
-2. Bonus Deposit Beruntun (Daily Streak Bonus) [{event_bonus_beruntun}]
+2. Bonus Deposit Beruntun (Daily Streak Bonus) [{ev_brt}]
 Bonus Deposit Beruntun adalah bonus spesial yang bisa didapatkan dengan melakukan deposit setiap hari secara berturut-turut. Pastikan Balance dibawah 1000 untuk dihitung sebagai deposit beruntun.
 Harus Di Claim di menu Reward.
 
 [Setting]
-- Multiplier = {bonus_depo_continue_multiplier}
-- Minimal Deposit = {bonus_depo_continue_min_amount}
-- Max Bonus = {bonus_depo_continue_max_amount}
-- Jumlah Beruntun = {bonus_depo_continue_count}
-- Termasuk Non Bank = {bonus_depo_continue_non_bank_include}
+- Multiplier = {brt_mul}
+- Minimal Deposit = {brt_min}
+- Max Bonus = {brt_max}
+- Jumlah Beruntun = {brt_cnt}
+- Termasuk Non Bank = {brt_nonbank}
 
 3. Bonus Freespin [AKTIF]
 Bonus Freespin adalah bonus yang diberikan setelah pengguna melakukan deposit harian.
@@ -164,25 +164,25 @@ Bonus APK adalah bonus yang hanya dapat diklaim melalui aplikasi (APK). Harus Di
 - Category To = Slot
 
 B. Bonus Cashback
-Bonus Cashback adalah bonus yang diberikan kepada member setiap hari {bonus_cashback_day}.
+Bonus Cashback adalah bonus yang diberikan kepada member setiap hari {cb_day}.
 Bonus Cashback tidak di Claim di menu Reward, tetapi masuk otomatis.
 
 [Setting]
-- Type = {weekly_bonus_cashback}
+- Type = {cb_type}
 By Total: 
-(mininum = {weekly_bonus_cashback_total_min_amount}) | (rate = {weekly_bonus_cashback_total_rate}%)
+(mininum = {cb_tot_min}) | (rate = {cb_tot_rate}%)
 
 By Game:
-Dindong = (mininum = {weekly_bonus_cashback_dd_min_amount}) - (rate = {weekly_bonus_cashback_dd_rate}%)
-Togel = (minimum = {weekly_bonus_cashback_togel_min_amount}) - (rate = {weekly_bonus_cashback_togel_rate}%)
-Tangkas = (minimum = {weekly_bonus_cashback_tangkas_min_amount}) - (rate = {weekly_bonus_cashback_tangkas_rate}%)
-Slot = (minimum = {weekly_bonus_cashback_slot_min_amount}) - (rate = {weekly_bonus_cashback_slot_rate}%)
-Live Casino = (minimum = {weekly_bonus_cashback_livecasino_min_amount}) - (rate = {weekly_bonus_cashback_livecasino_rate}%)
-Sabung Ayam = (minimum = {weekly_bonus_cashback_sabungayam_min_amount}) - (rate = {weekly_bonus_cashback_sabungayam_rate}%)
-Arcade = (minimum = {weekly_bonus_cashback_arcade_min_amount}) - (rate = {weekly_bonus_cashback_arcade_rate}%)
-Table Game = (minimum = {weekly_bonus_cashback_tablegame_min_amount}) - (rate = {weekly_bonus_cashback_tablegame_rate}%)
-Sports = (minimum = {weekly_bonus_cashback_sports_min_amount}) - (rate = {weekly_bonus_cashback_sports_rate}%)
-E-Sports = (minimum = {weekly_bonus_cashback_esports_min_amount}) - (rate = {weekly_bonus_cashback_esports_rate}%)
+Dindong = (mininum = {cb_dd_min}) - (rate = {cb_dd_rate}%)
+Togel = (minimum = {cb_tgl_min}) - (rate = {cb_tgl_rate}%)
+Tangkas = (minimum = {cb_tgk_min}) - (rate = {cb_tgk_rate}%)
+Slot = (minimum = {cb_slot_min}) - (rate = {cb_slot_rate}%)
+Live Casino = (minimum = {cb_lc_min}) - (rate = {cb_lc_rate}%)
+Sabung Ayam = (minimum = {cb_sa_min}) - (rate = {cb_sa_rate}%)
+Arcade = (minimum = {cb_arc_min}) - (rate = {cb_arc_rate}%)
+Table Game = (minimum = {cb_tbl_min}) - (rate = {cb_tbl_rate}%)
+Sports = (minimum = {cb_spt_min}) - (rate = {cb_spt_rate}%)
+E-Sports = (minimum = {cb_esp_min}) - (rate = {cb_esp_rate}%)
 
 C. Bonus Promo
 Bonus yang harus di verifikasi oleh Human Support.
@@ -199,11 +199,11 @@ Catatan:
             [
                 'title' => 'Deposit',
                 'content' => '[Informasi]
-- Minimal Deposit Rp {minimal_deposit_web}
+- Minimal Deposit Rp {dep_min}
 - Maximal Deposit Rp Tak terbatas
 - Deposit Menggunakan Pulsa Wajib Beserta SN Atau Nomor HP pengirim di Berita Deposit
-- Multiplier Deposit Bank = {multiplier_deposit_bank}
-- Multiplier Deposit Non Bank = {multiplier_deposit_non_bank}
+- Multiplier Deposit Bank = {dep_mul_bank}
+- Multiplier Deposit Non Bank = {dep_mul_nonbank}
 
 [BANK]
 BCA, BII / Maybank, BNI, BRI, BSI, BTN, CIMB Niaga, Niaga Syariah, Dana, Danamon, Mandiri, OCBC NISP, Bank Neo, Sea Bank, Jago, Permata, BTPN/Jenius, Bank MAS, Mandiri Syariah, BCA Syariah, QRIS

@@ -7,6 +7,7 @@ use App\Services\Agent\ChatAttachmentStorageService;
 use App\Services\Agent\CustomerIdentityService;
 use App\Support\LogSanitizer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Services\AIService;
@@ -21,6 +22,10 @@ class TelegramController extends Controller
         if ($chatId === '') {
             Log::warning('Invalid Telegram webhook payload: missing chat_id', LogSanitizer::summarize($request->all()));
             return response()->json(['status' => 'ignored']);
+        }
+
+        if ($this->isDuplicateMessage($request, $message, $chatId)) {
+            return response()->json(['status' => 'ignored', 'reason' => 'duplicate_message']);
         }
 
         // Try plain text first; fall back to media detection.
@@ -54,6 +59,34 @@ class TelegramController extends Controller
             ->delay(now()->addSeconds(app(AIService::class)->getMessageAwaitSeconds()));
 
         return response()->json(['status' => 'ok']);
+    }
+
+    private function isDuplicateMessage(Request $request, array $message, string $chatId): bool
+    {
+        $updateId = (string) $request->input('update_id', '');
+        $messageId = (string) ($message['message_id'] ?? '');
+
+        $fingerprint = $updateId !== ''
+            ? 'telegram:update:' . $updateId
+            : 'telegram:message:' . $chatId . ':' . $messageId;
+
+        if ($messageId === '' && $updateId === '') {
+            $text = trim((string) ($message['text'] ?? $message['caption'] ?? ''));
+            $date = (string) ($message['date'] ?? '');
+            $fingerprint = 'telegram:payload:' . sha1($chatId . '|' . $date . '|' . $text);
+        }
+
+        $cacheKey = 'chat:webhook:dedupe:' . $fingerprint;
+        if (!Cache::add($cacheKey, 1, now()->addSeconds(120))) {
+            Log::info('Duplicate Telegram message ignored', [
+                'chat_id' => $chatId,
+                'fingerprint' => $fingerprint,
+            ]);
+
+            return true;
+        }
+
+        return false;
     }
 
     /**

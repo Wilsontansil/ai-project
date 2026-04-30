@@ -9,6 +9,7 @@ use App\Support\LogSanitizer;
 use App\Support\MetricsCollector;
 use App\Support\UrlSsrfGuard;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Services\Agent\AgentContextService;
@@ -23,6 +24,10 @@ class LiveChatController extends Controller
         $payload = $request->all();
         Log::info('LiveChat webhook received', LogSanitizer::summarize($payload));
 
+        if ($this->isDuplicateEvent($payload)) {
+            return response()->json(['status' => 'ignored', 'reason' => 'duplicate_event']);
+        }
+
         $response = null;
 
         $challenge = (string) $request->input('challenge', $request->query('challenge', ''));
@@ -34,6 +39,52 @@ class LiveChatController extends Controller
         }
 
         return $response;
+    }
+
+    private function isDuplicateEvent(array $payload): bool
+    {
+        $eventId = (string) (
+            data_get($payload, 'event_id')
+            ?? data_get($payload, 'event.id')
+            ?? data_get($payload, 'payload.event_id')
+            ?? data_get($payload, 'payload.id')
+            ?? data_get($payload, 'id')
+            ?? ''
+        );
+
+        if ($eventId !== '') {
+            $cacheKey = 'chat:webhook:dedupe:livechat:event:' . $eventId;
+        } else {
+            $chatId = (string) (
+                data_get($payload, 'chatId')
+                ?? data_get($payload, 'payload.chatId')
+                ?? data_get($payload, 'chat.id')
+                ?? data_get($payload, 'conversation_id')
+                ?? ''
+            );
+            $text = trim((string) (
+                data_get($payload, 'message')
+                ?? data_get($payload, 'payload.message')
+                ?? data_get($payload, 'payload.text')
+                ?? ''
+            ));
+            $timestamp = (string) (
+                data_get($payload, 'timestamp')
+                ?? data_get($payload, 'event.timestamp')
+                ?? data_get($payload, 'payload.timestamp')
+                ?? ''
+            );
+
+            $cacheKey = 'chat:webhook:dedupe:livechat:payload:' . sha1($chatId . '|' . $timestamp . '|' . $text);
+        }
+
+        if (!Cache::add($cacheKey, 1, now()->addSeconds(120))) {
+            Log::info('Duplicate LiveChat event ignored', ['cache_key' => $cacheKey]);
+
+            return true;
+        }
+
+        return false;
     }
 
     private function buildChallengeResponse(Request $request, string $challenge)

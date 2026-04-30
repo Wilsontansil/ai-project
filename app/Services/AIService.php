@@ -200,11 +200,82 @@ class AIService
                 'at' => now()->timestamp,
             ];
             Cache::put($bufferKey, $buffer, now()->addMinutes(2));
+
+            // If a reply is being generated, keep buffering but do not elect a new leader yet.
+            if ($this->isAiProcessing($chatId, $channel)) {
+                return false;
+            }
         } finally {
             $lock->release();
         }
 
         return Cache::add($leaderKey, 1, now()->addSeconds($debounceSeconds + 2));
+    }
+
+    public function acquireAiProcessingLock(string $chatId, string $channel = '', int $ttlSeconds = 90): bool
+    {
+        $chatId = trim($chatId);
+        if ($chatId === '') {
+            return false;
+        }
+
+        return Cache::add($this->aiProcessingKey($chatId, $channel), 1, now()->addSeconds(max(10, $ttlSeconds)));
+    }
+
+    public function releaseAiProcessingLock(string $chatId, string $channel = ''): void
+    {
+        $chatId = trim($chatId);
+        if ($chatId === '') {
+            return;
+        }
+
+        Cache::forget($this->aiProcessingKey($chatId, $channel));
+    }
+
+    public function isAiProcessing(string $chatId, string $channel = ''): bool
+    {
+        $chatId = trim($chatId);
+        if ($chatId === '') {
+            return false;
+        }
+
+        return Cache::has($this->aiProcessingKey($chatId, $channel));
+    }
+
+    public function promoteBufferedMessagesToLeader(string $chatId, string $channel = ''): bool
+    {
+        $chatId = trim($chatId);
+        if ($chatId === '') {
+            return false;
+        }
+
+        $prefix = $channel !== '' ? $channel . ':' : '';
+        $bufferKey = 'chat:debounce:buffer:' . $prefix . $chatId;
+        $leaderKey = 'chat:debounce:leader:' . $prefix . $chatId;
+        $lock = Cache::lock('lock:' . $bufferKey, 5);
+        $lock->block(3);
+
+        try {
+            if ($this->isAiProcessing($chatId, $channel)) {
+                return false;
+            }
+
+            $messages = Cache::get($bufferKey, []);
+            if (!is_array($messages) || $messages === []) {
+                return false;
+            }
+
+            foreach ($messages as $item) {
+                $part = trim((string) ($item['message'] ?? ''));
+                if ($part !== '') {
+                    return Cache::add($leaderKey, 1, now()->addSeconds($this->getMessageAwaitSeconds() + 2));
+                }
+            }
+
+            return false;
+        } finally {
+            $lock->release();
+        }
     }
 
     /**
@@ -289,6 +360,13 @@ class AIService
         });
 
         return max(0, min(15, (int) $seconds));
+    }
+
+    private function aiProcessingKey(string $chatId, string $channel = ''): string
+    {
+        $prefix = $channel !== '' ? $channel . ':' : '';
+
+        return 'chat:debounce:busy:' . $prefix . $chatId;
     }
 
     /**

@@ -24,7 +24,7 @@ Gaya balasan:
                 'model' => 'gpt-4.1-mini',
                 'max_tokens' => 420,
                 'temperature' => 0.7,
-                'message_await_seconds' => 2,
+                'message_await_seconds' => 5,
                 'is_enabled' => true,
                 'is_default' => true,
                 'escalation_condition' => 'Bot wajib melakukan pengecekan awal dan mencoba menyelesaikan masalah user terlebih dahulu. Segera Eskalasi ke human support hanya jika Kasus dibawah terjadi.

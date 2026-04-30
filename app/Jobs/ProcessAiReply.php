@@ -50,121 +50,148 @@ class ProcessAiReply implements ShouldQueue
 
     public function handle(): void
     {
+        $aiService = app(AIService::class);
+
         // For delayed-dispatch debounce: collect buffered messages.
         $text = $this->combinedText;
         if ($text === '') {
-            $text = app(AIService::class)->collectBufferedMessages($this->chatId, $this->channel);
+            $text = $aiService->collectBufferedMessages($this->chatId, $this->channel);
             if ($text === null || $text === '') {
                 return;
             }
         }
 
-        $requestStart = MetricsCollector::startTimer();
-
-        $customer = null;
-        $agentContext = [];
-
-        try {
-            $customer = $this->customerId !== null ? Customer::find($this->customerId) : null;
-            if ($customer !== null) {
-                $agentContext = app(AgentContextService::class)->buildContext($customer, $text);
-
-                $msgMeta = ['chat_id' => $this->chatId];
-                if (!empty($this->attachmentMeta)) {
-                    $msgMeta['attachment'] = $this->attachmentMeta;
-                }
-                app(ConversationMemoryService::class)->addMessage(
-                    $customer,
-                    $this->channel,
-                    'user',
-                    $text,
-                    $msgMeta
-                );
-            }
-        } catch (\Throwable $e) {
-            Log::warning("{$this->channel} customer context persistence failed (job)", [
-                'chat_id' => $this->chatId,
-                'error' => $e->getMessage(),
-            ]);
-        }
-
-        // If customer is escalated, block replies based on current handoff setting.
-        if ($customer !== null && $this->shouldBlockAiReply($customer)) {
-            Log::info("Skipping AI reply — customer mode is '{$customer->mode}'", [
-                'customer_id' => $customer->id,
+        // Prevent parallel replies for the same customer/channel.
+        if (!$aiService->acquireAiProcessingLock($this->chatId, $this->channel, 120)) {
+            $aiService->bufferDebouncedMessage($this->chatId, $text, $this->channel);
+            Log::info('ProcessAiReply skipped because another job is processing', [
                 'channel' => $this->channel,
                 'chat_id' => $this->chatId,
             ]);
             return;
         }
 
-        $this->sendTypingIndicator();
+        try {
+            $requestStart = MetricsCollector::startTimer();
 
-        $reply = app(AIService::class)->reply($text, $this->chatId, $this->channel, $agentContext, $this->attachmentMeta);
+            $customer = null;
+            $agentContext = [];
 
-        $this->stopTypingIndicator();
-
-        // Detect escalation marker — strip it always; only act if agent has escalation_condition set.
-        $shouldEscalate = str_contains($reply, '[ESCALATE]');
-        $reply = trim(str_replace('[ESCALATE]', '', $reply));
-
-        if ($shouldEscalate) {
-            $agent = ChatAgent::getDefault();
-            $silentHandoff      = $agent?->silent_handoff ?? false;
-            $stopAiAfterHandoff = $agent?->stop_ai_after_handoff ?? true;
-
-            if (!$silentHandoff) {
-                if ($stopAiAfterHandoff) {
-                    $reply = "Permintaan Anda sedang diteruskan ke agen kami. Mohon tunggu sebentar 🙏\nYour request is being forwarded to our agent. Please wait a moment 🙏";
-                } elseif ($reply === '') {
-                    $reply = "Permintaan Anda sedang diteruskan ke Human CS. Mohon tunggu sebentar 🙏";
-                }
-            } else {
-                $reply = ''; // Silent — send nothing to customer
-            }
-
-            if ($customer !== null) {
-                try {
-                    $customer->update(['mode' => 'waiting']);
-                    Log::info('Customer escalated to waiting queue by AI', [
-                        'customer_id' => $customer->id,
-                        'channel' => $this->channel,
-                        'chat_id' => $this->chatId,
-                    ]);
-                } catch (\Throwable $e) {
-                    Log::error('Failed to set customer mode to waiting during escalation', [
-                        'customer_id' => $customer->id,
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-
-                // Generate escalation summary for backoffice agents.
-                app(EscalationSummaryService::class)->generate($customer, $this->chatId, $this->channel);
-            }
-        }
-
-        if ($customer !== null && trim($reply) !== '') {
             try {
-                app(ConversationMemoryService::class)->addMessage(
-                    $customer,
-                    $this->channel,
-                    'assistant',
-                    $reply,
-                    ['chat_id' => $this->chatId]
-                );
+                $customer = $this->customerId !== null ? Customer::find($this->customerId) : null;
+                if ($customer !== null) {
+                    $agentContext = app(AgentContextService::class)->buildContext($customer, $text);
+
+                    $msgMeta = ['chat_id' => $this->chatId];
+                    if (!empty($this->attachmentMeta)) {
+                        $msgMeta['attachment'] = $this->attachmentMeta;
+                    }
+                    app(ConversationMemoryService::class)->addMessage(
+                        $customer,
+                        $this->channel,
+                        'user',
+                        $text,
+                        $msgMeta
+                    );
+                }
             } catch (\Throwable $e) {
-                Log::warning("{$this->channel} assistant message persistence failed (job)", [
+                Log::warning("{$this->channel} customer context persistence failed (job)", [
                     'chat_id' => $this->chatId,
                     'error' => $e->getMessage(),
                 ]);
             }
-        }
 
-        if ($reply !== '') {
-            $this->sendReply($reply);
-        }
+            // If customer is escalated, block replies based on current handoff setting.
+            if ($customer !== null && $this->shouldBlockAiReply($customer)) {
+                Log::info("Skipping AI reply — customer mode is '{$customer->mode}'", [
+                    'customer_id' => $customer->id,
+                    'channel' => $this->channel,
+                    'chat_id' => $this->chatId,
+                ]);
+                return;
+            }
 
-        MetricsCollector::recordRequest($this->channel, MetricsCollector::elapsed($requestStart));
+            $this->sendTypingIndicator();
+
+            $reply = $aiService->reply($text, $this->chatId, $this->channel, $agentContext, $this->attachmentMeta);
+
+            $this->stopTypingIndicator();
+
+            // Detect escalation marker — strip it always; only act if agent has escalation_condition set.
+            $shouldEscalate = str_contains($reply, '[ESCALATE]');
+            $reply = trim(str_replace('[ESCALATE]', '', $reply));
+
+            if ($shouldEscalate) {
+                $agent = ChatAgent::getDefault();
+                $silentHandoff      = $agent?->silent_handoff ?? false;
+                $stopAiAfterHandoff = $agent?->stop_ai_after_handoff ?? true;
+
+                if (!$silentHandoff) {
+                    if ($stopAiAfterHandoff) {
+                        $reply = "Permintaan Anda sedang diteruskan ke agen kami. Mohon tunggu sebentar 🙏\nYour request is being forwarded to our agent. Please wait a moment 🙏";
+                    } elseif ($reply === '') {
+                        $reply = "Permintaan Anda sedang diteruskan ke Human CS. Mohon tunggu sebentar 🙏";
+                    }
+                } else {
+                    $reply = ''; // Silent — send nothing to customer
+                }
+
+                if ($customer !== null) {
+                    try {
+                        $customer->update(['mode' => 'waiting']);
+                        Log::info('Customer escalated to waiting queue by AI', [
+                            'customer_id' => $customer->id,
+                            'channel' => $this->channel,
+                            'chat_id' => $this->chatId,
+                        ]);
+                    } catch (\Throwable $e) {
+                        Log::error('Failed to set customer mode to waiting during escalation', [
+                            'customer_id' => $customer->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+
+                    // Generate escalation summary for backoffice agents.
+                    app(EscalationSummaryService::class)->generate($customer, $this->chatId, $this->channel);
+                }
+            }
+
+            if ($customer !== null && trim($reply) !== '') {
+                try {
+                    app(ConversationMemoryService::class)->addMessage(
+                        $customer,
+                        $this->channel,
+                        'assistant',
+                        $reply,
+                        ['chat_id' => $this->chatId]
+                    );
+                } catch (\Throwable $e) {
+                    Log::warning("{$this->channel} assistant message persistence failed (job)", [
+                        'chat_id' => $this->chatId,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
+            if ($reply !== '') {
+                $this->sendReply($reply);
+            }
+
+            MetricsCollector::recordRequest($this->channel, MetricsCollector::elapsed($requestStart));
+        } finally {
+            $aiService->releaseAiProcessingLock($this->chatId, $this->channel);
+
+            // Drain one additional batch if messages arrived while AI was processing.
+            if ($aiService->promoteBufferedMessagesToLeader($this->chatId, $this->channel)) {
+                ProcessAiReply::dispatch($this->channel, $this->chatId, '', $this->customerId, [])
+                    ->delay(now()->addSeconds($aiService->getMessageAwaitSeconds()));
+
+                Log::info('Scheduled follow-up ProcessAiReply from buffered messages', [
+                    'channel' => $this->channel,
+                    'chat_id' => $this->chatId,
+                ]);
+            }
+        }
     }
 
     // ── Channel-specific send logic ──────────────────────────

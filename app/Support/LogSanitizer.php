@@ -120,6 +120,64 @@ class LogSanitizer
     }
 
     /**
+     * Redact a tool HTTP response body before storing it in ToolRequestLog.
+     *
+     * Safe to persist:
+     *   - top-level scalar fields whose keys are not in REDACTED_KEYS
+     *     (e.g. "status", "message", "code", "success")
+     *
+     * Replaced / suppressed:
+     *   - any top-level field whose key is in REDACTED_KEYS → [REDACTED]
+     *   - "data" field (may contain balances, tokens, account details)
+     *     → replaced with its key list + item count
+     *   - nested arrays → replaced with [array(n)]
+     *   - strings over 200 chars → truncated
+     *
+     * @param  array<string, mixed>  $body
+     * @return array<string, mixed>
+     */
+    public static function redactResponseBody(array $body): array
+    {
+        $result = [];
+
+        foreach ($body as $key => $value) {
+            $normalized = strtolower((string) $key);
+
+            // Always redact fields matching the PII/credential list.
+            if (in_array($normalized, self::REDACTED_KEYS, true)) {
+                $result[$key] = '[REDACTED]';
+                continue;
+            }
+
+            // "data" typically holds the actual payload — store structure only.
+            if ($normalized === 'data') {
+                if (is_array($value)) {
+                    $result[$key] = '[data:keys=' . implode(',', array_keys($value)) . ' count=' . count($value) . ']';
+                } else {
+                    $result[$key] = '[data:redacted]';
+                }
+                continue;
+            }
+
+            // Nested arrays → summarise by key count.
+            if (is_array($value)) {
+                $result[$key] = '[array(' . count($value) . ')]';
+                continue;
+            }
+
+            // Scalars: keep but cap length.
+            if (is_string($value)) {
+                $result[$key] = mb_substr($value, 0, 200);
+                continue;
+            }
+
+            $result[$key] = $value;
+        }
+
+        return $result;
+    }
+
+    /**
      * Ensure a value is safe to write as a scalar log context entry.
      *
      * @param  mixed  $value

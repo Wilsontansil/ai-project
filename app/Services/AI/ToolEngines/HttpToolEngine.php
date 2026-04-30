@@ -221,7 +221,7 @@ class HttpToolEngine
                 'endpoint_url'    => $endpointUrl,
                 'request_payload' => LogSanitizer::redactArguments($requestPayload),
                 'response_status' => $responseStatus,
-                'response_body'   => $responseBody,
+                'response_body'   => $responseBody !== null ? LogSanitizer::redactResponseBody($responseBody) : null,
                 'latency_ms'      => $latencyMs,
                 'success'         => $success,
                 'error'           => $error,

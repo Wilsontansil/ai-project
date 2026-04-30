@@ -48,9 +48,22 @@ Or run individually:
 
 ```bash
 php artisan serve              # HTTP server
-php artisan queue:listen       # Queue worker (required for Telegram & WhatsApp replies)
+php artisan queue:work --tries=3 --backoff=10 --timeout=120   # Queue worker (recommended for Telegram & WhatsApp replies)
 npm run dev                    # Vite assets
 ```
+
+## Cache Notes
+
+- Project ini direkomendasikan memakai Redis untuk `CACHE_STORE` karena flow debounce chat, cache lock, dan anti-spam bergantung pada cache locking lintas proses.
+- Jika `CACHE_STORE=redis`, pastikan Redis server benar-benar aktif dan bisa diakses di `REDIS_HOST:REDIS_PORT` sebelum menjalankan aplikasi.
+- Jika Redis belum tersedia di local/dev machine, ubah sementara ke `CACHE_STORE=file` pada file `.env` aktif lalu jalankan `php artisan optimize:clear`.
+- Mengubah `.env.example` tidak mengubah runtime aplikasi. Laravel membaca file `.env` aktif dan config cache yang sudah dibuild.
+
+## Queue Notes
+
+- Untuk workload chatbot AI, gunakan `php artisan queue:work`, bukan `queue:listen`, karena worker long-running lebih efisien dan lebih stabil untuk job yang memanggil OpenAI/HTTP eksternal.
+- Rekomendasi baseline lokal/produksi ringan: `php artisan queue:work --tries=3 --backoff=10 --timeout=120`.
+- Pastikan `DB_QUEUE_RETRY_AFTER` atau `REDIS_QUEUE_RETRY_AFTER` lebih besar dari `--timeout`. Default project ini disetel ke `150` detik agar tidak mudah memproses ulang job AI yang masih berjalan.
 
 ## Environment Variables
 
@@ -67,6 +80,7 @@ npm run dev                    # Vite assets
 | `LIVECHAT_VERIFY_TOKEN`          | LiveChat challenge verification token                    |
 | `LIVECHAT_WEBHOOK_SECRET`        | LiveChat webhook auth secret                             |
 | `QUEUE_CONNECTION`               | Queue driver (default: `database`)                       |
+| `DB_QUEUE_RETRY_AFTER`           | Retry window database queue (recommended/default: `150`) |
 | `CACHE_STORE`                    | Cache driver (recommended/default: `redis`)              |
 | `CONVERSATION_RETENTION_DAYS`    | Auto-prune conversations older than N days (default: 90) |
 | `CUSTOMER_MEMORY_RETENTION_DAYS` | Auto-prune stale customer memory (default: 90)           |

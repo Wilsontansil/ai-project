@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('description', 500)->nullable();
             $table->longText('system_prompt')->nullable();
             $table->string('model', 60)->default('gpt-4.1-mini');
-            $table->unsignedInteger('max_tokens')->default(420);
+            $table->unsignedInteger('max_tokens')->default(1000);
             $table->decimal('temperature', 2, 1)->default(0.7);
             $table->unsignedSmallInteger('message_await_seconds')->default(2);
             $table->string('timezone', 64)->default('UTC');

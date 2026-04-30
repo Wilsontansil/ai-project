@@ -100,7 +100,7 @@ class AIService
             $payload = [
                 'model' => $model,
                 'messages' => $messages,
-                'max_completion_tokens' => $chatAgent->max_tokens ?? 420,
+                'max_completion_tokens' => $this->resolveMaxTokens((string) $message, $chatAgent->max_tokens),
             ];
 
             // Reasoning models (o1/o3/o4 series) only support temperature=1 (default).
@@ -146,7 +146,11 @@ class AIService
             $assistantReply = $msg->content ?? "Sorry, I couldn't understand.";
 
             if ($finishReason === 'length') {
-                $assistantReply .= "\n\nJika jawaban ini masih terpotong, balas: lanjut.";
+                Log::info('OpenAI response truncated at token limit', [
+                    'channel' => $channel,
+                    'model'   => $model,
+                    'max_completion_tokens' => $payload['max_completion_tokens'],
+                ]);
             }
 
             $assistantReply = $this->replyFormatter->prepare($activeHistory, $assistantReply);
@@ -169,6 +173,48 @@ class AIService
 
             return $this->replyFormatter->format('⚠️ Terjadi error. Silakan coba beberapa saat lagi.');
         }
+    }
+
+    /**
+     * Determine max completion tokens adaptively based on message complexity.
+     *
+     * If the ChatAgent has an explicit max_tokens set (not the default 1000),
+     * it is used as an absolute cap. Otherwise:
+     *   - Short/simple messages (< 80 chars, no complex keywords) → 600
+     *   - Long or complex messages (list, explain, panduan, etc.)  → 1400
+     *   - Default                                                  → 1000
+     */
+    private function resolveMaxTokens(string $message, ?int $agentMaxTokens): int
+    {
+        $configured = $agentMaxTokens ?? 1000;
+
+        $complexKeywords = [
+            'list', 'daftar', 'jelaskan', 'explain', 'cara', 'panduan',
+            'langkah', 'step', 'detail', 'lengkap', 'semua', 'all',
+            'perbandingan', 'compare', 'tabel', 'table',
+        ];
+
+        $lower = mb_strtolower($message);
+        $isComplex = false;
+        foreach ($complexKeywords as $kw) {
+            if (str_contains($lower, $kw)) {
+                $isComplex = true;
+                break;
+            }
+        }
+
+        $isShort = mb_strlen(trim($message)) < 80;
+
+        if ($isComplex) {
+            $adaptive = 1400;
+        } elseif ($isShort) {
+            $adaptive = 600;
+        } else {
+            $adaptive = 1000;
+        }
+
+        // If agent has a non-default explicit cap, honour it as ceiling.
+        return min($adaptive, $configured);
     }
 
     /**

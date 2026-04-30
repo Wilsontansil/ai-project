@@ -44,29 +44,79 @@ class KnowledgeBaseQueryGuard
             throw new \InvalidArgumentException('Hanya query SELECT yang diizinkan.');
         }
 
-        // Forbidden DML / DDL keywords.
         $upper = strtoupper($trimmed);
-        $forbidden = [
+
+        // ── 1. Forbidden DML / DDL keywords ──────────────────────────────────
+        $forbiddenWords = [
             'INSERT', 'UPDATE', 'DELETE', 'DROP', 'CREATE', 'ALTER',
             'TRUNCATE', 'REPLACE', 'EXEC', 'EXECUTE', 'GRANT', 'REVOKE',
-            'LOAD_FILE', 'INTO OUTFILE', 'INTO DUMPFILE',
+            // File I/O
+            'LOAD_FILE',
+            // Time-delay / blind injection functions
+            'SLEEP', 'BENCHMARK', 'WAIT_FOR_EXECUTED_GTID_SET',
+            // UNION-based injection
+            'UNION',
         ];
 
-        foreach ($forbidden as $kw) {
-            if (str_contains($kw, ' ')) {
-                // Multi-word phrases — simple substring match on uppercased SQL.
-                if (str_contains($upper, $kw)) {
-                    throw new \InvalidArgumentException("Query mengandung perintah terlarang: {$kw}");
-                }
-            } else {
-                // Single-word keywords — use word-boundary to avoid false positives.
-                if (preg_match('/\b' . preg_quote($kw, '/') . '\b/', $upper)) {
-                    throw new \InvalidArgumentException("Query mengandung perintah terlarang: {$kw}");
-                }
+        foreach ($forbiddenWords as $kw) {
+            if (preg_match('/\b' . preg_quote($kw, '/') . '\b/', $upper)) {
+                throw new \InvalidArgumentException("Query mengandung perintah terlarang: {$kw}");
             }
         }
 
-        // Reject multi-statement SQL (semicolons not at the very end).
+        // ── 2. Forbidden multi-word phrases ──────────────────────────────────
+        $forbiddenPhrases = [
+            'INTO OUTFILE',
+            'INTO DUMPFILE',
+        ];
+
+        foreach ($forbiddenPhrases as $phrase) {
+            if (str_contains($upper, $phrase)) {
+                throw new \InvalidArgumentException("Query mengandung perintah terlarang: {$phrase}");
+            }
+        }
+
+        // ── 3. Block access to internal/system databases ─────────────────────
+        // Matches: information_schema.x, mysql.x, sys.x, performance_schema.x
+        $forbiddenSchemas = [
+            'INFORMATION_SCHEMA',
+            'PERFORMANCE_SCHEMA',
+        ];
+
+        foreach ($forbiddenSchemas as $schema) {
+            if (str_contains($upper, $schema)) {
+                throw new \InvalidArgumentException("Akses ke database sistem tidak diizinkan: {$schema}");
+            }
+        }
+
+        // Word-boundary check for short schema names to avoid false positives
+        // e.g. "mysql.user" or "`sys`.`user_summary`"
+        $forbiddenSchemaWords = ['MYSQL', 'SYS'];
+        foreach ($forbiddenSchemaWords as $schema) {
+            // Only flag if followed by a dot (i.e. used as a database prefix)
+            if (preg_match('/\b' . preg_quote($schema, '/') . '\s*\./', $upper)) {
+                throw new \InvalidArgumentException("Akses ke database sistem tidak diizinkan: {$schema}");
+            }
+        }
+
+        // ── 4. Block MySQL system variable access (@@var) ────────────────────
+        if (str_contains($trimmed, '@@')) {
+            throw new \InvalidArgumentException('Akses ke variabel sistem (@@) tidak diizinkan.');
+        }
+
+        // ── 5. Block information-disclosure functions ─────────────────────────
+        $forbiddenFunctions = [
+            'USER()', 'CURRENT_USER()', 'SESSION_USER()', 'SYSTEM_USER()',
+            'DATABASE()', 'SCHEMA()', 'VERSION()',
+        ];
+
+        foreach ($forbiddenFunctions as $fn) {
+            if (str_contains($upper, strtoupper($fn))) {
+                throw new \InvalidArgumentException("Fungsi sistem tidak diizinkan: {$fn}");
+            }
+        }
+
+        // ── 6. Reject multi-statement SQL (semicolons not at the very end) ────
         // Strip string literals first to avoid matching semicolons inside values.
         $stripped = (string) preg_replace("/'(?:[^'\\\\]|\\\\.)*'/", "''", $trimmed);
         if (preg_match('/;(?!\s*$)/', $stripped)) {

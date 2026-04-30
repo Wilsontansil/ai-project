@@ -91,9 +91,9 @@ class KnowledgeBaseSeeder extends Seeder
             ],
             [
                 'title' => 'Bonus',
-                'content' => 'A. BONUS KLAIM
+                'content' => 'A. BONUS MISI KLAIM , Harus Di Claim di Menu Reward.
 1. Bonus Ajak Teman (Referral Bonus) [{ev_ref}]
-Program Referral Bonus adalah program yang memungkinkan pengguna mendapatkan bonus dengan mengajak teman untuk bergabung dan bermain. Harus Di Claim di menu Reward.
+Program Referral Bonus adalah program yang memungkinkan pengguna mendapatkan bonus dengan mengajak teman untuk bergabung dan bermain. 
 
 Cara mengikuti program ini:
 - Bagikan link referral yang tersedia di menu Profil/Akun.
@@ -107,10 +107,8 @@ Cara mengikuti program ini:
 - Teman Deposit {ref_min}-{ref_to} Dapat Bonus {ref_bet}
 - Teman Deposit > {ref_to} Dapat Bonus {ref_gt}
 
-
 2. Bonus Deposit Beruntun (Daily Streak Bonus) [{ev_brt}]
-Bonus Deposit Beruntun adalah bonus spesial yang bisa didapatkan dengan melakukan deposit setiap hari secara berturut-turut. Pastikan Balance dibawah 1000 untuk dihitung sebagai deposit beruntun.
-Harus Di Claim di menu Reward.
+Bonus Deposit Beruntun adalah bonus spesial yang bisa didapatkan dengan melakukan deposit setiap hari secara berturut-turut. Pastikan Balance dibawah 1000 untuk dihitung sebagai deposit beruntun. Jumlah Bonus adalah Nominal Deposit tertinggi dari jumlah beruntun.
 
 [Setting]
 - Multiplier = {brt_mul}
@@ -119,41 +117,43 @@ Harus Di Claim di menu Reward.
 - Jumlah Beruntun = {brt_cnt}
 - Termasuk Non Bank = {brt_nonbank}
 
-3. Bonus Freespin [AKTIF]
+3. Bonus Freespin [{ev_frp}]
 Bonus Freespin adalah bonus yang diberikan setelah pengguna melakukan deposit harian.
-Harus Di Claim di menu Reward.
 Bonus ini biasanya berupa putaran gratis (free spin) yang dapat digunakan pada permainan tertentu sesuai ketentuan yang berlaku.
 
 [Setting]
-- Multiplier = 1x
-- Minimal Deposit = 2000
-- Termasuk Non Bank = false
+- Multiplier = {fs_mul}
+- Minimal Deposit = {fs_min}
+- Termasuk Non Bank = {fs_nonbank}
 
-
-4. Bonus Deposit [NONAKTIF]
+4. Bonus Deposit [{ev_bd}]
 - Bonus First Deposit Bank
-  Bonus yang diberikan pada saat pengguna melakukan deposit pertama kali. Harus Di Claim di menu Reward.
+  Bonus yang diberikan pada saat pengguna melakukan deposit pertama kali.
 
   [Setting]
-  - Minimal Deposit = 2000
-  - Multiplier = 1x
+  - Minimal Deposit = {bfd_b_min}
+  - Rate = {bfd_b_rate}%
+  - Multiplier = {bfd_b_mul}
 
 - Bonus Daily Deposit Bank
-  Bonus yang diberikan untuk setiap deposit harian setelah deposit pertama. Harus Di Claim di menu Reward.
+  Bonus yang diberikan untuk setiap deposit harian setelah deposit pertama.
 
   [Setting]
-  - Minimal Deposit = 2000
-  - Multiplier = 1x
+  - Minimal Deposit = {bdd_b_min}
+  - Rate = {bdd_b_rate}%
+  - Multiplier = {bdd_b_mul}
 
 Catatan:
 Jika pengguna telah mendapatkan Bonus First Deposit Bank, maka tidak dapat lagi mendapatkan Bonus Daily Deposit Bank pada hari yang sama.
 
 
-5. Bonus APK [NONAKTIF]
-Bonus APK adalah bonus yang hanya dapat diklaim melalui aplikasi (APK). Harus Di Claim di menu Reward.
+5. Bonus APK [{ev_ap}]
+Bonus APK adalah bonus yang hanya dapat diklaim melalui aplikasi (APK).
 
 [Setting]
-- Multiplier = 1x
+- Multiplier = {bap_mul}
+- Jumlah Bonus = {bap_bon}
+- Jumlah Deposit = {bap_cou}
 
 6. Welcome Bonus New Member 100% [AKTIF]
 

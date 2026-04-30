@@ -67,6 +67,7 @@ npm run dev                    # Vite assets
 | `LIVECHAT_VERIFY_TOKEN`          | LiveChat challenge verification token                    |
 | `LIVECHAT_WEBHOOK_SECRET`        | LiveChat webhook auth secret                             |
 | `QUEUE_CONNECTION`               | Queue driver (default: `database`)                       |
+| `CACHE_STORE`                    | Cache driver (recommended/default: `redis`)              |
 | `CONVERSATION_RETENTION_DAYS`    | Auto-prune conversations older than N days (default: 90) |
 | `CUSTOMER_MEMORY_RETENTION_DAYS` | Auto-prune stale customer memory (default: 90)           |
 

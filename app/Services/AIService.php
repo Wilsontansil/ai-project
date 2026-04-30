@@ -115,6 +115,25 @@ class AIService
                 $payload['tool_choice'] = 'auto';
             }
 
+            if (config('logging.ai_datamodel_query_log', false)) {
+                $totalChars = array_sum(array_map(
+                    fn ($m) => mb_strlen(is_string($m['content'] ?? '') ? ($m['content'] ?? '') : json_encode($m['content'])),
+                    $payload['messages']
+                ));
+                $toolChars = mb_strlen(json_encode($payload['tools'] ?? []));
+                Log::info('AI payload size', [
+                    'channel'           => $channel,
+                    'model'             => $model,
+                    'messages_chars'    => $totalChars,
+                    'tools_chars'       => $toolChars,
+                    'total_chars'       => $totalChars + $toolChars,
+                    'est_tokens'        => (int) round(($totalChars + $toolChars) / 4),
+                    'max_completion_tokens' => $payload['max_completion_tokens'],
+                    'messages_count'    => count($payload['messages']),
+                    'tools_count'       => count($payload['tools'] ?? []),
+                ]);
+            }
+
             $openaiStart = MetricsCollector::startTimer();
             $response = $this->callOpenAiWithRetry($client, $payload);
             $openaiLatency = MetricsCollector::elapsed($openaiStart);

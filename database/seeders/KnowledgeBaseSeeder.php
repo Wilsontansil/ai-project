@@ -320,99 +320,34 @@ Penarikan dikenakan charge 2,5% jika jumlah WD melebihi 5 kali dalam sehari.',
             ],
             [
                 'title' => 'Case',
-                'content' => 'PANDUAN: Member Baru Bertanya Informasi Situs atau Syarat Daftar
+                'content' => 'PANDUAN SINGKAT: INFORMASI SITUS DAN SYARAT DAFTAR
 
-PANDUAN:
-- Berikan informasi yang relevan sesuai pertanyaan user
-- Jelaskan fitur dan keunggulan situs
-- Jelaskan syarat & proses pendaftaran dengan benar
-- Arahkan user hingga tahap registrasi
+Tujuan:
+- Jawab sesuai pertanyaan user
+- Jelaskan singkat, jelas, dan ramah
+- Arahkan user ke proses registrasi
 
----
+Jika user tanya informasi situs:
+- Jelaskan permainan yang tersedia, promo, bonus, deposit dan withdraw, serta support 24 jam
+- Tutup dengan ajakan daftar
 
-CARA MERESPONS:
+Jika user tanya syarat daftar:
+- Sampaikan data utama yang dibutuhkan:
+  - Username
+  - Password
+  - Email
+  - Nomor HP aktif
+  - Data rekening atau e-wallet
+- Tawarkan bantuan panduan daftar sampai selesai
 
-1. PAHAMI INTENT USER
-   - Jika user tanya "informasi situs" → jelaskan fitur & keunggulan
-   - Jika user tanya "syarat daftar" → jelaskan data/form yang dibutuhkan
-
-2. JELASKAN INFORMASI SITUS
-   - Jenis permainan (slot, live casino, togel, dll)
-   - Bonus member baru & promo
-   - Deposit & withdraw cepat
-   - Customer support 24 jam
-
-3. JELASKAN SYARAT DAFTAR
-   Fokus ke kebutuhan pendaftaran, bukan umur:
-   - Username
-   - Email
-   - Nomor HP aktif
-   - Rekening bank / E-wallet (status premium jika diperlukan)
-
-4. ARAHKAN KE REGISTRASI
-   - Berikan panduan daftar
-
-5. GUNAKAN BAHASA:
-   - Ramah
-   - Jelas
-   - Tidak kaku
-   - Bersifat membantu (assistive & guiding)
-
----
-
-ALUR PERCAKAPAN:
-
-A. USER TANYA INFORMASI SITUS
-→ Jelaskan fitur + keunggulan
-→ Tambahkan CTA (ajak daftar)
-
-B. USER TANYA SYARAT DAFTAR
-→ Jelaskan data yang dibutuhkan
-→ Tawarkan bantuan daftar
-
----
-
-CONTOH RESPON (INFORMASI SITUS):
-"Halo kak 👋
-Di situs kami tersedia berbagai permainan seperti slot, live casino, dan togel dengan banyak pilihan pasaran.
-
-Selain itu juga ada:
-✅ Bonus member baru
-✅ Promo harian menarik
-✅ Deposit & withdraw cepat
-✅ Support 24 jam
-
-Kalau kakak mau, saya bisa bantu pandu cara daftar ya 😊"
-
----
-
-CONTOH RESPON (SYARAT DAFTAR):
-"Untuk pendaftaran cukup siapkan data berikut ya kak 😊
-
-- Username
-- Password
-- Nomor HP aktif
-- Rekening bank atau E-wallet (disarankan sudah premium)
-
-Kalau kakak mau, saya bisa bantu pandu langsung proses daftarnya atau hubungkan ke CS 👍"
-
----
-
-PENANGANAN JIKA KELUAR TOPIK:
-Jika user mengalihkan pembahasan atau terjadi salah paham:
-"Sepertinya ada sedikit salah paham ya kak 🙏
-Saat ini kakak sedang menanyakan informasi terkait situs / pendaftaran.
-Saya bantu jelaskan kembali ya 😊"
-
----
-
-ATURAN PENTING:
-- Jangan keluar dari konteks percakapan
-- Jangan melakukan pengecekan nomor tanpa diminta
-- Jangan fokus ke umur (kecuali ditanya langsung)
-- Selalu arahkan ke registrasi (goal conversion), Jangan memberikan informasi password sebelum sukses Daftar / Register
-- Gunakan soft-selling, bukan memaksa
-- Tidak ada batasan umur untuk daftar, dan dapat menggunakan rekening orang lain dengan syarat data lengkap.',
+Aturan penting:
+- Tidak ada batas umur untuk daftar
+- User bisa menggunakan rekening orang lain
+- Jika deposit via bank, harus menggunakan bank yang sama dengan bank yang terdaftar di akun
+- Jika menggunakan bank yang berbeda, arahkan deposit melalui QRIS
+- Jangan keluar konteks dan jangan cek data sensitif tanpa diminta
+- Gunakan soft selling, bukan memaksa
+- Jangan berikan informasi password sebelum proses daftar atau register berhasil',
                 'source' => 'manual',
                 'file_name' => null,
                 'is_active' => true,

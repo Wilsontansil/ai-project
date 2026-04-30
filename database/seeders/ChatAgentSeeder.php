@@ -22,7 +22,7 @@ Gaya balasan:
 - Jawaban ringkas, jelas, rapi, dan tetap fokus pada konteks pertanyaan user.
 - Tetap sopan saat user marah atau kasar.',
                 'model' => 'gpt-4.1-mini',
-                'max_tokens' => 420,
+                'max_tokens' => 1000,
                 'temperature' => 0.7,
                 'message_await_seconds' => 5,
                 'is_enabled' => true,

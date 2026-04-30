@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -89,10 +90,11 @@ class DashboardController extends Controller
     }
 
     /**
-     * Redirect to the public HTTP URL of a chat attachment stored on the SFTP disk.
+     * Proxy-download a chat attachment stored on the SFTP disk.
+     * The file is streamed through PHP — the CDN/SFTP URL is never exposed to the client.
      * The `path` query parameter must start with `chat-attachments/`.
      */
-    public function chatAttachment(Request $request): RedirectResponse
+    public function chatAttachment(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse|\Illuminate\Http\Response
     {
         $path = (string) $request->query('path', '');
 
@@ -101,15 +103,41 @@ class DashboardController extends Controller
             abort(403);
         }
 
-        // Build the public HTTP URL from the disk's url config key.
-        // e.g. https://devasset.pilartestengine.com/assets/aiproject/chat-attachments/...
-        $baseUrl = rtrim((string) config('filesystems.disks.sftp.url', ''), '/');
+        $disk = Storage::disk('sftp');
 
-        if ($baseUrl === '') {
-            abort(500, 'Asset HTTP base URL is not configured.');
+        if (!$disk->exists($path)) {
+            abort(404);
         }
 
-        return redirect($baseUrl . '/' . ltrim($path, '/'));
+        $mimeType = $disk->mimeType($path) ?: 'application/octet-stream';
+        $filename = basename($path);
+        $size     = $disk->size($path);
+
+        // Inline for images/video/audio so they can be previewed in the browser;
+        // force download for everything else.
+        $disposition = str_starts_with($mimeType, 'image/')
+            || str_starts_with($mimeType, 'video/')
+            || str_starts_with($mimeType, 'audio/')
+            ? 'inline'
+            : 'attachment';
+
+        return response()->streamDownload(
+            function () use ($disk, $path): void {
+                $stream = $disk->readStream($path);
+                if ($stream !== null) {
+                    fpassthru($stream);
+                    fclose($stream);
+                }
+            },
+            $filename,
+            [
+                'Content-Type'        => $mimeType,
+                'Content-Length'      => $size,
+                'Content-Disposition' => "{$disposition}; filename=\"{$filename}\"",
+                'Cache-Control'       => 'private, no-store',
+                'X-Content-Type-Options' => 'nosniff',
+            ]
+        );
     }
 
     public function takeover(Customer $customer): RedirectResponse

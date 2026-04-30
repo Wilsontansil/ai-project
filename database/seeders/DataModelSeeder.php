@@ -246,6 +246,24 @@ class DataModelSeeder extends Seeder
         );
 
         DataModel::updateOrCreate(
+            ['slug' => 'event-bonus'],
+            [
+                'model_name' => 'EventBonus',
+                'description' => 'Event bonus data model schema.',
+                'table_name' => 'event_bonuses',
+                'connection_name' => 'mysqlgame',
+                'fields' => [
+                    'id' => ['type' => 'bigint', 'required' => false],
+                    'bonus_type' => ['type' => 'varchar', 'required' => false],
+                    'status' => ['type' => 'varchar', 'required' => true , 'value' => 'Active'],
+                    'agent' => ['type' => 'varchar', 'required' => true, 'value' => config('services.agent.kode')],
+                    'created_at' => ['type' => 'timestamp', 'required' => false],
+                    'updated_at' => ['type' => 'timestamp', 'required' => false],
+                ],
+            ]
+        );
+
+        DataModel::updateOrCreate(
             ['slug' => 'game'],
             [
                 'model_name' => 'Game',

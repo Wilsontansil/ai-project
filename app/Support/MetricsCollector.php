@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Jobs\PersistBotMetric;
 use App\Models\BotMetric;
 use Illuminate\Support\Facades\Log;
 
@@ -134,11 +135,31 @@ class MetricsCollector
     }
 
     /**
-     * Persist a metric row. Silently logs on failure.
+     * Persist a metric row asynchronously. Falls back to sync write only
+     * if queue dispatch fails, so no metric event is dropped.
      *
      * @param array<string, mixed> $meta
      */
     private static function record(string $metricType, string $channel, array $meta): void
+    {
+        try {
+            PersistBotMetric::dispatch($metricType, $channel, $meta);
+        } catch (\Throwable $e) {
+            Log::debug('MetricsCollector queue dispatch failed, fallback to sync write', [
+                'metric_type' => $metricType,
+                'error' => $e->getMessage(),
+            ]);
+
+            self::writeSync($metricType, $channel, $meta);
+        }
+    }
+
+    /**
+     * Persist metric row synchronously.
+     *
+     * @param array<string, mixed> $meta
+     */
+    private static function writeSync(string $metricType, string $channel, array $meta): void
     {
         try {
             BotMetric::query()->create([

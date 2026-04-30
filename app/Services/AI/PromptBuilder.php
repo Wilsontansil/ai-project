@@ -168,8 +168,8 @@ PROMPT;
 
     /**
      * Replace {key} placeholders in KB content with values from SystemConfig.
-     * If the config has a description, format as: value (description)
-     * so the AI understands what the raw value means.
+     * If the description is a value-label map (e.g. "1=Senin, 2=Selasa, ..."),
+     * the placeholder is replaced with the resolved label (e.g. "Senin").
      * Unknown keys are left as-is (no crash, no empty string substitution).
      */
     private function resolveConfigPlaceholders(string $content): string
@@ -180,10 +180,32 @@ PROMPT;
                 return $m[0];
             }
             if ($entry['description'] !== null) {
-                return $entry['value'] . ' (' . $entry['description'] . ')';
+                $label = $this->resolveDescriptionLabel($entry['value'], $entry['description']);
+                if ($label !== null) {
+                    return $label;
+                }
             }
             return $entry['value'];
         }, $content) ?? $content;
+    }
+
+    /**
+     * Parse a description like "1=Senin, 2=Selasa, 3=Rabu, ..." and return the label
+     * matching $value. Returns null if the description is not in that format or no match found.
+     */
+    private function resolveDescriptionLabel(string $value, string $description): ?string
+    {
+        // Match patterns like: 1=Senin or 1 = Senin (comma/semicolon separated)
+        preg_match_all('/([^,;=\s]+)\s*=\s*([^,;]+)/', $description, $matches, PREG_SET_ORDER);
+        if (empty($matches)) {
+            return null;
+        }
+        foreach ($matches as $match) {
+            if (trim($match[1]) === trim($value)) {
+                return trim($match[2]);
+            }
+        }
+        return null;
     }
 
     /**

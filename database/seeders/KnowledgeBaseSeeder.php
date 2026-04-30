@@ -290,17 +290,8 @@ Berikut jenis taruhan olahraga yang tersedia:
             [
                 'title' => 'Withdraw',
                 'content' => '[Informasi]
-- Minimal Withdraw Rp 25.000
-- Withdraw berkelipatan Rp 1.000
-
-Withdraw dengan E-WALLET:
-Semua akun E-Wallet wajib berstatus Premium sebelum penarikan dana/Withdraw(WD).
-Pastikan upgrade E-Wallet terlebih dahulu jika belum Premium.
-E-Wallet Premium adalah Wajib sejak awal.
-
-[Informasi]
--Minimal Withdraw Rp 25.000
--Withdraw berkelipatan Rp 1.000
+-Minimal Withdraw Rp {wd_min}
+-Withdraw berkelipatan Rp 1000
 
 Withdraw dengan E-WALLET:
 Semua akun E-Wallet wajib berstatus Premium sebelum penarikan dana/Withdraw(WD).

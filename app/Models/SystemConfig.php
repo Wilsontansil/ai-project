@@ -32,13 +32,15 @@ class SystemConfig extends Model
 
         $version = (int) Cache::get('system_configs_version', 1);
         $cacheKey = "system_config_value:v{$version}:{$key}";
-        $value = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($key) {
+        $value = Cache::remember($cacheKey, now()->addHours(1), function () use ($key) {
             $config = static::query()->where('key', $key)->first();
             if ($config === null) {
                 return null;
             }
 
-            return $config->resolveEffectiveValue();
+            // Read snapshot value only — no external DB query at runtime.
+            // Use "Sync All" or the hourly scheduler to refresh datamodel_lookup values.
+            return $config->value;
         });
 
         return ($value !== null && $value !== '') ? $value : $default;
@@ -59,14 +61,15 @@ class SystemConfig extends Model
         $version = (int) Cache::get('system_configs_version', 1);
         $cacheKey = "system_config_desc:v{$version}:{$key}";
 
-        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($key): array {
+        return Cache::remember($cacheKey, now()->addHours(1), function () use ($key): array {
             $config = static::query()->where('key', $key)->first();
             if ($config === null) {
                 return ['value' => null, 'description' => null];
             }
 
+            // Read snapshot value only — no external DB query at runtime.
             return [
-                'value'       => $config->resolveEffectiveValue(),
+                'value'       => $config->value,
                 'description' => ($config->description !== null && $config->description !== '') ? $config->description : null,
             ];
         });

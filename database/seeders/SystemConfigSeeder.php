@@ -526,6 +526,15 @@ class SystemConfigSeeder extends Seeder
                 'lookup_value' => 'bonus misi apk multiplier',
                 'result_field' => 'value',
             ],
+            [
+                'key' => 'wd_min',
+                'value' => '1000',
+                'source_type' => 'datamodel_lookup',
+                'data_model_id' => $settingsDataModelId,
+                'lookup_field' => 'kode',
+                'lookup_value' => 'min withdraw',
+                'result_field' => 'value',
+            ],
         ];
 
         foreach ($rows as $row) {

@@ -7,6 +7,7 @@ use App\Models\ProjectSetting;
 use App\Services\Agent\ChatAttachmentStorageService;
 use App\Services\Agent\CustomerIdentityService;
 use App\Support\LogSanitizer;
+use App\Support\UrlSsrfGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -210,6 +211,8 @@ class WhatsAppController extends Controller
             $headers  = $apiKey !== '' ? ['X-Api-Key' => $apiKey] : [];
 
             if ($mediaUrl !== '') {
+                UrlSsrfGuard::assertPublic($mediaUrl);
+
                 $dl = Http::timeout(20)->withHeaders($headers)->get($mediaUrl);
                 if ($dl->successful()) {
                     $contents = $dl->body();

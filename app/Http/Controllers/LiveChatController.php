@@ -7,6 +7,7 @@ use App\Models\ProjectSetting;
 use App\Services\Agent\ChatAttachmentStorageService;
 use App\Support\LogSanitizer;
 use App\Support\MetricsCollector;
+use App\Support\UrlSsrfGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -341,6 +342,8 @@ class LiveChatController extends Controller
             : '[' . $mediaType . ']';
 
         try {
+            UrlSsrfGuard::assertPublic($url);
+
             $download = Http::timeout(20)->get($url);
 
             if (!$download->successful()) {

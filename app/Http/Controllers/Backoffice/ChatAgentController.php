@@ -72,6 +72,8 @@ class ChatAgentController extends Controller
             $activeTab = 'general';
         }
 
+        $systemConfigSearch = trim((string) $request->query('sc_search', ''));
+
         $knowledgeMode = $request->query('mode');
         if (!in_array($knowledgeMode, ['view', 'edit'], true)) {
             $knowledgeMode = 'view';
@@ -93,6 +95,26 @@ class ChatAgentController extends Controller
             $selectedKnowledge = $knowledgeEntries->firstWhere('id', $selectedKnowledgeId);
         }
 
+        $systemConfigs = SystemConfig::query()
+            ->when($systemConfigSearch !== '', function ($query) use ($systemConfigSearch) {
+                $query->where(function ($inner) use ($systemConfigSearch) {
+                    $inner->where('key', 'like', '%' . $systemConfigSearch . '%')
+                        ->orWhere('value', 'like', '%' . $systemConfigSearch . '%')
+                        ->orWhere('description', 'like', '%' . $systemConfigSearch . '%')
+                        ->orWhere('lookup_field', 'like', '%' . $systemConfigSearch . '%')
+                        ->orWhere('lookup_value', 'like', '%' . $systemConfigSearch . '%')
+                        ->orWhere('result_field', 'like', '%' . $systemConfigSearch . '%');
+                });
+            })
+            ->orderBy('key')
+            ->paginate(15)
+            ->appends([
+                'tab' => $activeTab,
+                'mode' => $knowledgeMode,
+                'kb' => $selectedKnowledgeId > 0 ? $selectedKnowledgeId : null,
+                'sc_search' => $systemConfigSearch !== '' ? $systemConfigSearch : null,
+            ]);
+
         return view('backoffice.chat-agents.edit', [
             'agent' => $chatAgent,
             'agentRules' => $agentRules,
@@ -107,7 +129,8 @@ class ChatAgentController extends Controller
                 ->orderBy('category')
                 ->orderBy('display_name')
                 ->get(),
-            'systemConfigs' => SystemConfig::orderBy('key')->get(),
+            'systemConfigs' => $systemConfigs,
+            'systemConfigSearch' => $systemConfigSearch,
             'systemConfigDataModels' => DataModel::query()
                 ->orderBy('model_name')
                 ->get(['id', 'model_name', 'table_name', 'connection_name', 'fields']),

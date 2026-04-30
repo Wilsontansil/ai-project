@@ -319,7 +319,7 @@ Penarikan dikenakan charge 2,5% jika jumlah WD melebihi 5 kali dalam sehari.',
                 'is_active' => true,
             ],
             [
-                'title' => 'Case',
+                'title' => 'Register',
                 'content' => 'PANDUAN AI – MEMBER BARU (INFORMASI SITUS & DAFTAR)
 
 TUJUAN:

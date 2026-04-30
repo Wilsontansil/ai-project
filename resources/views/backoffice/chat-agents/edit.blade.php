@@ -784,6 +784,21 @@
                     </div>
                 @endif
 
+                <form method="GET" action="{{ route('backoffice.chat-agents.edit', $agent) }}"
+                    class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-3"
+                    style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                    <input type="hidden" name="tab" value="system-config">
+                    <label for="sc_search" class="bo-label" style="margin:0;min-width:92px">Search</label>
+                    <input id="sc_search" type="text" name="sc_search" value="{{ $systemConfigSearch ?? '' }}"
+                        placeholder="Search key, value, description, or lookup fields..." style="flex:1;min-width:220px" />
+                    <button type="submit" class="bo-btn-sm">Filter</button>
+                    @if (!empty($systemConfigSearch))
+                        <a class="bo-btn-secondary"
+                            href="{{ route('backoffice.chat-agents.edit', ['chatAgent' => $agent, 'tab' => 'system-config']) }}"
+                            style="font-size:0.75rem;padding:0.45rem 0.75rem">Reset</a>
+                    @endif
+                </form>
+
                 {{-- Existing rows --}}
                 <div class="overflow-hidden rounded-xl border border-white/10">
                     <table class="min-w-full text-xs" style="width:100%">
@@ -853,6 +868,12 @@
                         </tbody>
                     </table>
                 </div>
+
+                @if (method_exists($systemConfigs, 'links'))
+                    <div class="pt-1">
+                        {{ $systemConfigs->onEachSide(1)->links() }}
+                    </div>
+                @endif
 
                 {{-- Edit inline form (hidden until Edit clicked) --}}
                 <div id="sc-edit-panel" style="display:none"

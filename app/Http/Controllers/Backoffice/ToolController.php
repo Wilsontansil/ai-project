@@ -8,6 +8,7 @@ use App\Models\ProjectSetting;
 use App\Models\Tool;
 use App\Support\LogSanitizer;
 use App\Support\ResilientHttp;
+use App\Support\UrlSsrfGuard;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -616,6 +617,17 @@ class ToolController extends Controller
         $url = $data['route'];
 
         $body = $data['body'] ?? [];
+
+        // Guard against SSRF before making the outbound request.
+        try {
+            UrlSsrfGuard::assertPublic($url);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'url'     => $url,
+                'error'   => 'URL not allowed: ' . $e->getMessage(),
+            ], 422);
+        }
 
         Log::info('Webhook test request', [
             'channel' => 'tool.test_endpoint',

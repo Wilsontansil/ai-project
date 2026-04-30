@@ -7,6 +7,7 @@ use App\Models\ToolRequestLog;
 use App\Services\AI\Concerns\BuildsMissingDataMessage;
 use App\Support\LogSanitizer;
 use App\Support\ResilientHttp;
+use App\Support\UrlSsrfGuard;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -77,6 +78,19 @@ class HttpToolEngine
         ];
 
         $fullUrl = $route;
+
+        // Guard against SSRF: reject routes that resolve to private/internal addresses.
+        try {
+            UrlSsrfGuard::assertPublic($fullUrl);
+        } catch (\InvalidArgumentException $e) {
+            Log::error('HTTP endpoint SSRF rejected', [
+                'tool_name' => $tool->tool_name,
+                'url'       => $fullUrl,
+                'reason'    => $e->getMessage(),
+            ]);
+
+            return ['mode' => 'direct', 'reply' => self::USER_FACING_ERROR];
+        }
 
         Log::info('Executing HTTP endpoint', [
             'tool_name' => $tool->tool_name,

@@ -333,6 +333,10 @@
                         <div id="kb-edit-panel-manual">
                             <label for="kb_edit_content" class="bo-label">Content</label>
                             <textarea id="kb_edit_content" name="content" rows="8">{{ old('content', $selectedKnowledge->source !== 'datamodel' ? $selectedKnowledge->content : '') }}</textarea>
+                            <p class="mt-1 text-xs text-slate-400">
+                                <span id="kb-edit-char-count">0</span> chars
+                                &nbsp;·&nbsp; ~<span id="kb-edit-token-est">0</span> tokens
+                            </p>
                         </div>
 
                         <div id="kb-edit-panel-file" class="hidden">
@@ -402,6 +406,21 @@
                             radios.forEach(r => r.addEventListener('change', () => show(r.value)));
                             const checked = document.querySelector('.kb-edit-source-radio:checked');
                             if (checked) show(checked.value);
+
+                            // Char / token counter
+                            const editTextarea = document.getElementById('kb_edit_content');
+                            const editCharEl = document.getElementById('kb-edit-char-count');
+                            const editTokEl = document.getElementById('kb-edit-token-est');
+
+                            function updateEditCount() {
+                                const len = editTextarea.value.length;
+                                editCharEl.textContent = len.toLocaleString();
+                                editTokEl.textContent = Math.round(len / 4).toLocaleString();
+                                const color = len > 3000 ? 'text-red-400' : len > 1500 ? 'text-yellow-400' : 'text-slate-400';
+                                editCharEl.parentElement.className = 'mt-1 text-xs ' + color;
+                            }
+                            editTextarea.addEventListener('input', updateEditCount);
+                            updateEditCount();
                         })();
                     </script>
                 </div>
@@ -473,6 +492,10 @@
                     <div id="kb-add-panel-manual">
                         <label for="kb_content" class="bo-label">Content</label>
                         <textarea id="kb_content" name="content" rows="6" placeholder="Knowledge text...">{{ old('content') }}</textarea>
+                        <p class="mt-1 text-xs text-slate-400">
+                            <span id="kb-add-char-count">0</span> chars
+                            &nbsp;·&nbsp; ~<span id="kb-add-token-est">0</span> tokens
+                        </p>
                     </div>
 
                     <div id="kb-add-panel-file" class="hidden">
@@ -528,7 +551,24 @@
                         radios.forEach(r => r.addEventListener('change', () => show(r.value)));
                         const checked = document.querySelector('.kb-add-source-radio:checked');
                         if (checked) show(checked.value);
+
+                        // Char / token counter
+                        const addTextarea = document.getElementById('kb_content');
+                        const addCharEl = document.getElementById('kb-add-char-count');
+                        const addTokEl = document.getElementById('kb-add-token-est');
+
+                        function updateAddCount() {
+                            const len = addTextarea.value.length;
+                            addCharEl.textContent = len.toLocaleString();
+                            addTokEl.textContent = Math.round(len / 4).toLocaleString();
+                            const color = len > 3000 ? 'text-red-400' : len > 1500 ? 'text-yellow-400' : 'text-slate-400';
+                            addCharEl.parentElement.className = 'mt-1 text-xs ' + color;
+                        }
+                        addTextarea.addEventListener('input', updateAddCount);
+                        updateAddCount();
                     })();
+                </script>
+                })();
                 </script>
             </div>
         </div>

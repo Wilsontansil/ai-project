@@ -27,11 +27,6 @@ Gaya balasan:
                 'message_await_seconds' => 2,
                 'is_enabled' => true,
                 'is_default' => true,
-                // 'escalation_condition' => 'Coba bantu selesaikan masalah customer terlebih dahulu.
-                // Eskalasikan ke Human CS jika: deposit tidak masuk lebih dari 15 menit dan sudah dicek statusnya,
-                // akun bermasalah (suspend/banned),
-                // reset password kondisi balance diatas 10000 dan tidak dapat diselesaikan oleh bot, customer secara eksplisit meminta berbicara dengan manusia, atau masalah teknis lain yang tidak bisa diselesaikan bot. 
-                // JANGAN PERNAH menyuruh customer menghubungi livechat atau CS melalui website/aplikasi lain — gunakan [ESCALATE] untuk meneruskan ke Human CS',
                 'escalation_condition' => 'Bot wajib melakukan pengecekan awal dan mencoba menyelesaikan masalah user terlebih dahulu. Segera Eskalasi ke human support hanya jika Kasus dibawah terjadi.
 
 Panduan ringkas:

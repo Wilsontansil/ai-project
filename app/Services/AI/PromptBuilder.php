@@ -168,13 +168,21 @@ PROMPT;
 
     /**
      * Replace {key} placeholders in KB content with values from SystemConfig.
+     * If the config has a description, format as: value (description)
+     * so the AI understands what the raw value means.
      * Unknown keys are left as-is (no crash, no empty string substitution).
      */
     private function resolveConfigPlaceholders(string $content): string
     {
         return preg_replace_callback('/\{([a-zA-Z0-9_]+)\}/', function (array $m): string {
-            $value = SystemConfig::getValue($m[1]);
-            return $value !== null ? $value : $m[0];
+            $entry = SystemConfig::getValueWithDescription($m[1]);
+            if ($entry['value'] === null) {
+                return $m[0];
+            }
+            if ($entry['description'] !== null) {
+                return $entry['value'] . ' (' . $entry['description'] . ')';
+            }
+            return $entry['value'];
         }, $content) ?? $content;
     }
 

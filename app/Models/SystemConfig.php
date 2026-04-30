@@ -44,6 +44,34 @@ class SystemConfig extends Model
         return ($value !== null && $value !== '') ? $value : $default;
     }
 
+    /**
+     * Get value + description for a config key (used by PromptBuilder to give AI context).
+     * Returns ['value' => string|null, 'description' => string|null].
+     *
+     * @return array{value: string|null, description: string|null}
+     */
+    public static function getValueWithDescription(string $key): array
+    {
+        if (!Schema::hasTable('system_configs')) {
+            return ['value' => null, 'description' => null];
+        }
+
+        $version = (int) Cache::get('system_configs_version', 1);
+        $cacheKey = "system_config_desc:v{$version}:{$key}";
+
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($key): array {
+            $config = static::query()->where('key', $key)->first();
+            if ($config === null) {
+                return ['value' => null, 'description' => null];
+            }
+
+            return [
+                'value'       => $config->resolveEffectiveValue(),
+                'description' => ($config->description !== null && $config->description !== '') ? $config->description : null,
+            ];
+        });
+    }
+
     public static function setValue(string $key, ?string $value): void
     {
         static::updateOrCreate(['key' => $key], [

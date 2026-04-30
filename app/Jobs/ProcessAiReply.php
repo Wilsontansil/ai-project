@@ -36,9 +36,16 @@ class ProcessAiReply implements ShouldQueue
     public int $tries = 3;
 
     /**
-     * @var int[] Back-off in seconds between retries.
+     * Kill the job if it exceeds this many seconds.
+     * Must be ≤ worker --timeout and < queue retry_after.
      */
-    public array $backoff = [10, 30];
+    public int $timeout = 180;
+
+    /**
+     * @var int[] Back-off in seconds between retries.
+     * Generous delays — OpenAI/tool latency can be 60-120 s.
+     */
+    public array $backoff = [60, 120];
 
     public function __construct(
         public readonly string $channel,
@@ -62,7 +69,8 @@ class ProcessAiReply implements ShouldQueue
         }
 
         // Prevent parallel replies for the same customer/channel.
-        if (!$aiService->acquireAiProcessingLock($this->chatId, $this->channel, 120)) {
+        // Lock TTL matches $timeout so it auto-expires if the process is killed.
+        if (!$aiService->acquireAiProcessingLock($this->chatId, $this->channel, 180)) {
             $aiService->bufferDebouncedMessage($this->chatId, $text, $this->channel);
             Log::info('ProcessAiReply skipped because another job is processing', [
                 'channel' => $this->channel,

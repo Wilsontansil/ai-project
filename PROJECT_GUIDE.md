@@ -134,7 +134,8 @@ Telegram and WhatsApp webhooks dispatch a `ProcessAiReply` queue job instead of 
 ### ProcessAiReply Job (`app/Jobs/ProcessAiReply.php`)
 
 - **Queue:** `database` (default Laravel queue connection)
-- **Retries:** 3 total attempts with backoff `[10, 30]` seconds
+- **Retries:** 3 total attempts with backoff `[60, 120]` seconds
+- **Timeout:** 180 seconds (`$timeout` property — worker will kill job after this)
 - **Channels:** `telegram`, `whatsapp` (LiveChat stays synchronous)
 - **Steps:** Resolve customer → build agent context → save user message → send typing indicator → call OpenAI → stop typing → save assistant message → send reply → record metrics
 - **Config reads:** ProjectSetting values (bot tokens, WAHA URLs) are read at job execution time, not serialization, to avoid stale tokens.
@@ -142,14 +143,17 @@ Telegram and WhatsApp webhooks dispatch a `ProcessAiReply` queue job instead of 
 ### Running the Queue Worker
 
 ```bash
-# Development (restarts on code changes)
-php artisan queue:listen --tries=1 --timeout=0
-
-# Production (faster, no auto-restart)
-php artisan queue:work --tries=3
+# Development & Production
+php artisan queue:work --tries=3 --backoff=60 --timeout=180
 ```
 
-The `composer dev` script starts `queue:listen` automatically alongside the dev server.
+The `composer dev` script starts `queue:work --tries=3 --backoff=60 --timeout=180` automatically alongside the dev server.
+
+**Timing chain** (must be maintained in sync):
+
+- Job `$timeout` = 180 s
+- Worker `--timeout` = 180 s
+- `DB_QUEUE_RETRY_AFTER` / `REDIS_QUEUE_RETRY_AFTER` = 210 s (> timeout — prevents premature re-queue)
 
 ## Support Classes (`app/Support/`)
 

@@ -72,7 +72,8 @@ DB_CONNECTION=sqlite
 
 # Queue
 QUEUE_CONNECTION=database
-DB_QUEUE_RETRY_AFTER=150
+DB_QUEUE_RETRY_AFTER=210
+REDIS_QUEUE_RETRY_AFTER=210
 
 # Cache — gunakan file jika Redis belum terinstall
 CACHE_STORE=file
@@ -108,7 +109,7 @@ AGENT_KODE=PG
 ### Menjalankan Queue Worker (Manual)
 
 ```bash
-php artisan queue:work --tries=3 --backoff=10 --timeout=120
+php artisan queue:work --tries=3 --backoff=60 --timeout=180
 ```
 
 ---
@@ -195,7 +196,8 @@ DB_PASSWORD=StrongPassword123!
 
 # Queue — Redis
 QUEUE_CONNECTION=redis
-DB_QUEUE_RETRY_AFTER=150
+DB_QUEUE_RETRY_AFTER=210
+REDIS_QUEUE_RETRY_AFTER=210
 REDIS_CLIENT=phpredis
 REDIS_HOST=127.0.0.1
 REDIS_PASSWORD=your_redis_password
@@ -253,7 +255,7 @@ Buat file `/etc/supervisor/conf.d/laravel-worker.conf`:
 ```ini
 [program:laravel-worker]
 process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/ai-project/artisan queue:work redis --sleep=3 --tries=3 --backoff=10 --timeout=120 --max-time=3600
+command=php /var/www/ai-project/artisan queue:work redis --sleep=3 --tries=3 --backoff=60 --timeout=180 --max-time=3600
 autostart=true
 autorestart=true
 stopasgroup=true

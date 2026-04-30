@@ -56,7 +56,7 @@ class AIService
 
         $systemPrompt = $this->promptBuilder->buildSystemPrompt($chatAgent);
         $toolDefinitions = $this->toolDispatcher->getToolDefinitions($chatAgent);
-        $history = $this->conversationHistory->load($chatId, $channel);
+        $history = $this->conversationHistory->load($chatId, $channel, $chatAgent);
         $isNewSession = empty($history);
         $contextPrompt = $this->promptBuilder->buildAgentContextPrompt($agentContext, $channel);
         $activeHistory = $history;
@@ -156,7 +156,7 @@ class AIService
 
             if ($assistantReply !== null) {
                 $assistantReply = $this->replyFormatter->prepare($activeHistory, $assistantReply);
-                $this->conversationHistory->save($chatId, $activeHistory, $message, $assistantReply, $channel);
+                $this->conversationHistory->save($chatId, $activeHistory, $message, $assistantReply, $channel, $chatAgent);
 
                 return $assistantReply;
             }
@@ -173,7 +173,7 @@ class AIService
             }
 
             $assistantReply = $this->replyFormatter->prepare($activeHistory, $assistantReply);
-            $this->conversationHistory->save($chatId, $activeHistory, $message, $assistantReply, $channel);
+            $this->conversationHistory->save($chatId, $activeHistory, $message, $assistantReply, $channel, $chatAgent);
 
             return $assistantReply;
         } catch (\OpenAI\Exceptions\RateLimitException $e) {

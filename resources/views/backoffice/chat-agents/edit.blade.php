@@ -137,6 +137,13 @@
                             step="0.1" />
                     </div>
                     <div>
+                        <label for="max_history_messages"
+                            class="bo-label">{{ __('backoffice.pages.chat_agents.max_history_messages') }}</label>
+                        <input id="max_history_messages" type="number" name="max_history_messages"
+                            value="{{ old('max_history_messages', $agent->max_history_messages ?? 20) }}" min="2"
+                            max="100" step="1" />
+                    </div>
+                    <div>
                         <label class="bo-checkbox-label">
                             <input type="checkbox" name="is_enabled" value="1"
                                 {{ old('is_enabled', $agent->is_enabled) ? 'checked' : '' }} />

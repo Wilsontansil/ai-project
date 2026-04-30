@@ -137,6 +137,7 @@ return [
             'disabled' => 'Nonaktif',
             'no_description' => 'Tanpa deskripsi',
             'max_tokens' => 'Maks token',
+            'max_history_messages' => 'Maks history messages',
             'temp' => 'Suhu',
             'message_await_seconds' => 'Message Await (detik)',
             'message_await_help' => 'Delay sebelum AI merespons pesan user (0-15 detik).',

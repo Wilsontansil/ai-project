@@ -100,6 +100,12 @@
                         min="0" max="2" step="0.1" />
                 </div>
                 <div>
+                    <label for="max_history_messages"
+                        class="bo-label">{{ __('backoffice.pages.chat_agents.max_history_messages') }}</label>
+                    <input id="max_history_messages" type="number" name="max_history_messages"
+                        value="{{ old('max_history_messages', 20) }}" min="2" max="100" step="1" />
+                </div>
+                <div>
                     <label for="message_await_seconds"
                         class="bo-label">{{ __('backoffice.pages.chat_agents.message_await_seconds') }}</label>
                     <input id="message_await_seconds" type="number" name="message_await_seconds"

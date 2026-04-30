@@ -137,6 +137,7 @@ return [
             'disabled' => 'Disabled',
             'no_description' => 'No description',
             'max_tokens' => 'Max tokens',
+            'max_history_messages' => 'Max history messages',
             'temp' => 'Temp',
             'message_await_seconds' => 'Message Await (seconds)',
             'message_await_help' => 'Delay before AI responds to a user message (0-15 seconds).',

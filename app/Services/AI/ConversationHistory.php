@@ -2,6 +2,7 @@
 
 namespace App\Services\AI;
 
+use App\Models\ChatAgent;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -20,7 +21,7 @@ class ConversationHistory
     /** If chat is idle longer than this, treat next message as a fresh session. */
     private int $inactivityMinutes = 60;
 
-    public function load(?string $chatId, string $channel = ''): array
+    public function load(?string $chatId, string $channel = '', ?ChatAgent $chatAgent = null): array
     {
         if (!$chatId) {
             return [];
@@ -37,10 +38,16 @@ class ConversationHistory
 
         $history = Cache::get($this->key($chatId, $channel), []);
 
-        return is_array($history) ? $history : [];
+        if (!is_array($history)) {
+            return [];
+        }
+
+        $maxMessages = $this->resolveMaxMessages($chatAgent);
+
+        return array_slice($history, -$maxMessages);
     }
 
-    public function save(?string $chatId, array $history, string $userMessage, string $assistantReply, string $channel = ''): void
+    public function save(?string $chatId, array $history, string $userMessage, string $assistantReply, string $channel = '', ?ChatAgent $chatAgent = null): void
     {
         if (!$chatId) {
             return;
@@ -50,7 +57,8 @@ class ConversationHistory
         $history[] = ['role' => 'assistant', 'content' => $assistantReply];
 
         // Keep only recent messages to control token usage.
-        $history = array_slice($history, -$this->maxMessages);
+        $maxMessages = $this->resolveMaxMessages($chatAgent);
+        $history = array_slice($history, -$maxMessages);
 
         $ttl = now()->addHours($this->ttlHours);
         Cache::put($this->key($chatId, $channel), $history, $ttl);
@@ -79,5 +87,12 @@ class ConversationHistory
         $prefix = $channel !== '' ? $channel . ':' : '';
 
         return 'chat_last_active:' . $prefix . $chatId;
+    }
+
+    private function resolveMaxMessages(?ChatAgent $chatAgent): int
+    {
+        $value = (int) ($chatAgent?->max_history_messages ?? $this->maxMessages);
+
+        return max(2, min($value, 100));
     }
 }

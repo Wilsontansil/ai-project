@@ -15,6 +15,7 @@ class ChatAgent extends Model
         'system_prompt',
         'model',
         'max_tokens',
+        'max_history_messages',
         'temperature',
         'message_await_seconds',
         'timezone',
@@ -32,6 +33,7 @@ class ChatAgent extends Model
         'stop_ai_after_handoff' => 'boolean',
         'silent_handoff' => 'boolean',
         'temperature' => 'float',
+        'max_history_messages' => 'integer',
         'message_await_seconds' => 'integer',
         'meta' => 'array',
     ];

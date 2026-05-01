@@ -421,7 +421,7 @@ Catatan:
                 'is_active' => true,
             ],
             [
-                'title' => 'Link & Pola',
+               'title' => 'Link & Pola',
                'content' => 'PANDUAN LINK & POLA (JAWAB CEPAT DAN SPESIFIK)
 
    ATURAN INTENT:
@@ -432,64 +432,21 @@ Catatan:
 
    [RTP]
    URL RTP resmi:
-   https://rtpcmbet95.xyz/
+   {rtp_url}
 
    [APK]
    URL APK resmi:
-   https://apk.hi11office.com/CMBET(2.0.6).apk
+   {apk_url}
 
-   [POLA GACOR HARI INI]
-   PGSOFT:
-   - Mahjong Ways 2
-   - Anubis Wrath
-   - Candy Bonanza
-   - Wild Bandito
-   - Wild Bounty Showdown
+   [Game Gacor / Slot Gacor]
+   {game_gacor}
 
-   Pragmatic Play:
-   - Fortune of Olympus
-   - Gates of Olympus Dice
-   - Sweet Bonanza Super Scatter
-   - Starlight Archer 1000
-   - 5 Lions Megaways
-
-   Fastspin:
-   - Mahjong Princess
-   - Caribbean Riches
-   - Golden Moon Empire
-   - Jungle Quest
-   - Pai Gow Ways
-
-   [POLA VIP]
-   POLA MAHJONG WAYS 1
-   - Turbo ON - Manual 10x
-   - Turbo ON - Auto 10x
-   - Turbo OFF - Manual 15x
-   - Rekomendasi bet: 400 - 8.000
-
-   POLA WILD BANDITO
-   - Turbo ON - Auto 30x
-   - Turbo ON - Manual 18x
-   - Turbo OFF - Auto 30x
-   - Turbo ON - Manual 12x
-   - Rekomendasi bet: 400
-
-   POLA MAHJONG WAYS 2
-   - Turbo ON - Manual 14x
-   - Turbo ON - Auto 30x
-   - Turbo OFF - Manual 10x
-   - Rekomendasi bet: 400 - 8.000
-
-   POLA GATE OF OLYMPUS 1000
-   - ON/OFF/ON - 20 Auto DC ON
-   - OFF/ON/ON - 10 Manual DC OFF
-   - OFF/ON/ON - 30 Auto DC OFF
-   - OFF/OFF/ON - 50 Manual DC ON
-   - Buy Spin disarankan: 20 ribu x5 atau 60 ribu x3
+   [POLA VIP / POLA GACOR]
+   {pola_gacor}
 
    CATATAN RESPON AI:
    - Jangan campur dengan topik bonus/deposit jika user tidak minta.
-   - Jika user hanya menulis "rtp", "apk", atau "pola gacor", jawab dengan sopan.',
+   - Jika user hanya menulis "rtp", "apk", "game gacor" atau "pola gacor", jawab dengan sopan.',
                 'source' => 'manual',
                 'file_name' => null,
                 'is_active' => true,

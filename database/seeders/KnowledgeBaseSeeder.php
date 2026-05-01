@@ -489,7 +489,7 @@ Catatan:
 
    CATATAN RESPON AI:
    - Jangan campur dengan topik bonus/deposit jika user tidak minta.
-   - Jika user hanya menulis "rtp", "apk", atau "pola gacor", jawab langsung tanpa pembuka panjang.',
+   - Jika user hanya menulis "rtp", "apk", atau "pola gacor", jawab dengan sopan.',
                 'source' => 'manual',
                 'file_name' => null,
                 'is_active' => true,

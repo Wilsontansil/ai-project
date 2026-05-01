@@ -11,6 +11,8 @@ class SystemConfig extends Model
 {
     protected $fillable = [
         'key',
+        'label',
+        'type',
         'value',
         'description',
         'source_type',

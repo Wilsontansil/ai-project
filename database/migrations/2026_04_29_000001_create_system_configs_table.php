@@ -11,6 +11,8 @@ return new class extends Migration
         Schema::create('system_configs', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique();
+            $table->string('label')->nullable();
+            $table->string('type')->nullable();
             $table->text('value')->nullable();
             $table->text('description')->nullable();
             $table->string('source_type', 32)->default('manual');

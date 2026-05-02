@@ -956,7 +956,6 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => null,
             ],
-
             // ─── LOTTERY / TOGEL tools ───
             [
                 'tool_name' => 'checkPoolResult',

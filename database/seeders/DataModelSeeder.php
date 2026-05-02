@@ -394,6 +394,38 @@ class DataModelSeeder extends Seeder
         );
 
         DataModel::updateOrCreate(
+            ['slug' => 'agent-domains'],
+            [
+                'model_name' => 'AgentDomain',
+                'description' => 'Agent domain data model schema.',
+                'table_name' => 'agent_domains',
+                'connection_name' => 'mysqlgame',
+                'fields' => [
+                    'id' => ['type' => 'bigint unsigned', 'required' => false],
+                    'domain' => ['type' => 'varchar(125)', 'required' => false],
+                    'headertag' => ['type' => 'tinyint(1)', 'required' => false],
+                    'noindex' => ['type' => 'tinyint(1)', 'required' => false],
+                    'isapk' => ['type' => 'tinyint(1)', 'required' => false],
+                    'ispromo' => ['type' => 'tinyint(1)', 'required' => false],
+                    'issubdomain' => ['type' => 'tinyint(1)', 'required' => false],
+                    'subdomain' => ['type' => 'varchar(125)', 'required' => false],
+                    'agent' => ['type' => 'varchar(125)', 'required' => true, 'value' => config('services.agent.kode')],
+                    'utama' => ['type' => "enum('on','off')", 'required' => false],
+                    'zone_id' => ['type' => 'text', 'required' => false],
+                    'cloudflare_api_key' => ['type' => 'varchar(125)', 'required' => false],
+                    'cloudflare_email' => ['type' => 'varchar(125)', 'required' => false],
+                    'cloudflare_account_id' => ['type' => 'varchar(125)', 'required' => false],
+                    'IP' => ['type' => 'varchar(125)', 'required' => false],
+                    'isDNS' => ['type' => 'tinyint(1)', 'required' => false],
+                    'isSSL' => ['type' => 'tinyint(1)', 'required' => false],
+                    'isIPv6' => ['type' => 'tinyint(1)', 'required' => false],
+                    'created_at' => ['type' => 'timestamp', 'required' => false],
+                    'updated_at' => ['type' => 'timestamp', 'required' => false],
+                ],
+            ]
+        );
+
+        DataModel::updateOrCreate(
             ['slug' => 'pools-periode'],
             [
                 'model_name' => 'PoolsPeriode',

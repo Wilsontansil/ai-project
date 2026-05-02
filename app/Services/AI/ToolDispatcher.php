@@ -8,7 +8,6 @@ use App\Models\Tool;
 use App\Services\AI\ToolEngines\DataModelQueryEngine;
 use App\Services\AI\ToolEngines\HttpToolEngine;
 use App\Services\AI\ToolEngines\InfoToolEngine;
-use App\Services\AI\ToolEngines\WebScraperToolEngine;
 use App\Support\MetricsCollector;
 use App\Services\AI\EscalationSummaryService;
 use Illuminate\Support\Collection;
@@ -32,7 +31,6 @@ class ToolDispatcher
         private readonly InfoToolEngine $infoEngine,
         private readonly HttpToolEngine $httpEngine,
         private readonly DataModelQueryEngine $dataModelEngine,
-        private readonly WebScraperToolEngine $webScraperEngine,
     ) {}
 
     // ─── Public API ──────────────────────────────────────────────────────────
@@ -567,7 +565,6 @@ class ToolDispatcher
             'get' => $this->dataModelEngine->executeSingle($tool, $arguments),
             'get_multiple' => $this->dataModelEngine->executeMultiple($tool, $arguments),
             'update' => $this->httpEngine->execute($tool, $arguments),
-            'web_scraper' => $this->webScraperEngine->execute($tool, $arguments),
             default => [
                 'mode' => 'direct',
                 'reply' => "Tool {$tool->display_name} belum dikonfigurasi.",

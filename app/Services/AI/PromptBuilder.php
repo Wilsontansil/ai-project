@@ -7,7 +7,6 @@ use App\Models\AgentRule;
 use App\Models\KnowledgeBase;
 use App\Models\SystemConfig;
 use App\Models\Tool;
-use App\Models\WebsitePage;
 use App\Services\AI\KnowledgeBaseQueryGuard;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -63,8 +62,6 @@ class PromptBuilder
         if ($kbPrompt !== '') {
             $basePrompt .= "\n\n" . $kbPrompt;
         }
-
-        $basePrompt .= "\n\n" . $this->getWebsitePagesPrompt();
 
         $escalationPrompt = $this->getEscalationPrompt($chatAgent);
         if ($escalationPrompt !== '') {
@@ -321,37 +318,6 @@ PROMPT;
         }
 
         return "ALIH KE CS MANUSIA:\nCoba bantu selesaikan masalah customer terlebih dahulu. {$condition}, cukup tambahkan penanda tersembunyi persis di baris terakhir balasanmu: [ESCALATE] — tanpa spasi, tanpa teks tambahan setelahnya. Sistem akan otomatis mengirimkan pesan tunggu kepada customer. Gunakan [ESCALATE] setiap kali kondisi eskalasi terpenuhi — bahkan jika sudah pernah digunakan sebelumnya dalam percakapan ini.";
-    }
-
-    private function getWebsitePagesPrompt(): string
-    {
-        try {
-            $pages = WebsitePage::where('status', 'scraped')
-                ->orderBy('id')
-                ->get(['url', 'title', 'summary']);
-
-            if ($pages->isEmpty()) {
-                return "HALAMAN WEBSITE RESMI KAMI:\nSaat ini tidak ada URL website yang terdaftar. Jika customer bertanya tentang website atau link, sampaikan bahwa informasi URL belum tersedia.";
-            }
-
-            $lines = [
-                'HALAMAN WEBSITE RESMI KAMI:',
-                'Halaman-halaman berikut adalah milik website resmi kami sendiri. Kamu BOLEH dan HARUS membagikan URL ini ke customer kapanpun relevan — ini bukan website pihak ketiga, jadi tidak perlu ragu.',
-            ];
-
-            foreach ($pages as $page) {
-                $label = $page->title ?: $page->url;
-                $line = "- {$label}: {$page->url}";
-                if (!empty($page->summary)) {
-                    $line .= "\n  Ringkasan: {$page->summary}";
-                }
-                $lines[] = $line;
-            }
-
-            return implode("\n", $lines);
-        } catch (\Throwable) {
-            return '';
-        }
     }
 
     private function getBotName(): string

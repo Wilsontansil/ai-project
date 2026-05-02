@@ -14,7 +14,6 @@ use App\Http\Controllers\Backoffice\ToolController;
 use App\Http\Controllers\Backoffice\RoleController;
 use App\Http\Controllers\Backoffice\UserController;
 use App\Http\Controllers\Backoffice\SystemConfigController;
-use App\Http\Controllers\Backoffice\WebsitePageController;
 use Illuminate\Support\Facades\Route;
 
 $entryRedirect = fn () => redirect()->route('login');
@@ -138,16 +137,6 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
         Route::get('/backoffice/users/{user}/password', [UserController::class, 'editPassword'])->name('backoffice.users.password.edit');
         Route::put('/backoffice/users/{user}/password', [UserController::class, 'updatePassword'])->name('backoffice.users.password.update');
         Route::delete('/backoffice/users/{user}', [UserController::class, 'destroy'])->name('backoffice.users.destroy');
-    });
-
-    // Website Pages (admin only)
-    Route::middleware('permission:manage settings')->group(function () {
-        Route::get('/backoffice/website-pages', [WebsitePageController::class, 'index'])->name('backoffice.website-pages.index');
-        Route::get('/backoffice/website-pages/create', [WebsitePageController::class, 'create'])->name('backoffice.website-pages.create');
-        Route::post('/backoffice/website-pages', [WebsitePageController::class, 'store'])->name('backoffice.website-pages.store');
-        Route::get('/backoffice/website-pages/{websitePage}', [WebsitePageController::class, 'show'])->name('backoffice.website-pages.show');
-        Route::post('/backoffice/website-pages/{websitePage}/rescrape', [WebsitePageController::class, 'rescrape'])->name('backoffice.website-pages.rescrape');
-        Route::delete('/backoffice/website-pages/{websitePage}', [WebsitePageController::class, 'destroy'])->name('backoffice.website-pages.destroy');
     });
 
     Route::post('/backoffice/logout', [AuthController::class, 'logout'])->name('logout');

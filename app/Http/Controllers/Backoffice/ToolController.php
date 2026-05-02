@@ -118,7 +118,7 @@ class ToolController extends Controller
     private function toolValidationRules(bool $isCreate = false): array
     {
         $rules = [
-            'type' => ['required', 'string', 'in:info,get,update,get_multiple,web_scraper'],
+            'type' => ['required', 'string', 'in:info,get,update,get_multiple'],
             'display_name' => ['required', 'string', 'max:120'],
             'description' => ['nullable', 'string', 'max:500'],
             'params' => ['nullable', 'array'],

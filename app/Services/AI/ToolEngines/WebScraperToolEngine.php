@@ -140,7 +140,7 @@ class WebScraperToolEngine
                     'timeout' => 15,
                     'user_agent' => 'Mozilla/5.0 (compatible; AIBot/1.0)',
                     'follow_location' => true,
-                    'max_redirects' => 3,
+                    'max_redirects' => 10,
                 ],
                 'ssl' => [
                     'verify_peer' => true,

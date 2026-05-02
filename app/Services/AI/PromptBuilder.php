@@ -328,7 +328,7 @@ PROMPT;
         try {
             $pages = WebsitePage::where('status', 'scraped')
                 ->orderBy('id')
-                ->get(['url', 'title']);
+                ->get(['url', 'title', 'summary']);
 
             if ($pages->isEmpty()) {
                 return "HALAMAN WEBSITE RESMI KAMI:\nSaat ini tidak ada URL website yang terdaftar. Jika customer bertanya tentang website atau link, sampaikan bahwa informasi URL belum tersedia.";
@@ -341,7 +341,11 @@ PROMPT;
 
             foreach ($pages as $page) {
                 $label = $page->title ?: $page->url;
-                $lines[] = "- {$label}: {$page->url}";
+                $line = "- {$label}: {$page->url}";
+                if (!empty($page->summary)) {
+                    $line .= "\n  Ringkasan: {$page->summary}";
+                }
+                $lines[] = $line;
             }
 
             return implode("\n", $lines);

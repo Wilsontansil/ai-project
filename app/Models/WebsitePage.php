@@ -11,6 +11,7 @@ class WebsitePage extends Model
         'title',
         'content',
         'meta',
+        'summary',
         'status',
         'error_message',
         'last_scraped_at',

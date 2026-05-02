@@ -5,6 +5,7 @@ namespace App\Services\AI\ToolEngines;
 use App\Models\Tool;
 use App\Models\WebsitePage;
 use Illuminate\Support\Facades\Log;
+use OpenAI;
 
 class WebScraperToolEngine
 {
@@ -51,6 +52,43 @@ class WebScraperToolEngine
                 'page_count' => $pages->count(),
             ],
         ];
+    }
+
+    /**
+     * Use OpenAI to generate a 2-3 sentence summary of scraped webpage content.
+     * Returns null if the API key is missing, content is empty, or the call fails.
+     */
+    public static function summarizeContent(string $content, string $apiKey): ?string
+    {
+        if (trim($content) === '' || $apiKey === '') {
+            return null;
+        }
+
+        try {
+            $client = OpenAI::client($apiKey);
+            // Keep it cheap: first 3000 chars is enough to identify brand + purpose
+            $snippet = mb_substr($content, 0, 3000);
+
+            $response = $client->chat()->create([
+                'model' => 'gpt-4.1-mini',
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'Summarize the following webpage content in 2-3 concise sentences. Focus on what the website or business is about, its name/brand, and its main products or services. Be specific.',
+                    ],
+                    ['role' => 'user', 'content' => $snippet],
+                ],
+                'max_completion_tokens' => 150,
+            ]);
+
+            $summary = trim((string) ($response->choices[0]->message->content ?? ''));
+
+            return $summary !== '' ? $summary : null;
+        } catch (\Throwable $e) {
+            Log::warning('Website summary generation failed', ['error' => $e->getMessage()]);
+
+            return null;
+        }
     }
 
     /**

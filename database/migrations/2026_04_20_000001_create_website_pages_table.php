@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('title')->nullable();
             $table->longText('content')->nullable();
             $table->json('meta')->nullable();
+            $table->text('summary')->nullable();
             $table->enum('status', ['pending', 'scraped', 'failed'])->default('pending');
             $table->text('error_message')->nullable();
             $table->timestamp('last_scraped_at')->nullable();

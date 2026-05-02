@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Models\ProjectSetting;
 use App\Models\WebsitePage;
 use App\Services\AI\ToolEngines\WebScraperToolEngine;
 use Illuminate\Http\RedirectResponse;
@@ -45,10 +46,14 @@ class WebsitePageController extends Controller
         $result = WebScraperToolEngine::scrapeUrl($page->url);
 
         if ($result['error'] === null) {
+            $apiKey = (string) ProjectSetting::getValue('openai_api_key', config('services.openai.api_key', ''));
+            $summary = WebScraperToolEngine::summarizeContent((string) ($result['content'] ?? ''), $apiKey);
+
             $page->update([
                 'title' => $result['title'],
                 'content' => $result['content'],
                 'meta' => $result['meta'],
+                'summary' => $summary,
                 'status' => 'scraped',
                 'error_message' => null,
                 'last_scraped_at' => now(),
@@ -83,10 +88,14 @@ class WebsitePageController extends Controller
         $result = WebScraperToolEngine::scrapeUrl($websitePage->url);
 
         if ($result['error'] === null) {
+            $apiKey = (string) ProjectSetting::getValue('openai_api_key', config('services.openai.api_key', ''));
+            $summary = WebScraperToolEngine::summarizeContent((string) ($result['content'] ?? ''), $apiKey);
+
             $websitePage->update([
                 'title' => $result['title'],
                 'content' => $result['content'],
                 'meta' => $result['meta'],
+                'summary' => $summary,
                 'status' => 'scraped',
                 'error_message' => null,
                 'last_scraped_at' => now(),

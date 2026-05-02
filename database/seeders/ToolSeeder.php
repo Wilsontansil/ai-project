@@ -17,6 +17,7 @@ class ToolSeeder extends Seeder
         $withdrawModel = DataModel::query()->where('slug', 'withdraw')->first();
         $promoModel = DataModel::query()->where('slug', 'promo')->first();
         $gameModel = DataModel::query()->where('slug', 'game')->first();
+        $rekeningModel = DataModel::query()->where('slug', 'rekenings')->first();
         $providerModel = DataModel::query()->where('slug', 'providers')->first();
         $poolsPeriodeModel = DataModel::query()->where('slug', 'pools-periode')->first();
 
@@ -320,6 +321,39 @@ class ToolSeeder extends Seeder
                             'direction' => 'asc',
                         ],
                         'limit' => 10,
+                    ],
+                ],
+            ],
+            [
+                'tool_name' => 'Rekening',
+                'category' => 'payment',
+                'display_name' => 'Rekening',
+                'description' => 'Menyediakan informasi list Rekening yang "Active"',
+                'slug' => 'rekening',
+                'type' => 'get',
+                'is_enabled' => true,
+                'data_model_id' => $rekeningModel?->id,
+                'parameters' => null,
+                'endpoints' => null,
+                'keywords' => null,
+                'tool_rules' => "- List rekening Active\n- Listkan semua Rekening\n- Berikan detail bank, nama, norek\n- Bank yang di list adalah untuk Manual Deposit",
+                'information_text' => null,
+                'meta' => [
+                    'query' => [
+                        'select' => [],
+                        'conditions' => [
+                            [
+                                'field' => 'bank',
+                                'operator' => '!=',
+                                'source' => 'static',
+                                'value' => 'Auto Bank',
+                            ],
+                        ],
+                        'order_by' => [
+                            'field' => 'seq',
+                            'direction' => 'asc',
+                        ],
+                        'limit' => 50,
                     ],
                 ],
             ],

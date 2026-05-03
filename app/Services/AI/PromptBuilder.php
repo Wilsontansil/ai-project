@@ -316,7 +316,6 @@ PROMPT;
         if ($condition === '') {
             return '';
         }
-
         return "ALIH KE CS MANUSIA:\nCoba bantu selesaikan masalah customer terlebih dahulu. {$condition}, cukup tambahkan penanda tersembunyi persis di baris terakhir balasanmu: [ESCALATE] — tanpa spasi, tanpa teks tambahan setelahnya. Sistem akan otomatis mengirimkan pesan tunggu kepada customer. Gunakan [ESCALATE] setiap kali kondisi eskalasi terpenuhi — bahkan jika sudah pernah digunakan sebelumnya dalam percakapan ini.";
     }
 

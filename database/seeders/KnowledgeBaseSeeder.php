@@ -91,7 +91,7 @@ class KnowledgeBaseSeeder extends Seeder
             ],
             [
                 'title' => 'Bonus',
-                'content' => 'A. BONUS MISI KLAIM , Harus Di Claim di Menu Reward.
+                'content' => 'A. BONUS MISI KLAIM , Harus Di Claim di Menu Reward. Bonus ini harus di Claim sebelum bermain game agar tidak expired.
 1. Bonus Ajak Teman (Referral Bonus) [{ev_ref}]
 Program Referral Bonus adalah program yang memungkinkan pengguna mendapatkan bonus dengan mengajak teman untuk bergabung dan bermain. 
 

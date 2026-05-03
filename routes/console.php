@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\SystemConfig;
 use App\Services\DataRetentionService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -29,13 +28,6 @@ Artisan::command('retention:prune {--conversation-days=} {--dry-run}', function 
 })->purpose('Prune expired conversations using retention settings');
 
 // Auto-sync all datamodel_lookup SystemConfig values every hour.
-Schedule::call(function () {
-    $configs = SystemConfig::where('source_type', 'datamodel_lookup')->get();
-    foreach ($configs as $config) {
-        $resolved = $config->resolveEffectiveValue();
-        if ($resolved !== null) {
-            $config->updateQuietly(['value' => $resolved]);
-        }
-    }
-    SystemConfig::bumpCacheVersion();
-})->hourly()->name('system-config:sync-datamodel')->withoutOverlapping();
+Schedule::command('system-config:sync-datamodel')
+    ->hourly()
+    ->withoutOverlapping();

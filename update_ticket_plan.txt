@@ -1,0 +1,175 @@
+UPDATE_TICKET PLAN (DRAFT ONLY - NOT EXECUTED)
+Date: 2026-05-03
+Scope: Ticket-aware tool flow for reset password -> verify deposit proof, with strict trigger control and response-data pass-through.
+
+==================================================
+1) OBJECTIVE
+==================================================
+Build a robust update_ticket flow where:
+- AI explains reason first before ticket/process escalation.
+- verifyDeposit must NOT trigger freely.
+- verifyDeposit can trigger only from valid chain context or active ticket context.
+- Values from previous endpoint response can be passed into next step arguments.
+- Customer can track progress by ticket id when asking status.
+
+This file is planning only. No runtime behavior changed yet.
+
+==================================================
+2) CURRENT GAPS (AS-IS)
+==================================================
+- verifyDeposit chain target exists in resetPassword chain_rules, but verifyDeposit tool block is currently commented in seeder.
+- Current chain carry mechanism only forwards previous request args (carry_args), not endpoint response_data values.
+- No hard gate yet to enforce "chain_only" or "requires_ticket" tools.
+- No persisted ticket context yet for generic pending action lifecycle.
+
+==================================================
+3) TARGET BEHAVIOR (TO-BE)
+==================================================
+A) Trigger gating
+- verifyDeposit is callable only when one of these is true:
+  1) It is reached through chain rule from resetPassword failure, or
+  2) There is an active ticket with matching issue_type/action.
+- Direct AI call without valid context must be blocked gracefully.
+
+B) Reason-first policy
+- Before creating/opening ticket or requiring extra verification, AI must send reason and request confirmation.
+- Example:
+  "Demi keamanan akun, saldo di atas batas perlu verifikasi tambahan. Boleh kami lanjutkan proses verifikasi sekarang?"
+
+C) Response-data pass-through
+- From resetPassword response payload, selected fields (e.g. data.id, data.username) can be mapped into pending carry context.
+- Next tool (verifyDeposit) receives both:
+  - carry_args (request-origin values), and
+  - carry_from_response (response-origin values).
+
+D) Status visibility
+- Ticket/status query returns concise info:
+  - ticket id
+  - status
+  - required action
+  - next step
+
+==================================================
+4) PROPOSED CONFIG EXTENSIONS
+==================================================
+Add/standardize tool meta flags:
+- meta.trigger_mode: "open" | "chain_only" | "ticket_only"
+- meta.requires_ticket: true/false
+- meta.allowed_source_tools: ["resetPassword"] (optional)
+
+Extend chain_rules schema:
+- carry_args: ["namarek", "norek", "bank"]
+- carry_from_response:
+  {
+    "player_id": "response_data.id",
+    "username": "response_data.username"
+  }
+
+Optional chain context payload in cache:
+- source_tool
+- reason_code
+- carry_args
+- carry_from_response values
+- created_at
+- expires_at
+
+==================================================
+5) PLANNED FLOW: RESET PASSWORD -> VERIFY DEPOSIT
+==================================================
+Step 1
+- User asks reset password.
+- resetPassword tool executes.
+
+Step 2
+- Endpoint returns failed with message "balance greater than 10000" + data payload.
+
+Step 3
+- Chain evaluator matches failure condition.
+- System stores pending chain context and mapped carry data.
+- AI sends reason + requests proof deposit (or confirmation first if strict consent gate enabled).
+
+Step 4
+- User sends screenshot proof.
+- verifyDeposit runs only if chain/ticket gate is valid.
+- verifyDeposit gets:
+  - namarek/norek/bank (carry_args),
+  - player_id/username (carry_from_response),
+  - extracted image values (depoamount/time).
+
+Step 5
+- API verification result returned.
+- If success -> continue final reset completion response.
+- If failure -> keep pending status with clear corrective instruction.
+
+==================================================
+6) TICKET MODEL PLAN (PHASED)
+==================================================
+Phase 1 (minimal)
+- Add ticket id and status handling only for high-risk chained flows.
+- Keep pending cache for backward compatibility.
+
+Phase 2 (generalized)
+- Expand to generic Pending Action Ticket for multiple cases:
+  - reset pass
+  - withdrawal dispute
+  - identity verification
+  - bonus claim exception
+
+Suggested statuses:
+- open
+- pending_customer
+- pending_admin
+- pending_system
+- resolved
+- closed
+- cancelled
+
+Suggested required_action examples:
+- upload_payment_proof
+- confirm_amount
+- verify_identity
+- wait_admin_review
+
+==================================================
+7) VALIDATION SCENARIOS (TO TEST LATER)
+==================================================
+Scenario A (allowed)
+- resetPassword fails with balance rule -> verifyDeposit prompt appears -> user sends proof -> verifyDeposit executes.
+
+Scenario B (blocked)
+- user directly asks verifyDeposit without prior resetPassword chain/ticket -> tool blocked with safe message.
+
+Scenario C (response pass-through)
+- resetPassword response_data.id and response_data.username are available to verifyDeposit without re-asking user.
+
+Scenario D (status query)
+- user asks status -> system returns ticket id + status + pending action.
+
+==================================================
+8) DEPLOYMENT STRATEGY (WHEN YOU CONTINUE)
+==================================================
+Order of implementation:
+1. Seeder/tool config alignment (verifyDeposit availability + metadata)
+2. Dispatcher gate checks (chain_only/ticket_only)
+3. Chain response mapping support (carry_from_response)
+4. Reason-first response guard
+5. Ticket persistence integration
+6. Scheduler reminders/escalation
+
+Rollback approach:
+- Keep existing behavior behind feature flags per tool meta.
+- Disable chain-only gates quickly if unexpected impact occurs.
+
+==================================================
+9) OPEN DECISIONS FOR NEXT SESSION
+==================================================
+- Ticket ID format: TKT-YYMMDD-XXXX or custom?
+- Strict confirmation required every time, or auto-create if user already sends proof?
+- TTL for chain context: 10 min or 30 min?
+- Should verifyDeposit remain hidden from OpenAI tool list when no context?
+
+==================================================
+10) NOTE
+==================================================
+This is a planning artifact only.
+No code execution or behavior change has been applied from this plan.

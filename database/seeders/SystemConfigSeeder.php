@@ -246,7 +246,7 @@ class SystemConfigSeeder extends Seeder
                 'type' => 'auto_update',
                 'data_model_id' => $settingsDataModelId,
                 'lookup_field' => 'kode',
-                'lookup_value' => 'bonus cashback day',
+                'lookup_value' => 'bonus_cashback_day',
                 'result_field' => 'value',
             ],
             [

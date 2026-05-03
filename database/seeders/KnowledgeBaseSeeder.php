@@ -397,8 +397,22 @@ Saya bantu jelaskan kembali info pendaftaran ya 😊',
             ],
             [
                 'title' => 'General',
-                'content' => 'PARTNER SITE HANDLING
+                'content' => 'GENERAL WEBSITE KNOWLEDGE
 
+Nama website utama: PGS
+PGS adalah situs game online terpercaya di Indonesia dengan sistem keamanan canggih, promo eksklusif, deposit QRIS cepat, dan layanan 24 jam nonstop.
+Domain utama: {main_domain}
+
+ATURAN JAWABAN WEBSITE:
+1. Jika user bertanya tentang website, nama website, domain, link, atau akses situs:
+   - Selalu sebutkan bahwa website adalah PGS
+   - Berikan ringkasan singkat tentang PGS
+   - Wajib sertakan URL domain utama: {main_domain}
+2. Jika user meminta link website:
+   - Berikan langsung URL: {main_domain}
+3. Jawaban harus singkat, jelas, dan relevan.
+
+PARTNER SITE HANDLING:
 Daftar situs partner:
 - CMBET
 - BIGMSG
@@ -406,16 +420,14 @@ Daftar situs partner:
 - IDXBIG
 
 Aturan respon:
-
-1. Jika user menanyakan atau menyebut salah satu nama situs di atas:
-   - Jawab bahwa situs tersebut adalah "web partner"
-
+1. Jika user menanyakan atau menyebut salah satu nama situs partner di atas:
+   - Jawab bahwa situs tersebut adalah web partner.
 2. Jika user menanyakan situs lain di luar daftar:
-   - Jawab bahwa tidak ada relasi atau tidak dikenal
+   - Jawab bahwa tidak ada relasi atau tidak dikenal.
 
 Catatan:
-- Jawaban harus singkat dan jelas
-- Jangan menambahkan informasi di luar konteks',
+- Jangan menambahkan informasi di luar konteks.
+- Prioritaskan jawaban ringkas dan langsung.',
                 'source' => 'manual',
                 'file_name' => null,
                 'is_active' => true,

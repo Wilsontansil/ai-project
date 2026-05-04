@@ -15,6 +15,7 @@ class ToolSeeder extends Seeder
 
         $depositModel = DataModel::query()->where('slug', 'deposit')->first();
         $withdrawModel = DataModel::query()->where('slug', 'withdraw')->first();
+        $bonusApkModel = DataModel::query()->where('slug', 'bonus-apk')->first();
         $promoModel = DataModel::query()->where('slug', 'promo')->first();
         $gameModel = DataModel::query()->where('slug', 'game')->first();
         $rekeningModel = DataModel::query()->where('slug', 'rekenings')->first();
@@ -925,6 +926,37 @@ class ToolSeeder extends Seeder
                         'select' => ['operatortime', 'status', 'remark'],
                         'order_by' => [
                             'field' => 'operatortime',
+                            'direction' => 'desc',
+                        ],
+                        'limit' => 5,
+                    ],
+                ],
+            ],
+            [
+                'tool_name' => 'checkBonusAPK',
+                'category' => 'bonus',
+                'display_name' => 'Check Bonus APK',
+                'description' => 'Memeriksa status klaim Bonus APK pemain berdasarkan username. Menampilkan daftar bonus APK terbaru beserta status dan keterangannya.',
+                'slug' => 'check-bonus-apk',
+                'type' => 'get',
+                'is_enabled' => true,
+                'data_model_id' => $bonusApkModel?->id,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'username' => ['type' => 'string', 'description' => 'Username pemain'],
+                    ],
+                    'required' => ['username'],
+                ],
+                'endpoints' => null,
+                // 'keywords' => ['cek bonus apk', 'check bonus apk', 'status bonus apk', 'bonus apk saya', 'bonus apk pending', 'klaim bonus apk'],
+                'tool_rules' => "- Periksa status klaim Bonus APK berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus APK terbaru milik pemain\n- Sertakan minimal data status, remark, dan keterangan\n- Urutkan dari klaim terbaru ke yang paling lama\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus APK untuk pemain tersebut",
+                'information_text' => null,
+                'meta' => [
+                    'query' => [
+                        'select' => ['status', 'remark', 'keterangan', 'claimed_at'],
+                        'order_by' => [
+                            'field' => 'claimed_at',
                             'direction' => 'desc',
                         ],
                         'limit' => 5,

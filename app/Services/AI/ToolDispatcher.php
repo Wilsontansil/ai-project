@@ -48,7 +48,11 @@ class ToolDispatcher
                 ->where('tool_name', '!=', '_bot_config')
                 ->where('is_enabled', true)
                 ->orderBy('id')
-                ->get();
+                ->get()
+                // Exclude chain-only tools: they must only run via a pending chain,
+                // never through direct user intent or AI tool-choice.
+                ->filter(fn (Tool $t) => ($t->meta['trigger_mode'] ?? null) !== 'chain_only')
+                ->values();
         } catch (\Throwable) {
             return collect();
         }
@@ -56,6 +60,7 @@ class ToolDispatcher
 
     /**
      * Build the tools array for the OpenAI chat payload.
+     * chain_only tools are excluded so OpenAI never knows they exist.
      *
      * @return array<int, array<string, mixed>>
      */
@@ -96,6 +101,24 @@ class ToolDispatcher
         foreach ($tools as $tool) {
             $arguments = $this->extractArguments($msg, $tool->tool_name);
             if ($arguments !== null) {
+                // Guard: if a chain-pending tool is waiting and OpenAI just called the
+                // *source* tool again (not the pending target), ignore this explicit call
+                // and fall through to Step 2 so the pending chain tool is executed instead.
+                // This prevents the source tool from re-running when the user is responding
+                // to a chain prompt (e.g. user sends deposit screenshot after resetPassword
+                // triggered verifyDeposit — OpenAI sees history + data and re-calls
+                // resetPassword, but we must redirect to verifyDeposit).
+                if ($pendingKey !== null) {
+                    $pendingTarget = Cache::get($pendingKey);
+                    if ($pendingTarget !== null && $pendingTarget !== $tool->tool_name) {
+                        Log::info('Skipped explicit tool_call: active chain pending for different tool', [
+                            'called_tool'   => $tool->tool_name,
+                            'pending_tool'  => $pendingTarget,
+                        ]);
+                        continue;
+                    }
+                }
+
                 // Guard against hallucinated tool_calls: if OpenAI calls a tool
                 // but the user's CURRENT message doesn't match any of its keywords
                 // and clearly matches a different tool, skip this call and let
@@ -251,6 +274,21 @@ class ToolDispatcher
         }
 
         if ($bestTool !== null && $bestScore > 0) {
+            // Guard: if a chain is pending, do not let a keyword match hijack it.
+            // The user's message might partially match a tool keyword while they are
+            // actually responding to a chain prompt (e.g. "ini bukti transfer" might
+            // score on a keyword). Fall through to Step 2 (pending resume) instead.
+            $pendingTarget = $pendingKey !== null ? Cache::get($pendingKey) : null;
+            if ($pendingTarget !== null && $pendingTarget !== $bestTool->tool_name) {
+                Log::info('Skipped keyword-match tool: active chain pending for different tool', [
+                    'matched_tool'  => $bestTool->tool_name,
+                    'pending_tool'  => $pendingTarget,
+                ]);
+                // $bestTool is not the chain target — fall through to intent router
+                // which will also be blocked below, ultimately letting Step 2 handle it.
+                goto skip_keyword_and_intent;
+            }
+
             $arguments = $bestTool->needsArguments()
                 ? $this->forceExtractArguments(
                     $client, $bestTool, $contextPrompt, $history, $userMessage, $model
@@ -288,6 +326,9 @@ class ToolDispatcher
         if ($intentRoutedReply !== null) {
             return $intentRoutedReply;
         }
+
+        // Label used by the pending-chain guard in Step 3 above.
+        skip_keyword_and_intent:
 
         return null;
     }
@@ -502,6 +543,18 @@ class ToolDispatcher
         ?string $pendingKey = null,
         ?string $pendingToolName = null
     ): ?string {
+        // Hard block: chain_only tools must never be dispatched unless they arrived
+        // here via a pending chain (pendingToolName is set and matches this tool).
+        // This is the last line of defence regardless of how the call reached dispatch().
+        if (($tool->meta['trigger_mode'] ?? null) === 'chain_only'
+            && $pendingToolName !== $tool->tool_name) {
+            Log::warning('Blocked direct dispatch of chain_only tool', [
+                'tool_name'    => $tool->tool_name,
+                'pending_name' => $pendingToolName,
+            ]);
+            return null;
+        }
+
         $engineStart = MetricsCollector::startTimer();
         $engineError = null;
 

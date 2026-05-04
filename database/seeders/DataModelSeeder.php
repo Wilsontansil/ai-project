@@ -438,7 +438,7 @@ class DataModelSeeder extends Seeder
                     'eventbonus_id' => ['type' => 'bigint', 'required' => false],
                     'player_id' => ['type' => 'bigint', 'required' => false],
                     'player' => ['type' => 'varchar', 'required' => false],
-                    'agent' => ['type' => 'varchar', 'required' => false],
+                    'agent' => ['type' => 'varchar', 'required' => true, 'value' => config('services.agent.kode')],
                     'amount' => ['type' => 'decimal', 'required' => false],
                     'multiplierTO' => ['type' => 'varchar', 'required' => false],
                     'depositcount' => ['type' => 'varchar', 'required' => false],

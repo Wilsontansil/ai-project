@@ -1194,6 +1194,53 @@ class ToolSeeder extends Seeder
                     ],
                 ],
             ],
+
+            // ─── CHANGE REKENING ───────────────────────────────────────────────
+            [
+                'tool_name'    => 'changeRekening',
+                'category'     => 'account',
+                'display_name' => 'Ganti Rekening',
+                'description'  => 'Permintaan ganti rekening bank player. Memerlukan data rekening lama, rekening baru, dan verifikasi identitas melalui gambar KTP.',
+                'slug'         => 'change-rekening',
+                'type'         => 'update',
+                'is_enabled'   => true,
+                'data_model_id' => null,
+                'parameters'   => [
+                    'type'       => 'object',
+                    'properties' => [
+                        'namarek'     => ['type' => 'string', 'description' => 'Nama pemilik rekening (Lama)'],
+                        'norek'       => ['type' => 'string', 'description' => 'Nomor rekening / Nomor Hp (E-wallet) (Lama)'],
+                        'bank'        => ['type' => 'string', 'description' => 'Nama bank / Nama (E-wallet) (Lama)'],
+                        'namarek_new' => ['type' => 'string', 'description' => 'Nama rekening (Baru)'],
+                        'norek_new'   => ['type' => 'string', 'description' => 'Nomor rekening (Baru)'],
+                        'nama_ktp'    => ['type' => 'string', 'description' => 'Nama lengkap yang diekstrak dari gambar KTP'],
+                    ],
+                    'required'   => ['namarek', 'norek', 'bank', 'namarek_new', 'norek_new', 'nama_ktp'],
+                ],
+                'endpoints'    => [
+                    'endpoint' => [
+                        'route' => 'https://api-stg.pilartestengine.com/aiservice/api/bank/change',
+                        'body'  => [
+                            'namarek'     => '$arg->namarek',
+                            'norek'       => '$arg->norek',
+                            'bank'        => '$arg->bank',
+                            'namarek_new' => '$arg->namarek_new',
+                            'norek_new'   => '$arg->norek_new',
+                            'nama_ktp'    => '$arg->nama_ktp',
+                            'agent'       => config('services.agent.kode'),
+                        ],
+                        'expected_response' => [
+                            'status'  => 200,
+                            'message' => 'Success',
+                            'data'    => (object) [],
+                        ],
+                    ],
+                ],
+                'keywords'         => null,
+                'tool_rules'       => "- Kumpulkan data rekening lama terlebih dahulu: namarek (nama pemilik rekening lama), norek (nomor rekening / nomor HP e-wallet lama), bank (nama bank / e-wallet lama)\n- Kumpulkan data rekening baru: namarek_new (nama pemilik rekening baru), norek_new (nomor rekening baru)\n- Setelah data rekening terkumpul, minta user mengirimkan foto KTP yang sesuai dengan nama pemilik rekening\n- Analisa gambar KTP dan ekstrak nama lengkap yang tertera pada KTP sebagai nilai nama_ktp\n- Jangan eksekusi sebelum semua 6 data lengkap (namarek, norek, bank, namarek_new, norek_new, nama_ktp)\n- Nama pada KTP (nama_ktp) harus sesuai dengan nama rekening lama (namarek); jika tidak cocok, tolak dan minta klarifikasi\n- Setelah berhasil, konfirmasi kepada user bahwa rekening bank berhasil diperbarui",
+                'information_text' => null,
+                'meta'             => null,
+            ],
         ];
 
         foreach ($tools as $tool) {

@@ -305,6 +305,7 @@ Misalnya: WD 50.000 , maka akan masuk ke Rekening 43.500 yaitu dari 50.000 - 6.5
 
 Rule:
 Jika Limit Bank Sudah capai maka dapat menyuruh untuk Wd kembali di tanggal 1 bulan depan.
+Untuk melakukan Request Withdraw, Turnover (TO) harus diselesaikan terlebih dahulu.
 
 BIAYA PENARIKAN (WD):
 Penarikan dikenakan charge 2,5% jika jumlah WD melebihi 5 kali dalam sehari.',

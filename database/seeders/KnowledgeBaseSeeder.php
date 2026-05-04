@@ -303,6 +303,9 @@ Withdraw dengan Bank Digital:
 Semua penarikan ke rekening Bank Digital, akan di kenakan 6.500 ditanggung Player.
 Misalnya: WD 50.000 , maka akan masuk ke Rekening 43.500 yaitu dari 50.000 - 6.500(Biaya Admin).
 
+Rule:
+Jika Limit Bank Sudah capai maka dapat menyuruh untuk Wd kembali di tanggal 1 bulan depan.
+
 BIAYA PENARIKAN (WD):
 Penarikan dikenakan charge 2,5% jika jumlah WD melebihi 5 kali dalam sehari.',
                 'source' => 'manual',

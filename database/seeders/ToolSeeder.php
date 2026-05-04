@@ -869,36 +869,68 @@ class ToolSeeder extends Seeder
             // ],
 
             // ─── Deposit tools ───
-            // [
-            //     'tool_name' => 'checkDeposit',
-            //     'category' => 'payment',
-            //     'display_name' => 'Check Deposit',
-            //     'description' => 'Cek status deposit player berdasarkan username. Menampilkan informasi deposit terbaru dari data model deposit.',
-            //     'slug' => 'check-deposit',
-            //     'type' => 'get',
-            //     'is_enabled' => true,
-            //     'data_model_id' => $depositModel?->id,
-            //     'parameters' => [
-            //         'type' => 'object',
-            //         'properties' => [
-            //             'username' => ['type' => 'string', 'description' => 'Username pemain'],
-            //         ],
-            //         'required' => ['username'],
-            //     ],
-            //     'endpoints' => null,
-            //     'keywords' => ['cek deposit', 'check deposit', 'status deposit', 'deposit status', 'deposit saya', 'deposit belum masuk', 'deposit pending'],
-            //     'tool_rules' => "- Jika username belum ada, minta username secara natural\n- Tampilkan deposit TERBARU berdasarkan operatortime: status, nominal, tanggal\n- Jika pending, infokan sedang diproses\n- Jika accepted, infokan sudah berhasil\n- Jika rejected, infokan dan sarankan hubungi CS",
-            //     'information_text' => null,
-            //     'meta' => [
-            //         'query' => [
-            //             'order_by' => [
-            //                 'field' => 'operatortime',
-            //                 'direction' => 'desc',
-            //             ],
-            //             'limit' => 1,
-            //         ],
-            //     ],
-            // ],
+            [
+                'tool_name' => 'checkDeposit',
+                'category' => 'payment',
+                'display_name' => 'Check Deposit',
+                'description' => 'Cek status deposit dan remark pemain berdasarkan username. Menampilkan daftar deposit terbaru dari data model deposit.',
+                'slug' => 'check-deposit',
+                'type' => 'get',
+                'is_enabled' => true,
+                'data_model_id' => $depositModel?->id,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'username' => ['type' => 'string', 'description' => 'Username pemain'],
+                    ],
+                    'required' => ['username'],
+                ],
+                'endpoints' => null,
+                // 'keywords' => ['cek deposit', 'check deposit', 'status deposit', 'deposit status', 'deposit saya', 'deposit belum masuk', 'deposit pending', 'remark deposit'],
+                'tool_rules' => "- Check status deposit berdasarkan username\n- Jika username belum ada, minta username secara natural\n- Berikan dan listkan daftar deposit terbaru\n- Tampilkan minimal data operatortime, status, dan remark\n- Urutkan dari deposit terbaru ke yang paling lama\n- Jika tidak ada data deposit, sampaikan dengan jelas bahwa data deposit belum ditemukan",
+                'information_text' => null,
+                'meta' => [
+                    'query' => [
+                        'select' => ['operatortime', 'status', 'remark'],
+                        'order_by' => [
+                            'field' => 'operatortime',
+                            'direction' => 'desc',
+                        ],
+                        'limit' => 5,
+                    ],
+                ],
+            ],
+            [
+                'tool_name' => 'checkWithdraw',
+                'category' => 'payment',
+                'display_name' => 'Check Withdraw',
+                'description' => 'Cek status withdraw dan remark pemain berdasarkan username. Menampilkan daftar withdraw terbaru dari data model withdraw.',
+                'slug' => 'check-withdraw',
+                'type' => 'get',
+                'is_enabled' => true,
+                'data_model_id' => $withdrawModel?->id,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'username' => ['type' => 'string', 'description' => 'Username pemain'],
+                    ],
+                    'required' => ['username'],
+                ],
+                'endpoints' => null,
+                // 'keywords' => ['cek withdraw', 'check withdraw', 'status withdraw', 'withdraw status', 'wd saya', 'withdraw pending', 'remark withdraw'],
+                'tool_rules' => "- Check status withdraw berdasarkan username\n- Jika username belum ada, minta username secara natural\n- Berikan dan listkan daftar withdraw terbaru\n- Tampilkan minimal data operatortime, status, dan remark\n- Urutkan dari withdraw terbaru ke yang paling lama\n- Jika tidak ada data withdraw, sampaikan dengan jelas bahwa data withdraw belum ditemukan",
+                'information_text' => null,
+                'meta' => [
+                    'query' => [
+                        'select' => ['operatortime', 'status', 'remark'],
+                        'order_by' => [
+                            'field' => 'operatortime',
+                            'direction' => 'desc',
+                        ],
+                        'limit' => 5,
+                    ],
+                ],
+            ],
             [
                 'tool_name' => 'rejectDeposit',
                 'category' => 'payment',

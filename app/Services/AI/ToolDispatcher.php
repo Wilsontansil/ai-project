@@ -92,8 +92,14 @@ class ToolDispatcher
         string $model,
         string $chatId = '',
         string $channel = '',
-        ?ChatAgent $chatAgent = null
+        ?ChatAgent $chatAgent = null,
+        string|array $userContent = ''
     ): ?string {
+        // If caller did not supply pre-built multimodal content, fall back to plain text.
+        if ($userContent === '') {
+            $userContent = $userMessage;
+        }
+
         $tools = $this->getEnabledTools($chatAgent);
         $pendingKey = $this->pendingToolKey($chatId, $channel);
 
@@ -231,7 +237,7 @@ class ToolDispatcher
                         $carryArgs = (array) Cache::get($carryArgsKey, []);
 
                         $arguments = $this->forceExtractArguments(
-                            $client, $pendingTool, $contextPrompt, $history, $userMessage, $model
+                            $client, $pendingTool, $contextPrompt, $history, $userMessage, $model, $userContent
                         );
 
                         if ($arguments !== null) {
@@ -291,7 +297,7 @@ class ToolDispatcher
 
             $arguments = $bestTool->needsArguments()
                 ? $this->forceExtractArguments(
-                    $client, $bestTool, $contextPrompt, $history, $userMessage, $model
+                    $client, $bestTool, $contextPrompt, $history, $userMessage, $model, $userContent
                 )
                 : [];
 
@@ -780,7 +786,8 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
         ?string $contextPrompt,
         array $history,
         string $userMessage,
-        string $model
+        string $model,
+        string|array $userContent = ''
     ): ?array {
         $definition = $tool->getDefinition();
 
@@ -793,7 +800,7 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
         $messages = [
             [
                 'role' => 'system',
-                'content' => "Choose the matched tool and extract arguments from the conversation. Be flexible: users may provide data in natural language, mixed order, shorthand, abbreviations, or without labels. Use the latest message first, but also use recent chat history when it clearly contains the missing values. Do not require a rigid format or numbered template. For bank account name (namarek), accept any string the user provides — including usernames, nicknames, or gamertags — as-is without validation. If the conversation does not contain enough data for a required field, still call the tool with whatever arguments are available so the application can return the configured missing-data message.",
+                'content' => "Extract arguments for the tool from the conversation and the user's latest message (which may include an image/screenshot). Be flexible: accept natural language, mixed order, shorthand, or abbreviations. Use the latest message first, then recent history for any missing text-based values. For bank account name (namarek), accept any string as-is. IMPORTANT: for fields that must be extracted from a visual source (e.g. depoamount, time from a screenshot), only populate them if the image is present in the current message and you can clearly read the value. Do NOT guess, invent, or use placeholder values for visual fields. Leave them as empty string \"\" if the image is absent or the value is not clearly visible — the application will then ask the user to resend the screenshot.",
             ],
         ];
 
@@ -816,7 +823,9 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
             $messages[] = ['role' => $role, 'content' => $content];
         }
 
-        $messages[] = ['role' => 'user', 'content' => $userMessage];
+        // Use multimodal content (with image) when available so visual fields
+        // like depoamount and time can be extracted from the screenshot.
+        $messages[] = ['role' => 'user', 'content' => ($userContent !== '' ? $userContent : $userMessage)];
 
         try {
             $openaiStart = MetricsCollector::startTimer();

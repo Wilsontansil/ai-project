@@ -94,7 +94,8 @@ class AIService
             ]);
         }
 
-        $messages = array_merge($messages, $trimmedHistory, [['role' => 'user', 'content' => $this->buildUserContent((string) $message, $attachmentMeta)]]);
+        $userContent = $this->buildUserContent((string) $message, $attachmentMeta);
+        $messages = array_merge($messages, $trimmedHistory, [['role' => 'user', 'content' => $userContent]]);
 
         try {
             $payload = [
@@ -149,9 +150,10 @@ class AIService
             $finishReason = (string) ($response->choices[0]->finishReason ?? '');
 
             // Let the dispatcher handle tool calls and intent matching.
+            // Pass $userContent (may include image) so forceExtractArguments can see the screenshot.
             $assistantReply = $this->toolDispatcher->resolve(
                 $client, $msg, $message, $systemPrompt, $contextPrompt, $activeHistory, $model,
-                (string) $chatId, $channel, $chatAgent
+                (string) $chatId, $channel, $chatAgent, $userContent
             );
 
             if ($assistantReply !== null) {

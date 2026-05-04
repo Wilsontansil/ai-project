@@ -18,6 +18,10 @@ class SystemConfigSeeder extends Seeder
             ->where('slug', 'settings')
             ->value('id');
 
+        $agentDomainsDataModelId = DataModel::query()
+            ->where('slug', 'agent-domains')
+            ->value('id');
+
         if ($settingsDataModelId === null) {
             return;
         }
@@ -61,6 +65,17 @@ class SystemConfigSeeder extends Seeder
                 'lookup_field' => 'kode',
                 'lookup_value' => 'Multiply TO Non Bank',
                 'result_field' => 'value',
+            ],
+            [
+                'key' => 'main_domain',
+                'value' => '',
+                'source_type' => $agentDomainsDataModelId !== null ? 'datamodel_lookup' : 'manual',
+                'label' => 'main_domain',
+                'type' => 'auto_update',
+                'data_model_id' => $agentDomainsDataModelId,
+                'lookup_field' => $agentDomainsDataModelId !== null ? 'utama' : null,
+                'lookup_value' => $agentDomainsDataModelId !== null ? 'on' : null,
+                'result_field' => $agentDomainsDataModelId !== null ? 'domain' : null,
             ],
             [
                 'key' => 'ev_brt',

@@ -17,6 +17,7 @@ class ToolSeeder extends Seeder
         $withdrawModel = DataModel::query()->where('slug', 'withdraw')->first();
         $bonusApkModel = DataModel::query()->where('slug', 'bonus-apk')->first();
         $bonusBeruntunModel = DataModel::query()->where('slug', 'bonus-beruntun')->first();
+        $bonusDepositModel = DataModel::query()->where('slug', 'bonus-deposit')->first();
         $promoModel = DataModel::query()->where('slug', 'promo')->first();
         $gameModel = DataModel::query()->where('slug', 'game')->first();
         $rekeningModel = DataModel::query()->where('slug', 'rekenings')->first();
@@ -983,6 +984,37 @@ class ToolSeeder extends Seeder
                 'endpoints' => null,
                 // 'keywords' => ['cek bonus beruntun', 'check bonus beruntun', 'status bonus beruntun', 'bonus deposit beruntun', 'daily streak bonus'],
                 'tool_rules' => "- Periksa status klaim Bonus Deposit Beruntun berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus Beruntun terbaru milik pemain\n- Sertakan minimal data status, remark, dan keterangan\n- Urutkan dari klaim terbaru ke yang paling lama\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus Deposit Beruntun untuk pemain tersebut",
+                'information_text' => null,
+                'meta' => [
+                    'query' => [
+                        'select' => ['status', 'remark', 'keterangan', 'claimed_at'],
+                        'order_by' => [
+                            'field' => 'claimed_at',
+                            'direction' => 'desc',
+                        ],
+                        'limit' => 5,
+                    ],
+                ],
+            ],
+            [
+                'tool_name' => 'checkBonusDeposit',
+                'category' => 'bonus',
+                'display_name' => 'Check Bonus Deposit',
+                'description' => 'Memeriksa status klaim Bonus Deposit pemain berdasarkan username. Menampilkan daftar klaim bonus deposit terbaru beserta status dan keterangannya.',
+                'slug' => 'check-bonus-deposit',
+                'type' => 'get',
+                'is_enabled' => true,
+                'data_model_id' => $bonusDepositModel?->id,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'username' => ['type' => 'string', 'description' => 'Username pemain'],
+                    ],
+                    'required' => ['username'],
+                ],
+                'endpoints' => null,
+                // 'keywords' => ['cek bonus deposit', 'check bonus deposit', 'status bonus deposit', 'bonus deposit saya', 'klaim bonus deposit'],
+                'tool_rules' => "- Periksa status klaim Bonus Deposit berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus Deposit terbaru milik pemain\n- Sertakan minimal data status, remark, dan keterangan\n- Urutkan dari klaim terbaru ke yang paling lama\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus Deposit untuk pemain tersebut",
                 'information_text' => null,
                 'meta' => [
                     'query' => [

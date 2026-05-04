@@ -464,6 +464,44 @@ class DataModelSeeder extends Seeder
         );
 
         DataModel::updateOrCreate(
+            ['slug' => 'bonus-beruntun'],
+            [
+                'model_name' => 'BonusBeruntun',
+                'description' => 'Bonus Deposit Beruntun (Daily Streak) log data model schema.',
+                'table_name' => 'log_bonus_deposit10xes',
+                'connection_name' => 'mysqlgame',
+                'fields' => [
+                    'id' => ['type' => 'bigint', 'required' => false],
+                    'gtx' => ['type' => 'varchar', 'required' => false],
+                    'eventbonus_id' => ['type' => 'bigint', 'required' => false],
+                    'player_id' => ['type' => 'bigint', 'required' => false],
+                    'player' => ['type' => 'varchar', 'required' => false],
+                    'agent' => ['type' => 'varchar', 'required' => false],
+                    'amount' => ['type' => 'decimal', 'required' => false],
+                    'multiplierTO' => ['type' => 'varchar', 'required' => false],
+                    'depositcount' => ['type' => 'varchar', 'required' => false],
+                    'status' => ['type' => 'enum', 'required' => false],
+                    'is_read' => ['type' => 'tinyint', 'required' => false],
+                    'surrender_bonus' => ['type' => 'varchar', 'required' => false],
+                    'gtx_surrender' => ['type' => 'varchar', 'required' => false],
+                    'gtx_done' => ['type' => 'varchar', 'required' => false],
+                    'startdate' => ['type' => 'datetime', 'required' => false],
+                    'enddate' => ['type' => 'datetime', 'required' => false],
+                    'keterangan' => ['type' => 'text', 'required' => false],
+                    'remark' => ['type' => 'text', 'required' => false],
+                    'expired_at' => ['type' => 'datetime', 'required' => false],
+                    'claimed_at' => ['type' => 'datetime', 'required' => false],
+                    'accepted_at' => ['type' => 'datetime', 'required' => false],
+                    'reject_at' => ['type' => 'datetime', 'required' => false],
+                    'stoppend_at' => ['type' => 'datetime', 'required' => false],
+                    'cancelled_at' => ['type' => 'datetime', 'required' => false],
+                    'created_at' => ['type' => 'timestamp', 'required' => false],
+                    'updated_at' => ['type' => 'timestamp', 'required' => false],
+                ],
+            ]
+        );
+
+        DataModel::updateOrCreate(
             ['slug' => 'pools-periode'],
             [
                 'model_name' => 'PoolsPeriode',

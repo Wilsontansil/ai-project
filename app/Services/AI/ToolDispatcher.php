@@ -169,7 +169,7 @@ class ToolDispatcher
                         Cache::put($pendingKey, $tool->tool_name, now()->addMinutes(5));
                     }
 
-                    return $this->buildMissingDataMessage($tool);
+                    return $this->buildMissingDataMessage($tool, $arguments);
                 }
 
                 if ($pendingKey !== null) {
@@ -268,7 +268,7 @@ class ToolDispatcher
                         // Carry args are intentionally kept in cache so the next attempt can use them.
                         Cache::put($pendingKey, $pendingToolName, now()->addMinutes(5));
 
-                        return $this->buildMissingDataMessage($pendingTool);
+                        return $this->buildMissingDataMessage($pendingTool, $arguments ?? []);
                     }
                 }
 
@@ -315,7 +315,7 @@ class ToolDispatcher
                     Cache::put($pendingKey, $bestTool->tool_name, now()->addMinutes(5));
                 }
 
-                return $this->buildMissingDataMessage($bestTool);
+                return $this->buildMissingDataMessage($bestTool, $arguments ?? []);
             }
 
             $reply = $this->dispatch(
@@ -454,7 +454,7 @@ class ToolDispatcher
                         Cache::put($pendingKey, $tool->tool_name, now()->addMinutes(5));
                     }
 
-                    return $this->buildMissingDataMessage($tool);
+                    return $this->buildMissingDataMessage($tool, $arguments);
                 }
 
                 if ($pendingKey !== null) {
@@ -530,17 +530,43 @@ class ToolDispatcher
     /**
      * Generate the user-facing missing-data prompt from the tool's parameter schema.
      */
-    public function buildMissingDataMessage(Tool $tool): string
+    public function buildMissingDataMessage(Tool $tool, array $arguments = []): string
     {
         $properties = (array) data_get($tool->parameters, 'properties', []);
+        $required   = (array) data_get($tool->parameters, 'required', []);
+
         if ($properties === []) {
             return 'Mohon lengkapi data yang diperlukan.';
         }
 
-        $lines = ["Untuk {$tool->display_name}, mohon kirimkan data berikut:"];
-        foreach ($properties as $name => $prop) {
-            $desc = $prop['description'] ?? $name;
-            $lines[] = "- {$desc} ({$name})";
+        // When arguments are available, only list the required fields that are still empty.
+        $fieldsToList = $required;
+        if (!empty($arguments) && !empty($required)) {
+            $missing = array_filter($required, fn ($name) => trim((string) ($arguments[$name] ?? '')) === '');
+            if (!empty($missing)) {
+                $fieldsToList = array_values($missing);
+            }
+        }
+
+        if (empty($fieldsToList)) {
+            return 'Mohon lengkapi data yang diperlukan.';
+        }
+
+        $prefix = count($fieldsToList) === 1
+            ? "Untuk melanjutkan, mohon kirimkan:"
+            : "Untuk melanjutkan, mohon lengkapi data berikut:";
+
+        $lines = [$prefix];
+        foreach ($fieldsToList as $name) {
+            $prop     = $properties[(string) $name] ?? [];
+            $fullDesc = (string) ($prop['description'] ?? $name);
+            // Strip technical instructions — keep only the first human-readable sentence.
+            $shortDesc = explode('. HANYA', $fullDesc)[0];
+            $shortDesc = explode(' — JANGAN', $shortDesc)[0];
+            $shortDesc = explode('. Kosongkan', $shortDesc)[0];
+            $shortDesc = explode('. JANGAN', $shortDesc)[0];
+            $shortDesc = trim(explode(' — ', $shortDesc)[0]);
+            $lines[]   = "- {$shortDesc}";
         }
 
         return implode("\n", $lines);

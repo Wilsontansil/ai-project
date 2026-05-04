@@ -658,6 +658,54 @@ class DataModelSeeder extends Seeder
         );
 
         DataModel::updateOrCreate(
+            ['slug' => 'bonus-freespin'],
+            [
+                'model_name' => 'BonusFreespin',
+                'description' => 'Bonus Freespin log data model schema.',
+                'table_name' => 'log_free_spins',
+                'connection_name' => 'mysqlgame',
+                'fields' => [
+                    'id' => ['type' => 'bigint', 'required' => false],
+                    'gtx' => ['type' => 'varchar', 'required' => false],
+                    'eventbonus_id' => ['type' => 'bigint', 'required' => false],
+                    'player_id' => ['type' => 'bigint', 'required' => false],
+                    'player' => ['type' => 'varchar', 'required' => false],
+                    'multiplierTO' => ['type' => 'int', 'required' => false],
+                    'descriptionTO' => ['type' => 'varchar', 'required' => false],
+                    'status' => ['type' => 'enum', 'required' => false],
+                    'is_read' => ['type' => 'tinyint', 'required' => false],
+                    'surrender_bonus' => ['type' => 'varchar', 'required' => false],
+                    'gtx_surrender' => ['type' => 'varchar', 'required' => false],
+                    'gtx_done' => ['type' => 'varchar', 'required' => false],
+                    'deposit_id' => ['type' => 'varchar', 'required' => false],
+                    'deposit_invoice' => ['type' => 'varchar', 'required' => false],
+                    'minamount' => ['type' => 'decimal', 'required' => false],
+                    'autoaccept' => ['type' => 'tinyint', 'required' => false],
+                    'includenonbank' => ['type' => 'tinyint', 'required' => false],
+                    'ipaddress' => ['type' => 'varchar', 'required' => false],
+                    'wheelposition' => ['type' => 'varchar', 'required' => false],
+                    'totalrewardbeforespin' => ['type' => 'decimal', 'required' => false],
+                    'totalwinnerbeforespin' => ['type' => 'bigint', 'required' => false],
+                    'totalrewardafterspin' => ['type' => 'decimal', 'required' => false],
+                    'totalwinnerafterspin' => ['type' => 'bigint', 'required' => false],
+                    'amount' => ['type' => 'decimal', 'required' => false],
+                    'expired_at' => ['type' => 'datetime', 'required' => false],
+                    'claimed_at' => ['type' => 'datetime', 'required' => false],
+                    'accepted_at' => ['type' => 'datetime', 'required' => false],
+                    'reject_at' => ['type' => 'datetime', 'required' => false],
+                    'stopped_at' => ['type' => 'datetime', 'required' => false],
+                    'cancelled_at' => ['type' => 'datetime', 'required' => false],
+                    'Agent' => ['type' => 'varchar', 'required' => false],
+                    'token' => ['type' => 'varchar', 'required' => false],
+                    'keterangan' => ['type' => 'text', 'required' => false],
+                    'remark' => ['type' => 'text', 'required' => false],
+                    'created_at' => ['type' => 'timestamp', 'required' => false],
+                    'updated_at' => ['type' => 'timestamp', 'required' => false],
+                ],
+            ]
+        );
+
+        DataModel::updateOrCreate(
             ['slug' => 'pools-periode'],
             [
                 'model_name' => 'PoolsPeriode',

@@ -20,6 +20,7 @@ class ToolSeeder extends Seeder
         $bonusDepositModel = DataModel::query()->where('slug', 'bonus-deposit')->first();
         $bonusAjakTemanModel = DataModel::query()->where('slug', 'bonus-ajak-teman')->first();
         $bonusVoucherModel = DataModel::query()->where('slug', 'bonus-voucher')->first();
+        $bonusFreespinModel = DataModel::query()->where('slug', 'bonus-freespin')->first();
         $promoModel = DataModel::query()->where('slug', 'promo')->first();
         $gameModel = DataModel::query()->where('slug', 'game')->first();
         $rekeningModel = DataModel::query()->where('slug', 'rekenings')->first();
@@ -1079,6 +1080,37 @@ class ToolSeeder extends Seeder
                 'endpoints' => null,
                 // 'keywords' => ['cek bonus voucher', 'check bonus voucher', 'status bonus voucher', 'voucher bonus saya', 'klaim bonus voucher'],
                 'tool_rules' => "- Periksa status klaim Bonus Voucher berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus Voucher terbaru milik pemain\n- Sertakan minimal data status, remark, dan keterangan\n- Urutkan dari klaim terbaru ke yang paling lama\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus Voucher untuk pemain tersebut",
+                'information_text' => null,
+                'meta' => [
+                    'query' => [
+                        'select' => ['status', 'remark', 'keterangan', 'claimed_at'],
+                        'order_by' => [
+                            'field' => 'claimed_at',
+                            'direction' => 'desc',
+                        ],
+                        'limit' => 5,
+                    ],
+                ],
+            ],
+            [
+                'tool_name' => 'checkBonusFreespin',
+                'category' => 'bonus',
+                'display_name' => 'Check Bonus Freespin',
+                'description' => 'Memeriksa status klaim Bonus Freespin berdasarkan username. Menampilkan daftar klaim freespin terbaru beserta status dan keterangannya.',
+                'slug' => 'check-bonus-freespin',
+                'type' => 'get',
+                'is_enabled' => true,
+                'data_model_id' => $bonusFreespinModel?->id,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'username' => ['type' => 'string', 'description' => 'Username pemain'],
+                    ],
+                    'required' => ['username'],
+                ],
+                'endpoints' => null,
+                // 'keywords' => ['cek bonus freespin', 'check bonus freespin', 'status bonus freespin', 'freespin saya', 'klaim freespin'],
+                'tool_rules' => "- Periksa status klaim Bonus Freespin berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus Freespin terbaru milik pemain\n- Sertakan minimal data status, remark, dan keterangan\n- Urutkan dari klaim terbaru ke yang paling lama\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus Freespin untuk pemain tersebut",
                 'information_text' => null,
                 'meta' => [
                     'query' => [

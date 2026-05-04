@@ -949,9 +949,9 @@ class ToolSeeder extends Seeder
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
-                        'username' => ['type' => 'string', 'description' => 'Username pemain'],
+                        'player' => ['type' => 'string', 'description' => 'Username pemain'],
                     ],
-                    'required' => ['username'],
+                    'required' => ['player'],
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['cek bonus apk', 'check bonus apk', 'status bonus apk', 'bonus apk saya', 'bonus apk pending', 'klaim bonus apk'],
@@ -959,9 +959,9 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['status', 'remark', 'keterangan', 'claimed_at'],
+                        'select' => ['status', 'remark', 'keterangan', 'created_at'],
                         'order_by' => [
-                            'field' => 'claimed_at',
+                            'field' => 'created_at',
                             'direction' => 'desc',
                         ],
                         'limit' => 5,
@@ -980,9 +980,9 @@ class ToolSeeder extends Seeder
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
-                        'username' => ['type' => 'string', 'description' => 'Username pemain'],
+                        'player' => ['type' => 'string', 'description' => 'Username pemain'],
                     ],
-                    'required' => ['username'],
+                    'required' => ['player'],
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['cek bonus beruntun', 'check bonus beruntun', 'status bonus beruntun', 'bonus deposit beruntun', 'daily streak bonus'],
@@ -990,9 +990,9 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['status', 'remark', 'keterangan', 'claimed_at'],
+                        'select' => ['status', 'remark', 'keterangan', 'created_at'],
                         'order_by' => [
-                            'field' => 'claimed_at',
+                            'field' => 'created_at',
                             'direction' => 'desc',
                         ],
                         'limit' => 5,
@@ -1011,9 +1011,9 @@ class ToolSeeder extends Seeder
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
-                        'username' => ['type' => 'string', 'description' => 'Username pemain'],
+                        'player' => ['type' => 'string', 'description' => 'Username pemain'],
                     ],
-                    'required' => ['username'],
+                    'required' => ['player'],
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['cek bonus deposit', 'check bonus deposit', 'status bonus deposit', 'bonus deposit saya', 'klaim bonus deposit'],
@@ -1021,9 +1021,9 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['status', 'remark', 'keterangan', 'claimed_at'],
+                        'select' => ['status', 'remark', 'keterangan', 'created_at'],
                         'order_by' => [
-                            'field' => 'claimed_at',
+                            'field' => 'created_at',
                             'direction' => 'desc',
                         ],
                         'limit' => 5,
@@ -1042,9 +1042,9 @@ class ToolSeeder extends Seeder
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
-                        'username' => ['type' => 'string', 'description' => 'Username pemain'],
+                        'player' => ['type' => 'string', 'description' => 'Username pemain'],
                     ],
-                    'required' => ['username'],
+                    'required' => ['player'],
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['cek bonus ajak teman', 'check bonus ajak teman', 'status bonus referral', 'bonus referral saya', 'klaim bonus referral'],
@@ -1052,9 +1052,9 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['status', 'remark', 'keterangan', 'claimed_at'],
+                        'select' => ['status', 'remark', 'keterangan', 'created_at'],
                         'order_by' => [
-                            'field' => 'claimed_at',
+                            'field' => 'created_at',
                             'direction' => 'desc',
                         ],
                         'limit' => 5,
@@ -1073,9 +1073,9 @@ class ToolSeeder extends Seeder
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
-                        'username' => ['type' => 'string', 'description' => 'Username pemain'],
+                        'player' => ['type' => 'string', 'description' => 'Username pemain'],
                     ],
-                    'required' => ['username'],
+                    'required' => ['player'],
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['cek bonus voucher', 'check bonus voucher', 'status bonus voucher', 'voucher bonus saya', 'klaim bonus voucher'],
@@ -1083,9 +1083,9 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['status', 'remark', 'keterangan', 'claimed_at'],
+                        'select' => ['status', 'remark', 'keterangan', 'created_at'],
                         'order_by' => [
-                            'field' => 'claimed_at',
+                            'field' => 'created_at',
                             'direction' => 'desc',
                         ],
                         'limit' => 5,
@@ -1104,9 +1104,9 @@ class ToolSeeder extends Seeder
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
-                        'username' => ['type' => 'string', 'description' => 'Username pemain'],
+                        'player' => ['type' => 'string', 'description' => 'Username pemain'],
                     ],
-                    'required' => ['username'],
+                    'required' => ['player'],
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['cek bonus freespin', 'check bonus freespin', 'status bonus freespin', 'freespin saya', 'klaim freespin'],
@@ -1114,9 +1114,9 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['status', 'remark', 'keterangan', 'claimed_at'],
+                        'select' => ['status', 'remark', 'keterangan', 'created_at'],
                         'order_by' => [
-                            'field' => 'claimed_at',
+                            'field' => 'created_at',
                             'direction' => 'desc',
                         ],
                         'limit' => 5,

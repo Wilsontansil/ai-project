@@ -685,7 +685,6 @@ class ToolController extends Controller
                 'error' => $e->getMessage(),
                 'timestamp' => now()->toIso8601String(),
             ]);
-
             return response()->json([
                 'success' => false,
                 'url' => $url,

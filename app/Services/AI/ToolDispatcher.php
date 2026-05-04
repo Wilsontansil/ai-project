@@ -5,7 +5,9 @@ namespace App\Services\AI;
 use App\Models\ChatAgent;
 use App\Models\Customer;
 use App\Models\Tool;
+use App\Models\ToolCaseLog;
 use App\Services\AI\ToolEngines\DataModelQueryEngine;
+use App\Support\LogSanitizer;
 use App\Services\AI\ToolEngines\HttpToolEngine;
 use App\Services\AI\ToolEngines\InfoToolEngine;
 use App\Support\MetricsCollector;
@@ -93,7 +95,8 @@ class ToolDispatcher
         string $chatId = '',
         string $channel = '',
         ?ChatAgent $chatAgent = null,
-        string|array $userContent = ''
+        string|array $userContent = '',
+        array $agentContext = []
     ): ?string {
         // If caller did not supply pre-built multimodal content, fall back to plain text.
         if ($userContent === '') {
@@ -176,10 +179,13 @@ class ToolDispatcher
                 // Clear carry args now that we are proceeding to dispatch.
                 Cache::forget($this->carryArgsKey($chatId, $channel));
 
-                return $this->dispatch(
+                $reply = $this->dispatch(
                     $client, $tool, $arguments, $systemPrompt, $contextPrompt, $history, $userMessage, $model,
                     $chatId, $channel
                 );
+                $this->writeCaseLog($tool, $arguments, 'openai_tool_call', $chatId, $channel, $agentContext, $userContent, $reply);
+
+                return $reply;
             }
         }
 
@@ -249,10 +255,13 @@ class ToolDispatcher
                             }
                             Cache::forget($carryArgsKey);
 
-                            return $this->dispatch(
+                            $reply = $this->dispatch(
                                 $client, $pendingTool, $arguments, $systemPrompt, $contextPrompt, $history, $userMessage, $model,
                                 $chatId, $channel, $pendingKey, $pendingToolName
                             );
+                            $this->writeCaseLog($pendingTool, $arguments, 'chain_resume', $chatId, $channel, $agentContext, $userContent, $reply);
+
+                            return $reply;
                         }
 
                         // Extraction still failed — re-store pending and ask again.
@@ -309,10 +318,13 @@ class ToolDispatcher
                 return $this->buildMissingDataMessage($bestTool);
             }
 
-            return $this->dispatch(
+            $reply = $this->dispatch(
                 $client, $bestTool, $arguments ?? [], $systemPrompt, $contextPrompt, $history, $userMessage, $model,
                 $chatId, $channel
             );
+            $this->writeCaseLog($bestTool, $arguments ?? [], 'keyword', $chatId, $channel, $agentContext, $userContent, $reply);
+
+            return $reply;
         }
 
         // 4. AI intent-router fallback (no keyword dependency).
@@ -326,7 +338,9 @@ class ToolDispatcher
             $model,
             $chatId,
             $channel,
-            $pendingKey
+            $pendingKey,
+            $userContent,
+            $agentContext
         );
 
         if ($intentRoutedReply !== null) {
@@ -356,7 +370,9 @@ class ToolDispatcher
         string $model,
         string $chatId,
         string $channel,
-        ?string $pendingKey
+        ?string $pendingKey,
+        string|array $userContent = '',
+        array $agentContext = []
     ): ?string {
         if ($tools->isEmpty()) {
             return null;
@@ -445,7 +461,7 @@ class ToolDispatcher
                     Cache::forget($pendingKey);
                 }
 
-                return $this->dispatch(
+                $reply = $this->dispatch(
                     $client,
                     $tool,
                     $arguments,
@@ -457,6 +473,9 @@ class ToolDispatcher
                     $chatId,
                     $channel
                 );
+                $this->writeCaseLog($tool, $arguments, 'intent', $chatId, $channel, $agentContext, $userContent, $reply);
+
+                return $reply;
             }
         } catch (\Throwable $e) {
             MetricsCollector::recordOpenAiCall('system', $model, 'intent_route', 0, null, false);
@@ -771,6 +790,71 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
         }
 
         return 'Data berhasil dicek. Saya bantu jelaskan hasilnya ya.';
+    }
+
+    /**
+     * Record a business-level case log entry: who, from where, which tool,
+     * what arguments, was there an image, and what reply was returned.
+     * Fire-and-forget — never throws.
+     *
+     * @param array<string, mixed>  $arguments
+     * @param string|array          $userContent  Multimodal user content (may contain image_url blocks)
+     * @param array<string, mixed>  $agentContext Customer profile context from AgentContextService
+     */
+    private function writeCaseLog(
+        Tool $tool,
+        array $arguments,
+        string $triggerMode,
+        string $chatId,
+        string $channel,
+        array $agentContext,
+        string|array $userContent,
+        ?string $reply
+    ): void {
+        try {
+            $hasAttachment = false;
+            $attachmentUrl = null;
+            $attachmentMeta = null;
+
+            if (is_array($userContent)) {
+                foreach ($userContent as $block) {
+                    if (!is_array($block) || ($block['type'] ?? '') !== 'image_url') {
+                        continue;
+                    }
+                    $hasAttachment = true;
+                    $rawUrl = $block['image_url']['url'] ?? null;
+                    if ($rawUrl !== null && str_starts_with($rawUrl, 'data:')) {
+                        // Base64 image — store only mime type, never the blob.
+                        $mime = explode(';', substr($rawUrl, 5))[0] ?? 'image/unknown';
+                        $attachmentMeta = ['source' => 'base64', 'mime' => $mime];
+                    } else {
+                        $attachmentUrl = $rawUrl;
+                        $attachmentMeta = ['source' => 'url'];
+                    }
+                    break;
+                }
+            }
+
+            $customerProfile = $agentContext['customer_profile'] ?? null;
+
+            ToolCaseLog::query()->create([
+                'chat_id'         => $chatId,
+                'channel'         => $channel,
+                'tool_name'       => $tool->tool_name,
+                'display_name'    => $tool->display_name,
+                'trigger_mode'    => $triggerMode,
+                'arguments'       => LogSanitizer::redactArguments($arguments),
+                'has_attachment'  => $hasAttachment,
+                'attachment_url'  => $attachmentUrl,
+                'attachment_meta' => $attachmentMeta,
+                'customer_id'     => $customerProfile['id'] ?? null,
+                'customer_info'   => $customerProfile,
+                'tool_reply'      => $reply !== null ? mb_substr($reply, 0, 1000) : null,
+                'created_at'      => now(),
+            ]);
+        } catch (\Throwable $e) {
+            Log::debug('ToolCaseLog write failed', ['error' => $e->getMessage()]);
+        }
     }
 
     /**

@@ -151,9 +151,10 @@ class AIService
 
             // Let the dispatcher handle tool calls and intent matching.
             // Pass $userContent (may include image) so forceExtractArguments can see the screenshot.
+            // Pass $agentContext so writeCaseLog can record customer platform/profile.
             $assistantReply = $this->toolDispatcher->resolve(
                 $client, $msg, $message, $systemPrompt, $contextPrompt, $activeHistory, $model,
-                (string) $chatId, $channel, $chatAgent, $userContent
+                (string) $chatId, $channel, $chatAgent, $userContent, $agentContext
             );
 
             if ($assistantReply !== null) {

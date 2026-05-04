@@ -115,6 +115,7 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
     // System Logs (Technical)
     Route::middleware('permission:view metrics')->group(function () {
         Route::get('/backoffice/technical/request-logs', [TechnicalController::class, 'requestLogs'])->name('backoffice.technical.request-logs');
+        Route::get('/backoffice/technical/case-logs', [TechnicalController::class, 'caseLogs'])->name('backoffice.technical.case-logs');
     });
 
     // Role management

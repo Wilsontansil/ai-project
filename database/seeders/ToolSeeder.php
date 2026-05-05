@@ -46,33 +46,6 @@ class ToolSeeder extends Seeder
                 'meta' => ['bot_name' => 'xoneBot'],
             ],
 
-            // ─── ESCALATE type tools (no endpoint, triggers handoff) ───
-            [
-                'tool_name'        => 'human_support',
-                'category'         => 'system',
-                'display_name'     => 'Eskalasi ke Human Support',
-                'description'      => 'Mengeskalasi percakapan ke Human Support. Gunakan tool ini ketika masalah tidak dapat diselesaikan oleh bot, player meminta berbicara dengan CS manusia, atau kasus memerlukan penanganan manual.',
-                'slug'             => 'human-support',
-                'type'             => 'escalate',
-                'is_enabled'       => true,
-                'data_model_id'    => null,
-                'parameters'       => [
-                    'type'       => 'object',
-                    'properties' => [
-                        'reason' => [
-                            'type'        => 'string',
-                            'description' => 'Alasan singkat mengapa percakapan perlu diteruskan ke Human Support. Contoh: "Player minta bicara CS", "Masalah tidak dapat diselesaikan bot", "Akun banned".',
-                        ],
-                    ],
-                    'required' => [],
-                ],
-                'endpoints'        => null,
-                'keywords'         => null,
-                'tool_rules'       => "- Gunakan tool ini HANYA ketika masalah benar-benar tidak bisa diselesaikan oleh bot, atau player secara eksplisit meminta berbicara dengan CS manusia\n- Isi parameter reason dengan ringkasan singkat alasan eskalasi\n- Setelah tool ini dipanggil, informasikan kepada player bahwa permintaannya sedang diteruskan ke tim Human Support\n- Minta player untuk menunggu balasan dari agen kami\n- Jangan memberikan estimasi waktu response yang spesifik",
-                'information_text' => 'Permintaan Anda sedang kami teruskan ke tim Human Support. Mohon tunggu sebentar, agen kami akan segera membantu 🙏',
-                'meta'             => null,
-            ],
-
             // ─── UPDATE type tools (API endpoint) ───
             [
                 'tool_name' => 'resetPassword',
@@ -114,7 +87,7 @@ class ToolSeeder extends Seeder
                         //     'condition'  => 'contains',
                         //     'field'      => 'response_message',
                         //     'value'      => 'balance greater than 10,000',
-                        //     'chain_tool' => 'human_support',
+                        //     'chain_tool' => 'escalate',
                         //     'carry_args' => [],
                         //     'message'    => 'Balance Anda diatas 10.000 demi keamanan tolong kirimkan bukti transfer deposit terakhir anda, akan saya teruskan ke Human Support , harap tunggu sebentar ya',
                         // ],
@@ -123,7 +96,7 @@ class ToolSeeder extends Seeder
                             'condition'  => 'contains',
                             'field'      => 'response_message',
                             'value'      => 'Player is banned',
-                            'chain_tool' => 'human_support',
+                            'chain_tool' => 'escalate',
                             'carry_args' => [],
                             'message'    => 'Mohon maaf, akun Anda saat ini dalam status banned. Kendala ini akan kami teruskan ke tim Human Support kami, harap tunggu sebentar ya.',
                         ],
@@ -251,7 +224,7 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['suspend', 'check suspend', 'status', 'suspended', 'cek suspend', 'suspend status'],
-                'tool_rules' => "- Jika username belum ada, minta username secara natural tanpa memaksa format tertentu\n- Cek field 'banned_at': jika null berarti TIDAK suspend, jika ada tanggal berarti SUSPEND\n- Jika suspend, infokan bahwa akunnya sedang dalam status suspend dan masalah akan diteruskan ke Human CS\n- Jika tidak suspend, infokan bahwa akun dalam kondisi normal/aktif",
+                'tool_rules' => "- Jika username belum ada, minta username secara natural tanpa memaksa format tertentu\n- Cek field 'banned_at': jika null berarti TIDAK suspend, jika ada tanggal berarti SUSPEND\n- Jika suspend, infokan bahwa akunnya sedang dalam status suspend dan masalah akan diteruskan ke Human Support\n- Jika tidak suspend, infokan bahwa akun dalam kondisi normal/aktif",
                 'information_text' => null,
                 'meta' => null,
             ],
@@ -1181,7 +1154,7 @@ class ToolSeeder extends Seeder
                     ],
                 ],
                 // 'keywords' => ['reject deposit', 'tolak deposit', 'batalkan deposit', 'cancel deposit', 'deposit reject'],
-                'tool_rules' => "- Jika username belum ada, minta username terlebih dahulu\n- WAJIB konfirmasi ulang ke user sebelum menjalankan reject deposit — ini adalah aksi sensitif\n- Setelah user mengonfirmasi, baru jalankan tool\n- Jika berhasil, infokan bahwa deposit telah berhasil ditolak dan tampilkan status dari response\n- Jika gagal, infokan error dari response, sarankan mencoba lagi, dan jika masih gagal masalah akan diteruskan ke Human CS",
+                'tool_rules' => "- Jika username belum ada, minta username terlebih dahulu\n- WAJIB konfirmasi ulang ke user sebelum menjalankan reject deposit — ini adalah aksi sensitif\n- Setelah user mengonfirmasi, baru jalankan tool\n- Jika berhasil, infokan bahwa deposit telah berhasil ditolak dan tampilkan status dari response\n- Jika gagal, infokan error dari response, sarankan mencoba lagi, dan jika masih gagal masalah akan diteruskan ke Human Support",
                 'information_text' => null,
                 'meta' => null,
             ],
@@ -1268,7 +1241,7 @@ class ToolSeeder extends Seeder
                             'condition'  => 'equals',
                             'field'      => 'response_status',
                             'value'      => '400',
-                            'chain_tool' => 'human_support',
+                            'chain_tool' => 'escalate',
                             'carry_args' => [],
                             'message'    => '',
                         ],
@@ -1287,5 +1260,8 @@ class ToolSeeder extends Seeder
                 $tool
             );
         }
+
+        // Cleanup deprecated explicit escalate tool.
+        Tool::query()->where('tool_name', 'human_support')->delete();
     }
 }

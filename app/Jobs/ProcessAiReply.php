@@ -7,6 +7,7 @@ use App\Models\ProjectSetting;
 use App\Models\Customer;
 use App\Services\Agent\AgentContextService;
 use App\Services\Agent\ConversationMemoryService;
+use App\Services\AI\EscalationIntentDetector;
 use App\Services\AI\EscalationSummaryService;
 use App\Services\AIService;
 use App\Support\MetricsCollector;
@@ -117,6 +118,21 @@ class ProcessAiReply implements ShouldQueue
                 return;
             }
 
+            $keyword = app(EscalationIntentDetector::class)->detect($text);
+            if ($keyword !== null) {
+                $reply = $this->applyEscalationHandoff(
+                    $customer,
+                    ['trigger' => 'keyword_detector', 'keyword' => $keyword]
+                );
+
+                if ($reply !== '') {
+                    $this->sendReply($reply);
+                }
+
+                MetricsCollector::recordRequest($this->channel, MetricsCollector::elapsed($requestStart));
+                return;
+            }
+
             $this->sendTypingIndicator();
 
             $reply = $aiService->reply($text, $this->chatId, $this->channel, $agentContext, $this->attachmentMeta);
@@ -128,38 +144,7 @@ class ProcessAiReply implements ShouldQueue
             $reply = trim(str_replace('[ESCALATE]', '', $reply));
 
             if ($shouldEscalate) {
-                $agent = ChatAgent::getDefault();
-                $silentHandoff      = $agent?->silent_handoff ?? false;
-                $stopAiAfterHandoff = $agent?->stop_ai_after_handoff ?? true;
-
-                if (!$silentHandoff) {
-                    if ($stopAiAfterHandoff) {
-                        $reply = "Permintaan Anda sedang diteruskan ke agen kami. Mohon tunggu sebentar 🙏\nYour request is being forwarded to our agent. Please wait a moment 🙏";
-                    } elseif ($reply === '') {
-                        $reply = "Permintaan Anda sedang diteruskan ke Human CS. Mohon tunggu sebentar 🙏";
-                    }
-                } else {
-                    $reply = ''; // Silent — send nothing to customer
-                }
-
-                if ($customer !== null) {
-                    try {
-                        $customer->update(['mode' => 'waiting']);
-                        Log::info('Customer escalated to waiting queue by AI', [
-                            'customer_id' => $customer->id,
-                            'channel' => $this->channel,
-                            'chat_id' => $this->chatId,
-                        ]);
-                    } catch (\Throwable $e) {
-                        Log::error('Failed to set customer mode to waiting during escalation', [
-                            'customer_id' => $customer->id,
-                            'error' => $e->getMessage(),
-                        ]);
-                    }
-
-                    // Generate escalation summary for backoffice agents.
-                    app(EscalationSummaryService::class)->generate($customer, $this->chatId, $this->channel);
-                }
+                $reply = $this->applyEscalationHandoff($customer, ['trigger' => 'escalation_marker']);
             }
 
             if ($customer !== null && trim($reply) !== '') {
@@ -353,5 +338,63 @@ class ProcessAiReply implements ShouldQueue
         }
 
         return false;
+    }
+
+    private function applyEscalationHandoff(?Customer $customer, array $summaryContext = []): string
+    {
+        $reply = $this->buildEscalationReplyMessage();
+
+        if ($customer === null) {
+            Log::warning('Escalation requested but customer context is missing', [
+                'channel' => $this->channel,
+                'chat_id' => $this->chatId,
+                'source' => $summaryContext['trigger'] ?? 'unknown',
+            ]);
+
+            return $reply;
+        }
+
+        try {
+            $customer->update(['mode' => 'waiting']);
+            Log::info('Customer escalated to waiting queue by AI', [
+                'customer_id' => $customer->id,
+                'channel' => $this->channel,
+                'chat_id' => $this->chatId,
+                'source' => $summaryContext['trigger'] ?? 'unknown',
+            ]);
+
+            app(EscalationSummaryService::class)->generate(
+                $customer,
+                $this->chatId,
+                $this->channel,
+                $summaryContext
+            );
+        } catch (\Throwable $e) {
+            Log::error('Failed to set customer mode to waiting during escalation', [
+                'customer_id' => $customer->id,
+                'channel' => $this->channel,
+                'chat_id' => $this->chatId,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return $reply;
+    }
+
+    private function buildEscalationReplyMessage(): string
+    {
+        $agent = ChatAgent::getDefault();
+        $silentHandoff = $agent?->silent_handoff ?? false;
+        $stopAiAfterHandoff = $agent?->stop_ai_after_handoff ?? true;
+
+        if ($silentHandoff) {
+            return '';
+        }
+
+        if ($stopAiAfterHandoff) {
+            return "Permintaan Anda sedang diteruskan ke agen kami. Mohon tunggu sebentar 🙏\nYour request is being forwarded to our agent. Please wait a moment 🙏";
+        }
+
+        return 'Permintaan Anda sedang diteruskan ke Human Support. Mohon tunggu sebentar 🙏';
     }
 }

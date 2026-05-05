@@ -1187,7 +1187,7 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
             }
 
             // ── Human support escalation ────────────────────────────────────
-            if ($chainToolName === 'human_support') {
+            if (in_array($chainToolName, ['human_support', 'escalate', 'escalation'], true)) {
                 // Move the customer to the waiting queue.
                 try {
                     $customer = Customer::query()

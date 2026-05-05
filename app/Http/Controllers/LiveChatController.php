@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\ChatAgent;
 use App\Models\ProjectSetting;
 use App\Services\Agent\ChatAttachmentStorageService;
+use App\Services\AI\EscalationIntentDetector;
+use App\Services\AI\EscalationSummaryService;
 use App\Support\LogSanitizer;
 use App\Support\MetricsCollector;
 use App\Support\UrlSsrfGuard;
@@ -209,42 +211,45 @@ class LiveChatController extends Controller
             return '';
         }
 
+        $keyword = app(EscalationIntentDetector::class)->detect($combinedText);
+        if ($keyword !== null) {
+            if ($customer !== null) {
+                return $this->applyEscalationHandoff(
+                    $customer,
+                    $chatId,
+                    'livechat',
+                    ['trigger' => 'keyword_detector', 'keyword' => $keyword]
+                );
+            }
+
+            Log::warning('Escalation keyword detected but customer context is missing', [
+                'channel' => 'livechat',
+                'chat_id' => $chatId,
+                'keyword' => $keyword,
+            ]);
+
+            return $this->buildEscalationReplyMessage();
+        }
+
         $reply = app(AIService::class)->reply($combinedText, $chatId, 'livechat', $agentContext, $attachmentMeta);
 
         // Detect escalation marker and enforce queue behavior.
         $shouldEscalate = str_contains($reply, '[ESCALATE]');
         $reply = trim(str_replace('[ESCALATE]', '', $reply));
 
-        if ($shouldEscalate) {
-            $agent = ChatAgent::getDefault();
-            $silentHandoff = $agent?->silent_handoff ?? false;
-            $stopAiAfterHandoff = $agent?->stop_ai_after_handoff ?? true;
-
-            if ($silentHandoff) {
-                $reply = '';
-            } elseif ($stopAiAfterHandoff) {
-                $reply = "Permintaan Anda sedang diteruskan ke agen kami. Mohon tunggu sebentar 🙏\nYour request is being forwarded to our agent. Please wait a moment 🙏";
-            } elseif ($reply === '') {
-                $reply = 'Permintaan Anda sedang diteruskan ke Human CS. Mohon tunggu sebentar 🙏';
-            }
-
-            if ($customer !== null) {
-                try {
-                    $customer->update(['mode' => 'waiting']);
-                    Log::info('Customer escalated to waiting queue by AI', [
-                        'customer_id' => $customer->id,
-                        'channel' => 'livechat',
-                        'chat_id' => $chatId,
-                    ]);
-                } catch (\Throwable $e) {
-                    Log::error('Failed to set customer mode to waiting during escalation', [
-                        'customer_id' => $customer->id,
-                        'channel' => 'livechat',
-                        'chat_id' => $chatId,
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-            }
+        if ($shouldEscalate && $customer !== null) {
+            $reply = $this->applyEscalationHandoff(
+                $customer,
+                $chatId,
+                'livechat',
+                ['trigger' => 'escalation_marker']
+            );
+        } elseif ($shouldEscalate) {
+            Log::warning('Escalation marker emitted but customer context is missing', [
+                'channel' => 'livechat',
+                'chat_id' => $chatId,
+            ]);
+            $reply = $this->buildEscalationReplyMessage();
         }
 
         MetricsCollector::recordRequest('livechat', MetricsCollector::elapsed($requestStart));
@@ -343,6 +348,54 @@ class LiveChatController extends Controller
         }
 
         return false;
+    }
+
+    private function applyEscalationHandoff($customer, string $chatId, string $channel, array $summaryContext = []): string
+    {
+        $reply = $this->buildEscalationReplyMessage();
+
+        try {
+            $customer->update(['mode' => 'waiting']);
+            Log::info('Customer escalated to waiting queue by AI', [
+                'customer_id' => $customer->id,
+                'channel' => $channel,
+                'chat_id' => $chatId,
+                'source' => $summaryContext['trigger'] ?? 'unknown',
+            ]);
+
+            app(EscalationSummaryService::class)->generate(
+                $customer,
+                $chatId,
+                $channel,
+                $summaryContext
+            );
+        } catch (\Throwable $e) {
+            Log::error('Failed to set customer mode to waiting during escalation', [
+                'customer_id' => $customer->id,
+                'channel' => $channel,
+                'chat_id' => $chatId,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return $reply;
+    }
+
+    private function buildEscalationReplyMessage(): string
+    {
+        $agent = ChatAgent::getDefault();
+        $silentHandoff = $agent?->silent_handoff ?? false;
+        $stopAiAfterHandoff = $agent?->stop_ai_after_handoff ?? true;
+
+        if ($silentHandoff) {
+            return '';
+        }
+
+        if ($stopAiAfterHandoff) {
+            return "Permintaan Anda sedang diteruskan ke agen kami. Mohon tunggu sebentar 🙏\nYour request is being forwarded to our agent. Please wait a moment 🙏";
+        }
+
+        return 'Permintaan Anda sedang diteruskan ke Human Support. Mohon tunggu sebentar 🙏';
     }
 
     /**

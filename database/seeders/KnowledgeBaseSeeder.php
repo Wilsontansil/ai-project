@@ -235,7 +235,13 @@ Contoh: Transfer 100.000 + 200.000 + 300.000 = isi form 600.000
 Jangan submit form lebih dari 1x — cukup 1 form dengan total semua transfer.
 
 Catatan:
-Tidak ada Refund , jika terjadi kesalahan dalam transfer atau Deposit akan di arahkan ke Human Support',
+Tidak ada Refund , jika terjadi kesalahan dalam transfer atau Deposit akan di arahkan ke Human Support
+
+Catatan:
+Tidak ada Refund , jika terjadi kesalahan dalam transfer atau Deposit akan di arahkan ke Human Support.
+Rekening ada 2 tipe:
+- Rekening Player , yaitu rekening yang didaftarkan ke aku player / user
+- Rekening Web , yaitu rekening yang terdaftar di Website untuk proses deposit, daftar Rekening Web yang aktif dapat liat dari Tool Rekening.',
                 'source' => 'manual',
                 'file_name' => null,
                 'is_active' => true,

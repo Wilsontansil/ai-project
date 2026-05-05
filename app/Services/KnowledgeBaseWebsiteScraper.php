@@ -111,11 +111,11 @@ class KnowledgeBaseWebsiteScraper
     {
         $ids = [];
 
-        if (preg_match_all('/<button[^>]*class="[^"]*pola_gacor[^"]*"[^>]*data-id="(\d+)"[^>]*>/i', $html, $m1) === 1) {
+        if (preg_match_all('/<button[^>]*class="[^"]*pola_gacor[^"]*"[^>]*data-id="(\d+)"[^>]*>/i', $html, $m1) > 0) {
             $ids = array_merge($ids, $m1[1]);
         }
 
-        if (preg_match_all('/<button[^>]*data-id="(\d+)"[^>]*class="[^"]*pola_gacor[^"]*"[^>]*>/i', $html, $m2) === 1) {
+        if (preg_match_all('/<button[^>]*data-id="(\d+)"[^>]*class="[^"]*pola_gacor[^"]*"[^>]*>/i', $html, $m2) > 0) {
             $ids = array_merge($ids, $m2[1]);
         }
 

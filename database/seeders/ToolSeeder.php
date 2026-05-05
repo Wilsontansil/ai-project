@@ -1213,7 +1213,7 @@ class ToolSeeder extends Seeder
                         'bank'        => ['type' => 'string', 'description' => 'Nama bank / Nama (E-wallet) (Lama)'],
                         'namarek_new' => ['type' => 'string', 'description' => 'Nama rekening (Baru)'],
                         'norek_new'   => ['type' => 'string', 'description' => 'Nomor rekening (Baru)'],
-                        'nama_ktp'    => ['type' => 'string', 'description' => 'Kirim Gambar KTP yang Sesuai dengan Nama Rekening'],
+                        'nama_ktp'    => ['type' => 'string', 'description' => 'Kirim Gambar KTP'],
                     ],
                     'required'   => ['namarek', 'norek', 'bank', 'namarek_new', 'norek_new', 'nama_ktp'],
                 ],

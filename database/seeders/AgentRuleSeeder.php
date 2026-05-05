@@ -20,8 +20,6 @@ class AgentRuleSeeder extends Seeder
                 'instruction' => 'Jika user meminta ganti rekening, tanyakan alasan terlebih dahulu.
 Hanya lanjut jika alasan terkait kesalahan data rekening (salah nomor rekening/norek atau salah nama rekening/namarek).
 Jika alasan valid, kumpulkan data rekening lama dan baru: namarek, norek, bank, namarek_new, norek_new.
-Validasi kemiripan data lama vs data baru dengan ketentuan ketat (Levenshtein) agar perubahannya bukan ganti identitas rekening total.
-Jika perbedaan melebihi ambang (lebih dari 4 karakter atau melibatkan perubahan huruf yang signifikan), JANGAN eksekusi tool "Ganti Rekening".
 Jika alasan di luar koreksi kesalahan data, permintaan ganti rekening tidak diperbolehkan.',
                 'type' => 'guideline',
                 'category' => 'behavior',

@@ -205,7 +205,7 @@ class ToolSeeder extends Seeder
                         'namarek' => ['type' => 'string', 'description' => 'Nama pemilik rekening (bisa nama asli atau username/nickname yang terdaftar di bank, terima apa adanya)'],
                         'norek' => ['type' => 'string', 'description' => 'Nomor rekening'],
                     ],
-                    'required' => ['username', 'email', 'hp', 'bank', 'namarek', 'norek'],
+                    'required' => ['username', 'bank', 'namarek', 'norek'],
                 ],
                 'endpoints' => [
                     'endpoint' => [

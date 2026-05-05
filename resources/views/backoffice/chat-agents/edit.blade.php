@@ -135,6 +135,8 @@
                         <input id="temperature" type="number" name="temperature"
                             value="{{ old('temperature', $agent->temperature) }}" min="0" max="2"
                             step="0.1" />
+                        <p style="margin-top:0.25rem;font-size:0.7rem;color:#64748b">
+                            {{ __('backoffice.pages.chat_agents.temp_help') }}</p>
                     </div>
                     <div>
                         <label for="max_history_messages"

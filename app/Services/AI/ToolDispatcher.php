@@ -1154,7 +1154,12 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
                         ]);
 
                         // Generate summary so backoffice agents see the escalation context.
-                        app(EscalationSummaryService::class)->generate($customer, $chatId, $channel);
+                        app(EscalationSummaryService::class)->generate(
+                            $customer,
+                            $chatId,
+                            $channel,
+                            array_merge(['tool_name' => $tool->tool_name], $toolContext)
+                        );
                     }
                 } catch (\Throwable $e) {
                     Log::error('Failed to escalate customer via chain rule', [

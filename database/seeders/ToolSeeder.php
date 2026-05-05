@@ -46,6 +46,33 @@ class ToolSeeder extends Seeder
                 'meta' => ['bot_name' => 'xoneBot'],
             ],
 
+            // ─── ESCALATE type tools (no endpoint, triggers handoff) ───
+            [
+                'tool_name'        => 'human_support',
+                'category'         => 'system',
+                'display_name'     => 'Eskalasi ke Human Support',
+                'description'      => 'Mengeskalasi percakapan ke Human Support. Gunakan tool ini ketika masalah tidak dapat diselesaikan oleh bot, player meminta berbicara dengan CS manusia, atau kasus memerlukan penanganan manual.',
+                'slug'             => 'human-support',
+                'type'             => 'escalate',
+                'is_enabled'       => true,
+                'data_model_id'    => null,
+                'parameters'       => [
+                    'type'       => 'object',
+                    'properties' => [
+                        'reason' => [
+                            'type'        => 'string',
+                            'description' => 'Alasan singkat mengapa percakapan perlu diteruskan ke Human Support. Contoh: "Player minta bicara CS", "Masalah tidak dapat diselesaikan bot", "Akun banned".',
+                        ],
+                    ],
+                    'required' => [],
+                ],
+                'endpoints'        => null,
+                'keywords'         => null,
+                'tool_rules'       => "- Gunakan tool ini HANYA ketika masalah benar-benar tidak bisa diselesaikan oleh bot, atau player secara eksplisit meminta berbicara dengan CS manusia\n- Isi parameter reason dengan ringkasan singkat alasan eskalasi\n- Setelah tool ini dipanggil, informasikan kepada player bahwa permintaannya sedang diteruskan ke tim Human Support\n- Minta player untuk menunggu balasan dari agen kami\n- Jangan memberikan estimasi waktu response yang spesifik",
+                'information_text' => 'Permintaan Anda sedang kami teruskan ke tim Human Support. Mohon tunggu sebentar, agen kami akan segera membantu 🙏',
+                'meta'             => null,
+            ],
+
             // ─── UPDATE type tools (API endpoint) ───
             [
                 'tool_name' => 'resetPassword',

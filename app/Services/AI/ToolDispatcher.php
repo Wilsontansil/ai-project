@@ -617,6 +617,44 @@ class ToolDispatcher
             return null;
         }
 
+        // ── Escalate type: move customer to waiting queue immediately ─────────
+        if ($tool->type === 'escalate') {
+            try {
+                $customer = Customer::query()
+                    ->where('platform_user_id', $chatId)
+                    ->where('platform', $channel)
+                    ->first();
+
+                if ($customer !== null) {
+                    $customer->update(['mode' => 'waiting']);
+                    Log::info('Customer escalated to waiting queue via escalate tool', [
+                        'tool_name'   => $tool->tool_name,
+                        'customer_id' => $customer->id,
+                        'channel'     => $channel,
+                        'chat_id'     => $chatId,
+                    ]);
+
+                    app(EscalationSummaryService::class)->generate(
+                        $customer,
+                        $chatId,
+                        $channel,
+                        ['tool_name' => $tool->tool_name, 'reason' => $arguments['reason'] ?? '']
+                    );
+                }
+            } catch (\Throwable $e) {
+                Log::error('Failed to escalate customer via escalate tool', [
+                    'tool_name' => $tool->tool_name,
+                    'chat_id'   => $chatId,
+                    'error'     => $e->getMessage(),
+                ]);
+            }
+
+            $infoText = trim((string) ($tool->information_text ?? ''));
+            return $infoText !== ''
+                ? $infoText
+                : 'Permintaan Anda sedang kami teruskan ke tim Human Support. Mohon tunggu sebentar, agen kami akan segera membantu 🙏';
+        }
+
         $engineStart = MetricsCollector::startTimer();
         $engineError = null;
 

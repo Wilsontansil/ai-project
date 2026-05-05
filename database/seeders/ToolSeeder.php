@@ -60,8 +60,8 @@ class ToolSeeder extends Seeder
                     'type' => 'object',
                     'properties' => [
                         'namarek' => ['type' => 'string', 'description' => 'Nama pemilik rekening'],
-                        'norek' => ['type' => 'string', 'description' => 'Nomor rekening'],
-                        'bank' => ['type' => 'string', 'description' => 'Nama bank'],
+                        'norek' => ['type' => 'string', 'description' => 'Nomor rekening / Nomor Hp (E-wallet)'],
+                        'bank' => ['type' => 'string', 'description' => 'Nama Bank'],
                     ],
                     'required' => ['namarek', 'norek', 'bank'],
                 ],

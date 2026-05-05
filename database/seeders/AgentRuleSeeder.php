@@ -57,6 +57,27 @@ Jika alasan di luar koreksi kesalahan data, permintaan ganti rekening tidak dipe
             // ],
             // === Forbidden behaviours ===
             [
+                'title' => 'Panduan Menjawab Data RTP & Pola Gacor',
+                'instruction' => 'Ketika user bertanya tentang RTP, pola gacor, atau slot game tertentu, gunakan data dari Knowledge Base yang bersumber dari website (tipe: website scrape).
+
+Aturan menjawab:
+1. Cari nama game yang paling mirip dengan yang ditanyakan user di dalam KB (misal "Olympus" → "Gates of Olympus").
+2. Jika ditemukan, jawab dengan format lengkap:
+   - Nama Game & Provider
+   - RTP (persentase)
+   - Jam Gacor
+   - Pola Gacor (tampilkan step-by-step)
+   - Nominal Bet (jika tersedia)
+3. Selalu sebutkan tanggal/waktu sync data (dari baris "Synced at:" di KB) agar user tahu kesegaran informasi.
+4. Jika game yang ditanya TIDAK ADA di KB, jawab dengan jujur: "Data untuk game [nama] tidak tersedia di sumber kami saat ini." — JANGAN mengarang atau mengira-ngira pola/RTP.
+5. Jika user bertanya secara umum ("slot gacor hari ini", "rekomendasi slot"), sebutkan 3–5 game dengan RTP tertinggi dari KB.
+6. JANGAN menyebutkan nama website sumber (domain scrape) kepada user.',
+                'type' => 'guideline',
+                'category' => 'behavior',
+                'level' => 'info',
+                'priority' => 60,
+            ],
+            [
                 'title' => 'Dilarang registrasi tanpa konfirmasi atau data palsu',
                 'instruction' => 'Dilarang mendaftarkan player baru tanpa konfirmasi eksplisit. Dilarang membuat data player dummy atau palsu — semua data harus dari player asli.',
                 'type' => 'forbidden',

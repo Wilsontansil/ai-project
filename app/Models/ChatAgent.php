@@ -47,20 +47,25 @@ class ChatAgent extends Model
             }
         });
 
-        static::saved(fn () => Cache::forget('chat_agent_default'));
-        static::deleted(fn () => Cache::forget('chat_agent_default'));
+        static::saved(fn () => Cache::forget('chat_agent_default_id'));
+        static::deleted(fn () => Cache::forget('chat_agent_default_id'));
     }
 
     /**
      * Get the default agent, or the first enabled one.
-     * Cached for 60 seconds — invalidated automatically on save/delete.
+     * Caches only the agent ID (avoids Eloquent object serialization issues),
+     * then loads a fresh model by that ID. Invalidated automatically on save/delete.
      */
     public static function getDefault(): ?self
     {
-        return Cache::remember('chat_agent_default', 60, function () {
-            return static::where('is_default', true)->first()
+        $id = Cache::remember('chat_agent_default_id', 60, function () {
+            $agent = static::where('is_default', true)->first()
                 ?? static::where('is_enabled', true)->first();
+
+            return $agent?->id;
         });
+
+        return $id !== null ? static::find($id) : null;
     }
 
     public function scopeEnabled($query)

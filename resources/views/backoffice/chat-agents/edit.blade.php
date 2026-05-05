@@ -325,7 +325,7 @@
                         <div>
                             <label class="bo-label">Source Type</label>
                             <div class="flex flex-wrap gap-2 mt-1">
-                                @foreach (['manual' => 'Manual Text', 'file' => 'Upload .txt', 'datamodel' => 'DataModel Query'] as $val => $label)
+                                @foreach (['manual' => 'Manual Text', 'file' => 'Upload .txt', 'datamodel' => 'DataModel Query', 'website' => 'Website Scrape (RTP)'] as $val => $label)
                                     <label
                                         class="flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-slate-200 transition has-[:checked]:border-cyan-400 has-[:checked]:text-cyan-300">
                                         <input type="radio" name="source_type" value="{{ $val }}"
@@ -376,6 +376,37 @@
                             </div>
                         </div>
 
+                        <div id="kb-edit-panel-website" class="hidden space-y-3">
+                            <div>
+                                <label for="kb_edit_source_url" class="bo-label">Website URL</label>
+                                <input id="kb_edit_source_url" type="url" name="source_url"
+                                    value="{{ old('source_url', $selectedKnowledge->source_url) }}"
+                                    placeholder="https://rtpcmbet96.xyz" />
+                                @error('source_url')
+                                    <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="kb_edit_source_limit" class="bo-label">Max Games</label>
+                                <input id="kb_edit_source_limit" type="number" name="source_limit" min="1"
+                                    max="50"
+                                    value="{{ old('source_limit', (int) data_get($selectedKnowledge->source_options, 'limit', 15)) }}" />
+                                <p class="mt-1 text-xs text-slate-400">Jumlah game yang diambil saat sinkronisasi (1-50).
+                                </p>
+                            </div>
+                            @if ($selectedKnowledge->source === 'website')
+                                <div class="rounded-lg border border-white/10 bg-slate-900/70 p-3 text-xs text-slate-300">
+                                    <div>Last sync:
+                                        {{ optional($selectedKnowledge->last_synced_at)?->format('d M Y H:i') ?? '-' }}
+                                    </div>
+                                    <div>Status: {{ $selectedKnowledge->last_sync_status ?? '-' }}</div>
+                                    @if ($selectedKnowledge->last_sync_error)
+                                        <div class="text-red-300">Error: {{ $selectedKnowledge->last_sync_error }}</div>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+
                         <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
                             <span>Updated: {{ $selectedKnowledge->updated_at->format('d M Y H:i') }}</span>
                         </div>
@@ -405,6 +436,7 @@
                                 manual: document.getElementById('kb-edit-panel-manual'),
                                 file: document.getElementById('kb-edit-panel-file'),
                                 datamodel: document.getElementById('kb-edit-panel-datamodel'),
+                                website: document.getElementById('kb-edit-panel-website'),
                             };
 
                             function show(val) {
@@ -484,7 +516,7 @@
                     <div>
                         <label class="bo-label">Source Type</label>
                         <div class="flex flex-wrap gap-2 mt-1">
-                            @foreach (['manual' => 'Manual Text', 'file' => 'Upload .txt', 'datamodel' => 'DataModel Query'] as $val => $label)
+                            @foreach (['manual' => 'Manual Text', 'file' => 'Upload .txt', 'datamodel' => 'DataModel Query', 'website' => 'Website Scrape (RTP)'] as $val => $label)
                                 <label
                                     class="flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-xs text-slate-200 transition has-[:checked]:border-cyan-400 has-[:checked]:text-cyan-300">
                                     <input type="radio" name="source_type" value="{{ $val }}"
@@ -535,6 +567,23 @@
                         </div>
                     </div>
 
+                    <div id="kb-add-panel-website" class="hidden space-y-3">
+                        <div>
+                            <label for="kb_source_url" class="bo-label">Website URL</label>
+                            <input id="kb_source_url" type="url" name="source_url" value="{{ old('source_url') }}"
+                                placeholder="https://rtpcmbet96.xyz" />
+                            @error('source_url')
+                                <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label for="kb_source_limit" class="bo-label">Max Games</label>
+                            <input id="kb_source_limit" type="number" name="source_limit" min="1"
+                                max="50" value="{{ old('source_limit', 15) }}" />
+                            <p class="mt-1 text-xs text-slate-400">Jumlah game yang diambil saat sinkronisasi (1-50).</p>
+                        </div>
+                    </div>
+
                     <label class="bo-checkbox-label" style="max-width:max-content">
                         <input type="checkbox" name="is_active" value="1"
                             {{ old('is_active', true) ? 'checked' : '' }} />
@@ -550,6 +599,7 @@
                             manual: document.getElementById('kb-add-panel-manual'),
                             file: document.getElementById('kb-add-panel-file'),
                             datamodel: document.getElementById('kb-add-panel-datamodel'),
+                            website: document.getElementById('kb-add-panel-website'),
                         };
 
                         function show(val) {
@@ -574,8 +624,6 @@
                         addTextarea.addEventListener('input', updateAddCount);
                         updateAddCount();
                     })();
-                </script>
-                })();
                 </script>
             </div>
         </div>

@@ -46,9 +46,17 @@
                                     <td class="px-4 py-3">
                                         <span
                                             class="rounded-full px-2 py-0.5 text-[10px] font-semibold
-                                            {{ $entry->source === 'file' ? 'bg-violet-500/20 text-violet-300 ring-1 ring-violet-400/30' : 'bg-slate-500/20 text-slate-300 ring-1 ring-slate-400/30' }}">
+                                            {{ $entry->source === 'file' ? 'bg-violet-500/20 text-violet-300 ring-1 ring-violet-400/30' : ($entry->source === 'website' ? 'bg-cyan-500/20 text-cyan-300 ring-1 ring-cyan-400/30' : 'bg-slate-500/20 text-slate-300 ring-1 ring-slate-400/30') }}">
                                             {{ $entry->source }}
                                         </span>
+                                        @if ($entry->source === 'website')
+                                            <div class="mt-1 text-[10px] text-slate-400">
+                                                Sync: {{ $entry->last_sync_status ?? '-' }}
+                                                @if ($entry->last_synced_at)
+                                                    · {{ $entry->last_synced_at->format('d M H:i') }}
+                                                @endif
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="px-4 py-3">
                                         @if ($entry->is_active)

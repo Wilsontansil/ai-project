@@ -16,11 +16,18 @@ class KnowledgeBase extends Model
         'file_name',
         'data_model_id',
         'query_sql',
+        'source_url',
+        'source_options',
+        'last_synced_at',
+        'last_sync_status',
+        'last_sync_error',
         'is_active',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'source_options' => 'array',
+        'last_synced_at' => 'datetime',
     ];
 
     public function chatAgent()

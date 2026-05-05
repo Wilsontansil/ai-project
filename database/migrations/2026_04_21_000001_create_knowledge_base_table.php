@@ -13,10 +13,15 @@ return new class extends Migration
             $table->foreignId('chat_agent_id')->constrained('chat_agents')->cascadeOnDelete();
             $table->string('title');
             $table->longText('content')->nullable();
-            $table->string('source')->default('manual'); // 'manual', 'file', or 'datamodel'
+            $table->string('source')->default('manual'); // 'manual', 'file', 'datamodel', or 'website'
             $table->string('file_name')->nullable();
             $table->foreignId('data_model_id')->nullable()->constrained('data_models')->nullOnDelete();
             $table->text('query_sql')->nullable();
+            $table->string('source_url')->nullable();
+            $table->json('source_options')->nullable();
+            $table->timestamp('last_synced_at')->nullable();
+            $table->string('last_sync_status', 20)->nullable(); // success | failed
+            $table->text('last_sync_error')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

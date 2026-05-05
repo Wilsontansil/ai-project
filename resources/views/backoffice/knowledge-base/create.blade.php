@@ -25,7 +25,7 @@
             <div>
                 <label class="mb-2 block text-sm text-slate-200">Source Type</label>
                 <div class="flex flex-wrap gap-3">
-                    @foreach (['manual' => 'Manual Text', 'file' => 'Upload .txt File', 'datamodel' => 'DataModel Query'] as $val => $label)
+                    @foreach (['manual' => 'Manual Text', 'file' => 'Upload .txt File', 'datamodel' => 'DataModel Query', 'website' => 'Website Scrape (RTP)'] as $val => $label)
                         <label
                             class="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-slate-900/70 px-4 py-2.5 text-sm text-slate-200 transition has-[:checked]:border-cyan-400 has-[:checked]:text-cyan-300">
                             <input type="radio" name="source_type" value="{{ $val }}"
@@ -99,6 +99,28 @@
                 </div>
             </div>
 
+            {{-- Website scrape panel --}}
+            <div id="panel-website" class="hidden space-y-4">
+                <div>
+                    <label for="source_url" class="mb-2 block text-sm text-slate-200">Website URL</label>
+                    <p class="mb-2 text-xs text-slate-400">Masukkan URL website RTP. Sistem akan scrape game gacor dan pola
+                        gacor lalu simpan ke content Knowledge Base.</p>
+                    <input id="source_url" type="url" name="source_url" value="{{ old('source_url') }}"
+                        placeholder="https://rtpcmbet95.xyz/"
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                    @error('source_url')
+                        <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label for="source_limit" class="mb-2 block text-sm text-slate-200">Max Games to Sync</label>
+                    <input id="source_limit" type="number" name="source_limit" value="{{ old('source_limit', 15) }}"
+                        min="1" max="50"
+                        class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
+                    <p class="mt-1 text-xs text-slate-400">Rekomendasi: 10-20 agar prompt AI tetap ringan.</p>
+                </div>
+            </div>
+
             <div class="flex items-center gap-3">
                 <input id="is_active" type="checkbox" name="is_active" value="1" checked
                     class="h-4 w-4 rounded border-white/20 bg-slate-800 text-cyan-400" />
@@ -135,11 +157,16 @@
                 manual: document.getElementById('panel-manual'),
                 file: document.getElementById('panel-file'),
                 datamodel: document.getElementById('panel-datamodel'),
+                website: document.getElementById('panel-website'),
             };
 
             function showPanel(val) {
                 Object.entries(panels).forEach(([key, el]) => {
-                    el.classList.toggle('hidden', key !== val);
+                    if (val === 'file') {
+                        el.classList.toggle('hidden', key !== 'manual' && key !== 'file');
+                    } else {
+                        el.classList.toggle('hidden', key !== val);
+                    }
                 });
             }
 

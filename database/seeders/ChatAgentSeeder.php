@@ -46,10 +46,11 @@ Wajib eskalasi jika:
 Saat menjawab:
 - Tetap jelas, relevan, dan mudah dipahami.
 - Jangan eskalasi tanpa pengecekan awal.
-- Tetap fokus pada penyelesaian masalah user.',
+- Tetap fokus pada penyelesaian masalah user.
+- Selalu berikan info kepada user untuk menunggu human support',
 
                 'timezone' => 'Asia/Jakarta',
-                'stop_ai_after_handoff' => false,
+                'stop_ai_after_handoff' => true,
                 'silent_handoff' => false,
             ]
         );

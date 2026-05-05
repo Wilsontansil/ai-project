@@ -334,7 +334,7 @@ class ToolSeeder extends Seeder
                 'tool_name' => 'Rekening',
                 'category' => 'payment',
                 'display_name' => 'Rekening',
-                'description' => 'Menyediakan informasi list Rekening yang "Active"',
+                'description' => 'Menyediakan informasi list Rekening Web yang "Active"',
                 'slug' => 'rekening',
                 'type' => 'get',
                 'is_enabled' => true,
@@ -342,7 +342,7 @@ class ToolSeeder extends Seeder
                 'parameters' => null,
                 'endpoints' => null,
                 'keywords' => null,
-                'tool_rules' => "- List rekening Active\n- Listkan semua Rekening\n- Berikan detail bank, nama, norek\n- Bank yang di list adalah untuk Manual Deposit",
+                'tool_rules' => "- - List rekening Active yang ada pada Website / Platform\n- Listkan semua Rekening\n- Berikan detail bank, nama, norek\n- Bank yang di list adalah untuk Manual Deposit",
                 'information_text' => null,
                 'meta' => [
                     'query' => [
@@ -897,9 +897,9 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['operatortime', 'status', 'remark'],
+                        'select' => ['created_at', 'status', 'remark'],
                         'order_by' => [
-                            'field' => 'operatortime',
+                            'field' => 'created_at',
                             'direction' => 'desc',
                         ],
                         'limit' => 5,
@@ -928,9 +928,9 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['operatortime', 'status', 'remark'],
+                        'select' => ['created_at', 'status', 'remark'],
                         'order_by' => [
-                            'field' => 'operatortime',
+                            'field' => 'created_at',
                             'direction' => 'desc',
                         ],
                         'limit' => 5,
@@ -1237,7 +1237,7 @@ class ToolSeeder extends Seeder
                     ],
                 ],
                 'keywords'         => null,
-                'tool_rules'       => "- Kumpulkan data rekening lama terlebih dahulu: namarek (nama pemilik rekening lama), norek (nomor rekening / nomor HP e-wallet lama), bank (nama bank / e-wallet lama)\n- Kumpulkan data rekening baru: namarek_new (nama pemilik rekening baru), norek_new (nomor rekening baru)\n- Setelah data rekening terkumpul, minta user mengirimkan foto KTP yang sesuai dengan nama pemilik rekening\n- Analisa gambar KTP dan ekstrak nama lengkap yang tertera pada KTP sebagai nilai nama_ktp\n- Jangan eksekusi sebelum semua 6 data lengkap (namarek, norek, bank, namarek_new, norek_new, nama_ktp)\n- Nama pada KTP (nama_ktp) harus sesuai dengan nama rekening lama (namarek); jika tidak cocok, tolak dan minta klarifikasi\n- Setelah berhasil, konfirmasi kepada user bahwa rekening bank berhasil diperbarui",
+                'tool_rules'       => "⚠️ PENTING — BACA SEBELUM MEMPROSES GANTI REKENING:\n- Ganti Rekening HANYA diperbolehkan untuk memperbaiki kesalahan nomor rekening (norek) atau nama rekening (namarek). DILARANG memproses jika user ingin mengganti rekening ke rekening yang sepenuhnya berbeda/baru tanpa alasan kesalahan data.\n- Sampaikan ketentuan ini kepada user di awal sebelum mengumpulkan data apapun.\n- Kumpulkan data rekening lama terlebih dahulu: namarek (nama pemilik rekening lama), norek (nomor rekening / nomor HP e-wallet lama), bank (nama bank / e-wallet lama)\n- Kumpulkan data rekening baru: namarek_new (nama pemilik rekening baru), norek_new (nomor rekening baru)\n- Setelah data rekening terkumpul, minta user mengirimkan foto KTP yang sesuai dengan nama pemilik rekening\n- Analisa gambar KTP dan ekstrak nama lengkap yang tertera pada KTP sebagai nilai nama_ktp\n- Jangan eksekusi sebelum semua 6 data lengkap (namarek, norek, bank, namarek_new, norek_new, nama_ktp)\n- Nama pada KTP (nama_ktp) harus sesuai dengan nama rekening lama (namarek); jika tidak cocok, tolak dan minta klarifikasi\n- WAJIB konfirmasi ulang seluruh data kepada user sebelum mengeksekusi perubahan rekening — ini adalah aksi sensitif dan tidak dapat dibatalkan\n- Setelah berhasil, konfirmasi kepada user bahwa rekening bank berhasil diperbarui",
                 'information_text' => null,
                 'meta'             => null,
             ],

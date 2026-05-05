@@ -131,7 +131,7 @@ class ToolSeeder extends Seeder
                             'on'         => 'failure',
                             'condition'  => 'contains',
                             'field'      => 'response_message',
-                            'value'      => 'balance greater than 10,000',
+                            'value'      => 'balance greater than 100,000',
                             'chain_tool' => 'verifyDeposit',
                             'carry_args' => ['namarek', 'norek', 'bank'],
                             'message'    => 'Demi keamanan akun, saldo di atas batas perlu verifikasi tambahan. Boleh kami lanjutkan proses verifikasi sekarang? Silakan kirimkan bukti transfer deposit terakhir Anda.',

@@ -7,7 +7,6 @@ use App\Models\ProjectSetting;
 use App\Models\Customer;
 use App\Services\Agent\AgentContextService;
 use App\Services\Agent\ConversationMemoryService;
-use App\Services\AI\ConversationHistory;
 use App\Services\AI\EscalationSummaryService;
 use App\Services\AIService;
 use App\Support\MetricsCollector;
@@ -18,7 +17,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use OpenAI;
 
 /**
  * Processes an AI reply asynchronously for Telegram and WhatsApp channels.
@@ -340,65 +338,6 @@ class ProcessAiReply implements ShouldQueue
     private function wahaSession(): string
     {
         return (string) ProjectSetting::getValue('whatsapp_session', config('services.whatsapp.session', 'default'));
-    }
-
-    /** @deprecated Use App\Services\AI\EscalationSummaryService instead. */
-    private function generateEscalationSummary(Customer $customer): void
-    {
-        try {
-            $apiKey = (string) ProjectSetting::getValue('openai_api_key', config('services.openai.api_key', ''));
-            if ($apiKey === '') {
-                return;
-            }
-
-            // Use cache-based session history (current session only) instead of DB history
-            // (all-day) so the summary reflects only the current escalation reason.
-            $sessionMessages = app(ConversationHistory::class)->load($this->chatId, $this->channel);
-            if (empty($sessionMessages)) {
-                return;
-            }
-
-            $transcript = collect($sessionMessages)->map(function ($msg) {
-                $role = $msg['role'] === 'assistant' ? 'Bot' : 'Customer';
-                return "{$role}: " . ($msg['content'] ?? '');
-            })->implode("\n");
-
-            $client = OpenAI::client($apiKey);
-            $agent  = ChatAgent::getDefault();
-            $model  = $agent?->model ?? 'gpt-4.1-mini';
-
-            $isReasoningModel = (bool) preg_match('/^o\d/', $model);
-            $summarizePayload = [
-                'model' => $model,
-                'max_completion_tokens' => 80,
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => 'You are a summarizer. In 1-2 short sentences, summarize the customer\'s main issue from the conversation so a human agent can quickly understand why the customer was escalated. Be concise and factual. Reply in the same language as the conversation.',
-                    ],
-                    [
-                        'role' => 'user',
-                        'content' => $transcript,
-                    ],
-                ],
-            ];
-            if (! $isReasoningModel) {
-                $summarizePayload['temperature'] = 0.3;
-            }
-
-            $response = $client->chat()->create($summarizePayload);
-
-            $summary = trim($response->choices[0]->message->content ?? '');
-
-            if ($summary !== '') {
-                $customer->update(['escalation_summary' => $summary]);
-            }
-        } catch (\Throwable $e) {
-            Log::warning('Failed to generate escalation summary', [
-                'customer_id' => $customer->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
     }
 
     private function shouldBlockAiReply(Customer $customer): bool

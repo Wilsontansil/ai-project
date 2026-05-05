@@ -22,7 +22,7 @@ class LiveChatController extends Controller
     public function handleWebhook(Request $request)
     {
         $payload = $request->all();
-        Log::info('LiveChat webhook received', LogSanitizer::summarize($payload));
+        Log::debug('LiveChat webhook received', LogSanitizer::summarize($payload));
 
         if ($this->isDuplicateEvent($payload)) {
             return response()->json(['status' => 'ignored', 'reason' => 'duplicate_event']);

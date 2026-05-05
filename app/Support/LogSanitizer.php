@@ -70,7 +70,7 @@ class LogSanitizer
                 $result[$key] = '[array(' . count($value) . ')]';
             } elseif (is_string($value)) {
                 // Cap string length so large blobs don't flood the log.
-                $result[$key] = mb_substr($value, 0, 80);
+                $result[$key] = mb_substr($value, 0, 200);
             } else {
                 $result[$key] = $value;
             }

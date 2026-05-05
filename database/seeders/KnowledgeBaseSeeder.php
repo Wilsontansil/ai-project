@@ -155,14 +155,6 @@ Bonus APK adalah bonus yang hanya dapat diklaim melalui aplikasi (APK).
 - Jumlah Bonus = {bap_bon}
 - Jumlah Deposit = {bap_cou}
 
-6. Welcome Bonus New Member 100% [AKTIF]
-
-[Setting]
-- Multiplier = 1x
-- First Deposit
-- Minimal Deposit = 10000
-- Category To = Slot
-
 B. Bonus Cashback
 Bonus Cashback adalah bonus yang diberikan kepada member setiap hari {cb_day}.
 Bonus Cashback tidak di Claim di menu Reward, tetapi masuk otomatis.

@@ -6,11 +6,6 @@ use App\Models\Customer;
 
 class AgentContextService
 {
-    public function __construct(
-        private readonly ConversationMemoryService $memoryService,
-    ) {
-    }
-
     public function buildContext(Customer $customer, string $message): array
     {
         return [

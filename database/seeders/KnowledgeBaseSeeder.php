@@ -232,7 +232,10 @@ Deposit Beberapa Kali Transfer (Multiple Transfer):
 Jika Kakak sudah melakukan beberapa kali transfer untuk 1 tujuan deposit, cukup isi 1x form deposit saja 😊
 Masukkan total keseluruhan nominal dari semua transfer yang sudah dilakukan.
 Contoh: Transfer 100.000 + 200.000 + 300.000 = isi form 600.000
-Jangan submit form lebih dari 1x — cukup 1 form dengan total semua transfer.',
+Jangan submit form lebih dari 1x — cukup 1 form dengan total semua transfer.
+
+Catatan:
+Tidak ada Refund , jika terjadi kesalahan dalam transfer atau Deposit akan di arahkan ke Human Support',
                 'source' => 'manual',
                 'file_name' => null,
                 'is_active' => true,

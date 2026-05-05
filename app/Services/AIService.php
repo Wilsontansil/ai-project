@@ -421,7 +421,7 @@ class AIService
      */
     public function getMessageAwaitSeconds(): int
     {
-        $seconds = Cache::remember('ai:message_await_seconds:default_agent', now()->addSeconds(20), function (): int {
+        $seconds = Cache::remember('ai:message_await_seconds:default_agent', now()->addSeconds(300), function (): int {
             $agent = ChatAgent::getDefault();
 
             return (int) ($agent?->message_await_seconds ?? $this->defaultDebounceSeconds);

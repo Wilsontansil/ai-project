@@ -142,30 +142,32 @@ PROMPT;
             return '';
         }
 
-        try {
-            $entries = KnowledgeBase::query()
-                ->where('chat_agent_id', $chatAgent->id)
-                ->where('is_active', true)
-                ->orderBy('id')
-                ->get();
+        return Cache::remember("promptbuilder:kb_prompt:{$chatAgent->id}", 300, function () use ($chatAgent): string {
+            try {
+                $entries = KnowledgeBase::query()
+                    ->where('chat_agent_id', $chatAgent->id)
+                    ->where('is_active', true)
+                    ->orderBy('id')
+                    ->get();
 
-            if ($entries->isEmpty()) {
+                if ($entries->isEmpty()) {
+                    return '';
+                }
+                $lines = ['KNOWLEDGE BASE (gunakan sebagai referensi tambahan):'];
+                foreach ($entries as $entry) {
+                    if ($entry->source === 'datamodel') {
+                        $content = $this->resolveDataModelKbContent($entry);
+                    } else {
+                        $content = $this->resolveConfigPlaceholders((string) $entry->content);
+                    }
+                    $lines[] = "### {$entry->title}\n{$content}";
+                }
+
+                return implode("\n\n", $lines);
+            } catch (\Throwable) {
                 return '';
             }
-            $lines = ['KNOWLEDGE BASE (gunakan sebagai referensi tambahan):'];
-            foreach ($entries as $entry) {
-                if ($entry->source === 'datamodel') {
-                    $content = $this->resolveDataModelKbContent($entry);
-                } else {
-                    $content = $this->resolveConfigPlaceholders((string) $entry->content);
-                }
-                $lines[] = "### {$entry->title}\n{$content}";
-            }
-
-            return implode("\n\n", $lines);
-        } catch (\Throwable) {
-            return '';
-        }
+        });
     }
 
     /**
@@ -269,50 +271,53 @@ PROMPT;
 
     private function getAgentRulesPrompt(?ChatAgent $chatAgent): string
     {
-        try {
+        $agentId = $chatAgent?->id ?? 'null';
 
-        $query = AgentRule::query()->where('is_active', true);
+        return Cache::remember("promptbuilder:agent_rules:{$agentId}", 300, function () use ($chatAgent): string {
+            try {
+                $query = AgentRule::query()->where('is_active', true);
 
-        if ($chatAgent) {
-            $query->where('chat_agent_id', $chatAgent->id);
-        } else {
-            $query->whereNull('chat_agent_id');
-        }
+                if ($chatAgent) {
+                    $query->where('chat_agent_id', $chatAgent->id);
+                } else {
+                    $query->whereNull('chat_agent_id');
+                }
 
-        $allRules = $query->orderBy('priority')->get();
+                $allRules = $query->orderBy('priority')->get();
 
-        if ($allRules->isEmpty()) {
-            return '';
-        }
+                if ($allRules->isEmpty()) {
+                    return '';
+                }
 
-        $sections = [];
+                $sections = [];
 
-        // Guidelines
-        $guidelines = $allRules->where('type', 'guideline');
-        if ($guidelines->isNotEmpty()) {
-            $lines = ['ATURAN (ikuti dengan ketat):'];
-            foreach ($guidelines as $rule) {
-                $tag = strtoupper($rule->category);
-                $lines[] = "- [{$tag}] {$rule->instruction}";
+                // Guidelines
+                $guidelines = $allRules->where('type', 'guideline');
+                if ($guidelines->isNotEmpty()) {
+                    $lines = ['ATURAN (ikuti dengan ketat):'];
+                    foreach ($guidelines as $rule) {
+                        $tag = strtoupper($rule->category);
+                        $lines[] = "- [{$tag}] {$rule->instruction}";
+                    }
+                    $sections[] = implode("\n", $lines);
+                }
+
+                // Forbidden
+                $forbidden = $allRules->where('type', 'forbidden');
+                if ($forbidden->isNotEmpty()) {
+                    $lines = ['PERILAKU TERLARANG (dilarang keras — jangan pernah dilanggar):'];
+                    foreach ($forbidden as $rule) {
+                        $levelTag = strtoupper($rule->level);
+                        $lines[] = "- [{$levelTag}] {$rule->instruction}";
+                    }
+                    $sections[] = implode("\n", $lines);
+                }
+
+                return implode("\n\n", $sections);
+            } catch (\Throwable) {
+                return '';
             }
-            $sections[] = implode("\n", $lines);
-        }
-
-        // Forbidden
-        $forbidden = $allRules->where('type', 'forbidden');
-        if ($forbidden->isNotEmpty()) {
-            $lines = ['PERILAKU TERLARANG (dilarang keras — jangan pernah dilanggar):'];
-            foreach ($forbidden as $rule) {
-                $levelTag = strtoupper($rule->level);
-                $lines[] = "- [{$levelTag}] {$rule->instruction}";
-            }
-            $sections[] = implode("\n", $lines);
-        }
-
-        return implode("\n\n", $sections);
-        } catch (\Throwable) {
-            return '';
-        }
+        });
     }
 
     private function getEscalationPrompt(?ChatAgent $chatAgent): string
@@ -326,12 +331,25 @@ PROMPT;
 
     private function getBotName(): string
     {
-        try {
-            $config = Tool::query()->where('tool_name', '_bot_config')->first();
+        return Cache::remember('promptbuilder:bot_name', 600, function (): string {
+            try {
+                $config = Tool::query()->where('tool_name', '_bot_config')->first();
 
-            return trim((string) ($config?->meta['bot_name'] ?? 'xoneBot')) ?: 'xoneBot';
-        } catch (\Throwable) {
-            return 'xoneBot';
-        }
+                return trim((string) ($config?->meta['bot_name'] ?? 'xoneBot')) ?: 'xoneBot';
+            } catch (\Throwable) {
+                return 'xoneBot';
+            }
+        });
+    }
+
+    /**
+     * Invalidate cached prompt components for an agent.
+     * Call this from backoffice whenever agent rules, KB entries, or bot config are saved.
+     */
+    public static function invalidateAgentCache(int|string $agentId): void
+    {
+        Cache::forget("promptbuilder:agent_rules:{$agentId}");
+        Cache::forget("promptbuilder:kb_prompt:{$agentId}");
+        Cache::forget('promptbuilder:bot_name');
     }
 }

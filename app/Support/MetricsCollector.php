@@ -25,6 +25,13 @@ class MetricsCollector
     private const DEFAULT_OUTPUT_COST_PER_1K = 0.0016;
 
     /**
+     * In-process buffer — accumulated until flush() is called.
+     *
+     * @var array<int, array{metric_type: string, channel: string, meta: array<string, mixed>}>
+     */
+    private static array $buffer = [];
+
+    /**
      * Start a high-resolution timer. Returns the start time.
      */
     public static function startTimer(): float
@@ -138,19 +145,47 @@ class MetricsCollector
      * Persist a metric row asynchronously. Falls back to sync write only
      * if queue dispatch fails, so no metric event is dropped.
      *
+     * Events are buffered in-process and dispatched as a single batch job
+     * when flush() is called (end of request / end of queue job).
+     * Auto-flushes when the buffer reaches 20 items to cap memory usage.
+     *
      * @param array<string, mixed> $meta
      */
     private static function record(string $metricType, string $channel, array $meta): void
     {
+        self::$buffer[] = ['metric_type' => $metricType, 'channel' => $channel, 'meta' => $meta];
+
+        // Safety valve: flush early if the buffer grows unexpectedly large.
+        if (count(self::$buffer) >= 20) {
+            self::flush();
+        }
+    }
+
+    /**
+     * Dispatch all buffered metric records as a single queue job.
+     * Called automatically at end of HTTP request (via AppServiceProvider) and
+     * explicitly at the end of each ProcessAiReply job.
+     */
+    public static function flush(): void
+    {
+        if (self::$buffer === []) {
+            return;
+        }
+
+        $batch = self::$buffer;
+        self::$buffer = [];
+
         try {
-            PersistBotMetric::dispatch($metricType, $channel, $meta);
+            PersistBotMetric::dispatch($batch);
         } catch (\Throwable $e) {
-            Log::debug('MetricsCollector queue dispatch failed, fallback to sync write', [
-                'metric_type' => $metricType,
+            Log::debug('MetricsCollector flush dispatch failed, falling back to sync writes', [
+                'count' => count($batch),
                 'error' => $e->getMessage(),
             ]);
 
-            self::writeSync($metricType, $channel, $meta);
+            foreach ($batch as $record) {
+                self::writeSync($record['metric_type'], $record['channel'], $record['meta']);
+            }
         }
     }
 

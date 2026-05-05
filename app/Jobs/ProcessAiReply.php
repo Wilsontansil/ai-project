@@ -189,6 +189,9 @@ class ProcessAiReply implements ShouldQueue
         } finally {
             $aiService->releaseAiProcessingLock($this->chatId, $this->channel);
 
+            // Flush all buffered metric records accumulated during this job in one batch job.
+            MetricsCollector::flush();
+
             // Drain one additional batch if messages arrived while AI was processing.
             if ($aiService->promoteBufferedMessagesToLeader($this->chatId, $this->channel)) {
                 ProcessAiReply::dispatch($this->channel, $this->chatId, '', $this->customerId, [])

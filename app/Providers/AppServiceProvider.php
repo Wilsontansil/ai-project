@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\MetricsCollector;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 
@@ -26,5 +27,9 @@ class AppServiceProvider extends ServiceProvider
         if (str_starts_with(config('app.url', ''), 'https://')) {
             URL::forceScheme('https');
         }
+
+        // Flush buffered metrics at the end of every HTTP request.
+        // For queue jobs, ProcessAiReply calls MetricsCollector::flush() explicitly.
+        $this->app->terminating(fn () => MetricsCollector::flush());
     }
 }

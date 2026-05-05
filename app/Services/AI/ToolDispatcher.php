@@ -863,7 +863,7 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
 
             $customerProfile = $agentContext['customer_profile'] ?? null;
 
-            ToolCaseLog::query()->create([
+            $logData = [
                 'chat_id'         => $chatId,
                 'channel'         => $channel,
                 'tool_name'       => $tool->tool_name,
@@ -877,7 +877,9 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
                 'customer_info'   => $customerProfile,
                 'tool_reply'      => $reply !== null ? mb_substr($reply, 0, 1000) : null,
                 'created_at'      => now(),
-            ]);
+            ];
+
+            dispatch(fn () => ToolCaseLog::query()->create($logData));
         } catch (\Throwable $e) {
             Log::debug('ToolCaseLog write failed', ['error' => $e->getMessage()]);
         }

@@ -253,21 +253,7 @@ class DashboardController extends Controller
             $endDate = now()->toDateString();
         }
 
-        $conversations = Conversation::query()
-            ->where('customer_id', $customer->id)
-            ->whereBetween('conversation_date', [$startDate, $endDate])
-            ->orderBy('conversation_date')
-            ->get();
-
-        // Combine messages from all dates into a single flat array
-        $messages = [];
-        foreach ($conversations as $convo) {
-            $date = $convo->conversation_date->toDateString();
-            foreach ($convo->messages ?? [] as $msg) {
-                $msg['date'] = $date;
-                $messages[] = $msg;
-            }
-        }
+        $messages = $this->fetchFlatMessages($customer, (string) $startDate, (string) $endDate);
 
         return view('backoffice.customer-chat', [
             'customer' => $customer,
@@ -291,20 +277,7 @@ class DashboardController extends Controller
             $endDate = now()->toDateString();
         }
 
-        $conversations = Conversation::query()
-            ->where('customer_id', $customer->id)
-            ->whereBetween('conversation_date', [$startDate, $endDate])
-            ->orderBy('conversation_date')
-            ->get();
-
-        $messages = [];
-        foreach ($conversations as $convo) {
-            $date = $convo->conversation_date->toDateString();
-            foreach ($convo->messages ?? [] as $msg) {
-                $msg['date'] = $date;
-                $messages[] = $msg;
-            }
-        }
+        $messages = $this->fetchFlatMessages($customer, (string) $startDate, (string) $endDate);
 
         $isOwner = $customer->assigned_user_id !== null
             && (int) $customer->assigned_user_id === (int) optional($request->user())->id;
@@ -711,5 +684,31 @@ class DashboardController extends Controller
         }
 
         return $baseUrl . '/' . ltrim($path, '/');
+    }
+
+    /**
+     * Fetch all conversations for a customer within a date range and flatten
+     * their messages into a single array, each stamped with 'date'.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function fetchFlatMessages(Customer $customer, string $startDate, string $endDate): array
+    {
+        $conversations = Conversation::query()
+            ->where('customer_id', $customer->id)
+            ->whereBetween('conversation_date', [$startDate, $endDate])
+            ->orderBy('conversation_date')
+            ->get();
+
+        $messages = [];
+        foreach ($conversations as $convo) {
+            $date = $convo->conversation_date->toDateString();
+            foreach ($convo->messages ?? [] as $msg) {
+                $msg['date'] = $date;
+                $messages[] = $msg;
+            }
+        }
+
+        return $messages;
     }
 }

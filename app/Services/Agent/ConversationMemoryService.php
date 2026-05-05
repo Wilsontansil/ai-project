@@ -12,7 +12,7 @@ class ConversationMemoryService
     {
         $today = now()->toDateString();
 
-        $conversation = Conversation::query()->firstOrCreate(
+        $conversation = Conversation::query()->firstOrNew(
             [
                 'customer_id' => $customer->id,
                 'conversation_date' => $today,
@@ -32,10 +32,10 @@ class ConversationMemoryService
         ];
 
         // Cap stored messages to prevent unbounded JSON growth on long chats.
-        $maxStoredMessages = 10000;
+        $maxStoredMessages = 500;
         $messages = array_slice($messages, -$maxStoredMessages);
 
-        $conversation->update(['messages' => $messages, 'channel' => $channel]);
+        $conversation->fill(['messages' => $messages, 'channel' => $channel])->save();
 
         return $conversation;
     }

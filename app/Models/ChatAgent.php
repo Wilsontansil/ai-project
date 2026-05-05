@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class ChatAgent extends Model
@@ -45,15 +46,21 @@ class ChatAgent extends Model
                 $agent->slug = Str::slug($agent->name);
             }
         });
+
+        static::saved(fn () => Cache::forget('chat_agent_default'));
+        static::deleted(fn () => Cache::forget('chat_agent_default'));
     }
 
     /**
      * Get the default agent, or the first enabled one.
+     * Cached for 60 seconds — invalidated automatically on save/delete.
      */
     public static function getDefault(): ?self
     {
-        return static::where('is_default', true)->first()
-            ?? static::where('is_enabled', true)->first();
+        return Cache::remember('chat_agent_default', 60, function () {
+            return static::where('is_default', true)->first()
+                ?? static::where('is_enabled', true)->first();
+        });
     }
 
     public function scopeEnabled($query)

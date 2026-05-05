@@ -6,7 +6,6 @@ use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Schema;
 
 class ProjectSetting extends Model
 {
@@ -36,10 +35,6 @@ class ProjectSetting extends Model
      */
     public static function getValue(string $key, ?string $default = null): ?string
     {
-        if (!Schema::hasTable('project_settings')) {
-            return $default;
-        }
-
         $cached = Cache::get('project_settings');
 
         if ($cached === null) {

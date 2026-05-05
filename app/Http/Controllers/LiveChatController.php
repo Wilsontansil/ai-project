@@ -209,7 +209,7 @@ class LiveChatController extends Controller
             return '';
         }
 
-        $reply = app(AIService::class)->reply($combinedText, $chatId, 'livechat', $agentContext);
+        $reply = app(AIService::class)->reply($combinedText, $chatId, 'livechat', $agentContext, $attachmentMeta);
 
         // Detect escalation marker and enforce queue behavior.
         $shouldEscalate = str_contains($reply, '[ESCALATE]');

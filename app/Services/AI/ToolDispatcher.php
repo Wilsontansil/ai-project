@@ -905,12 +905,14 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
             return [];
         }
 
+        $toolSpecificHint = $this->buildToolSpecificExtractionHint($tool);
+
         // Use a minimal prompt — only extraction instruction + context.
         // The full system prompt (agent rules, base prompt) is not needed here.
         $messages = [
             [
                 'role' => 'system',
-                'content' => "Extract arguments for the tool from the conversation and the user's latest message (which may include an image/screenshot). Be flexible: accept natural language, mixed order, shorthand, or abbreviations. Use the latest message first, then recent history for any missing text-based values. For bank account name (namarek), accept any string as-is. IMPORTANT: for fields that must be extracted from a visual source (e.g. depoamount, time from a screenshot), only populate them if the image is present in the current message and you can clearly read the value. Do NOT guess, invent, or use placeholder values for visual fields. Leave them as empty string \"\" if the image is absent or the value is not clearly visible — the application will then ask the user to resend the screenshot.",
+                'content' => "Extract arguments for the tool from the conversation and the user's latest message (which may include an image/screenshot). Be flexible: accept natural language, mixed order, shorthand, or abbreviations. Use the latest message first, then recent history for any missing text-based values. For bank account name (namarek), accept any string as-is. IMPORTANT: for fields that must be extracted from a visual source, only populate them if the image is present in the current message and you can clearly read the value. Never copy visual-only fields from plain user text. Do NOT guess, invent, or use placeholder values for visual fields. Leave them as empty string \"\" if the image is absent or the value is not clearly visible — the application will then ask the user to resend the screenshot.{$toolSpecificHint}",
             ],
         ];
 
@@ -972,6 +974,68 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
         }
 
         return null;
+    }
+
+    /**
+     * Build tool-specific extraction guidance from parameter descriptions.
+     * This keeps extraction rules generic across tools and avoids hardcoding field names.
+     */
+    private function buildToolSpecificExtractionHint(Tool $tool): string
+    {
+        $properties = (array) data_get($tool->parameters, 'properties', []);
+
+        if ($properties === []) {
+            return '';
+        }
+
+        $visualFields = [];
+        $ktpNameFields = [];
+
+        foreach ($properties as $field => $prop) {
+            $fieldName = (string) $field;
+            $description = (string) ($prop['description'] ?? '');
+            $descLower = mb_strtolower($description);
+            $fieldLower = mb_strtolower($fieldName);
+
+            $isVisualField =
+                str_contains($descLower, 'foto') ||
+                str_contains($descLower, 'gambar') ||
+                str_contains($descLower, 'screenshot') ||
+                str_contains($descLower, 'image') ||
+                str_contains($descLower, 'ktp') ||
+                str_contains($descLower, 'scan') ||
+                str_contains($descLower, 'ocr') ||
+                str_contains($descLower, 'lampiran');
+
+            if (!$isVisualField) {
+                continue;
+            }
+
+            $visualFields[] = $fieldName;
+
+            $isKtpNameField = str_contains($descLower, 'ktp')
+                && (str_contains($descLower, 'nama') || str_contains($fieldLower, 'nama'));
+
+            if ($isKtpNameField) {
+                $ktpNameFields[] = $fieldName;
+            }
+        }
+
+        if ($visualFields === []) {
+            return '';
+        }
+
+        $hint = ' Tool-specific rule: treat these fields as visual-only and only fill them from the current image when clearly readable: ['
+            . implode(', ', $visualFields)
+            . ']. If the image is missing or unreadable, keep them as empty string "".';
+
+        if ($ktpNameFields !== []) {
+            $hint .= ' For KTP-related name fields ['
+                . implode(', ', $ktpNameFields)
+                . '], extract the value from the KTP label "Nama"; do not take it from typed chat text.';
+        }
+
+        return $hint;
     }
 
     /**

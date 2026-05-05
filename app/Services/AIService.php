@@ -52,6 +52,11 @@ class AIService
 
         $client = OpenAI::client($apiKey);
         $chatAgent = ChatAgent::getDefault();
+
+        if ($chatAgent === null) {
+            return $this->replyFormatter->format('AI agent belum dikonfigurasi. Silakan tambahkan agent di backoffice.');
+        }
+
         $model = $chatAgent->model ?? $this->model;
 
         $systemPrompt = $this->promptBuilder->buildSystemPrompt($chatAgent);
@@ -158,7 +163,7 @@ class AIService
             );
 
             if ($assistantReply !== null) {
-                $assistantReply = $this->replyFormatter->prepare($activeHistory, $assistantReply);
+                $assistantReply = $this->replyFormatter->prepare($activeHistory, $assistantReply, $chatAgent->max_tokens);
                 $this->conversationHistory->save($chatId, $activeHistory, $message, $assistantReply, $channel, $chatAgent);
 
                 return $assistantReply;
@@ -175,7 +180,7 @@ class AIService
                 ]);
             }
 
-            $assistantReply = $this->replyFormatter->prepare($activeHistory, $assistantReply);
+            $assistantReply = $this->replyFormatter->prepare($activeHistory, $assistantReply, $chatAgent->max_tokens);
             $this->conversationHistory->save($chatId, $activeHistory, $message, $assistantReply, $channel, $chatAgent);
 
             return $assistantReply;

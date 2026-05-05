@@ -14,8 +14,13 @@ namespace App\Services\AI;
  */
 class ReplyFormatter
 {
-    public function format(string $reply): string
+    /**
+     * @param int|null $maxTokens  Agent max_tokens cap — converts to a char limit (~4 chars/token).
+     *                             Defaults to 1400 chars when null.
+     */
+    public function format(string $reply, ?int $maxTokens = null): string
     {
+        $charLimit = $maxTokens !== null ? max(800, $maxTokens * 4) : 1400;
         $normalized = str_replace(["\r\n", "\r"], "\n", $reply);
         $normalized = $this->formatInlineVerificationList($normalized);
         $lines = array_map(static fn ($line) => trim((string) $line), explode("\n", $normalized));
@@ -46,7 +51,7 @@ class ReplyFormatter
         }
 
         // Keep reply complete; only hard-limit extremely long output.
-        if (mb_strlen($tidy) <= 1400) {
+        if (mb_strlen($tidy) <= $charLimit) {
             return $tidy;
         }
 
@@ -59,7 +64,7 @@ class ReplyFormatter
         foreach ($sentences as $sentence) {
             $segmentLength = mb_strlen($sentence) + ($length > 0 ? 1 : 0);
 
-            if ($length + $segmentLength > 1400) {
+            if ($length + $segmentLength > $charLimit) {
                 break;
             }
 
@@ -71,7 +76,7 @@ class ReplyFormatter
             return implode(' ', $chunks) . "\n\n(Pesan dipersingkat karena terlalu panjang.)";
         }
 
-        return mb_substr($tidy, 0, 1400) . "\n\n(Pesan dipersingkat karena terlalu panjang.)";
+        return mb_substr($tidy, 0, $charLimit) . "\n\n(Pesan dipersingkat karena terlalu panjang.)";
     }
 
     /**
@@ -79,9 +84,12 @@ class ReplyFormatter
      *
      * @param array<int, array<string, string>> $history
      */
-    public function prepare(array $history, string $reply): string
+    /**
+     * @param int|null $maxTokens  Passed through to format() for dynamic char limit.
+     */
+    public function prepare(array $history, string $reply, ?int $maxTokens = null): string
     {
-        $formatted = $this->format($reply);
+        $formatted = $this->format($reply, $maxTokens);
 
         if ($this->isRepeatedAssistantReply($history, $formatted)) {
             return 'Siap, saya lanjut dari data terbaru kamu ya.';

@@ -45,12 +45,23 @@ class ToolDispatcher
     public function getEnabledTools(?ChatAgent $chatAgent = null): Collection
     {
         try {
-            return Tool::query()
+            $query = Tool::query()
                 ->with('dataModel')
                 ->where('tool_name', '!=', '_bot_config')
                 ->where('is_enabled', true)
-                ->orderBy('id')
-                ->get()
+                ->orderBy('id');
+
+            // When an agent is provided, scope to tools explicitly assigned via the
+            // chat_agent_tool pivot. Falls back to all enabled tools when the agent
+            // has no assignments — preserves backwards-compatible single-agent behaviour.
+            if ($chatAgent !== null) {
+                $assignedIds = $chatAgent->tools()->pluck('tools.id');
+                if ($assignedIds->isNotEmpty()) {
+                    $query->whereIn('id', $assignedIds);
+                }
+            }
+
+            return $query->get()
                 // Exclude chain-only tools: they must only run via a pending chain,
                 // never through direct user intent or AI tool-choice.
                 ->filter(fn (Tool $t) => ($t->meta['trigger_mode'] ?? null) !== 'chain_only')

@@ -68,7 +68,8 @@ Aturan menjawab:
 2. Jika game yang ditanya TIDAK ADA di KB, jawab dengan jujur: "Data untuk game [nama] tidak tersedia di sumber kami saat ini." — JANGAN mengarang atau mengira-ngira pola/RTP.
 3. Jika user bertanya secara umum ("slot gacor hari ini", "rekomendasi slot"), sebutkan 3–5 game dengan RTP tertinggi dari KB.
 4. JANGAN menyebutkan nama website sumber (domain scrape) kepada user.
-5. Selalu Utamakan ["PRAGMATIC PLAY","PG SOFT"] di Urutan 1 dan 2',
+5. Selalu Utamakan ["PRAGMATIC PLAY","PG SOFT"] di Urutan 1 dan 2.
+6. Juga Berikan {rtp_url} dari System Config',
                 'type' => 'guideline',
                 'category' => 'behavior',
                 'level' => 'info',

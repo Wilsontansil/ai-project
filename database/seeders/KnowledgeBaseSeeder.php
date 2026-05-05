@@ -577,13 +577,12 @@ Catatan:
             ],
             [
                'title' => 'Link & Pola',
-               'content' => 'PANDUAN LINK & POLA (JAWAB CEPAT DAN SPESIFIK)
+               'content' => 'PANDUAN LINK
 
    ATURAN INTENT:
    - Jika user minta link RTP, kirim bagian RTP saja.
    - Jika user minta link APK, kirim bagian APK saja.
-   - Jika user minta pola gacor, kirim bagian Pola saja.
-   - Jika user minta semua, baru kirim RTP + APK + Pola berurutan.
+   - Jika user minta semua, baru kirim RTP + APK.
 
    [RTP]
    URL RTP resmi:
@@ -593,15 +592,8 @@ Catatan:
    URL APK resmi:
    {apk_url}
 
-   [Game Gacor / Slot Gacor]
-   {game_gacor}
-
-   [POLA VIP / POLA GACOR]
-   {pola_gacor}
-
    CATATAN RESPON AI:
-   - Jangan campur dengan topik bonus/deposit jika user tidak minta.
-   - Jika user hanya menulis "rtp", "apk", "game gacor" atau "pola gacor", jawab dengan sopan.',
+   - Jangan campur dengan topik bonus/deposit jika user tidak minta.',
                 'source' => 'manual',
                 'file_name' => null,
                 'is_active' => true,

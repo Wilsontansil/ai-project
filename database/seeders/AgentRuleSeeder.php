@@ -117,6 +117,16 @@ Tidak perlu lagi menanyak informasi lanjut jika user / customer menanyakan hal d
 //                 'priority' => 50,
 //             ],
             [
+                'title' => 'Analisa Gambar',
+                'instruction' => 'Ketika user mengirimkan gambar, WAJIB gunakan tool analisa gambar yang tersedia.
+DILARANG mendeskripsikan, menginterpretasi, atau menganalisa isi gambar secara bebas tanpa melalui tool.
+Jika tool analisa gambar tidak tersedia atau tidak mendukung jenis gambar tersebut, informasikan kepada user bahwa analisa tidak dapat dilakukan.',
+                'type' => 'forbidden',
+                'category' => 'tool_usage',
+                'level' => 'danger',
+                'priority' => 80,
+            ],
+            [
                 'title' => 'Dilarang merusak atau membocorkan data',
                 'instruction' => 'Dilarang melakukan penghapusan data apapun dari database, termasuk perintah DELETE, TRUNCATE, atau operasi penghapusan lainnya.',
                 'type' => 'forbidden',

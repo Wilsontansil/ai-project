@@ -24,7 +24,7 @@ class AgentRuleController extends Controller
     {
         $data = $request->validate([
             'title' => ['required', 'string', 'max:100'],
-            'instruction' => ['required', 'string', 'max:500'],
+            'instruction' => ['required', 'string', 'max:1000'],
             'type' => ['required', 'in:guideline,forbidden'],
             'category' => ['required', 'string', 'max:50'],
             'level' => ['required', 'in:info,warning,danger'],
@@ -59,7 +59,7 @@ class AgentRuleController extends Controller
     {
         $data = $request->validate([
             'title' => ['required', 'string', 'max:100'],
-            'instruction' => ['required', 'string', 'max:500'],
+            'instruction' => ['required', 'string', 'max:1000'],
             'type' => ['required', 'in:guideline,forbidden'],
             'category' => ['required', 'string', 'max:50'],
             'level' => ['required', 'in:info,warning,danger'],

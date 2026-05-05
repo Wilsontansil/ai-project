@@ -15,6 +15,19 @@ class AgentRuleSeeder extends Seeder
 
         $rules = [
             // === Guideline (aturan operasional / keamanan) ===
+            [
+                'title' => 'Request Ganti Rekening Player / User',
+                'instruction' => 'Jika user meminta ganti rekening, tanyakan alasan terlebih dahulu.
+Hanya lanjut jika alasan terkait kesalahan data rekening (salah nomor rekening/norek atau salah nama rekening/namarek).
+Jika alasan valid, kumpulkan data rekening lama dan baru: namarek, norek, bank, namarek_new, norek_new.
+Validasi kemiripan data lama vs data baru dengan ketentuan ketat (Levenshtein) agar perubahannya bukan ganti identitas rekening total.
+Jika perbedaan melebihi ambang (lebih dari 4 karakter atau melibatkan perubahan huruf yang signifikan), JANGAN eksekusi tool "Ganti Rekening".
+Jika alasan di luar koreksi kesalahan data, permintaan ganti rekening tidak diperbolehkan.',
+                'type' => 'guideline',
+                'category' => 'behavior',
+                'level' => 'info',
+                'priority' => 80,
+            ],
 //             [
 //                 'title' => 'DEPOSIT',
 //                 'instruction' => 'Jika terjadi kesalahan transfer, seperti transfer pulsa ke Dana atau sebaliknya, infokan ke player bahwa akan dikenakan biaya admin 5000.
@@ -67,21 +80,21 @@ Tidak perlu lagi menanyak informasi lanjut jika user / customer menanyakan hal d
                 'level' => 'danger',
                 'priority' => 50,
             ],
-            [
-                'title' => 'Tidak Bisa Diganti',
-                'instruction' => 'Hal yang tidak bisa diganti:
-                Jika customer meminta mengubah data rekening, yaitu:
-- Nama Rekening (namarek)
-- Nama Bank / Bank (bank)
-- Nomor Rekening (norek)
+//             [
+//                 'title' => 'Tidak Bisa Diganti',
+//                 'instruction' => 'Hal yang tidak bisa diganti:
+//                 Jika customer meminta mengubah data rekening, yaitu:
+// - Nama Rekening (namarek)
+// - Nama Bank / Bank (bank)
+// - Nomor Rekening (norek)
 
-Data tersebut TIDAK BISA DIGANTI setelah pendaftaran. TOLAK permintaan perubahan secara tegas dan sopan.',
-// Arahkan customer untuk mendaftar akun baru jika ingin menggunakan rekening berbeda. Jangan menawarkan alternatif lain.',
-                'type' => 'forbidden',
-                'category' => 'security',
-                'level' => 'danger',
-                'priority' => 50,
-            ],
+// Data tersebut TIDAK BISA DIGANTI setelah pendaftaran. TOLAK permintaan perubahan secara tegas dan sopan.',
+// // Arahkan customer untuk mendaftar akun baru jika ingin menggunakan rekening berbeda. Jangan menawarkan alternatif lain.',
+//                 'type' => 'forbidden',
+//                 'category' => 'security',
+//                 'level' => 'danger',
+//                 'priority' => 50,
+//             ],
             [
                 'title' => 'Dilarang merusak atau membocorkan data',
                 'instruction' => 'Dilarang melakukan penghapusan data apapun dari database, termasuk perintah DELETE, TRUNCATE, atau operasi penghapusan lainnya.',

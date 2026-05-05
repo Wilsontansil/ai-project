@@ -475,8 +475,7 @@ INTENT USER:
 
 2. SYARAT DAFTAR
 → Jelaskan data:
-- Username & password
-- Nomor HP aktif
+- Username
 - Rekening bank / E-wallet
 
 → Ketentuan:

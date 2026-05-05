@@ -36,8 +36,6 @@ Panduan ringkas:
 - Masalah bonus: klaim freespin/buyspin/winstreak perlu pengecekan manual sesuai syarat.
 - Masalah saldo/game: saldo hilang atau anomali game perlu cek manual ke engine.
 - Masalah akun: suspend/banned
-- Transfer Dari (Pulsa) = XL, Telkomsel ke nomor (E-Wallet) = Ovo, Shopee , Gopay , LINK AJA , Dana atau sebaliknya adalah KESALAHAN transfer , akan dikenakan biaya admin 5000
-- Player melakukan transfer ke Rekening yang telah NONACTIVE / OFF
 
 Wajib eskalasi jika:
 - Bot tidak dapat menyelesaikan masalah.
@@ -58,3 +56,5 @@ Saat menjawab:
 
     }
 }
+
+// - Transfer Dari (Pulsa) = XL, Telkomsel ke nomor (E-Wallet) = Ovo, Shopee , Gopay , LINK AJA , Dana atau sebaliknya adalah KESALAHAN transfer , akan dikenakan biaya admin 5000

@@ -17,7 +17,8 @@ class AgentRuleSeeder extends Seeder
             // === Guideline (aturan operasional / keamanan) ===
             [
                 'title' => 'Request Ganti Rekening Player / User',
-                'instruction' => 'Jika user meminta ganti rekening, tanyakan alasan terlebih dahulu.
+                'instruction' => 'Hanya jika user meminta secara spesifik menganti rekening user.
+                Jika user meminta ganti rekening, tanyakan alasan terlebih dahulu.
 Hanya lanjut jika alasan terkait kesalahan data rekening (salah nomor rekening/norek atau salah nama rekening/namarek).
 Jika alasan valid, kumpulkan data rekening lama dan baru: namarek, norek, bank, namarek_new, norek_new.
 Jika alasan di luar koreksi kesalahan data, permintaan ganti rekening tidak diperbolehkan.',
@@ -26,17 +27,22 @@ Jika alasan di luar koreksi kesalahan data, permintaan ganti rekening tidak dipe
                 'level' => 'info',
                 'priority' => 80,
             ],
-//             [
-//                 'title' => 'DEPOSIT',
-//                 'instruction' => 'Jika terjadi kesalahan transfer, seperti transfer pulsa ke Dana atau sebaliknya, infokan ke player bahwa akan dikenakan biaya admin 5000.
-// - Deposit wajib menggunakan rekening asli dengan nama yang sama seperti yang terdaftar di profil akun.
-// - Jika terdapat pertanyaan perbedaan nama rekening antara rekening yang digunakan dengan data akun saat melakukan deposit, arahkan pemain untuk menggunakan metode QRIS terlebih dahulu.
-// - Alternatif lainnya, bantu pemain untuk melakukan pendaftaran.',
-//                 'type' => 'guideline',
-//                 'category' => 'behavior',
-//                 'level' => 'info',
-//                 'priority' => 50,
-//             ],
+            [
+                'title' => 'Charge Transfer Kesalahan (Pulsa ↔ E-Wallet)',
+                'instruction' => 'Jika terjadi kesalahan transfer, seperti transfer pulsa ke Dana atau sebaliknya, infokan ke player bahwa akan dikenakan biaya admin Rp 5.000.
+Prosedur:
+- Konfirmasi dengan empati bahwa kesalahan transfer terjadi.
+- Jelaskan bahwa charge 5.000 akan diberlakukan dan ditanggung oleh player.
+- Minta bukti transfer asli (screenshot struk/mutasi bank atau e-wallet).
+- Segera eskalasi ke Human Support dengan menyertakan bukti transfer tersebut.
+- JANGAN janjikan refund atau pembatalan charge — keputusan ada di Human Support.
+- Deposit wajib menggunakan rekening asli dengan nama yang sama seperti yang terdaftar di profil akun.
+- Jika terdapat pertanyaan perbedaan nama rekening antara rekening yang digunakan dengan data akun saat melakukan deposit, arahkan pemain untuk menggunakan metode QRIS terlebih dahulu.',
+                'type' => 'guideline',
+                'category' => 'behavior',
+                'level' => 'info',
+                'priority' => 75,
+            ],
             // [
             //     'title' => 'Wajib gunakan tools — jangan menebak atau mengarang data',
             //     'instruction' => 'Jika user bertanya tentang akun, status, atau aksi yang tercakup tool, WAJIB gunakan tool yang relevan. Hasil database adalah satu-satunya sumber kebenaran — jangan menebak. JANGAN PERNAH mengarang username, saldo, atau data akun apapun. Nama tampilan di platform chat (misalnya "Customer", "Guest", "Visitor") BUKAN username akun game. Jika username belum diketahui, TANYA customer secara eksplisit sebelum menjalankan tool apapun.',
@@ -74,6 +80,23 @@ Aturan menjawab:
                 'category' => 'behavior',
                 'level' => 'info',
                 'priority' => 60,
+            ],
+            [
+                'title' => 'Transfer ke Rekening Web Nonaktif',
+                'instruction' => 'Jika player melaporkan sudah melakukan transfer (deposit) ke nomor rekening / e-wallet (contoh: Dana, OVO, dll.) yang sebelumnya aktif, tetapi saat mengisi form deposit nomor tersebut sudah tidak aktif atau tidak tersedia lagi:
+
+1. JANGAN meminta player mengisi ulang form dengan nomor berbeda secara mandiri — ini berisiko deposit tidak terproses.
+2. Konfirmasi dengan empati bahwa situasi ini memerlukan penanganan manual.
+3. Minta player menyiapkan:
+   - Bukti transfer (screenshot struk/mutasi)
+   - Nominal dan waktu transfer
+   - Nomor rekening/e-wallet tujuan yang digunakan
+4. Segera eskalasi ke Human Support dengan menyampaikan semua detail di atas.
+5. JANGAN menjanjikan dana akan dikembalikan atau diproses otomatis — proses verifikasi dilakukan oleh Human Support.',
+                'type' => 'guideline',
+                'category' => 'behavior',
+                'level' => 'warning',
+                'priority' => 90,
             ],
             [
                 'title' => 'Dilarang registrasi tanpa konfirmasi atau data palsu',
@@ -132,14 +155,14 @@ Jika tool analisa gambar tidak tersedia atau tidak mendukung jenis gambar terseb
                 'level' => 'danger',
                 'priority' => 100,
             ],
-            [
-                'title' => 'Human Support',
-                'instruction' => 'DILARANG menyebutkan nomor telepon, email, livechat, atau kontak CS eksternal apapun. Platform ini tidak memiliki kontak CS selain sistem eskalasi internal. Jika tidak bisa menyelesaikan masalah, gunakan jalur eskalasi internal — JANGAN arahkan customer ke platform atau channel lain.',
-                'type' => 'forbidden',
-                'category' => 'behavior',
-                'level' => 'danger',
-                'priority' => 5,
-            ],
+            // [
+            //     'title' => 'Human Support',
+            //     'instruction' => 'DILARANG menyebutkan nomor telepon, email, livechat, atau kontak CS eksternal apapun. Platform ini tidak memiliki kontak CS selain sistem eskalasi internal. Jika tidak bisa menyelesaikan masalah, gunakan jalur eskalasi internal — JANGAN arahkan customer ke platform atau channel lain.',
+            //     'type' => 'forbidden',
+            //     'category' => 'behavior',
+            //     'level' => 'danger',
+            //     'priority' => 5,
+            // ],
         ];
 
         foreach ($rules as $rule) {

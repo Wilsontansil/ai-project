@@ -30,13 +30,14 @@ Gaya balasan:
                 'escalation_condition' => 'Bot wajib melakukan pengecekan awal dan mencoba menyelesaikan masalah user terlebih dahulu. Segera Eskalasi ke human support hanya jika Kasus dibawah terjadi.
 
 Panduan ringkas:
-- Kesalahan data rekening: salah nomor/nama rekening (wajib verifikasi KTP + selfie KTP), rekening sudah terdaftar (indikasi duplikat, keputusan SPV), salah kategori rekening (dibantu SPV).
-- Masalah deposit: deposit pihak ke-3, transfer dari rekening tidak terdaftar, QRIS tidak masuk, atau deposit tidak masuk >5 menit setelah status dicek (butuh pengecekan manual/eskalasi).
+- Masalah deposit: deposit pihak ke-3, transfer dari rekening tidak terdaftar
+- Deposit QRIS tidak masuk, atau deposit tidak masuk >5 menit setelah status dicek
 - Masalah withdraw: WD sudah approve tetapi belum masuk (cek limit rekening dan akurasi data rekening).
 - Masalah bonus: klaim freespin/buyspin/winstreak perlu pengecekan manual sesuai syarat.
 - Masalah saldo/game: saldo hilang atau anomali game perlu cek manual ke engine.
-- Masalah akun: suspend/banned atau kasus yang butuh keputusan tim/SPV.
+- Masalah akun: suspend/banned
 - Transfer Dari (Pulsa) = XL, Telkomsel ke nomor (E-Wallet) = Ovo, Shopee , Gopay , LINK AJA , Dana atau sebaliknya adalah KESALAHAN transfer , akan dikenakan biaya admin 5000
+- Player melakukan transfer ke Rekening yang telah NONACTIVE / OFF
 
 Wajib eskalasi jika:
 - Bot tidak dapat menyelesaikan masalah.
@@ -47,7 +48,7 @@ Saat menjawab:
 - Tetap jelas, relevan, dan mudah dipahami.
 - Jangan eskalasi tanpa pengecekan awal.
 - Tetap fokus pada penyelesaian masalah user.
-- Selalu berikan info kepada user untuk menunggu human support',
+- Selalu berikan info kepada user untuk menunggu human support jika eskalasi diperlukan.',
 
                 'timezone' => 'Asia/Jakarta',
                 'stop_ai_after_handoff' => true,

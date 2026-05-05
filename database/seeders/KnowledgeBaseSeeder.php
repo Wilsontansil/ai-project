@@ -288,6 +288,145 @@ Berikut jenis taruhan olahraga yang tersedia:
                 'is_active' => true,
             ],
             [
+               'title' => 'Togel Info',
+               'content' => 'DAFTAR ISTILAH, PENJELASAN, DAN PARAMETER TOGEL
+
+   4D (4 Digit)
+   Tebakan angka terdiri dari 4 digit (0000-9999). Harus tepat seluruhnya untuk menang.
+   Win: 3000x
+   Kei: 0%
+   Min Bet: 500
+   Discount: 66%
+
+   3D Depan (3DD)
+   Tebakan 3 digit dari bagian depan angka 4D (contoh: 1234 -> 123).
+   Win: 400x
+   Kei: 0%
+   Min Bet: 500
+   Discount: 59%
+
+   3D Belakang (3DB)
+   Tebakan 3 digit dari bagian belakang angka 4D (contoh: 1234 -> 234).
+   Win: 400x
+   Kei: 0%
+   Min Bet: 500
+   Discount: 59%
+
+   2D Depan (2DD)
+   Tebakan 2 digit dari bagian depan angka 4D (contoh: 1234 -> 12).
+   Win: 70x
+   Kei: 0%
+   Min Bet: 500
+   Discount: 29%
+
+   2D Tengah (2DT)
+   Tebakan 2 digit dari bagian tengah angka 4D (contoh: 1234 -> 23).
+   Win: 70x
+   Kei: 0%
+   Min Bet: 500
+   Discount: 29%
+
+   2D Belakang (2DB)
+   Tebakan 2 digit dari bagian belakang angka 4D (contoh: 1234 -> 34).
+   Win: 70x
+   Kei: 0%
+   Min Bet: 500
+   Discount: 29%
+
+   Colok Bebas (CB)
+   Menebak 1 angka yang muncul di hasil 4D tanpa memperhatikan posisi.
+   Win 1x: 1.5x
+   Win 2x: 3x
+   Win 3x: 4.5x
+   Win 4x: 6x
+   Kei: 0%
+   Min Bet: 5000
+   Discount: 6%
+
+   Colok Bebas 2D (CB2)
+   Menebak 2 angka yang harus muncul di hasil 4D tanpa urutan.
+   Win 1x: 6.5x
+   Win 2x: 10x
+   Win 3x: 18x
+   Kei: 0%
+   Min Bet: 5000
+   Discount: 8%
+
+   Colok Naga (CB3)
+   Menebak 3 angka yang harus muncul di hasil 4D tanpa posisi.
+   Win 1x: 20x
+   Win 2x: 29x
+   Kei: 0%
+   Min Bet: 5000
+   Discount: 10%
+
+   Colok Jitu (CJ)
+   Menebak 1 angka di posisi tertentu (harus tepat di posisi tersebut).
+   Win (Tepat): 8x
+   Kei: 0%
+   Min Bet: 5000
+   Discount: 6%
+
+   Tepi Tengah (TT)
+   Menebak kombinasi posisi tepi (depan dan belakang) atau tengah sesuai aturan.
+   Win: 1x
+   Kei: -3%
+   Min Bet: 5000
+   Discount: 0%
+
+   Dasar (DS)
+   Menebak angka dasar (0-9) yang muncul.
+   Win: 1x
+   Kei:
+   - Ganjil: -25%
+   - Genap: 10%
+   - Besar: -25%
+   - Kecil: 10%
+   Min Bet: 5000
+   Discount: 0%
+
+   50-50 (50)
+   Tebakan dua kemungkinan (ganjil/genap atau besar/kecil).
+   Win: 1x
+   Kei: -3%
+   Min Bet: 5000
+   Discount: 0%
+
+   Shio (SH)
+   Tebakan berdasarkan zodiak Tionghoa yang dikaitkan dengan angka.
+   Win: 9x
+   Kei: 0%
+   Min Bet: 5000
+   Discount: 8%
+
+   Silang Homo (SHM)
+   Pola kombinasi silang angka dengan hubungan tertentu antar digit.
+   Win: 1x
+   Kei: -2.5%
+   Min Bet: 5000
+   Discount: 0%
+
+   Kembang Kempis (KK)
+   Pola angka naik-turun atau kembar dalam hasil.
+   Win: 1x
+   Kei:
+   - Kembang: -3%
+   - Kempis: -3%
+   - Kembar: 50%
+   Min Bet: 5000
+   Discount: 0%
+
+   Kombinasi (KM)
+   Gabungan beberapa angka atau pola untuk membentuk prediksi.
+   Win: 2.3x
+   Kei: 0%
+   Min Bet: 5000
+   Discount: 8%',
+               'source' => 'manual',
+               'file_name' => null,
+               'is_active' => true,
+            ],
+            [
                 'title' => 'Withdraw',
                 'content' => '[Informasi]
 -Minimal Withdraw Rp {wd_min}

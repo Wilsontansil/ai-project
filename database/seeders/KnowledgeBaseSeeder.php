@@ -11,186 +11,63 @@ class KnowledgeBaseSeeder extends Seeder
 {
     public function run(): void
     {
-      $defaultAgent = ChatAgent::getDefault() ?? ChatAgent::query()->first();
-      if ($defaultAgent === null) {
-         return;
-      }
+        $agents = ChatAgent::query()->pluck('id', 'agent_type');
+        $triageId  = $agents['triage']  ?? null;
+        $akunId    = $agents['account'] ?? null;
+        $bayarId   = $agents['payment'] ?? null;
+        $bonusId   = $agents['bonus']   ?? null;
+        $gameId    = $agents['game']    ?? null;
 
-      $providersDataModelId = DataModel::query()
-          ->where('slug', 'providers')
-          ->value('id');
+        if (!$triageId && !$akunId && !$bayarId && !$bonusId && !$gameId) {
+            return;
+        }
 
-        $entries = [
-            [
-                'title' => 'Pools',
-                'content' => '1 - HKP - Hongkong Lotto
-   Sunday - Saturday : Close 22:30 | Result 23:00 | Open 23:05
+        $providersDataModelId = DataModel::query()
+            ->where('slug', 'providers')
+            ->value('id');
 
-2 - SGP - Singapore Pools
-   Sunday, Monday, Wednesday, Thursday, Saturday : Close 17:15 | Result 17:45 | Open 17:50
+        // Clean up seeder-managed entries before re-seeding
+        KnowledgeBase::query()->whereIn('title', [
+            'Pools', 'Bonus', 'Deposit', 'Sports', 'Togel Info',
+            'Withdraw', 'Register', 'General', 'Link & Pola', 'Provider',
+        ])->delete();
 
-3 - SDY - Sydney Lotto
-   Sunday - Saturday : Close 13:25 | Result 13:55 | Open 14:00
+        $this->seed($triageId, [
+            ['title' => 'General', 'source' => 'manual', 'content' => 'GENERAL WEBSITE KNOWLEDGE
 
-4 - SMR - Samosir Pools
-   Sunday - Saturday : Close 19:30 | Result 20:00 | Open 20:05
+Nama website utama: PGS
+PGS adalah situs game online terpercaya di Indonesia dengan sistem keamanan canggih, promo eksklusif, deposit QRIS cepat, dan layanan 24 jam nonstop.
+Domain utama: {main_domain}
 
-5 - HKS - HK Siang
-   Sunday - Saturday : Close 10:30 | Result 11:00 | Open 11:05
+Jika user bertanya tentang website, nama website, domain, link, atau akses situs:
+- Selalu sebutkan bahwa website adalah PGS
+- Wajib sertakan URL domain utama: {main_domain}
 
-6 - TMC - Toto Macau
-   Sunday - Saturday (6 sesi per hari):
-   Sesi 1 : Close 23:45 | Result 00:00 | Open 00:05
-   Sesi 2 : Close 12:45 | Result 13:00 | Open 13:05
-   Sesi 3 : Close 15:45 | Result 16:00 | Open 16:05
-   Sesi 4 : Close 18:45 | Result 19:00 | Open 19:05
-   Sesi 5 : Close 21:45 | Result 22:00 | Open 22:05
-   Sesi 6 : Close 22:45 | Result 23:00 | Open 23:05
+PARTNER SITE HANDLING:
+Situs partner: CMBET, BIGMSG, GSC11, IDXBIG
+Jika user menyebut salah satu: jawab bahwa situs tersebut adalah web partner.
+Jika situs lain di luar daftar: tidak ada relasi.'],
+        ]);
 
-7 - CHP - China Pools
-   Sunday - Saturday : Close 15:15 | Result 15:30 | Open 15:35
+        $this->seed($akunId, [
+            ['title' => 'Register', 'source' => 'manual', 'content' => 'PANDUAN AI MEMBER BARU
 
-8 - MGC - Cambodia
-   Sunday - Saturday : Close 19:30 | Result 19:50 | Open 19:55
+ATURAN: Jawab sesuai pertanyaan, bahasa ramah, jangan cek data tanpa diminta.
 
-9 - OG1 - Oregon 1
-   Sunday - Saturday : Close 02:45 | Result 03:00 | Open 03:05
+INTENT:
+1. TANYA INFO SITUS -> slot, live casino, togel, sabung ayam, sports, bonus & promo harian, WD & deposit cepat, support 24 jam. Tutup dengan ajakan daftar.
+2. TANYA SYARAT DAFTAR -> Username + Rekening bank/E-wallet. Tidak ada batasan umur. Boleh rekening orang lain (nama sesuai profil). E-wallet wajib Premium untuk WD.
+3. LANGSUNG MINTA DAFTAR -> Minta: username + nomor rekening/E-wallet + nama pemilik.
 
-10 - OG2 - Oregon 2
-   Sunday - Saturday : Close 05:45 | Result 06:00 | Open 06:05
+CONTOH:
+[INFO SITUS] "Halo kak! Kami punya slot, live casino, togel, sabung ayam! Bonus member baru, promo harian, WD & deposit cepat, support 24 jam. Mau saya bantu daftar? 😊"
+[SYARAT DAFTAR] "Cukup siapkan username dan rekening bank/E-wallet (nama sesuai profil). Saya bantu pandu daftarnya ya kak!"
+[LANGSUNG DAFTAR] "Siap kak! Boleh share: 1. Username yang diinginkan 2. Nomor rekening/E-wallet + nama pemilik"
+JIKA KELUAR TOPIK: "Saya khusus bantu pendaftaran. Ada yang mau ditanyakan? 😊"'],
+        ]);
 
-11 - OG3 - Oregon 3
-   Sunday - Saturday : Close 08:45 | Result 09:00 | Open 09:05
-
-12 - OG4 - Oregon 4
-   Sunday - Saturday : Close 11:45 | Result 12:00 | Open 12:05
-
-13 - BE - Bullseye
-   Sunday - Saturday : Close 12:50 | Result 13:10 | Open 13:15
-
-14 - SW - Swiss
-   Sunday - Saturday : Close 15:30 | Result 16:00 | Open 16:05
-
-15 - MC - Macau
-   Sunday - Saturday : Close 19:30 | Result 20:00 | Open 20:05
-
-16 - CAI - Cairo
-   Sunday - Saturday : Close 12:00 | Result 12:30 | Open 12:35
-
-17 - TW - Taiwan
-   Sunday - Saturday : Close 23:20 | Result 23:50 | Open 23:55
-
-18 - QTR - Qatar
-   Sunday - Saturday : Close 20:30 | Result 21:00 | Open 21:05
-
-19 - MLY - Malaysia
-   Sunday - Saturday : Close 18:30 | Result 19:00 | Open 19:05',
-                'source' => 'manual',
-                'file_name' => null,
-                'is_active' => true,
-            ],
-            [
-                'title' => 'Bonus',
-                'content' => 'A. BONUS MISI KLAIM , Harus Di Claim di Menu Reward. Bonus ini harus di Claim sebelum bermain game agar tidak expired.
-1. Bonus Ajak Teman (Referral Bonus) [{ev_ref}]
-Program Referral Bonus adalah program yang memungkinkan pengguna mendapatkan bonus dengan mengajak teman untuk bergabung dan bermain. 
-
-Cara mengikuti program ini:
-- Bagikan link referral yang tersedia di menu Profil/Akun.
-- Ajak teman untuk mendaftar melalui link tersebut.
-- Bonus akan diberikan secara otomatis setelah teman yang diundang melakukan deposit.
-- [Penting] Player yang mendapatkan Bonus Harus melakukan 1 kali deposit sukses sebelum Teman yang diajak melakukan Deposit.
-
-[Setting]
-- Multiplier = {ref_mul}
-- Minimal Deposit = {ref_min}-{ref_to}
-- Teman Deposit {ref_min}-{ref_to} Dapat Bonus {ref_bet}
-- Teman Deposit > {ref_to} Dapat Bonus {ref_gt}
-
-2. Bonus Deposit Beruntun (Daily Streak Bonus) [{ev_brt}]
-Bonus Deposit Beruntun adalah bonus spesial yang bisa didapatkan dengan melakukan deposit setiap hari secara berturut-turut. Pastikan Balance dibawah 1000 untuk dihitung sebagai deposit beruntun. Jumlah Bonus adalah Nominal Deposit tertinggi dari jumlah beruntun.
-
-[Setting]
-- Multiplier = {brt_mul}
-- Minimal Deposit = {brt_min}
-- Max Bonus = {brt_max}
-- Jumlah Beruntun = {brt_cnt}
-- Termasuk Non Bank = {brt_nonbank}
-
-3. Bonus Freespin [{ev_frp}]
-Bonus Freespin adalah bonus yang diberikan setelah pengguna melakukan deposit harian.
-Bonus ini biasanya berupa putaran gratis (free spin) yang dapat digunakan pada permainan tertentu sesuai ketentuan yang berlaku.
-
-[Setting]
-- Multiplier = {fs_mul}
-- Minimal Deposit = {fs_min}
-- Termasuk Non Bank = {fs_nonbank}
-
-4. Bonus Deposit [{ev_bd}]
-- Bonus First Deposit Bank
-  Bonus yang diberikan pada saat pengguna melakukan deposit pertama kali.
-
-  [Setting]
-  - Minimal Deposit = {bfd_b_min}
-  - Rate = {bfd_b_rate}%
-  - Multiplier = {bfd_b_mul}
-
-- Bonus Daily Deposit Bank
-  Bonus yang diberikan untuk setiap deposit harian setelah deposit pertama.
-
-  [Setting]
-  - Minimal Deposit = {bdd_b_min}
-  - Rate = {bdd_b_rate}%
-  - Multiplier = {bdd_b_mul}
-
-Catatan:
-Jika pengguna telah mendapatkan Bonus First Deposit Bank, maka tidak dapat lagi mendapatkan Bonus Daily Deposit Bank pada hari yang sama.
-
-
-5. Bonus APK [{ev_ap}]
-Bonus APK adalah bonus yang hanya dapat diklaim melalui aplikasi (APK).
-
-[Setting]
-- Multiplier = {bap_mul}
-- Jumlah Bonus = {bap_bon}
-- Jumlah Deposit = {bap_cou}
-
-B. Bonus Cashback
-Bonus Cashback adalah bonus yang diberikan kepada member setiap hari {cb_day}.
-Bonus Cashback tidak di Claim di menu Reward, tetapi masuk otomatis.
-
-[Setting]
-- Type = {cb_type}
-By Total: 
-(mininum = {cb_tot_min}) | (rate = {cb_tot_rate}%)
-
-By Game:
-Dindong = (mininum = {cb_dd_min}) - (rate = {cb_dd_rate}%)
-Togel = (minimum = {cb_tgl_min}) - (rate = {cb_tgl_rate}%)
-Tangkas = (minimum = {cb_tgk_min}) - (rate = {cb_tgk_rate}%)
-Slot = (minimum = {cb_slot_min}) - (rate = {cb_slot_rate}%)
-Live Casino = (minimum = {cb_lc_min}) - (rate = {cb_lc_rate}%)
-Sabung Ayam = (minimum = {cb_sa_min}) - (rate = {cb_sa_rate}%)
-Arcade = (minimum = {cb_arc_min}) - (rate = {cb_arc_rate}%)
-Table Game = (minimum = {cb_tbl_min}) - (rate = {cb_tbl_rate}%)
-Sports = (minimum = {cb_spt_min}) - (rate = {cb_spt_rate}%)
-E-Sports = (minimum = {cb_esp_min}) - (rate = {cb_esp_rate}%)
-
-C. Bonus Promo
-Bonus yang harus di verifikasi oleh Human Support.
-- Bonus Buy Spin , Bonus Freespin
-- Bonus winstreak sabung ayam
-[Escalate] ke Human Support
-
-Catatan:
-- Tidak ada bonus lain selain bonus diatas.',
-                'source' => 'manual',
-                'file_name' => null,
-                'is_active' => true,
-            ],
-            [
-                'title' => 'Deposit',
-                'content' => '[Informasi]
+        $this->seed($bayarId, [
+            ['title' => 'Deposit', 'source' => 'manual', 'content' => '[Informasi]
 - Minimal Deposit Rp {dep_min}
 - Maximal Deposit Rp Tak terbatas
 - Deposit Menggunakan Pulsa Wajib Beserta SN Atau Nomor HP pengirim di Berita Deposit
@@ -198,422 +75,167 @@ Catatan:
 - Multiplier Deposit Non Bank = {dep_mul_nonbank}
 
 [BANK]
-BCA, BII / Maybank, BNI, BRI, BSI, BTN, CIMB Niaga, Niaga Syariah, Dana, Danamon, Mandiri, OCBC NISP, Bank Neo, Sea Bank, Jago, Permata, BTPN/Jenius, Bank MAS, Mandiri Syariah, BCA Syariah, QRIS
-(E-Wallet) = Ovo, Shopee , Gopay , LINK AJA , Dana
+BCA, BII/Maybank, BNI, BRI, BSI, BTN, CIMB Niaga, Niaga Syariah, Dana, Danamon, Mandiri, OCBC NISP, Bank Neo, Sea Bank, Jago, Permata, BTPN/Jenius, Bank MAS, Mandiri Syariah, BCA Syariah, QRIS
+(E-Wallet) = Ovo, Shopee, Gopay, LINK AJA, Dana
 
-[NON BANK]
-(Pulsa) = XL, Telkomsel
-
-Cara Deposit Melalui Pulsa:
-Buka website kami, lalu masuk ke menu Form Deposit.
-Pilih metode deposit menggunakan pulsa, misalnya XL atau Telkomsel.
-Kirim pulsa ke nomor yang ditentukan.
-Setelah berhasil, isi form deposit sesuai dengan nominal pulsa yang dikirim.
-Jangan lupa di kolom Keterangan, cantumkan SN atau nomor pengirim (jika melakukan transfer pulsa).
-Ajukan form deposit untuk menyelesaikan proses.
-
-Catatan:
-Deposit pulsa bisa dilakukan dari mana saja: konter pulsa, transfer pulsa melalui 858, top-up mobile banking, atau metode lain yang tersedia.
+[NON BANK] (Pulsa) = XL, Telkomsel
 
 Deposit Bank:
-Deposit Berbeda bank akan dikenakan biaya sebesar 6.500 atau 2.500 (BI-Fast).
-Saat melakukan transfer antar bank, pastikan nominal yang dikirim sesuai dengan nominal permintaan, karena biaya akan ditanggung oleh pemain/user.
-PENTING: Nominal di form deposit harus sama persis dengan nominal permintaan deposit (bukan ditambah biaya admin).
-Contoh 1: jika permintaan deposit 20.000, isi form deposit 20.000.
-Contoh 2: jika permintaan deposit 12.000, isi form deposit 12.000.
-Biaya antar bank 6.500 atau 2.500 (BI-Fast) adalah biaya tambahan dari bank dan ditanggung user di luar nominal deposit.
+Deposit berbeda bank dikenakan biaya 6.500 atau 2.500 (BI-Fast). Nominal di form deposit harus SAMA PERSIS dengan nominal permintaan deposit.
 Wajib menggunakan rekening pribadi dengan nama yang sama persis seperti yang terdaftar di profil akun.
 
-Deposit QRIS:
-Deposit QRIS tidak wajib mengunakan rekening yang asli dengan nama yang sama seperti terdaftar di profil akun.
-Bisa jadi alternatif jika terjadi masalah perbedaan nama rekening saat deposit bank.
+Deposit QRIS: Tidak wajib rekening asli. Bisa jadi alternatif jika ada masalah perbedaan nama rekening.
 
-============
-Context:
-Jika member melakukan beberapa kali transfer untuk 1 tujuan deposit yang sama, maka member hanya perlu mengisi 1x form deposit saja.
-Aturan:
-- Jangan meminta member submit form berkali-kali.
-- Gunakan total gabungan dari seluruh transfer.
+Context: Jika member transfer beberapa kali untuk 1 deposit, cukup isi 1x form deposit dengan total gabungan.
 
-Cara Jawab:
-“Cukup isi 1x form deposit saja 😊 Silakan masukkan total seluruh transfer, tidak perlu submit form terpisah.”
+Catatan: Tidak ada Refund. Jika terjadi kesalahan, arahkan ke Human Support.
+Rekening Player = rekening terdaftar di akun player.
+Rekening Web = rekening di website untuk proses deposit (lihat Tool Rekening).'],
+            ['title' => 'Withdraw', 'source' => 'manual', 'content' => '[Informasi]
+- Minimal Withdraw Rp {wd_min}
+- Withdraw berkelipatan Rp 1000
 
-Contoh:
-Transfer: Rp2.002.856 + Rp501.526
-Total: Rp2.504.382
-Jawaban:
-“Cukup isi 1x form deposit saja kak 😊 Silakan masukkan total Rp2.504.382, tidak perlu submit form terpisah.”
+Withdraw dengan E-WALLET: Semua akun E-Wallet wajib berstatus Premium. Pastikan upgrade terlebih dahulu.
 
-Jangan:
-Meminta member submit form lebih dari 1x
-Meminta input nominal satu per satu
-Memberikan jawaban membingungkan atau bertentangan
-============
-
-Catatan:
-Tidak ada Refund , jika terjadi kesalahan dalam transfer atau Deposit akan di arahkan ke Human Support.
-Rekening ada 2 tipe:
-- Rekening Player , yaitu rekening yang didaftarkan ke aku player / user
-- Rekening Web , yaitu rekening yang terdaftar di Website untuk proses deposit, daftar Rekening Web yang aktif dapat liat dari Tool Rekening.',
-                'source' => 'manual',
-                'file_name' => null,
-                'is_active' => true,
-            ],
-            [
-                'title' => 'Sports',
-                'content' => 'Mix Parlay adalah taruhan yang menggabungkan beberapa pertandingan dalam satu tiket, dan semua tebakan harus benar agar menang.
-
-HASIL PERTANDINGAN DALAM TIKET PARLAY:
-- Kalah (Lose): Satu pertandingan saja kalah → seluruh tiket gugur/kalah total.
-- Seri (Draw): Odds pertandingan tersebut diubah menjadi 1, tidak mempengaruhi tiket, sisa pertandingan tetap berjalan.
-- Void/Ditunda: Pertandingan dibatalkan atau ditunda >24 jam → dianggap Void, odds menjadi 1, tiket tetap berjalan.
-- Menang Setengah (Won Half): Tiket tetap hidup, tetapi odds dihitung ulang dengan rumus: (Odds awal - 1) ÷ 2 + 1.
-
-CARA HITUNG TOTAL ODDS:
-Total odds = kalikan semua odds pertandingan yang dipilih.
-Contoh: 1.80 × 2.00 × 1.50 = 5.40
-
-CARA HITUNG PAYOUT (KEMENANGAN):
-Payout = Total Odds × Modal taruhan.
-Keuntungan bersih = Payout - Modal.
-Contoh: 5.40 × Rp100.000 = Rp540.000 (payout), keuntungan bersih = Rp440.000.
-
-
-Berikut jenis taruhan olahraga yang tersedia:
-
-1. HANDICAP (HDP / Asian Handicap)
-   Tim kuat memberi voor (nilai gol tambahan) ke tim lemah untuk menyeimbangkan peluang.
-   Contoh: Tim A -1 berarti Tim A harus menang minimal 2 gol agar taruhan menang.
-
-2. OVER/UNDER (O/U)
-   Menebak apakah total gol kedua tim berada di atas (Over) atau di bawah (Under) angka yang ditentukan.
-   Contoh: O/U 2.5 — Over jika total gol ≥ 3, Under jika total gol ≤ 2.
-
-3. 1X2
-   Format taruhan klasik tanpa handicap:
-   - 1 = Home (tuan rumah menang)
-   - X = Draw (seri)
-   - 2 = Away (tim tamu menang)
-
-4. ODD/EVEN (O/E)
-   Menebak apakah total gol akhir pertandingan bernilai ganjil (Odd) atau genap (Even).',
-                'source' => 'manual',
-                'file_name' => null,
-                'is_active' => true,
-            ],
-            [
-               'title' => 'Togel Info',
-               'content' => 'DAFTAR ISTILAH, PENJELASAN, DAN PARAMETER TOGEL
-
-   4D (4 Digit)
-   Tebakan angka terdiri dari 4 digit (0000-9999). Harus tepat seluruhnya untuk menang.
-   Win: 3000x
-   Kei: 0%
-   Min Bet: 500
-   Discount: 66%
-
-   3D Depan (3DD)
-   Tebakan 3 digit dari bagian depan angka 4D (contoh: 1234 -> 123).
-   Win: 400x
-   Kei: 0%
-   Min Bet: 500
-   Discount: 59%
-
-   3D Belakang (3DB)
-   Tebakan 3 digit dari bagian belakang angka 4D (contoh: 1234 -> 234).
-   Win: 400x
-   Kei: 0%
-   Min Bet: 500
-   Discount: 59%
-
-   2D Depan (2DD)
-   Tebakan 2 digit dari bagian depan angka 4D (contoh: 1234 -> 12).
-   Win: 70x
-   Kei: 0%
-   Min Bet: 500
-   Discount: 29%
-
-   2D Tengah (2DT)
-   Tebakan 2 digit dari bagian tengah angka 4D (contoh: 1234 -> 23).
-   Win: 70x
-   Kei: 0%
-   Min Bet: 500
-   Discount: 29%
-
-   2D Belakang (2DB)
-   Tebakan 2 digit dari bagian belakang angka 4D (contoh: 1234 -> 34).
-   Win: 70x
-   Kei: 0%
-   Min Bet: 500
-   Discount: 29%
-
-   Colok Bebas (CB)
-   Menebak 1 angka yang muncul di hasil 4D tanpa memperhatikan posisi.
-   Win 1x: 1.5x
-   Win 2x: 3x
-   Win 3x: 4.5x
-   Win 4x: 6x
-   Kei: 0%
-   Min Bet: 5000
-   Discount: 6%
-
-   Colok Bebas 2D (CB2)
-   Menebak 2 angka yang harus muncul di hasil 4D tanpa urutan.
-   Win 1x: 6.5x
-   Win 2x: 10x
-   Win 3x: 18x
-   Kei: 0%
-   Min Bet: 5000
-   Discount: 8%
-
-   Colok Naga (CB3)
-   Menebak 3 angka yang harus muncul di hasil 4D tanpa posisi.
-   Win 1x: 20x
-   Win 2x: 29x
-   Kei: 0%
-   Min Bet: 5000
-   Discount: 10%
-
-   Colok Jitu (CJ)
-   Menebak 1 angka di posisi tertentu (harus tepat di posisi tersebut).
-   Win (Tepat): 8x
-   Kei: 0%
-   Min Bet: 5000
-   Discount: 6%
-
-   Tepi Tengah (TT)
-   Menebak kombinasi posisi tepi (depan dan belakang) atau tengah sesuai aturan.
-   Win: 1x
-   Kei: -3%
-   Min Bet: 5000
-   Discount: 0%
-
-   Dasar (DS)
-   Menebak angka dasar (0-9) yang muncul.
-   Win: 1x
-   Kei:
-   - Ganjil: -25%
-   - Genap: 10%
-   - Besar: -25%
-   - Kecil: 10%
-   Min Bet: 5000
-   Discount: 0%
-
-   50-50 (50)
-   Tebakan dua kemungkinan (ganjil/genap atau besar/kecil).
-   Win: 1x
-   Kei: -3%
-   Min Bet: 5000
-   Discount: 0%
-
-   Shio (SH)
-   Tebakan berdasarkan zodiak Tionghoa yang dikaitkan dengan angka.
-   Win: 9x
-   Kei: 0%
-   Min Bet: 5000
-   Discount: 8%
-
-   Silang Homo (SHM)
-   Pola kombinasi silang angka dengan hubungan tertentu antar digit.
-   Win: 1x
-   Kei: -2.5%
-   Min Bet: 5000
-   Discount: 0%
-
-   Kembang Kempis (KK)
-   Pola angka naik-turun atau kembar dalam hasil.
-   Win: 1x
-   Kei:
-   - Kembang: -3%
-   - Kempis: -3%
-   - Kembar: 50%
-   Min Bet: 5000
-   Discount: 0%
-
-   Kombinasi (KM)
-   Gabungan beberapa angka atau pola untuk membentuk prediksi.
-   Win: 2.3x
-   Kei: 0%
-   Min Bet: 5000
-   Discount: 8%',
-               'source' => 'manual',
-               'file_name' => null,
-               'is_active' => true,
-            ],
-            [
-                'title' => 'Withdraw',
-                'content' => '[Informasi]
--Minimal Withdraw Rp {wd_min}
--Withdraw berkelipatan Rp 1000
-
-Withdraw dengan E-WALLET:
-Semua akun E-Wallet wajib berstatus Premium sebelum penarikan dana/Withdraw(WD).
-Pastikan upgrade E-Wallet terlebih dahulu jika belum Premium.
-E-Wallet Premium adalah Wajib sejak awal.
-
-Withdraw dengan Bank Digital:
-[ Bank Jago , SeaBank , blu by BCA Digital , Bank Neo Commerce (Neo Bank / Neo+) , Jenius (BTPN)]
-Semua penarikan ke rekening Bank Digital, akan di kenakan 6.500 ditanggung Player.
-Misalnya: WD 50.000 , maka akan masuk ke Rekening 43.500 yaitu dari 50.000 - 6.500(Biaya Admin).
+Withdraw dengan Bank Digital (Bank Jago, SeaBank, blu BCA, Neo Bank, Jenius):
+Dikenakan biaya 6.500 ditanggung Player.
+Contoh: WD 50.000 -> masuk rekening 43.500 (50.000 - 6.500).
 
 Rule:
-Jika Limit Bank Sudah capai maka dapat menyuruh untuk Wd kembali di tanggal 1 bulan depan.
-Untuk melakukan Request Withdraw, Turnover (TO) harus diselesaikan terlebih dahulu.
+- Jika limit bank sudah capai, WD kembali di tanggal 1 bulan depan.
+- Turnover (TO) harus diselesaikan dulu sebelum WD.
 
-BIAYA PENARIKAN (WD):
-Penarikan dikenakan charge 2,5% jika jumlah WD melebihi 5 kali dalam sehari.',
-                'source' => 'manual',
-                'file_name' => null,
-                'is_active' => true,
-            ],
-            [
-                'title' => 'Register',
-                'content' => 'PANDUAN AI – MEMBER BARU
+BIAYA PENARIKAN (WD): Charge 2,5% jika WD lebih dari 5 kali dalam sehari.'],
+        ]);
 
-ATURAN:
-- Jawab sesuai pertanyaan, jangan keluar konteks
-- Bahasa ramah & santai
-- Jangan cek data apapun tanpa diminta
-- Arahkan ke registrasi secara natural
+        $this->seed($bonusId, [
+            ['title' => 'Bonus', 'source' => 'manual', 'content' => 'A. BONUS MISI KLAIM (Claim di Menu Reward sebelum bermain)
 
----
+1. Bonus Ajak Teman (Referral) [{ev_ref}]
+- Bagikan link referral di menu Profil/Akun.
+- Bonus otomatis setelah teman deposit.
+- Player harus 1x deposit sukses sebelum teman deposit.
+- Multiplier={ref_mul} | Min Deposit={ref_min}-{ref_to} | Bonus={ref_bet} | >ref_to={ref_gt}
 
-INTENT USER:
+2. Bonus Deposit Beruntun [{ev_brt}]
+- Deposit setiap hari berturut-turut. Balance harus <1000 untuk dihitung.
+- Bonus = nominal deposit tertinggi dari beruntun.
+- Multiplier={brt_mul} | Min={brt_min} | Max={brt_max} | Jumlah={brt_cnt}
 
-1. TANYA INFO SITUS
-→ Jelaskan singkat:
-- Permainan: slot, live casino, togel, sabung ayam, sports, dll
-- Bonus & promo harian, deposit & WD cepat, support 24 jam
-→ Tutup dengan ajakan daftar
+3. Bonus Freespin [{ev_frp}]
+- Diberikan setelah deposit harian.
+- Multiplier={fs_mul} | Min={fs_min}
 
-2. TANYA SYARAT DAFTAR
-→ Data: Username + Rekening bank / E-wallet
-→ Ketentuan:
-- Tidak ada batasan umur
-- Boleh rekening orang lain (nama harus sesuai profil)
-- Deposit dari rekening terdaftar, atau pakai QRIS jika berbeda
-- E-wallet wajib Premium untuk WD
-→ Tawarkan bantuan pandu daftar
+4. Bonus Deposit [{ev_bd}]
+- First Deposit Bank: Min={bfd_b_min} | Rate={bfd_b_rate}% | Mul={bfd_b_mul}
+- Daily Deposit Bank: Min={bdd_b_min} | Rate={bdd_b_rate}% | Mul={bdd_b_mul}
+(Tidak bisa dapat keduanya di hari yang sama)
 
-3. LANGSUNG MINTA DAFTAR
-→ Minta: username + nomor rekening/E-wallet + nama pemilik
-→ Arahkan ke halaman registrasi
+5. Bonus APK [{ev_ap}]
+- Hanya bisa diklaim via APK.
+- Multiplier={bap_mul} | Jumlah Bonus={bap_bon} | Jumlah Deposit={bap_cou}
 
----
+B. Bonus Cashback (masuk otomatis setiap hari {cb_day})
+- Type={cb_type}
+- By Total: min={cb_tot_min} | rate={cb_tot_rate}%
+- By Game: Slot={cb_slot_min}/{cb_slot_rate}% | Togel={cb_tgl_min}/{cb_tgl_rate}% | Live Casino={cb_lc_min}/{cb_lc_rate}%
+  Sabung Ayam={cb_sa_min}/{cb_sa_rate}% | Sports={cb_spt_min}/{cb_spt_rate}% | dll.
 
-CONTOH RESPON:
+C. Bonus Promo (verifikasi Human Support)
+- Bonus Buy Spin, Freespin, Winstreak sabung ayam -> [Escalate] ke Human Support
 
-[INFO SITUS]
-"Halo kak 👋
-Kami punya slot, live casino, togel, sabung ayam, dan masih banyak lagi!
-✅ Bonus member baru  ✅ Promo harian  ✅ WD & deposit cepat  ✅ Support 24 jam
-Mau saya bantu daftar kak? 😊"
+Catatan: Tidak ada bonus lain selain bonus di atas.'],
+        ]);
 
-[SYARAT DAFTAR]
-"Cukup siapkan:
-- Username pilihan kakak
-- Rekening bank / E-wallet (nama sesuai profil)
-Catatan: tidak ada batasan umur, boleh rekening orang lain, bisa QRIS jika beda rekening, e-wallet wajib Premium untuk WD.
-Saya bantu pandu daftarnya ya kak 👍"
+        $this->seed($gameId, [
+            ['title' => 'Pools', 'source' => 'manual', 'content' => '1 - HKP - Hongkong Lotto: Close 22:30 | Result 23:00 | Open 23:05 (Sun-Sat)
+2 - SGP - Singapore Pools: Close 17:15 | Result 17:45 | Open 17:50 (Sun,Mon,Wed,Thu,Sat)
+3 - SDY - Sydney Lotto: Close 13:25 | Result 13:55 | Open 14:00 (Sun-Sat)
+4 - SMR - Samosir Pools: Close 19:30 | Result 20:00 | Open 20:05 (Sun-Sat)
+5 - HKS - HK Siang: Close 10:30 | Result 11:00 | Open 11:05 (Sun-Sat)
+6 - TMC - Toto Macau (6 sesi/hari Sun-Sat):
+   Sesi 1: Close 23:45|Result 00:00|Open 00:05 | Sesi 2: Close 12:45|Result 13:00|Open 13:05
+   Sesi 3: Close 15:45|Result 16:00|Open 16:05 | Sesi 4: Close 18:45|Result 19:00|Open 19:05
+   Sesi 5: Close 21:45|Result 22:00|Open 22:05 | Sesi 6: Close 22:45|Result 23:00|Open 23:05
+7 - CHP - China Pools: Close 15:15 | Result 15:30 | Open 15:35 (Sun-Sat)
+8 - MGC - Cambodia: Close 19:30 | Result 19:50 | Open 19:55 (Sun-Sat)
+9 - OG1 - Oregon 1: Close 02:45 | Result 03:00 | Open 03:05 (Sun-Sat)
+10 - OG2 - Oregon 2: Close 05:45 | Result 06:00 | Open 06:05 (Sun-Sat)
+11 - OG3 - Oregon 3: Close 08:45 | Result 09:00 | Open 09:05 (Sun-Sat)
+12 - OG4 - Oregon 4: Close 11:45 | Result 12:00 | Open 12:05 (Sun-Sat)
+13 - BE - Bullseye: Close 12:50 | Result 13:10 | Open 13:15 (Sun-Sat)
+14 - SW - Swiss: Close 15:30 | Result 16:00 | Open 16:05 (Sun-Sat)
+15 - MC - Macau: Close 19:30 | Result 20:00 | Open 20:05 (Sun-Sat)
+16 - CAI - Cairo: Close 12:00 | Result 12:30 | Open 12:35 (Sun-Sat)
+17 - TW - Taiwan: Close 23:20 | Result 23:50 | Open 23:55 (Sun-Sat)
+18 - QTR - Qatar: Close 20:30 | Result 21:00 | Open 21:05 (Sun-Sat)
+19 - MLY - Malaysia: Close 18:30 | Result 19:00 | Open 19:05 (Sun-Sat)'],
+            ['title' => 'Sports', 'source' => 'manual', 'content' => 'Mix Parlay: menggabungkan beberapa pertandingan, semua tebakan harus benar.
 
-[LANGSUNG DAFTAR]
-"Siap kak! Boleh share:
-1. Username yang diinginkan
-2. Nomor rekening / E-wallet + nama pemilik"
+HASIL DALAM TIKET PARLAY:
+- Kalah (Lose): 1 pertandingan kalah = seluruh tiket gugur.
+- Seri (Draw): Odds diubah ke 1, tiket tetap berjalan.
+- Void/Ditunda (>24 jam): Odds menjadi 1, tiket tetap berjalan.
+- Menang Setengah: odds = (Odds awal - 1) / 2 + 1.
 
-JIKA KELUAR TOPIK:
-"Sepertinya ada salah paham ya kak 🙏 Saya khusus bantu pendaftaran. Ada yang mau ditanyakan? 😊"',
-                'source' => 'manual',
-                'file_name' => null,
-                'is_active' => true,
-            ],
-            [
-                'title' => 'General',
-                'content' => 'GENERAL WEBSITE KNOWLEDGE
+HITUNG TOTAL ODDS: Kalikan semua odds. Contoh: 1.80 x 2.00 x 1.50 = 5.40
+PAYOUT: Total Odds x Modal. Contoh: 5.40 x Rp100.000 = Rp540.000
 
-Nama website utama: PGS
-PGS adalah situs game online terpercaya di Indonesia dengan sistem keamanan canggih, promo eksklusif, deposit QRIS cepat, dan layanan 24 jam nonstop.
-Domain utama: {main_domain}
+JENIS TARUHAN:
+1. HANDICAP (HDP): Tim kuat beri voor ke tim lemah.
+2. OVER/UNDER (O/U): Total gol di atas/bawah angka tertentu.
+3. 1X2: 1=Home menang, X=Draw, 2=Away menang.
+4. ODD/EVEN (O/E): Total gol akhir ganjil atau genap.'],
+            ['title' => 'Togel Info', 'source' => 'manual', 'content' => 'DAFTAR ISTILAH DAN PARAMETER TOGEL
 
-ATURAN JAWABAN WEBSITE:
-1. Jika user bertanya tentang website, nama website, domain, link, atau akses situs:
-   - Selalu sebutkan bahwa website adalah PGS
-   - Berikan ringkasan singkat tentang PGS
-   - Wajib sertakan URL domain utama: {main_domain}
-2. Jika user meminta link website:
-   - Berikan langsung URL: {main_domain}
-3. Jawaban harus singkat, jelas, dan relevan.
+4D: Win 3000x | Kei 0% | Min 500 | Discount 66%
+3D Depan (3DD): Win 400x | Kei 0% | Min 500 | Discount 59%
+3D Belakang (3DB): Win 400x | Kei 0% | Min 500 | Discount 59%
+2D Depan (2DD): Win 70x | Kei 0% | Min 500 | Discount 29%
+2D Tengah (2DT): Win 70x | Kei 0% | Min 500 | Discount 29%
+2D Belakang (2DB): Win 70x | Kei 0% | Min 500 | Discount 29%
+Colok Bebas (CB): Win 1x=1.5x, 2x=3x, 3x=4.5x, 4x=6x | Kei 0% | Min 5000 | Discount 6%
+Colok Bebas 2D (CB2): Win 1x=6.5x, 2x=10x, 3x=18x | Kei 0% | Min 5000 | Discount 8%
+Colok Naga (CB3): Win 1x=20x, 2x=29x | Kei 0% | Min 5000 | Discount 10%
+Colok Jitu (CJ): Win 8x | Kei 0% | Min 5000 | Discount 6%
+Tepi Tengah (TT): Win 1x | Kei -3% | Min 5000 | Discount 0%
+Dasar (DS): Win 1x | Kei Ganjil -25%/Genap 10%/Besar -25%/Kecil 10% | Min 5000 | Discount 0%
+50-50 (50): Win 1x | Kei -3% | Min 5000 | Discount 0%
+Shio (SH): Win 9x | Kei 0% | Min 5000 | Discount 8%
+Silang Homo (SHM): Win 1x | Kei -2.5% | Min 5000 | Discount 0%
+Kembang Kempis (KK): Win 1x | Kei Kembang/Kempis -3%, Kembar 50% | Min 5000 | Discount 0%
+Kombinasi (KM): Win 2.3x | Kei 0% | Min 5000 | Discount 8%'],
+            ['title' => 'Link & Pola', 'source' => 'manual', 'content' => 'PANDUAN LINK
 
-PARTNER SITE HANDLING:
-Daftar situs partner:
-- CMBET
-- BIGMSG
-- GSC11
-- IDXBIG
+ATURAN INTENT:
+- Jika user minta link RTP, kirim bagian RTP saja.
+- Jika user minta link APK, kirim bagian APK saja.
+- Jika user minta semua, kirim RTP + APK.
 
-Aturan respon:
-1. Jika user menanyakan atau menyebut salah satu nama situs partner di atas:
-   - Jawab bahwa situs tersebut adalah web partner.
-2. Jika user menanyakan situs lain di luar daftar:
-   - Jawab bahwa tidak ada relasi atau tidak dikenal.
+[RTP] URL RTP resmi: {rtp_url}
+[APK] URL APK resmi: {apk_url}
 
-Catatan:
-- Jangan menambahkan informasi di luar konteks.
-- Prioritaskan jawaban ringkas dan langsung.',
-                'source' => 'manual',
-                'file_name' => null,
-                'is_active' => true,
-            ],
-            [
-               'title' => 'Link & Pola',
-               'content' => 'PANDUAN LINK
+CATATAN: Jangan campur dengan topik bonus/deposit jika user tidak minta.'],
+            ['title' => 'Provider', 'source' => 'datamodel', 'content' => null,
+             'data_model_id' => $providersDataModelId,
+             'query_sql' => 'SELECT * FROM providers WHERE active = 1'],
+        ]);
+    }
 
-   ATURAN INTENT:
-   - Jika user minta link RTP, kirim bagian RTP saja.
-   - Jika user minta link APK, kirim bagian APK saja.
-   - Jika user minta semua, baru kirim RTP + APK.
-
-   [RTP]
-   URL RTP resmi:
-   {rtp_url}
-
-   [APK]
-   URL APK resmi:
-   {apk_url}
-
-   CATATAN RESPON AI:
-   - Jangan campur dengan topik bonus/deposit jika user tidak minta.',
-                'source' => 'manual',
-                'file_name' => null,
-                'is_active' => true,
-            ],
-            [
-               'title' => 'Provider',
-               'content' => null,
-               'source' => 'datamodel',
-               'file_name' => null,
-               'data_model_id' => $providersDataModelId,
-               'query_sql' => 'SELECT * FROM providers WHERE active = 1',
-               'is_active' => true,
-            ],
-        ];
+    private function seed(?int $agentId, array $entries): void
+    {
+        if ($agentId === null) {
+            return;
+        }
 
         foreach ($entries as $entry) {
-            KnowledgeBase::query()->updateOrCreate(
-            [
-               'chat_agent_id' => $defaultAgent->id,
-               'title' => $entry['title'],
-            ],
-            [
-               'chat_agent_id' => $defaultAgent->id,
-               'content' => $entry['content'],
-               'source' => $entry['source'],
-               'file_name' => $entry['file_name'],
-               'data_model_id' => $entry['data_model_id'] ?? null,
-               'query_sql' => $entry['query_sql'] ?? null,
-               'is_active' => $entry['is_active'],
-            ]
-            );
+            KnowledgeBase::query()->create(array_merge([
+                'chat_agent_id' => $agentId,
+                'file_name'     => null,
+                'data_model_id' => null,
+                'query_sql'     => null,
+                'is_active'     => true,
+            ], $entry));
         }
     }
 }

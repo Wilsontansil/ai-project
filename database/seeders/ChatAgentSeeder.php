@@ -64,7 +64,7 @@ Tugasmu menangani pertanyaan umum yang tidak termasuk kategori akun, pembayaran,
             ]
         );
 
-        $agentTriage->tools()->sync(Tool::query()->where('is_enabled', true)->pluck('id'));
+        $agentTriage->tools()->sync(Tool::query()->pluck('id'));
 
         // ----------------------------------------------------------------
         // 2. Agent Akun — Account specialist

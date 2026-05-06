@@ -977,7 +977,7 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
         $visionConfig    = (array) ($tool->vision_config ?? []);
         $expectedDoc     = trim((string) ($visionConfig['expected_document'] ?? ''));
         $docTypePhrase   = $expectedDoc !== ''
-            ? "the image is not "{$expectedDoc}""
+            ? "the image is not \"{$expectedDoc}\""
             : 'the image is not the expected document type';
 
         // Use a minimal prompt — only extraction instruction + context.
@@ -1121,7 +1121,7 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
         $fieldNames = array_column($visualFields, 'field');
 
         $hint  = ' Tool-specific vision rule: the user must attach an image of type';
-        $hint .= $expectedDoc !== '' ? " "{$expectedDoc}"." : ' the required document.';
+        $hint .= $expectedDoc !== '' ? " \"{$expectedDoc}\"." : ' the required document.';
 
         if ($validityHints !== '') {
             $hint .= " A valid image must show: {$validityHints}.";

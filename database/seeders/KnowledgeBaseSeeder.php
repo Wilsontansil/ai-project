@@ -218,7 +218,7 @@ ATURAN INTENT:
 CATATAN: Jangan campur dengan topik bonus/deposit jika user tidak minta.'],
             ['title' => 'Provider', 'source' => 'datamodel', 'content' => null,
              'data_model_id' => $providersDataModelId,
-             'query_sql' => 'SELECT * FROM providers WHERE active = 1'],
+             'query_sql' => 'SELECT name, alias, category FROM providers WHERE active = 1 ORDER BY urutan ASC'],
         ]);
 
         // Assign all KB entries to triage

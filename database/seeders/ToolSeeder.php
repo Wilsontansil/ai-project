@@ -363,8 +363,55 @@ class ToolSeeder extends Seeder
                     ],
                 ],
             ],
+            [
+                'tool_name' => 'listProviders',
+                'category' => 'games',
+                'display_name' => 'List Provider',
+                'description' => 'Menampilkan daftar provider game yang tersedia di platform. Bisa difilter berdasarkan nama atau alias provider, atau tampilkan semua yang aktif.',
+                'slug' => 'list-providers',
+                'type' => 'get',
+                'is_enabled' => true,
+                'data_model_id' => $providerModel?->id,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'keyword' => ['type' => 'string', 'description' => 'Kata kunci untuk mencari provider berdasarkan nama atau alias. Boleh sebagian: "pg", "pragmatic", "micro", dll. Kosongkan untuk tampilkan semua provider aktif.'],
+                    ],
+                    'required' => [],
+                ],
+                'endpoints' => null,
+                'tool_rules' => "- Gunakan tool ini saat user bertanya tentang provider apa saja yang tersedia, atau mencari provider spesifik\n- Tampilkan field: name, alias, category\n- Jika user kirim kata kunci (misal \"pg\", \"pragmatic\"), filter berdasarkan name atau alias\n- Jika user tanya semua provider atau tidak menyebut kata kunci, tampilkan seluruh provider aktif\n- Urutkan berdasarkan urutan (urutan asc)\n- Jika tidak ditemukan, sampaikan provider tidak tersedia\n- Jangan tampilkan field id, image, slug, atau isshow kepada user",
+                'information_text' => null,
+                'keywords' => ['provider', 'list provider', 'daftar provider', 'ada provider apa', 'provider apa saja', 'provider game'],
+                'meta' => [
+                    'query' => [
+                        'select' => ['name', 'alias', 'category'],
+                        'conditions' => [
+                            [
+                                'field'    => 'active',
+                                'operator' => '=',
+                                'source'   => 'static',
+                                'value'    => 1,
+                            ],
+                            [
+                                'field'         => 'keyword',
+                                'operator'      => 'LIKE%%',
+                                'source'        => 'arg',
+                                'arg'           => 'keyword',
+                                'group'         => 1,
+                                'skip_if_empty' => true,
+                            ],
+                        ],
+                        'order_by' => [
+                            'field'     => 'urutan',
+                            'direction' => 'asc',
+                        ],
+                        'limit' => 100,
+                    ],
+                ],
+            ],
             // [
-            //     'tool_name' => 'listProviders',
+            //     'tool_name' => 'listProviders',  (old get_multiple version — replaced by get version above)
             //     'category' => 'games',
             //     'display_name' => 'List Provider',
             //     'description' => 'Menampilkan daftar provider game yang tersedia. Bisa filter berdasarkan nama atau alias provider.',

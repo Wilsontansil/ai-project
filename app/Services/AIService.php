@@ -131,6 +131,8 @@ class AIService
                 $toolChars = mb_strlen(json_encode($payload['tools'] ?? []));
                 Log::info('AI payload size', [
                     'channel'           => $channel,
+                    'agent'             => $chatAgent?->name ?? 'default',
+                    'agent_type'        => $chatAgent?->agent_type ?? null,
                     'model'             => $model,
                     'messages_chars'    => $totalChars,
                     'tools_chars'       => $toolChars,

@@ -959,7 +959,7 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['status', 'remark', 'keterangan', 'created_at'],
+                        'select' => ['status', 'remark', 'created_at'],
                         'order_by' => [
                             'field' => 'created_at',
                             'direction' => 'desc',
@@ -990,7 +990,7 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['status', 'remark', 'keterangan', 'created_at'],
+                        'select' => ['status', 'remark', 'created_at'],
                         'order_by' => [
                             'field' => 'created_at',
                             'direction' => 'desc',
@@ -1021,7 +1021,7 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['status', 'remark', 'keterangan', 'created_at'],
+                        'select' => ['status', 'remark', 'created_at'],
                         'order_by' => [
                             'field' => 'created_at',
                             'direction' => 'desc',
@@ -1052,7 +1052,7 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['status', 'remark', 'keterangan', 'created_at'],
+                        'select' => ['status', 'remark', 'created_at'],
                         'order_by' => [
                             'field' => 'created_at',
                             'direction' => 'desc',
@@ -1083,7 +1083,7 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['status', 'remark', 'keterangan', 'created_at'],
+                        'select' => ['status', 'remark', 'created_at'],
                         'order_by' => [
                             'field' => 'created_at',
                             'direction' => 'desc',
@@ -1114,7 +1114,7 @@ class ToolSeeder extends Seeder
                 'information_text' => null,
                 'meta' => [
                     'query' => [
-                        'select' => ['status', 'remark', 'keterangan', 'created_at'],
+                        'select' => ['status', 'remark', 'created_at'],
                         'order_by' => [
                             'field' => 'created_at',
                             'direction' => 'desc',

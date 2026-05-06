@@ -51,14 +51,13 @@ class ToolDispatcher
                 ->where('is_enabled', true)
                 ->orderBy('id');
 
-            // When an agent is provided, scope to tools explicitly assigned via the
-            // chat_agent_tool pivot. Falls back to all enabled tools when the agent
-            // has no assignments — preserves backwards-compatible single-agent behaviour.
+            // When an agent is provided, strictly scope to tools explicitly assigned
+            // via the chat_agent_tool pivot. Agents with no pivot assignments (e.g.
+            // Triage) intentionally receive no tools. Only when no agent is given
+            // (legacy / $chatAgent = null) do we load all enabled tools.
             if ($chatAgent !== null) {
                 $assignedIds = $chatAgent->tools()->pluck('tools.id');
-                if ($assignedIds->isNotEmpty()) {
-                    $query->whereIn('id', $assignedIds);
-                }
+                $query->whereIn('id', $assignedIds);
             }
 
             return $query->get()

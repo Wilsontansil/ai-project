@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ChatAgent;
 use App\Models\ProjectSetting;
+use App\Services\AI\AgentRouter;
 use App\Services\AI\ConversationHistory;
 use App\Services\AI\PromptBuilder;
 use App\Services\AI\ReplyFormatter;
@@ -33,6 +34,7 @@ class AIService
         private readonly ConversationHistory $conversationHistory,
         private readonly ReplyFormatter $replyFormatter,
         private readonly ToolDispatcher $toolDispatcher,
+        private readonly AgentRouter $agentRouter,
     ) {}
 
     /**
@@ -51,7 +53,7 @@ class AIService
         }
 
         $client = OpenAI::client($apiKey);
-        $chatAgent = ChatAgent::getDefault();
+        $chatAgent = $this->agentRouter->resolve((string) $message, $chatId, $channel);
 
         if ($chatAgent === null) {
             return $this->replyFormatter->format('AI agent belum dikonfigurasi. Silakan tambahkan agent di backoffice.');

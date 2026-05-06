@@ -26,6 +26,8 @@ return new class extends Migration
             $table->boolean('stop_ai_after_handoff')->default(false);
             $table->boolean('silent_handoff')->default(false);
             $table->json('meta')->nullable();
+            $table->string('agent_type', 30)->default('general')->nullable(); // general|account|payment|bonus|game|triage
+            $table->json('routing_keywords')->nullable();
             $table->timestamps();
         });
 

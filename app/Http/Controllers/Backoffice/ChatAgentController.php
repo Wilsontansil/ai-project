@@ -131,6 +131,11 @@ class ChatAgentController extends Controller
                 ->orderBy('category')
                 ->orderBy('display_name')
                 ->get(),
+            'agentTools' => $chatAgent->tools()
+                ->where('tool_name', '!=', '_bot_config')
+                ->orderBy('category')
+                ->orderBy('display_name')
+                ->get(),
             'systemConfigs' => $systemConfigs,
             'systemConfigSearch' => $systemConfigSearch,
             'systemConfigDataModels' => DataModel::query()
@@ -191,6 +196,22 @@ class ChatAgentController extends Controller
 
         return redirect()->route('backoffice.chat-agents.index')
             ->with('success', "Agent \"{$chatAgent->name}\" berhasil diduplikasi.");
+    }
+
+    public function attachTool(ChatAgent $chatAgent, Tool $tool): RedirectResponse
+    {
+        $chatAgent->tools()->syncWithoutDetaching([$tool->id]);
+
+        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'tools'])
+            ->with('success', "\"{$tool->display_name}\" berhasil ditambahkan ke agent.");
+    }
+
+    public function detachTool(ChatAgent $chatAgent, Tool $tool): RedirectResponse
+    {
+        $chatAgent->tools()->detach($tool->id);
+
+        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'tools'])
+            ->with('success', "\"{$tool->display_name}\" berhasil dihapus dari agent.");
     }
 
     public function storeKnowledgeBase(Request $request, ChatAgent $chatAgent): RedirectResponse

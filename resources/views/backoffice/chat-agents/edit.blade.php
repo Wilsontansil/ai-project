@@ -742,25 +742,24 @@
     @endif
 
     @if ($isToolsTab)
+        {{-- Assigned Tools --}}
         <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 space-y-5">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
                 <div>
-                    <h2 class="text-sm font-semibold text-white">Tools</h2>
-                    <p class="text-xs text-slate-400">All tools are available to this agent by default.</p>
+                    <h2 class="text-sm font-semibold text-white">Assigned Tools</h2>
+                    <p class="text-xs text-slate-400">Tools yang aktif digunakan oleh agent ini.</p>
                 </div>
-                @can('manage tools')
-                    <a href="{{ route('backoffice.tools.create', ['from_agent' => $agent->id]) }}" class="bo-btn-primary"
-                        style="font-size:0.75rem;padding:0.5rem 1rem">+ New Tool</a>
-                @endcan
             </div>
 
-            @if (($availableTools ?? collect())->isEmpty())
-                <p class="text-xs text-slate-400">No tools available.
-                    @can('manage tools')
-                        <a href="{{ route('backoffice.tools.create') }}" class="text-cyan-400 hover:underline">Create
-                            the first tool</a>.
-                    @endcan
-                </p>
+            @if (session('success'))
+                <div
+                    style="background:rgba(16,185,129,0.15);border:1px solid rgba(52,211,153,0.3);border-radius:0.75rem;padding:0.75rem 1rem;font-size:0.75rem;color:#6ee7b7">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if (($agentTools ?? collect())->isEmpty())
+                <p class="text-xs text-slate-400">Belum ada tool yang di-assign ke agent ini.</p>
             @else
                 <div class="overflow-hidden rounded-xl border border-white/10">
                     <div class="overflow-x-auto">
@@ -771,19 +770,14 @@
                                     <th class="px-3 py-2 font-medium">Tool Key</th>
                                     <th class="px-3 py-2 font-medium">Type</th>
                                     <th class="px-3 py-2 font-medium">Category</th>
-                                    <th class="px-3 py-2 font-medium">
-                                        Status
-                                        <span
-                                            style="display:block;font-size:10px;font-weight:400;text-transform:none;letter-spacing:normal;color:#64748b">click
-                                            to toggle</span>
-                                    </th>
-                                    @can('manage tools')
+                                    <th class="px-3 py-2 font-medium">Status</th>
+                                    @can('manage agents')
                                         <th class="px-3 py-2 font-medium text-right">Actions</th>
                                     @endcan
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-white/5">
-                                @foreach ($availableTools as $tool)
+                                @foreach ($agentTools as $tool)
                                     <tr class="transition hover:bg-white/5 {{ $tool->is_enabled ? '' : 'opacity-50' }}">
                                         <td class="px-3 py-2">
                                             <span class="font-medium text-white">{{ $tool->display_name }}</span>
@@ -796,7 +790,6 @@
                                             style="font-family:ui-monospace,monospace;font-size:11px">
                                             {{ $tool->tool_name }}</td>
                                         <td class="px-3 py-2">
-                                            <?php $toolType = strtoupper((string) ($tool->type ?: 'api')); ?>
                                             @if ($tool->type === 'function')
                                                 <span
                                                     style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(139,92,246,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#c4b5fd">FUNCTION</span>
@@ -805,7 +798,7 @@
                                                     style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(59,130,246,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#93c5fd">API</span>
                                             @else
                                                 <span
-                                                    style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(100,116,139,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#94a3b8">{{ $toolType }}</span>
+                                                    style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(100,116,139,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#94a3b8">{{ strtoupper((string) ($tool->type ?: 'api')) }}</span>
                                             @endif
                                         </td>
                                         <td class="px-3 py-2">
@@ -813,36 +806,24 @@
                                                 style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(6,182,212,0.15);padding:2px 10px;font-size:11px;font-weight:600;color:#67e8f9">{{ strtoupper((string) ($tool->category ?: 'general')) }}</span>
                                         </td>
                                         <td class="px-3 py-2">
-                                            <form method="POST"
-                                                action="{{ route('backoffice.tools.toggleEnabled', $tool) }}">
-                                                @csrf
-                                                @if ($tool->is_enabled)
-                                                    <button type="submit"
-                                                        style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(16,185,129,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#6ee7b7;border:1px solid rgba(52,211,153,0.3);cursor:pointer"
-                                                        title="Klik untuk nonaktifkan">Active</button>
-                                                @else
-                                                    <button type="submit"
-                                                        style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(239,68,68,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#fca5a5;border:1px solid rgba(248,113,113,0.3);cursor:pointer"
-                                                        title="Klik untuk aktifkan">Inactive</button>
-                                                @endif
-                                            </form>
+                                            @if ($tool->is_enabled)
+                                                <span
+                                                    style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(16,185,129,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#6ee7b7;border:1px solid rgba(52,211,153,0.3)">Active</span>
+                                            @else
+                                                <span
+                                                    style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(239,68,68,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#fca5a5;border:1px solid rgba(248,113,113,0.3)">Inactive</span>
+                                            @endif
                                         </td>
-                                        @can('manage tools')
+                                        @can('manage agents')
                                             <td class="px-3 py-2 text-right">
-                                                <div
-                                                    style="display:flex;align-items:center;justify-content:flex-end;gap:0.5rem">
-                                                    <a href="{{ route('backoffice.tools.edit', $tool) }}?from_agent={{ $agent->id }}"
-                                                        class="bo-btn-sm">Edit</a>
-                                                    <form method="POST"
-                                                        action="{{ route('backoffice.tools.destroy', $tool) }}"
-                                                        onsubmit="return confirm('Delete tool \'{{ addslashes($tool->display_name) }}\'?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <input type="hidden" name="from_agent"
-                                                            value="{{ $agent->id }}">
-                                                        <button type="submit" class="bo-btn-danger">Delete</button>
-                                                    </form>
-                                                </div>
+                                                <form method="POST"
+                                                    action="{{ route('backoffice.chat-agents.tools.detach', [$agent, $tool]) }}"
+                                                    onsubmit="return confirm('Hapus \'{{ addslashes($tool->display_name) }}\' dari agent ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="bo-btn-danger"
+                                                        style="font-size:0.7rem;padding:0.3rem 0.75rem">Remove</button>
+                                                </form>
                                             </td>
                                         @endcan
                                     </tr>
@@ -853,6 +834,76 @@
                 </div>
             @endif
         </div>
+
+        {{-- Available Tools (not yet assigned) --}}
+        @can('manage agents')
+            @php
+                $assignedIds = ($agentTools ?? collect())->pluck('id');
+                $unassignedTools = ($availableTools ?? collect())
+                    ->filter(fn($t) => !$assignedIds->contains($t->id))
+                    ->values();
+            @endphp
+            @if ($unassignedTools->isNotEmpty())
+                <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 space-y-4">
+                    <div>
+                        <h2 class="text-sm font-semibold text-white">Add Tools</h2>
+                        <p class="text-xs text-slate-400">Tool lain yang tersedia. Klik "+ Add" untuk assign ke agent ini.</p>
+                    </div>
+                    <div class="overflow-hidden rounded-xl border border-white/10">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-xs" style="width:100%">
+                                <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
+                                    <tr>
+                                        <th class="px-3 py-2 font-medium">Name</th>
+                                        <th class="px-3 py-2 font-medium">Tool Key</th>
+                                        <th class="px-3 py-2 font-medium">Category</th>
+                                        <th class="px-3 py-2 font-medium text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-white/5">
+                                    @foreach ($unassignedTools as $tool)
+                                        <tr class="transition hover:bg-white/5 {{ $tool->is_enabled ? '' : 'opacity-40' }}">
+                                            <td class="px-3 py-2">
+                                                <span class="font-medium text-white">{{ $tool->display_name }}</span>
+                                                @if ($tool->description)
+                                                    <span
+                                                        class="block text-[11px] text-slate-400">{{ Str::limit($tool->description, 60) }}</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-3 py-2 text-slate-300"
+                                                style="font-family:ui-monospace,monospace;font-size:11px">
+                                                {{ $tool->tool_name }}</td>
+                                            <td class="px-3 py-2">
+                                                <span
+                                                    style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(6,182,212,0.15);padding:2px 10px;font-size:11px;font-weight:600;color:#67e8f9">{{ strtoupper((string) ($tool->category ?: 'general')) }}</span>
+                                            </td>
+                                            <td class="px-3 py-2 text-right">
+                                                <form method="POST"
+                                                    action="{{ route('backoffice.chat-agents.tools.attach', [$agent, $tool]) }}">
+                                                    @csrf
+                                                    <button type="submit" class="bo-btn-primary"
+                                                        style="font-size:0.7rem;padding:0.3rem 0.75rem">+ Add</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        @endcan
+
+        {{-- Create new tool --}}
+        @can('manage tools')
+            <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-4"
+                style="display:flex;align-items:center;justify-content:space-between;gap:1rem">
+                <p class="text-xs text-slate-400">Buat tool baru dan langsung assign ke agent ini.</p>
+                <a href="{{ route('backoffice.tools.create', ['from_agent' => $agent->id]) }}" class="bo-btn-primary"
+                    style="font-size:0.75rem;padding:0.5rem 1rem;white-space:nowrap">+ New Tool</a>
+            </div>
+        @endcan
     @endif
 
     @if ($isSystemConfigTab)

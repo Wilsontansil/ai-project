@@ -26,6 +26,8 @@ class ChatAgent extends Model
         'stop_ai_after_handoff',
         'silent_handoff',
         'meta',
+        'agent_type',
+        'routing_keywords',
     ];
 
     protected $casts = [
@@ -37,6 +39,7 @@ class ChatAgent extends Model
         'max_history_messages' => 'integer',
         'message_await_seconds' => 'integer',
         'meta' => 'array',
+        'routing_keywords' => 'array',
     ];
 
     protected static function booted(): void

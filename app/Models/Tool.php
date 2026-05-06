@@ -27,6 +27,7 @@ class Tool extends Model
         'tool_rules',
         'information_text',
         'meta',
+        'vision_config',
         'category',
     ];
 
@@ -37,6 +38,7 @@ class Tool extends Model
         'keywords' => 'array',
         'information_text' => 'array',
         'meta' => 'array',
+        'vision_config' => 'array',
     ];
 
     /**

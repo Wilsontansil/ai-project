@@ -373,6 +373,102 @@
                 </div>
             </div>{{-- end #section-info --}}
 
+            {{-- ─── Vision / Analisa Gambar ─── --}}
+            @php
+                $vc = $tool->vision_config ?? [];
+                $vcRequiresImage = !empty($vc['requires_image']);
+                $vcExpectedDoc = old('vision_expected_document', $vc['expected_document'] ?? '');
+                $vcValidityHints = old('vision_validity_hints', $vc['validity_hints'] ?? '');
+                $vcRejectionMsg = old('vision_rejection_message', $vc['rejection_message'] ?? '');
+                $vcRepromptMsg = old('vision_reprompt_message', $vc['reprompt_message'] ?? '');
+                $vcVisualFields = old('vision_fields', $vc['visual_fields'] ?? []);
+                $vcOpen = $vcRequiresImage || $vcExpectedDoc !== '' || !empty($vcVisualFields);
+            @endphp
+            <div id="section-vision" class="rounded-2xl border border-violet-400/20 bg-violet-500/5 p-4 space-y-4">
+                <div class="flex items-center justify-between cursor-pointer select-none"
+                    onclick="toggleVisionConfig(this)">
+                    <div>
+                        <h3 class="text-sm font-semibold text-violet-300">{{ __('backoffice.pages.tools.vision_title') }}
+                        </h3>
+                        <p class="mt-1 text-xs text-slate-400">{{ __('backoffice.pages.tools.vision_subtitle') }}</p>
+                    </div>
+                    <span class="vision-chevron text-violet-400 text-lg transition-transform"
+                        style="transform:{{ $vcOpen ? '' : 'rotate(-90deg)' }};line-height:1">&#x25BE;</span>
+                </div>
+                <div id="vision-config-body" style="{{ $vcOpen ? '' : 'display:none' }}" class="space-y-4">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="vision_requires_image" value="1"
+                            {{ $vcRequiresImage ? 'checked' : '' }}
+                            class="h-4 w-4 rounded border-white/20 bg-slate-900 text-violet-400 focus:ring-violet-400">
+                        <span
+                            class="text-sm text-slate-200">{{ __('backoffice.pages.tools.vision_requires_image') }}</span>
+                    </label>
+
+                    <div>
+                        <label
+                            class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.vision_expected_document') }}</label>
+                        <input type="text" name="vision_expected_document" maxlength="255"
+                            value="{{ $vcExpectedDoc }}"
+                            placeholder="{{ __('backoffice.pages.tools.vision_expected_document_placeholder') }}"
+                            class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none focus:border-violet-400" />
+                    </div>
+
+                    <div>
+                        <label
+                            class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.vision_validity_hints') }}</label>
+                        <textarea name="vision_validity_hints" rows="2" maxlength="500"
+                            placeholder="{{ __('backoffice.pages.tools.vision_validity_hints_placeholder') }}"
+                            class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none focus:border-violet-400">{{ $vcValidityHints }}</textarea>
+                    </div>
+
+                    <div>
+                        <label
+                            class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.vision_rejection_message') }}</label>
+                        <textarea name="vision_rejection_message" rows="2" maxlength="500"
+                            placeholder="{{ __('backoffice.pages.tools.vision_rejection_message_placeholder') }}"
+                            class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none focus:border-violet-400">{{ $vcRejectionMsg }}</textarea>
+                    </div>
+
+                    <div>
+                        <label
+                            class="mb-1 block text-xs text-slate-300">{{ __('backoffice.pages.tools.vision_reprompt_message') }}</label>
+                        <textarea name="vision_reprompt_message" rows="2" maxlength="500"
+                            placeholder="{{ __('backoffice.pages.tools.vision_reprompt_message_placeholder') }}"
+                            class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none focus:border-violet-400">{{ $vcRepromptMsg }}</textarea>
+                    </div>
+
+                    <div>
+                        <p class="mb-1 text-xs text-slate-300">{{ __('backoffice.pages.tools.vision_fields') }}</p>
+                        <p class="mb-2 text-xs text-slate-400">{{ __('backoffice.pages.tools.vision_fields_help') }}</p>
+                        <div id="vision-fields-list" class="space-y-2">
+                            @foreach ($vcVisualFields as $vf)
+                                <div class="vision-field-row grid gap-2 rounded-xl border border-white/10 bg-slate-900/50 p-3"
+                                    style="grid-template-columns:1.2fr 1.2fr 2fr auto">
+                                    <input type="text" name="vision_fields[{{ $loop->index }}][field]"
+                                        value="{{ $vf['field'] ?? '' }}"
+                                        placeholder="{{ __('backoffice.pages.tools.vision_field_name_placeholder') }}"
+                                        class="rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-violet-400" />
+                                    <input type="text" name="vision_fields[{{ $loop->index }}][label]"
+                                        value="{{ $vf['label'] ?? '' }}"
+                                        placeholder="{{ __('backoffice.pages.tools.vision_field_label_placeholder') }}"
+                                        class="rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-violet-400" />
+                                    <input type="text" name="vision_fields[{{ $loop->index }}][hint]"
+                                        value="{{ $vf['hint'] ?? '' }}"
+                                        placeholder="{{ __('backoffice.pages.tools.vision_field_hint_placeholder') }}"
+                                        class="rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-violet-400" />
+                                    <button type="button" onclick="this.closest('.vision-field-row').remove()"
+                                        class="rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 hover:bg-red-500/20">&times;</button>
+                                </div>
+                            @endforeach
+                        </div>
+                        <button type="button" onclick="addVisionFieldRow()"
+                            class="mt-2 rounded-xl border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-xs text-violet-300 transition hover:bg-violet-500/20">
+                            + {{ __('backoffice.pages.tools.vision_add_field') }}
+                        </button>
+                    </div>
+                </div>
+            </div>{{-- end #section-vision --}}
+
             <div class="flex items-center gap-4 pt-2">
                 <label class="flex cursor-pointer items-center gap-3">
                     <input type="hidden" name="is_enabled" value="0">
@@ -556,6 +652,39 @@
         }
 
         document.getElementById('type').addEventListener('change', toggleTypeSections);
+
+        /* ── Vision Config ── */
+        function toggleVisionConfig(header) {
+            const body = document.getElementById('vision-config-body');
+            const chevron = header.querySelector('.vision-chevron');
+            const hidden = body.style.display === 'none';
+            body.style.display = hidden ? '' : 'none';
+            chevron.style.transform = hidden ? '' : 'rotate(-90deg)';
+        }
+
+        let visionFieldIdx = {{ count($vcVisualFields) }};
+
+        function addVisionFieldRow(field = '', label = '', hint = '') {
+            const list = document.getElementById('vision-fields-list');
+            const row = document.createElement('div');
+            row.className = 'vision-field-row grid gap-2 rounded-xl border border-white/10 bg-slate-900/50 p-3';
+            row.style.gridTemplateColumns = '1.2fr 1.2fr 2fr auto';
+            row.innerHTML = `
+                <input type="text" name="vision_fields[${visionFieldIdx}][field]" value="${field}"
+                    placeholder="{{ __('backoffice.pages.tools.vision_field_name_placeholder') }}"
+                    class="rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-violet-400" />
+                <input type="text" name="vision_fields[${visionFieldIdx}][label]" value="${label}"
+                    placeholder="{{ __('backoffice.pages.tools.vision_field_label_placeholder') }}"
+                    class="rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-violet-400" />
+                <input type="text" name="vision_fields[${visionFieldIdx}][hint]" value="${hint}"
+                    placeholder="{{ __('backoffice.pages.tools.vision_field_hint_placeholder') }}"
+                    class="rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-violet-400" />
+                <button type="button" onclick="this.closest('.vision-field-row').remove()"
+                    class="rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 hover:bg-red-500/20">&times;</button>
+            `;
+            list.appendChild(row);
+            visionFieldIdx++;
+        }
 
         /* ── Data Model field helpers (GET type) ── */
         function getSelectedDataModelFields() {

@@ -168,6 +168,16 @@ class ToolController extends Controller
             'query_order_by_field'             => ['nullable', 'string', 'max:80'],
             'query_order_by_direction'         => ['nullable', 'string', 'in:asc,desc'],
             'query_limit'                      => ['nullable', 'integer', 'min:1', 'max:100'],
+            // vision config
+            'vision_requires_image'            => ['nullable', 'boolean'],
+            'vision_expected_document'         => ['nullable', 'string', 'max:255'],
+            'vision_validity_hints'            => ['nullable', 'string', 'max:500'],
+            'vision_rejection_message'         => ['nullable', 'string', 'max:500'],
+            'vision_reprompt_message'          => ['nullable', 'string', 'max:500'],
+            'vision_fields'                    => ['nullable', 'array'],
+            'vision_fields.*.field'            => ['required_with:vision_fields', 'string', 'max:80'],
+            'vision_fields.*.label'            => ['nullable', 'string', 'max:120'],
+            'vision_fields.*.hint'             => ['nullable', 'string', 'max:300'],
         ];
 
         if ($isCreate) {
@@ -192,6 +202,7 @@ class ToolController extends Controller
             'tool_rules' => trim($data['tool_rules'] ?? '') ?: null,
             'information_text' => $this->buildInformationTexts($request),
             'meta'             => $this->buildToolMeta($request, $tool, $type),
+            'vision_config'    => $this->buildVisionConfig($request),
             'category'         => $data['category'] ?? null,
             'is_enabled'       => $request->boolean('is_enabled', true),
         ];
@@ -334,6 +345,57 @@ class ToolController extends Controller
             $conditions[] = $cond;
         }
         return $conditions;
+    }
+
+    /**
+     * Build the vision_config array from form input.
+     * Returns null when no vision settings are provided.
+     */
+    private function buildVisionConfig(Request $request): ?array
+    {
+        $requiresImage = $request->boolean('vision_requires_image', false);
+        $expectedDoc   = trim((string) $request->input('vision_expected_document', ''));
+        $validityHints = trim((string) $request->input('vision_validity_hints', ''));
+        $rejectionMsg  = trim((string) $request->input('vision_rejection_message', ''));
+        $repromptMsg   = trim((string) $request->input('vision_reprompt_message', ''));
+        $rawFields     = (array) $request->input('vision_fields', []);
+
+        $visualFields = [];
+        foreach ($rawFields as $row) {
+            $field = trim((string) ($row['field'] ?? ''));
+            if ($field === '') {
+                continue;
+            }
+            $visualFields[] = [
+                'field' => $field,
+                'label' => trim((string) ($row['label'] ?? '')),
+                'hint'  => trim((string) ($row['hint'] ?? '')),
+            ];
+        }
+
+        // Only store vision_config when at least one meaningful value is set.
+        if (!$requiresImage && $expectedDoc === '' && empty($visualFields)) {
+            return null;
+        }
+
+        $config = ['requires_image' => $requiresImage];
+        if ($expectedDoc !== '') {
+            $config['expected_document'] = $expectedDoc;
+        }
+        if ($validityHints !== '') {
+            $config['validity_hints'] = $validityHints;
+        }
+        if ($rejectionMsg !== '') {
+            $config['rejection_message'] = $rejectionMsg;
+        }
+        if ($repromptMsg !== '') {
+            $config['reprompt_message'] = $repromptMsg;
+        }
+        if (!empty($visualFields)) {
+            $config['visual_fields'] = $visualFields;
+        }
+
+        return $config;
     }
 
     private function buildInformationTexts(Request $request): ?array

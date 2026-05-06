@@ -579,7 +579,22 @@ class ToolDispatcher
             $lines[]   = "- {$shortDesc}";
         }
 
-        return implode("\n", $lines);
+        $message = implode("\n", $lines);
+
+        // If the tool has a vision_config with a reprompt_message and any of the
+        // still-missing fields are visual fields, append the reprompt message so the
+        // user knows exactly which image to send.
+        $visionConfig  = (array) ($tool->vision_config ?? []);
+        $repromptMsg   = trim((string) ($visionConfig['reprompt_message'] ?? ''));
+        if ($repromptMsg !== '' && !empty($visionConfig['visual_fields'])) {
+            $visualFieldNames = array_column((array) $visionConfig['visual_fields'], 'field');
+            $missingVisual    = array_intersect($fieldsToList, $visualFieldNames);
+            if (!empty($missingVisual)) {
+                $message .= "\n\n" . $repromptMsg;
+            }
+        }
+
+        return $message;
     }
 
     // ─── Private dispatch helpers ────────────────────────────────────────────
@@ -957,12 +972,20 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
 
         $toolSpecificHint = $this->buildToolSpecificExtractionHint($tool);
 
+        // When vision_config defines an expected document, replace the generic phrase
+        // in the system message with the actual document name.
+        $visionConfig    = (array) ($tool->vision_config ?? []);
+        $expectedDoc     = trim((string) ($visionConfig['expected_document'] ?? ''));
+        $docTypePhrase   = $expectedDoc !== ''
+            ? "the image is not "{$expectedDoc}""
+            : 'the image is not the expected document type';
+
         // Use a minimal prompt — only extraction instruction + context.
         // The full system prompt (agent rules, base prompt) is not needed here.
         $messages = [
             [
                 'role' => 'system',
-                'content' => "Extract arguments for the tool from the conversation and the user's latest message (which may include an image/screenshot). Be flexible: accept natural language, mixed order, shorthand, or abbreviations. Use the latest message first, then recent history for any missing TEXT-BASED values ONLY. CRITICAL RULE FOR VISUAL FIELDS: fields that must come from an image must ONLY be filled from the current image in this message — never from history, never from assistant recap messages, never from other parameter values. If the current message contains no image, or the image is not the expected document type, or the value is not clearly readable, set the visual field to empty string \"\". Do NOT guess, infer, or use any text source as a substitute for a visual field.{$toolSpecificHint}",
+                'content' => "Extract arguments for the tool from the conversation and the user's latest message (which may include an image/screenshot). Be flexible: accept natural language, mixed order, shorthand, or abbreviations. Use the latest message first, then recent history for any missing TEXT-BASED values ONLY. CRITICAL RULE FOR VISUAL FIELDS: fields that must come from an image must ONLY be filled from the current image in this message — never from history, never from assistant recap messages, never from other parameter values. If the current message contains no image, or {$docTypePhrase}, or the value is not clearly readable, set the visual field to empty string \"\". Do NOT guess, infer, or use any text source as a substitute for a visual field.{$toolSpecificHint}",
             ],
         ];
 
@@ -1027,11 +1050,19 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
     }
 
     /**
-     * Build tool-specific extraction guidance from parameter descriptions.
-     * This keeps extraction rules generic across tools and avoids hardcoding field names.
+     * Build tool-specific extraction guidance.
+     * If the tool has a vision_config, use it to build a rich, structured hint.
+     * Otherwise, fall back to the legacy keyword-based heuristic.
      */
     private function buildToolSpecificExtractionHint(Tool $tool): string
     {
+        $visionConfig = (array) ($tool->vision_config ?? []);
+
+        if (!empty($visionConfig) && !empty($visionConfig['visual_fields'])) {
+            return $this->buildVisionConfigHint($visionConfig);
+        }
+
+        // ── Legacy fallback: detect visual fields from description keywords ──
         $properties = (array) data_get($tool->parameters, 'properties', []);
 
         if ($properties === []) {
@@ -1068,6 +1099,51 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
         $hint = ' Tool-specific rule: treat these fields as visual-only — ['
             . implode(', ', $visualFields)
             . ']. Rules: (1) only fill from the current image, never from conversation history, assistant messages, or other parameter values; (2) if the image is absent, unreadable, or is not the expected document type, set to empty string ""; (3) do not copy values from sibling parameters.';
+
+        return $hint;
+    }
+
+    /**
+     * Build a rich extraction hint from a tool's vision_config.
+     *
+     * @param array<string, mixed> $visionConfig
+     */
+    private function buildVisionConfigHint(array $visionConfig): string
+    {
+        $expectedDoc    = trim((string) ($visionConfig['expected_document'] ?? ''));
+        $validityHints  = trim((string) ($visionConfig['validity_hints'] ?? ''));
+        $visualFields   = (array) ($visionConfig['visual_fields'] ?? []);
+
+        if (empty($visualFields)) {
+            return '';
+        }
+
+        $fieldNames = array_column($visualFields, 'field');
+
+        $hint  = ' Tool-specific vision rule: the user must attach an image of type';
+        $hint .= $expectedDoc !== '' ? " "{$expectedDoc}"." : ' the required document.';
+
+        if ($validityHints !== '') {
+            $hint .= " A valid image must show: {$validityHints}.";
+        }
+
+        $hint .= ' These fields MUST be extracted from the current image ONLY — ['
+            . implode(', ', $fieldNames)
+            . ']. Never use history, assistant messages, or other parameter values for these fields.'
+            . ' If the image is absent, unreadable, or is not the expected document type, set all of them to empty string "".';
+
+        foreach ($visualFields as $vf) {
+            $field = trim((string) ($vf['field'] ?? ''));
+            $label = trim((string) ($vf['label'] ?? ''));
+            $fhint = trim((string) ($vf['hint'] ?? ''));
+            if ($field === '') {
+                continue;
+            }
+            $fieldDesc = $label !== '' ? "{$field} ({$label})" : $field;
+            if ($fhint !== '') {
+                $hint .= " For {$fieldDesc}: {$fhint}.";
+            }
+        }
 
         return $hint;
     }

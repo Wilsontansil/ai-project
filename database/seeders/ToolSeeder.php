@@ -155,9 +155,20 @@ class ToolSeeder extends Seeder
                         ],
                     ],
                 ],
-                'tool_rules' => "- Tool ini dipanggil otomatis dari resetPassword ketika response gagal karena balance melebihi ketentuan\n- Data namarek, norek, bank sudah tersedia dari sesi resetPassword sebelumnya — jangan tanya ulang\n- Minta user mengirimkan screenshot bukti transfer deposit\n- Analisa gambar dan ekstrak: jumlah transfer (depoamount) dan waktu transfer (time) — nilai ini HANYA boleh diambil dari gambar screenshot, JANGAN mengambil dari teks chat, history, atau nilai parameter lain\n- Jika gambar bukan screenshot bukti transfer (tidak terlihat nominal dan waktu transaksi), set depoamount = '' dan time = '' lalu minta kirim ulang screenshot yang benar\n- Jangan eksekusi sebelum semua 5 data lengkap (namarek, norek, bank, depoamount, time)\n- Setelah berhasil, infokan bahwa password berhasil direset ke 1234567 dan berikan link website untuk login",
+                'tool_rules' => "- Tool ini dipanggil otomatis dari resetPassword ketika response gagal karena balance melebihi ketentuan\n- Data namarek, norek, bank sudah tersedia dari sesi resetPassword sebelumnya — jangan tanya ulang\n- Jangan eksekusi sebelum semua 5 data lengkap (namarek, norek, bank, depoamount, time)\n- Setelah berhasil, infokan bahwa password berhasil direset ke 1234567 dan berikan link website untuk login",
                 'information_text' => null,
                 'meta' => null,
+                'vision_config' => [
+                    'requires_image'     => true,
+                    'expected_document'  => 'Screenshot bukti transfer bank atau e-wallet',
+                    'validity_hints'     => 'Harus terlihat nominal transfer, waktu transaksi, dan nama bank atau e-wallet pengirim',
+                    'rejection_message'  => 'Gambar yang dikirim bukan screenshot bukti transfer yang valid. Silakan kirim ulang screenshot struk atau mutasi bank/e-wallet yang menampilkan nominal dan waktu transaksi.',
+                    'reprompt_message'   => 'Silakan kirimkan screenshot bukti transfer deposit Anda (struk atau mutasi bank/e-wallet).',
+                    'visual_fields' => [
+                        ['field' => 'depoamount', 'label' => 'Nominal transfer',   'hint' => 'Cari angka nominal transfer di area utama struk. Abaikan simbol Rp atau titik pemisah ribuan.'],
+                        ['field' => 'time',       'label' => 'Waktu transaksi',    'hint' => 'Cari tanggal dan jam transaksi pada struk. Format: YYYY-MM-DD HH:mm atau HH:mm DD/MM/YYYY.'],
+                    ],
+                ],
             ],
             [
                 'tool_name' => 'register',

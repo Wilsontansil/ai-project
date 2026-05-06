@@ -1261,6 +1261,13 @@ class ToolSeeder extends Seeder
             );
         }
 
+        // Assign all tools to triage agent so it can handle any case
+        $triage = \App\Models\ChatAgent::where('agent_type', 'triage')->first();
+        if ($triage !== null) {
+            $allToolIds = \App\Models\Tool::query()->pluck('id')->toArray();
+            $triage->tools()->syncWithoutDetaching($allToolIds);
+        }
+
         // Cleanup deprecated explicit escalate tool.
         Tool::query()->where('tool_name', 'human_support')->delete();
     }

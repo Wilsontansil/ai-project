@@ -374,17 +374,15 @@
 
     @if ($isRulesTab)
         <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+            <div
+                style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem">
                 <div>
-                    <h2 class="text-sm font-semibold text-white">{{ __('backoffice.pages.chat_agents.agent_rules') }}
-                    </h2>
-                    <p class="text-xs text-slate-400">{{ __('backoffice.pages.chat_agents.agent_rules_subtitle') }}</p>
+                    <h2 class="text-sm font-semibold text-white">{{ __('backoffice.pages.chat_agents.agent_rules') }}</h2>
+                    <p class="text-xs text-slate-400">Assign atau lepas rules dari agent ini. Untuk edit konten, gunakan
+                        menu Agent Rules di sidebar.</p>
                 </div>
                 @can('manage agent-rules')
-                    <a href="{{ route('backoffice.agent-rules.create', $agent) }}" class="bo-btn-primary"
-                        style="font-size:0.75rem;padding:0.5rem 1rem">
-                        + {{ __('backoffice.pages.chat_agents.new_rule') }}
-                    </a>
+                    <a href="{{ route('backoffice.agent-rules.index') }}" class="bo-btn-sm">Manage Rules ↗</a>
                 @endcan
             </div>
 
@@ -457,10 +455,6 @@
                                             <div
                                                 style="display:flex;align-items:center;justify-content:flex-end;gap:0.5rem">
                                                 @can('manage agent-rules')
-                                                    <a href="{{ route('backoffice.agent-rules.edit', [$agent, $rule]) }}"
-                                                        class="bo-btn-sm">
-                                                        {{ __('backoffice.common.edit') }}
-                                                    </a>
                                                     <form method="POST"
                                                         action="{{ route('backoffice.chat-agents.rules.detach', [$agent, $rule]) }}"
                                                         onsubmit="return confirm('Lepas rule \'{{ addslashes($rule->title) }}\' dari agent ini?')">
@@ -504,8 +498,7 @@
                                 </thead>
                                 <tbody class="divide-y divide-white/5">
                                     @foreach ($rulesLibrary as $libRule)
-                                        <tr
-                                            class="transition hover:bg-white/5 {{ $libRule->is_active ? '' : 'opacity-40' }}">
+                                        <tr class="transition hover:bg-white/5 {{ $libRule->is_active ? '' : 'opacity-40' }}">
                                             <td class="px-3 py-2">
                                                 <span class="font-medium text-white">{{ $libRule->title }}</span>
                                                 <span

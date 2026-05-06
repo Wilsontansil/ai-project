@@ -58,13 +58,14 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
         Route::delete('/backoffice/chat-agents/{chatAgent}/knowledge-base/{knowledgeBase}/detach', [ChatAgentController::class, 'detachKnowledgeBase'])->name('backoffice.chat-agents.knowledge-base.detach');
     });
 
-    // Agent rules scoped per agent (admin only)
+    // Agent Rules (standalone management)
     Route::middleware('permission:manage agent-rules')->group(function () {
-        Route::get('/backoffice/chat-agents/{chatAgent}/rules/create', [AgentRuleController::class, 'create'])->name('backoffice.agent-rules.create');
-        Route::post('/backoffice/chat-agents/{chatAgent}/rules', [AgentRuleController::class, 'store'])->name('backoffice.agent-rules.store');
-        Route::get('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}/edit', [AgentRuleController::class, 'edit'])->name('backoffice.agent-rules.edit');
-        Route::put('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}', [AgentRuleController::class, 'update'])->name('backoffice.agent-rules.update');
-        Route::delete('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}', [AgentRuleController::class, 'destroy'])->name('backoffice.agent-rules.destroy');
+        Route::get('/backoffice/agent-rules', [AgentRuleController::class, 'index'])->name('backoffice.agent-rules.index');
+        Route::get('/backoffice/agent-rules/create', [AgentRuleController::class, 'create'])->name('backoffice.agent-rules.create');
+        Route::post('/backoffice/agent-rules', [AgentRuleController::class, 'store'])->name('backoffice.agent-rules.store');
+        Route::get('/backoffice/agent-rules/{agentRule}/edit', [AgentRuleController::class, 'edit'])->name('backoffice.agent-rules.edit');
+        Route::put('/backoffice/agent-rules/{agentRule}', [AgentRuleController::class, 'update'])->name('backoffice.agent-rules.update');
+        Route::delete('/backoffice/agent-rules/{agentRule}', [AgentRuleController::class, 'destroy'])->name('backoffice.agent-rules.destroy');
         Route::post('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}/attach', [ChatAgentController::class, 'attachRule'])->name('backoffice.chat-agents.rules.attach');
         Route::delete('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}/detach', [ChatAgentController::class, 'detachRule'])->name('backoffice.chat-agents.rules.detach');
     });

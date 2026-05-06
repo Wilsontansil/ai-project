@@ -1,25 +1,26 @@
 @extends('backoffice.partials.layout')
 
-@section('title', __('backoffice.pages.agent_rules.new_title') . ' — ' . $chatAgent->name)
-@section('page-title', __('backoffice.pages.agent_rules.page_title'))
+@section('title', 'New Agent Rule')
+@section('page-title', 'Agent Rules')
+
+@php($boActive = 'agent-rules')
 
 @section('content')
     {{-- Header --}}
     <div style="display:flex;align-items:center;justify-content:space-between"
         class="rounded-2xl border border-slate-700/70 bg-slate-900/85 px-4 py-4 sm:px-5">
         <div>
-            <h1 class="text-lg font-semibold sm:text-2xl">{{ __('backoffice.pages.agent_rules.new_title') }}</h1>
-            <p class="text-xs text-slate-400">
-                {{ __('backoffice.pages.agent_rules.new_subtitle', ['agent' => $chatAgent->name]) }}</p>
+            <h1 class="text-lg font-semibold sm:text-2xl">New Agent Rule</h1>
+            <p class="text-xs text-slate-400">Create a reusable rule that can be assigned to agents.</p>
         </div>
-        <a href="{{ route('backoffice.chat-agents.edit', $chatAgent) }}" class="bo-btn-secondary"
+        <a href="{{ route('backoffice.agent-rules.index') }}" class="bo-btn-secondary"
             style="font-size:0.75rem;padding:0.5rem 1rem">
-            &larr; {{ __('backoffice.pages.agent_rules.back_to_agent') }}
+            &larr; Back to Rules
         </a>
     </div>
 
     <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-4 sm:p-5">
-        <form method="POST" action="{{ route('backoffice.agent-rules.store', $chatAgent) }}" class="space-y-4">
+        <form method="POST" action="{{ route('backoffice.agent-rules.store') }}" class="space-y-4">
             @csrf
 
             <div>
@@ -88,7 +89,7 @@
 
             <div style="display:flex;align-items:center;gap:0.75rem;padding-top:0.5rem">
                 <button type="submit" class="bo-btn-primary">{{ __('backoffice.pages.agent_rules.submit_rule') }}</button>
-                <a href="{{ route('backoffice.chat-agents.edit', $chatAgent) }}"
+                <a href="{{ route('backoffice.agent-rules.index') }}"
                     class="bo-btn-secondary">{{ __('backoffice.common.cancel') }}</a>
             </div>
         </form>

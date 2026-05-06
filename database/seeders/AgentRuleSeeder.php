@@ -221,5 +221,14 @@ Jika tool analisa gambar tidak tersedia atau tidak mendukung jenis gambar terseb
                 $agent?->agentRules()->syncWithoutDetaching([$existing->id]);
             }
         }
+
+        // Triage gets every rule that exists
+        if ($triageId !== null) {
+            $triageAgent = \App\Models\ChatAgent::find($triageId);
+            if ($triageAgent !== null) {
+                $allRuleIds = AgentRule::query()->pluck('id')->toArray();
+                $triageAgent->agentRules()->syncWithoutDetaching($allRuleIds);
+            }
+        }
     }
 }

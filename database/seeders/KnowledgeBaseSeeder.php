@@ -220,6 +220,9 @@ CATATAN: Jangan campur dengan topik bonus/deposit jika user tidak minta.'],
              'data_model_id' => $providersDataModelId,
              'query_sql' => 'SELECT * FROM providers WHERE active = 1'],
         ]);
+
+        // Assign all KB entries to triage
+        $this->assignAllToTriage($triageId);
     }
 
     private function seed(?int $agentId, array $entries): void
@@ -243,5 +246,18 @@ CATATAN: Jangan campur dengan topik bonus/deposit jika user tidak minta.'],
             ], $entry));
             $agent->knowledgeBases()->syncWithoutDetaching([$kb->id]);
         }
+    }
+
+    private function assignAllToTriage(?int $triageId): void
+    {
+        if ($triageId === null) {
+            return;
+        }
+        $triageAgent = \App\Models\ChatAgent::find($triageId);
+        if ($triageAgent === null) {
+            return;
+        }
+        $allKbIds = KnowledgeBase::query()->pluck('id')->toArray();
+        $triageAgent->knowledgeBases()->syncWithoutDetaching($allKbIds);
     }
 }

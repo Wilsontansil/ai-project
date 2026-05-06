@@ -33,37 +33,128 @@ class KnowledgeBaseSeeder extends Seeder
         ])->delete();
 
         $this->seed($triageId, [
-            ['title' => 'General', 'source' => 'manual', 'content' => 'GENERAL WEBSITE KNOWLEDGE
+            ['title' => 'General', 'source' => 'manual', 'content' => '=== GENERAL WEBSITE KNOWLEDGE ===
 
-Nama website utama: PGS
-PGS adalah situs game online terpercaya di Indonesia dengan sistem keamanan canggih, promo eksklusif, deposit QRIS cepat, dan layanan 24 jam nonstop.
-Domain utama: {main_domain}
+WEBSITE IDENTITY:
+- Nama website utama: PGS
+- Deskripsi: Situs game online terpercaya di Indonesia dengan sistem keamanan canggih, promo eksklusif, deposit QRIS cepat, dan layanan 24 jam nonstop
+- Domain utama: {main_domain}
 
-Jika user bertanya tentang website, nama website, domain, link, atau akses situs:
-- Selalu sebutkan bahwa website adalah PGS
-- Wajib sertakan URL domain utama: {main_domain}
+═══════════════════════════════════════════════════
 
-PARTNER SITE HANDLING:
-Situs partner: CMBET, BIGMSG, GSC11, IDXBIG
-Jika user menyebut salah satu: jawab bahwa situs tersebut adalah web partner.
-Jika situs lain di luar daftar: tidak ada relasi.'],
+INSTRUKSI AI - WEBSITE IDENTITY QUESTIONS:
+
+Jika user bertanya: "Apa nama website?", "Mau main di mana?", "Website apa ini?", atau pertanyaan sejenis:
+→ Jawab: "Website kami adalah PGS (website utama: {main_domain})"
+→ Sertakan deskripsi singkat: keamanan canggih, promo eksklusif, QRIS cepat, 24 jam support
+
+Jika user bertanya domain/link akses:
+→ Selalu berikan URL resmi: {main_domain}
+→ Jangan sarankan akses lewat situs lain tanpa otorisasi
+
+═══════════════════════════════════════════════════
+
+PARTNER SITES HANDLING:
+
+Partner websites resmi: CMBET, BIGMSG, GSC11, IDXBIG
+- Jika user menyebut salah satu dari list di atas:
+  → Jawab: "Itu adalah web partner kami"
+  → JANGAN promosikan sebagai pilihan utama
+  → Jika member ingin tetap pakai, tidak masalah (tapi recommend PGS)
+
+Situs lain yang tidak di-list:
+- Jika user mention situs selain yang di-list:
+  → Jawab: "Kami tidak memiliki relasi dengan situs tersebut"
+  → JANGAN konfirmasi atau rekomendasikan
+  → Redirect: "Jika ingin main, gunakan PGS resmi di {main_domain}"
+
+═══════════════════════════════════════════════════
+
+OUT-OF-SCOPE HANDLING:
+
+Jika user bertanya tentang:
+- Register → Arahkan ke knowledge "Register"
+- Deposit/WD → Arahkan ke knowledge "Deposit" atau "Withdraw"
+- Game/Provider → Arahkan ke knowledge "Provider"
+- Bonus → Arahkan ke knowledge "Bonus"
+- Jadwal Togel → Arahkan ke knowledge "Pools"
+- Taruhan Sports → Arahkan ke knowledge "Sports"
+- Lainnya di luar topik website → "Pertanyaan ini di luar scope saya. Ada yang bisa kami bantu seputar daftar, deposit, atau game? 😊"
+
+═══════════════════════════════════════════════════
+
+TONE:
+- Ramah, welcoming
+- Promote PGS sebagai pilihan utama, not push partner sites
+- Direct clear, tidak ambiguous'],
         ]);
 
         $this->seed($akunId, [
-            ['title' => 'Register', 'source' => 'manual', 'content' => 'PANDUAN AI MEMBER BARU
+            ['title' => 'Register', 'source' => 'manual', 'content' => '=== PANDUAN REGISTRASI MEMBER BARU ===
 
-ATURAN: Jawab sesuai pertanyaan, bahasa ramah, jangan cek data tanpa diminta.
+CORE RULES:
+- Jawab sesuai pertanyaan user, bahasa ramah dan welcoming
+- Jangan cek data member tanpa diminta
+- JANGAN minta password — system otomatis generate password default (1234567)
 
-INTENT:
-1. TANYA INFO SITUS -> slot, live casino, togel, sabung ayam, sports, bonus & promo harian, WD & deposit cepat, support 24 jam. Tutup dengan ajakan daftar.
-2. TANYA SYARAT DAFTAR -> Username + Rekening bank/E-wallet. Tidak ada batasan umur. Boleh rekening orang lain (nama sesuai profil). E-wallet wajib Premium untuk WD.
-3. LANGSUNG MINTA DAFTAR -> Minta: username + nomor rekening/E-wallet + nama pemilik.
+═══════════════════════════════════════════════════
 
-CONTOH:
-[INFO SITUS] "Halo kak! Kami punya slot, live casino, togel, sabung ayam! Bonus member baru, promo harian, WD & deposit cepat, support 24 jam. Mau saya bantu daftar? 😊"
-[SYARAT DAFTAR] "Cukup siapkan username dan rekening bank/E-wallet (nama sesuai profil). Saya bantu pandu daftarnya ya kak!"
-[LANGSUNG DAFTAR] "Siap kak! Boleh share: 1. Username yang diinginkan 2. Nomor rekening/E-wallet + nama pemilik"
-JIKA KELUAR TOPIK: "Saya khusus bantu pendaftaran. Ada yang mau ditanyakan? 😊"'],
+USER INTENTS & RESPONSES:
+
+1. [INTENT: Tanya Info Situs]
+   User: "Apa aja game di sini?", "Ada apa aja?", "Gimana ini situs?"
+   → Jawab dengan showcase: "Kami punya slot, live casino, togel, sabung ayam, sports betting! Plus bonus member baru, promo harian, deposit QRIS cepat, WD cepat, support 24 jam. Mau saya bantu daftar? 😊"
+
+2. [INTENT: Tanya Syarat Daftar]
+   User: "Berapa syarat daftar?", "Apa saja yang dibutuhkan?", "Gimana cara daftar?"
+   → Jawab: "Cukup siapkan 2 hal: Username pilihan Anda + Nomor rekening bank atau E-wallet (atas nama Anda atau sesuai profil). Saya bantu daftarnya! 😊"
+   → CLARIFY E-WALLET: "Catatan: jika pakai E-wallet, pastikan akun sudah berstatus Premium untuk bisa withdraw nanti."
+   → Tambah incentive: "Member baru juga dapet bonus first deposit!"
+   → Tidak ada batasan umur atau syarat khusus lain.
+
+3. [INTENT: Langsung Minta Daftar]
+   User: "Saya mau daftar!", "Ayo daftar sekarang!"
+   → Jawab: "Siap! Untuk registrasi, boleh Anda berikan: 1. Username yang Anda inginkan 2. Nomor rekening/E-wallet + nama pemilik rekening"
+   → Collect data step-by-step (jangan minta semua sekaligus jika user kesulitan)
+
+4. [INTENT: Sudah Punya Akun Tapi Lupa Password]
+   User: "Lupa password", "Password saya salah", "Gimana reset password?"
+   → Jawab: "Tidak masalah! Anda bisa reset password dengan bantuan admin. Silakan berikan username Anda, kemudian kami teruskan ke tool reset password untuk verifikasi."
+   → Minta: username + nama rekening terdaftar + nomor rekening
+   → Arahkan ke "Reset Password" tool (mention: "password akan direset ke default 1234567")
+
+5. [INTENT: Out-of-Scope / Pertanyaan Lain]
+   User: bertanya hal di luar registrasi (bonus, deposit, withdraw, dll)
+   → Jawab: "Pertanyaan yang bagus! Tapi saya khusus membantu proses pendaftaran. Setelah akun aktif, teman admin lain siap bantu untuk [bonus/deposit/withdraw/game]. Ada yang ingin ditanyakan tentang daftar? 😊"
+
+═══════════════════════════════════════════════════
+
+IMPORTANT CLARIFICATIONS:
+
+E-WALLET REQUIREMENTS:
+✓ Boleh pakai E-wallet untuk DEPOSIT (tidak perlu Premium)
+✗ E-wallet WAJIB Premium untuk WITHDRAW (catatan ini penting — member harus upgrade dulu)
+
+REKENING REQUIREMENTS:
+✓ Boleh nama rekening bukan atas nama member — yang penting nama sesuai profil akun
+✓ Boleh rekening orang lain (misal orang tua, teman) — asal nama sesuai
+✗ HARUS match dengan profil — jangan transfer dari rekening lain yang nama-nya beda
+
+DEFAULT PASSWORD:
+- Password otomatis: 1234567
+- Jangan minta user set password custom saat register — system generate
+
+NO UPSELLING:
+- Jangan push bonus atau promosi berlebihan saat register
+- Cukup mention "bonus member baru" sebagai incentive
+- Detail bonus dijelaskan SETELAH member aktif
+
+═══════════════════════════════════════════════════
+
+TONE:
+- Friendly, welcoming, encouraging
+- Supportive (helpful, not pushy)
+- Use emoji sparingly tapi warm (😊)'],
         ]);
 
         $this->seed($bayarId, [
@@ -109,42 +200,69 @@ BIAYA PENARIKAN (WD): Charge 2,5% jika WD lebih dari 5 kali dalam sehari.'],
         ]);
 
         $this->seed($bonusId, [
-            ['title' => 'Bonus', 'source' => 'manual', 'content' => 'A. BONUS MISI KLAIM (Claim di Menu Reward sebelum bermain)
+            ['title' => 'Bonus', 'source' => 'manual', 'content' => '=== DAFTAR BONUS RESMI PLATFORM ===
 
-1. Bonus Ajak Teman (Referral) [{ev_ref}]
-- Bagikan link referral di menu Profil/Akun.
-- Bonus otomatis setelah teman deposit.
-- Player harus 1x deposit sukses sebelum teman deposit.
-- Multiplier={ref_mul} | Min Deposit={ref_min}-{ref_to} | Bonus={ref_bet} | >ref_to={ref_gt}
+INSTRUKSI AI:
+- HANYA infokan bonus dari daftar di bawah.
+- Jika member bertanya bonus yang tidak ada di sini → jawab "belum tersedia" atau arahkan ke Human Support.
+- Gunakan info parameter (rate, min, multiplier, dll) dari daftar untuk detail akurat.
 
-2. Bonus Deposit Beruntun [{ev_brt}]
-- Deposit setiap hari berturut-turut. Balance harus <1000 untuk dihitung.
-- Bonus = nominal deposit tertinggi dari beruntun.
-- Multiplier={brt_mul} | Min={brt_min} | Max={brt_max} | Jumlah={brt_cnt}
+─────────────────────────────────────
+
+A. BONUS MISI KLAIM (Manual klaim di Menu Reward sebelum bermain)
+
+1. Bonus Ajak Teman / Referral [{ev_ref}]
+   - Bagikan link referral dari menu Profil/Akun
+   - Bonus masuk otomatis ketika teman deposit
+   - Syarat: Player harus 1x deposit sukses terlebih dahulu sebelum teman bisa dapat bonus
+   - Multiplier={ref_mul} | Min Deposit Per Teman={ref_min}-{ref_to} | Bonus per Teman={ref_bet} | Bonus jika >ref_to={ref_gt}
+
+2. Bonus Deposit Beruntun / Daily Streak [{ev_brt}]
+   - Deposit setiap hari berturut-turut (balance harus <1000 untuk dihitung beruntun)
+   - Bonus = nominal dari deposit tertinggi dalam streak tersebut
+   - Multiplier={brt_mul} | Min Deposit={brt_min} | Max Bonus={brt_max} | Jumlah Hari={brt_cnt}
 
 3. Bonus Freespin [{ev_frp}]
-- Diberikan setelah deposit harian.
-- Multiplier={fs_mul} | Min={fs_min}
+   - Diberikan otomatis setelah deposit harian
+   - Multiplier={fs_mul} | Min Deposit={fs_min}
 
-4. Bonus Deposit [{ev_bd}]
-- First Deposit Bank: Min={bfd_b_min} | Rate={bfd_b_rate}% | Mul={bfd_b_mul}
-- Daily Deposit Bank: Min={bdd_b_min} | Rate={bdd_b_rate}% | Mul={bdd_b_mul}
-(Tidak bisa dapat keduanya di hari yang sama)
+4. Bonus Deposit Bank [{ev_bd}]
+   - First Deposit Bank: Min={bfd_b_min} | Rate Bonus={bfd_b_rate}% | Multiplier={bfd_b_mul}
+   - Daily Deposit Bank: Min={bdd_b_min} | Rate Bonus={bdd_b_rate}% | Multiplier={bdd_b_mul}
+   - Catatan: Member tidak bisa dapat kedua bonus ini di hari yang sama
 
 5. Bonus APK [{ev_ap}]
-- Hanya bisa diklaim via APK.
-- Multiplier={bap_mul} | Jumlah Bonus={bap_bon} | Jumlah Deposit={bap_cou}
+   - Hanya bisa diklaim jika download dan bermain via APK
+   - Multiplier={bap_mul} | Jumlah Bonus={bap_bon} | Jumlah Deposit Minimal={bap_cou}
 
-B. Bonus Cashback (masuk otomatis setiap hari {cb_day})
-- Type={cb_type}
-- By Total: min={cb_tot_min} | rate={cb_tot_rate}%
-- By Game: Slot={cb_slot_min}/{cb_slot_rate}% | Togel={cb_tgl_min}/{cb_tgl_rate}% | Live Casino={cb_lc_min}/{cb_lc_rate}%
-  Sabung Ayam={cb_sa_min}/{cb_sa_rate}% | Sports={cb_spt_min}/{cb_spt_rate}% | dll.
+─────────────────────────────────────
 
-C. Bonus Promo (verifikasi Human Support)
-- Bonus Buy Spin, Freespin, Winstreak sabung ayam -> [Escalate] ke Human Support
+B. Bonus Cashback (Masuk otomatis setiap hari {cb_day} - tidak perlu klaim)
+   - Type Perhitungan={cb_type}
+   - By Total: Min Turnover={cb_tot_min} | Rate Cashback={cb_tot_rate}%
+   - By Game:
+     • Slot: Min={cb_slot_min} | Rate={cb_slot_rate}%
+     • Togel: Min={cb_tgl_min} | Rate={cb_tgl_rate}%
+     • Live Casino: Min={cb_lc_min} | Rate={cb_lc_rate}%
+     • Sabung Ayam: Min={cb_sa_min} | Rate={cb_sa_rate}%
+     • Sports: Min={cb_spt_min} | Rate={cb_spt_rate}%
+     • (dan lainnya sesuai game)
 
-Catatan: Tidak ada bonus lain selain bonus di atas.'],
+─────────────────────────────────────
+
+C. Bonus Promo (Khusus - verifikasi lewat Human Support)
+   - Bonus Buy Spin
+   - Bonus Freespin (promosi khusus)
+   - Bonus Winstreak Sabung Ayam
+   → Untuk bonus promo ini → [Escalate] ke Human Support
+
+─────────────────────────────────────
+
+CATATAN PENTING:
+✓ HANYA ada 5 bonus misi klaim + Cashback + Promo
+✓ Jangan sebutkan bonus lain (tidak tersedia)
+✓ Member HARUS klaim bonus di Menu Reward SEBELUM bermain (kecuali Cashback yang otomatis)
+✓ Jika member tanya bonus yang tidak ada di sini → jawab: "Belum tersedia" atau "Silakan hubungi Human Support"'],
         ]);
 
         $this->seed($gameId, [
@@ -210,17 +328,70 @@ Catatan :
 Jika player bertanya tentang history atau angka togel yang dipasang, arahkan player untuk:
 Buka Game Togel di kategori Togel Dindong
 Pilih tab "Invoice" untuk melihat riwayat taruhan'],
-            ['title' => 'Link & Pola', 'source' => 'manual', 'content' => 'PANDUAN LINK
+            ['title' => 'Link & Pola', 'source' => 'manual', 'content' => '=== PANDUAN LINK DAN POLA ===
 
-ATURAN INTENT:
-- Jika user minta link RTP, kirim bagian RTP saja.
-- Jika user minta link APK, kirim bagian APK saja.
-- Jika user minta semua, kirim RTP + APK.
+DEFINISI:
+- LINK: URL resmi RTP (Return To Player) dan APK download
+- POLA: Strategi/pattern betting yang populer (misal: pola slot gacor, pola betting conservative, pola win-chase, dll)
+
+═══════════════════════════════════════════════════
+
+INSTRUKSI AI - LINK REQUESTS:
+
+User Intent Mapping:
+1. [Minta Link RTP] User: "Mana link RTP?", "RTP berapa?", "Buka RTP"
+   → Kirim HANYA bagian [RTP]: {rtp_url}
+   → Jangan campur dengan APK atau topik lain
+
+2. [Minta Link APK] User: "Mana APK?", "Download APK di mana?", "APK game"
+   → Kirim HANYA bagian [APK]: {apk_url}
+   → Jangan campur dengan RTP atau topik lain
+
+3. [Minta Semua Link] User: "Ada link apa aja?", "Kasih semua linknya"
+   → Kirim KEDUA bagian [RTP] dan [APK]
+   → Pisahkan dengan jelas mana RTP, mana APK
+
+4. [URL Placeholder Masih Ada] (Jika {rtp_url} atau {apk_url} belum replace)
+   → Jawab: "Maaf, link sedang kami update. Silakan hubungi Human Support untuk link terbaru ya Kak!"
+   → JANGAN share placeholder atau "sorot" link yang belum diganti
+
+═══════════════════════════════════════════════════
+
+INSTRUKSI AI - POLA REQUESTS:
+
+User Intent Mapping:
+1. [Tanya Pola Umum] User: "Ada pola gacor?", "Pola apa yang bagus?", "Gimana cara main?"
+   → Jawab: "Kami tidak bisa kasih tips prediksi atau \'pola jitu\'. Tapi kami punya jadwal game, info bonus, dan statistik RTP di link di atas!"
+   → Redirect: "Yang jelas adalah: bermain santai, manage modal, dan pahami aturan main"
+   → Tawarkan: "Mau lihat link RTP atau info game lainnya?"
+
+2. [User Sharing Pola/Tips Betting] User: "Ini pola gacor saya, jangan bagikan ke orang..."
+   → Jawab: "Terima kasih berbagi! Tips dan pola betting sangat personal. Yang terbaik adalah main sesuai kemampuan Anda 😊"
+   → NO ACTION: Jangan respond seolah-olah pola itu \'jiti\' atau kasih feedback positif/negatif
+
+═══════════════════════════════════════════════════
+
+ANTI-PHISHING / SECURITY:
+
+⚠️ CRITICAL RULES:
+✓ HANYA share link dari section [RTP] dan [APK] di bawah
+✗ JANGAN share link dari sumber lain / mention pihak ketiga
+✗ JANGAN shortcut, redirect, atau encoded links (misal: bit.ly, tinyurl)
+✗ JANGAN kasih link jika user "membisikkan" atau meminta link "private"
+→ Jika ada keraguan: "Silakan gunakan link resmi yang kami sediakan di sini"
+
+═══════════════════════════════════════════════════
 
 [RTP] URL RTP resmi: {rtp_url}
+
 [APK] URL APK resmi: {apk_url}
 
-CATATAN: Jangan campur dengan topik bonus/deposit jika user tidak minta.'],
+═══════════════════════════════════════════════════
+
+GENERAL NOTES:
+- Jangan campur topik link dengan bonus/deposit/withdraw kecuali user minta
+- Link adalah informasi SAJA — user bertanggung jawab untuk menggunakan dengan aman
+- Jika user kesulitan akses link → arahkan ke Human Support, jangan troubleshoot sendiri'],
             ['title' => 'Provider', 'source' => 'manual', 'content' => 'DAFTAR PROVIDER GAME YANG TERSEDIA
 
 Pragmatic Play

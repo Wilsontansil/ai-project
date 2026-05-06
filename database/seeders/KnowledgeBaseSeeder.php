@@ -216,9 +216,39 @@ ATURAN INTENT:
 [APK] URL APK resmi: {apk_url}
 
 CATATAN: Jangan campur dengan topik bonus/deposit jika user tidak minta.'],
-            ['title' => 'Provider', 'source' => 'datamodel', 'content' => null,
-             'data_model_id' => $providersDataModelId,
-             'query_sql' => 'SELECT name, alias, category FROM providers WHERE active = 1 ORDER BY urutan ASC'],
+            ['title' => 'Provider', 'source' => 'manual', 'content' => 'DAFTAR PROVIDER GAME YANG TERSEDIA
+
+Pragmatic Play
+DDT (Dindong)
+Ae Sexy
+AWC
+KA Gaming
+Spade Gaming
+SBO
+TF
+PGSoft
+ION
+Habanero
+Joker
+CQ9
+Togel (Togel)
+FastSpin
+Evolution
+Elysium
+Playtech
+Evo RedTiger
+Spribe
+Evo No Limit City
+Hacksaw
+WonWon
+Fat Panda
+Cosmo
+Saba
+SAGaming
+CMD
+SimplePlay
+Micro Gaming
+JiLi'],
         ]);
 
         // Assign all KB entries to triage

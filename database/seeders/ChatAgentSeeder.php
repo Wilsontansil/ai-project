@@ -243,7 +243,7 @@ Lingkup tugasmu:
         );
 
         $agentGame->tools()->sync(
-            Tool::whereIn('tool_name', ['promo', 'checkGame', 'checkPoolResult', 'listProviders'])
+            Tool::whereIn('tool_name', ['promo', 'checkGame', 'checkPoolResult'])
                 ->pluck('id')
         );
     }

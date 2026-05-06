@@ -204,7 +204,12 @@ Dasar (DS): Win 1x | Kei Ganjil -25%/Genap 10%/Besar -25%/Kecil 10% | Min 5000 |
 Shio (SH): Win 9x | Kei 0% | Min 5000 | Discount 8%
 Silang Homo (SHM): Win 1x | Kei -2.5% | Min 5000 | Discount 0%
 Kembang Kempis (KK): Win 1x | Kei Kembang/Kempis -3%, Kembar 50% | Min 5000 | Discount 0%
-Kombinasi (KM): Win 2.3x | Kei 0% | Min 5000 | Discount 8%'],
+Kombinasi (KM): Win 2.3x | Kei 0% | Min 5000 | Discount 8%
+
+Catatan :
+Jika player bertanya tentang history atau angka togel yang dipasang, arahkan player untuk:
+Buka Game Togel di kategori Togel Dindong
+Pilih tab "Invoice" untuk melihat riwayat taruhan'],
             ['title' => 'Link & Pola', 'source' => 'manual', 'content' => 'PANDUAN LINK
 
 ATURAN INTENT:

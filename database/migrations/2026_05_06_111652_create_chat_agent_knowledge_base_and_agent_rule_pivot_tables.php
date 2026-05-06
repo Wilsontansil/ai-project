@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreign('chat_agent_id')->references('id')->on('chat_agents')->onDelete('cascade');
             $table->foreign('knowledge_base_id')->references('id')->on('knowledge_base')->onDelete('cascade');
         });
-
         // Pivot: agent <-> agent_rules
         Schema::create('chat_agent_agent_rule', function (Blueprint $table) {
             $table->unsignedBigInteger('chat_agent_id');

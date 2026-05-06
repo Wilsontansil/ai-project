@@ -182,21 +182,102 @@ Context: Jika member transfer beberapa kali untuk 1 deposit, cukup isi 1x form d
 Catatan: Tidak ada Refund. Jika terjadi kesalahan, arahkan ke Human Support.
 Rekening Player = rekening terdaftar di akun player.
 Rekening Web = rekening di website untuk proses deposit (lihat Tool Rekening).'],
-            ['title' => 'Withdraw', 'source' => 'manual', 'content' => '[Informasi]
+            ['title' => 'Withdraw', 'source' => 'manual', 'content' => '=== PANDUAN WITHDRAWAL / PENARIKAN DANA ===
+
+CORE RULES:
 - Minimal Withdraw Rp {wd_min}
 - Withdraw berkelipatan Rp 1000
+- Turnover (TO) HARUS diselesaikan terlebih dahulu sebelum bisa WD
+- Jika TO belum selesai → WD tidak bisa diproses
 
-Withdraw dengan E-WALLET: Semua akun E-Wallet wajib berstatus Premium. Pastikan upgrade terlebih dahulu.
+═══════════════════════════════════════════════════
 
-Withdraw dengan Bank Digital (Bank Jago, SeaBank, blu BCA, Neo Bank, Jenius):
-Dikenakan biaya 6.500 ditanggung Player.
-Contoh: WD 50.000 -> masuk rekening 43.500 (50.000 - 6.500).
+INSTRUKSI AI - WITHDRAWAL REQUESTS:
 
-Rule:
-- Jika limit bank sudah capai, WD kembali di tanggal 1 bulan depan.
-- Turnover (TO) harus diselesaikan dulu sebelum WD.
+User Intent Mapping:
 
-BIAYA PENARIKAN (WD): Charge 2,5% jika WD lebih dari 5 kali dalam sehari.'],
+1. [INTENT: Tanya Proses Withdraw]
+   User: "Gimana cara withdraw?", "Mau tarik dana", "Kapan bisa withdraw?", "Proses withdraw berapa lama?"
+   → Jawab langkah-langkah: "Prosesnya simpel! 1. Pastikan Turnover sudah selesai → 2. Pilih metode (E-wallet atau Bank) → 3. Isi form withdraw → 4. Tunggu proses (biasanya cepat)"
+   → Clarify: "Minimal Rp {wd_min}, kelipatan Rp 1000. Pilih E-wallet atau bank sesuai mau. Ada biaya untuk beberapa metode, lihat detail di bawah"
+   → Tawarkan: "Mau tahu tentang E-wallet, Bank Digital, atau ada masalah tertentu?"
+
+2. [INTENT: E-Wallet vs Bank]
+   User: "Pakai E-wallet atau bank?", "Mana yang lebih cepat?", "Biaya berapa?", "Withdraw pake apa yang bagus?"
+   → Jawab comparison:
+     - E-WALLET: Cepat, tapi HARUS Premium terlebih dahulu. Tidak ada biaya tambahan.
+     - BANK DIGITAL (Jago, SeaBank, blu BCA, Neo, Jenius): Ada biaya Rp 6.500 (ditanggung player). Lumayan cepat.
+     - BANK BIASA: Tergantung bank, ada limit per hari/bulan.
+   → Clarify: "Jika belum Premium, upgrade dulu baru bisa WD E-wallet. Untuk bank digital, fee sudah jelas Rp 6.500"
+   → Contoh: "WD 50.000 via bank digital → masuk rekening 43.500 (50.000 - 6.500)"
+
+3. [INTENT: Withdraw Problem / Tidak Bisa Withdraw]
+   User: "Ga bisa withdraw", "Button withdraw hilang", "Withdraw error", "Apa masalah kok ga bisa WD?"
+   → Troubleshooting checklist (jawab satu-satu):
+     ✓ "Turnover Anda sudah selesai?" → Jika belum, selesaikan TO dulu
+     ✓ "Pakai E-wallet?" → Harus Premium status. Cek di profil, upgrade jika belum
+     ✓ "Nomor rekening sudah benar?" → Pastikan rekening terdaftar + nominal kelipatan Rp 1000
+     ✓ "Sudah ada withdraw pending?" → Tunggu selesai dulu (jangan multiple WD simultan)
+     ✓ "Bank limit sudah capai?" → Lihat di bawah rule limit bank
+   → Jika masih error setelah cek semua → "Silakan hubungi Human Support dengan screenshot error-nya ya Kak"
+
+4. [INTENT: Withdraw Pending / Terlalu Lama]
+   User: "Withdraw saya mana?", "Kok pending?", "Berapa lama proses withdraw?", "Sudah transfer tapi belum masuk rekening"
+   → Jawab: "Biasanya WD masuk dalam hitungan menit sampai jam. Tapi bisa lebih lama tergantung bank. Cek status di riwayat transaksi dulu"
+   → If pending 24+ jam: "Jika sudah lebih dari 24 jam belum masuk, hubungi Human Support dengan bukti screenshot. Mungkin ada kendala di bank"
+
+5. [INTENT: Bank Limit Sudah Habis / "Jatah WD Habis"]
+   User: "Bank limit habis", "Quota WD habis", "Kenapa ga bisa WD lagi?", "Kapan bisa WD lagi?"
+   → Jawab: "Bank digital punya limit per hari/bulan yang ditentukan bank. Jika sudah capai limit → WD kembali bisa dilakukan tanggal 1 bulan depan"
+   → Clarify: "Ini bukan kebijakan kami, tapi kebijakan dari bank. Untuk WD lebih banyak, bisa coba bank lain atau E-wallet (jika sudah Premium)"
+   → Contoh: "Hari ini limit bank Anda sudah tercapai → Coba WD lagi besok atau tanggal 1 bulan depan limit reset"
+
+6. [INTENT: Charge Withdraw Multiple Times]
+   User: "Kenapa kena charge ganda?", "Biaya withdraw berapa kalau banyak?", "Ada biaya tambahan?"
+   → Jawab: "Biaya normal seperti di atas. TAPI ada aturan special: Jika WD lebih dari 5 kali dalam sehari → Kena charge tambahan 2,5%"
+   → Contoh: "WD kali ke-6 dalam sehari: Total WD Rp 100.000 → Charge 2,5% = Rp 2.500 → Masuk Rp 97.500"
+   → Tip: "Gather WD beberapa hari, jangan WD 6+ kali dalam 1 hari biar tidak kena charge tambahan"
+
+═══════════════════════════════════════════════════
+
+IMPORTANT CLARIFICATIONS:
+
+E-WALLET WITHDRAWAL:
+✓ E-wallet WAJIB berstatus PREMIUM terlebih dahulu
+✓ Tidak ada biaya tambahan (free)
+✓ Proses cepat (biasanya menit)
+✗ Jika belum Premium → tidak bisa WD, harus upgrade dulu
+
+BANK DIGITAL WITHDRAWAL:
+✓ Bank: Jago, SeaBank, blu BCA, Neo Bank, Jenius
+✓ Biaya: Rp 6.500 (ditanggung player, bukan kami)
+✓ Proses: Cepat (hitungan jam)
+✗ Ada limit per hari/bulan (dari bank, bukan kami)
+
+BANK WITHDRAWAL (Non-Digital):
+✓ Bisa semua bank (BCA, Mandiri, BNI, dll)
+✓ Biaya: Sesuai kebijakan bank
+✓ Proses: Tergantung bank (biasanya 1-3 hari)
+✗ Ada limit per hari/bulan
+
+TURNOVER (TO):
+✓ MUST diselesaikan sebelum WD
+✓ TO adalah target betting yang harus dicapai
+✓ Info TO ada di profil/dashboard
+✗ Jika TO belum selesai → WD BLOCKED (system akan reject)
+
+BANK LIMIT RESET:
+✓ Limit bank reset tanggal 1 setiap bulan
+✓ Bukan reset real-time (tunggu berganti tanggal)
+✓ Jika ingin WD lebih, try bank lain atau E-wallet Premium
+
+═══════════════════════════════════════════════════
+
+TONE:
+- Helpful, clarifying, not defensive
+- Acknowledge frustration if WD issues ("Kesel ya kalo pending?")
+- Pro-active suggest solutions (troubleshooting checklist)
+- Direct ke Human Support jika di luar kemampuan'],
         ]);
 
         $this->seed($bonusId, [
@@ -392,39 +473,105 @@ GENERAL NOTES:
 - Jangan campur topik link dengan bonus/deposit/withdraw kecuali user minta
 - Link adalah informasi SAJA — user bertanggung jawab untuk menggunakan dengan aman
 - Jika user kesulitan akses link → arahkan ke Human Support, jangan troubleshoot sendiri'],
-            ['title' => 'Provider', 'source' => 'manual', 'content' => 'DAFTAR PROVIDER GAME YANG TERSEDIA
+            ['title' => 'Provider', 'source' => 'manual', 'content' => '=== DAFTAR PROVIDER GAME YANG TERSEDIA ===
 
-Pragmatic Play
-DDT (Dindong)
-Ae Sexy (Sabung)
-AWC
-KA Gaming
-Spade Gaming
-SBO
-TF
-PGSoft
-ION
-Habanero
-Joker
-CQ9
-Togel (Togel)
-FastSpin
-Evolution
-Elysium
-Playtech
-Evo RedTiger
-Spribe
-Evo No Limit City
-Hacksaw
-WonWon
-Fat Panda
-Cosmo
-Saba
-SAGaming
-CMD
-SimplePlay
-Micro Gaming
-JiLi'],
+═══════════════════════════════════════════════════
+
+INSTRUKSI AI - PROVIDER REQUESTS:
+
+User Intent Mapping:
+
+1. [Tanya Provider Apa Aja] User: "Ada provider apa aja?", "Provider apa saja yang ada?", "Game apa aja di sini?"
+   → Jawab singkat: "Kami punya berbagai provider untuk slot, live casino, sabung ayam, dan togel. Cek kategori di bawah!"
+   → TIDAK perlu list semua provider (terlalu panjang)
+   → Tawarkan: "Mau tahu provider untuk game apa? (Slot / Live Casino / Togel / Sabung Ayam / Sports)"
+
+2. [Tanya Provider Spesifik per Kategori] User: "Provider slot apa aja?", "Provider togel apa?", "Provider live casino?"
+   → Jawab: Lihat kategori di bawah, sebutkan provider sesuai kategori yang ditanya
+   → Contoh: "Untuk slot kami punya: Pragmatic Play, PGSoft, Habanero, Joker, CQ9, dan lainnya"
+   → Jangan recommend provider tertentu sebagai "terbaik" atau "paling gacor"
+
+3. [Rekomendasikan Provider "Bagus" / "Gacor"] User: "Provider mana yang bagus?", "Mana yang gacor?", "Recommend provider dong"
+   → Jawab: "Semua provider kami bagus dan fair! RTP sudah terverifikasi di link kami. Pilih yang Anda sukai aja 😊"
+   → JANGAN recommend spesifik provider
+   → JANGAN sebut "gacor", "sering jackpot", atau pola menang tertentu
+   → Redirect: "Lihat RTP masing-masing di link untuk info transaksi"
+
+4. [Tanya Provider yang Tidak Ada] User: "Ada provider XXX?", "Kenapa tidak ada provider YYY?", "Provider ZZZ di sini nggak?"
+   → Jawab: "Saat ini kami tidak punya [Provider XXX]. Tapi kami punya banyak pilihan lain yang bagus! Mau coba provider lain?"
+   → JANGAN konfirmasi atau breakdown kenapa provider tertentu tidak ada
+   → Redirect: Tawarkan kategori/game yang berbeda
+
+═══════════════════════════════════════════════════
+
+ANTI-RECOMMENDATION RULES (CRITICAL):
+
+⚠️ DO NOT:
+✗ Recommend spesifik provider sebagai "terbaik", "paling gacor", atau "paling sering jackpot"
+✗ Buat ranking provider (provider A > provider B)
+✗ Sebut provider punya "sistem curang" atau "mudah menang"
+✗ Buat janji ROI atau win guarantee untuk provider tertentu
+
+✓ DO:
+✓ Sebutkan semua provider tersedia tanpa bias
+✓ Redirect user ke RTP link untuk info transaksi
+✓ Encourage user memilih sesuai preferensi (tema, gameplay, dll)
+
+═══════════════════════════════════════════════════
+
+PROVIDER CATEGORIES:
+
+[SLOT]
+- Pragmatic Play
+- PGSoft
+- Habanero
+- Joker
+- CQ9
+- AWC
+- KA Gaming
+- Spade Gaming
+- ION
+- FastSpin
+- Elysium
+- Evo RedTiger
+- Evo No Limit City
+- Hacksaw
+- WonWon
+- Fat Panda
+- Cosmo
+- Saba
+- SAGaming
+- CMD
+- SimplePlay
+- Micro Gaming
+- JiLi
+
+[LIVE CASINO]
+- Evolution
+- Playtech
+- SBO
+- TF
+- Spribe
+
+[SABUNG AYAM]
+- Ae Sexy
+
+[TOGEL]
+- DDT (Dindong)
+- Togel (Togel)
+
+[SPORTS]
+- SBO
+- Saba
+- SAGaming
+
+═══════════════════════════════════════════════════
+
+GENERAL NOTES:
+- Semua provider fair dan sudah verified dengan RTP transparan
+- User bisa main provider apa saja sesuai selera (tema, gameplay)
+- RTP dan statistik transaksi bisa lihat di link resmi kami
+- Jika ada pertanyaan teknis provider → arahkan ke Human Support'],
         ]);
 
         // Assign all KB entries to triage

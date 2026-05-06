@@ -31,15 +31,17 @@ class AgentRuleController extends Controller
             'priority' => ['required', 'integer', 'min:1', 'max:9999'],
         ]);
 
-        $chatAgent->agentRules()->create([
-            'title' => trim($data['title']),
+        $rule = AgentRule::query()->create([
+            'chat_agent_id' => null,
+            'title'       => trim($data['title']),
             'instruction' => trim($data['instruction']),
-            'type' => $data['type'],
-            'category' => trim($data['category']),
-            'level' => $data['level'],
-            'priority' => $data['priority'],
-            'is_active' => true,
+            'type'        => $data['type'],
+            'category'    => trim($data['category']),
+            'level'       => $data['level'],
+            'priority'    => $data['priority'],
+            'is_active'   => true,
         ]);
+        $chatAgent->agentRules()->syncWithoutDetaching([$rule->id]);
 
         return redirect()->route('backoffice.chat-agents.edit', $chatAgent)
             ->with('success', __('backoffice.agent_rules.created'));

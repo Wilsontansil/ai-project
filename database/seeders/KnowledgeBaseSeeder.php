@@ -228,14 +228,20 @@ CATATAN: Jangan campur dengan topik bonus/deposit jika user tidak minta.'],
             return;
         }
 
+        $agent = \App\Models\ChatAgent::find($agentId);
+        if ($agent === null) {
+            return;
+        }
+
         foreach ($entries as $entry) {
-            KnowledgeBase::query()->create(array_merge([
-                'chat_agent_id' => $agentId,
+            $kb = KnowledgeBase::query()->create(array_merge([
+                'chat_agent_id' => null,
                 'file_name'     => null,
                 'data_model_id' => null,
                 'query_sql'     => null,
                 'is_active'     => true,
             ], $entry));
+            $agent->knowledgeBases()->syncWithoutDetaching([$kb->id]);
         }
     }
 }

@@ -76,14 +76,14 @@ class ChatAgent extends Model
         return $query->where('is_enabled', true);
     }
 
-    public function agentRules()
+    public function agentRules(): BelongsToMany
     {
-        return $this->hasMany(AgentRule::class);
+        return $this->belongsToMany(AgentRule::class, 'chat_agent_agent_rule');
     }
 
-    public function knowledgeBases()
+    public function knowledgeBases(): BelongsToMany
     {
-        return $this->hasMany(KnowledgeBase::class);
+        return $this->belongsToMany(KnowledgeBase::class, 'chat_agent_knowledge_base');
     }
 
     public function tools(): BelongsToMany

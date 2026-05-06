@@ -92,6 +92,19 @@ class ChatAgentController extends Controller
             ->orderByDesc('updated_at')
             ->get();
 
+        $assignedKbIds   = $knowledgeEntries->pluck('id');
+        $assignedRuleIds = $agentRules->pluck('id');
+
+        $knowledgeLibrary = KnowledgeBase::query()
+            ->whereNotIn('id', $assignedKbIds)
+            ->orderBy('title')
+            ->get();
+
+        $rulesLibrary = \App\Models\AgentRule::query()
+            ->whereNotIn('id', $assignedRuleIds)
+            ->orderBy('type')->orderBy('priority')
+            ->get();
+
         $selectedKnowledge = null;
         if ($selectedKnowledgeId > 0) {
             $selectedKnowledge = $knowledgeEntries->firstWhere('id', $selectedKnowledgeId);
@@ -121,6 +134,8 @@ class ChatAgentController extends Controller
             'agent' => $chatAgent,
             'agentRules' => $agentRules,
             'knowledgeEntries' => $knowledgeEntries,
+            'knowledgeLibrary' => $knowledgeLibrary,
+            'rulesLibrary' => $rulesLibrary,
             'selectedKnowledge' => $selectedKnowledge,
             'knowledgeMode' => $knowledgeMode,
             'activeTab' => $activeTab,
@@ -233,8 +248,8 @@ class ChatAgentController extends Controller
             try {
                 $scraped = app(KnowledgeBaseWebsiteScraper::class)->scrapeRtpWebsite($data['source_url'], $sourceLimit);
 
-                KnowledgeBase::query()->create([
-                    'chat_agent_id' => $chatAgent->id,
+                $kb = KnowledgeBase::query()->create([
+                    'chat_agent_id' => null,
                     'title' => $data['title'],
                     'content' => $scraped['content'],
                     'source' => 'website',
@@ -252,6 +267,7 @@ class ChatAgentController extends Controller
                     'last_sync_error' => null,
                     'is_active' => $request->boolean('is_active', true),
                 ]);
+                $chatAgent->knowledgeBases()->syncWithoutDetaching([$kb->id]);
             } catch (\Throwable $e) {
                 return back()->withInput()->withErrors([
                     'source_url' => 'Website scrape gagal: ' . $e->getMessage(),
@@ -281,8 +297,8 @@ class ChatAgentController extends Controller
                 return back()->withInput()->withErrors(['query_sql' => 'Query gagal dieksekusi: ' . $e->getMessage()]);
             }
 
-            KnowledgeBase::query()->create([
-                'chat_agent_id' => $chatAgent->id,
+            $kb = KnowledgeBase::query()->create([
+                'chat_agent_id' => null,
                 'title'         => $data['title'],
                 'content'       => null,
                 'source'        => 'datamodel',
@@ -296,6 +312,7 @@ class ChatAgentController extends Controller
                 'last_sync_error' => null,
                 'is_active'     => $request->boolean('is_active', true),
             ]);
+            $chatAgent->knowledgeBases()->syncWithoutDetaching([$kb->id]);
         } else {
             $data = $request->validate([
                 'title' => [
@@ -317,8 +334,8 @@ class ChatAgentController extends Controller
                 $fileName = $file->getClientOriginalName();
             }
 
-            KnowledgeBase::query()->create([
-                'chat_agent_id' => $chatAgent->id,
+            $kb = KnowledgeBase::query()->create([
+                'chat_agent_id' => null,
                 'title'         => $data['title'],
                 'content'       => $content,
                 'source'        => $source,
@@ -332,6 +349,7 @@ class ChatAgentController extends Controller
                 'last_sync_error' => null,
                 'is_active'     => $request->boolean('is_active', true),
             ]);
+            $chatAgent->knowledgeBases()->syncWithoutDetaching([$kb->id]);
         }
 
         return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'knowledge-base'])
@@ -491,9 +509,41 @@ class ChatAgentController extends Controller
             ->with('success', 'Knowledge base entry deleted.');
     }
 
+    public function attachKnowledgeBase(ChatAgent $chatAgent, KnowledgeBase $knowledgeBase): RedirectResponse
+    {
+        $chatAgent->knowledgeBases()->syncWithoutDetaching([$knowledgeBase->id]);
+
+        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'knowledge-base'])
+            ->with('success', "\"" . $knowledgeBase->title . "\" berhasil ditambahkan ke agent.");
+    }
+
+    public function detachKnowledgeBase(ChatAgent $chatAgent, KnowledgeBase $knowledgeBase): RedirectResponse
+    {
+        $chatAgent->knowledgeBases()->detach($knowledgeBase->id);
+
+        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'knowledge-base'])
+            ->with('success', "\"" . $knowledgeBase->title . "\" berhasil dilepas dari agent.");
+    }
+
+    public function attachRule(ChatAgent $chatAgent, \App\Models\AgentRule $agentRule): RedirectResponse
+    {
+        $chatAgent->agentRules()->syncWithoutDetaching([$agentRule->id]);
+
+        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'rules'])
+            ->with('success', "\"" . $agentRule->title . "\" berhasil ditambahkan ke agent.");
+    }
+
+    public function detachRule(ChatAgent $chatAgent, \App\Models\AgentRule $agentRule): RedirectResponse
+    {
+        $chatAgent->agentRules()->detach($agentRule->id);
+
+        return redirect()->route('backoffice.chat-agents.edit', ['chatAgent' => $chatAgent, 'tab' => 'rules'])
+            ->with('success', "\"" . $agentRule->title . "\" berhasil dilepas dari agent.");
+    }
+
     private function ensureKnowledgeOwnership(ChatAgent $chatAgent, KnowledgeBase $knowledgeBase): void
     {
-        if ((int) $knowledgeBase->chat_agent_id !== (int) $chatAgent->id) {
+        if (!$chatAgent->knowledgeBases()->where('knowledge_base.id', $knowledgeBase->id)->exists()) {
             abort(404);
         }
     }

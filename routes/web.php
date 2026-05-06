@@ -53,6 +53,8 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
         Route::post('/backoffice/chat-agents/{chatAgent}/knowledge-base', [ChatAgentController::class, 'storeKnowledgeBase'])->name('backoffice.chat-agents.knowledge-base.store');
         Route::put('/backoffice/chat-agents/{chatAgent}/knowledge-base/{knowledgeBase}', [ChatAgentController::class, 'updateKnowledgeBase'])->name('backoffice.chat-agents.knowledge-base.update');
         Route::delete('/backoffice/chat-agents/{chatAgent}/knowledge-base/{knowledgeBase}', [ChatAgentController::class, 'destroyKnowledgeBase'])->name('backoffice.chat-agents.knowledge-base.destroy');
+        Route::post('/backoffice/chat-agents/{chatAgent}/knowledge-base/{knowledgeBase}/attach', [ChatAgentController::class, 'attachKnowledgeBase'])->name('backoffice.chat-agents.knowledge-base.attach');
+        Route::delete('/backoffice/chat-agents/{chatAgent}/knowledge-base/{knowledgeBase}/detach', [ChatAgentController::class, 'detachKnowledgeBase'])->name('backoffice.chat-agents.knowledge-base.detach');
     });
 
     // Agent rules scoped per agent (admin only)
@@ -62,6 +64,8 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
         Route::get('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}/edit', [AgentRuleController::class, 'edit'])->name('backoffice.agent-rules.edit');
         Route::put('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}', [AgentRuleController::class, 'update'])->name('backoffice.agent-rules.update');
         Route::delete('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}', [AgentRuleController::class, 'destroy'])->name('backoffice.agent-rules.destroy');
+        Route::post('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}/attach', [ChatAgentController::class, 'attachRule'])->name('backoffice.chat-agents.rules.attach');
+        Route::delete('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}/detach', [ChatAgentController::class, 'detachRule'])->name('backoffice.chat-agents.rules.detach');
     });
 
     // Tools (admin only)

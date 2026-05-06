@@ -196,22 +196,29 @@ Jika tool analisa gambar tidak tersedia atau tidak mendukung jenis gambar terseb
             if ($agentId === null) {
                 continue;
             }
+            $agent = \App\Models\ChatAgent::find($agentId);
+            if ($agent === null) {
+                continue;
+            }
             foreach ($rules as $rule) {
-                AgentRule::query()->updateOrCreate(
-                    ['title' => $rule['title'], 'chat_agent_id' => $agentId],
-                    array_merge($rule, ['chat_agent_id' => $agentId, 'is_active' => true])
-                );
+                $existing = AgentRule::query()->where('title', $rule['title'])->first();
+                if ($existing === null) {
+                    $existing = AgentRule::query()->create(array_merge($rule, ['chat_agent_id' => null, 'is_active' => true]));
+                }
+                $agent->agentRules()->syncWithoutDetaching([$existing->id]);
             }
         }
 
         // Seed global rules to every agent
         $allAgentIds = array_filter([$triageId, $akunId, $bayarId, $gameId, $bonusId]);
-        foreach ($allAgentIds as $agentId) {
-            foreach ($globalRules as $rule) {
-                AgentRule::query()->updateOrCreate(
-                    ['title' => $rule['title'], 'chat_agent_id' => $agentId],
-                    array_merge($rule, ['chat_agent_id' => $agentId, 'is_active' => true])
-                );
+        foreach ($globalRules as $rule) {
+            $existing = AgentRule::query()->where('title', $rule['title'])->first();
+            if ($existing === null) {
+                $existing = AgentRule::query()->create(array_merge($rule, ['chat_agent_id' => null, 'is_active' => true]));
+            }
+            foreach ($allAgentIds as $agentId) {
+                $agent = \App\Models\ChatAgent::find($agentId);
+                $agent?->agentRules()->syncWithoutDetaching([$existing->id]);
             }
         }
     }

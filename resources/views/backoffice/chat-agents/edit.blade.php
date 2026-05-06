@@ -294,6 +294,16 @@
                                                 href="{{ route('backoffice.chat-agents.edit', ['chatAgent' => $agent, 'tab' => 'knowledge-base', 'mode' => 'view', 'kb' => $entry->id]) }}">View</a>
                                             <a class="bo-btn-sm"
                                                 href="{{ route('backoffice.chat-agents.edit', ['chatAgent' => $agent, 'tab' => 'knowledge-base', 'mode' => 'edit', 'kb' => $entry->id]) }}">Edit</a>
+                                            @can('manage agents')
+                                                <form method="POST"
+                                                    action="{{ route('backoffice.chat-agents.knowledge-base.detach', [$agent, $entry]) }}"
+                                                    onsubmit="return confirm('Lepas \'{{ addslashes($entry->title) }}\' dari agent ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="bo-btn-danger"
+                                                        style="font-size:0.7rem;padding:0.3rem 0.75rem">Remove</button>
+                                                </form>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>
@@ -628,6 +638,59 @@
                     })();
                 </script>
             </div>
+
+            {{-- Add from Library --}}
+            @can('manage agents')
+                @if (($knowledgeLibrary ?? collect())->isNotEmpty())
+                    <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 space-y-4">
+                        <div>
+                            <h2 class="text-sm font-semibold text-white">Add from Library</h2>
+                            <p class="text-xs text-slate-400">Knowledge base entries yang belum di-assign ke agent ini. Klik "+
+                                Add" untuk assign.</p>
+                        </div>
+                        <div class="overflow-hidden rounded-xl border border-white/10">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-xs" style="width:100%">
+                                    <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
+                                        <tr>
+                                            <th class="px-3 py-2 font-medium">Title</th>
+                                            <th class="px-3 py-2 font-medium">Source</th>
+                                            <th class="px-3 py-2 font-medium">Status</th>
+                                            <th class="px-3 py-2 font-medium text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-white/5">
+                                        @foreach ($knowledgeLibrary as $libEntry)
+                                            <tr
+                                                class="transition hover:bg-white/5 {{ $libEntry->is_active ? '' : 'opacity-40' }}">
+                                                <td class="px-3 py-2 font-medium text-white">{{ $libEntry->title }}</td>
+                                                <td class="px-3 py-2 text-slate-300">{{ $libEntry->source }}</td>
+                                                <td class="px-3 py-2">
+                                                    @if ($libEntry->is_active)
+                                                        <span
+                                                            style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(16,185,129,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#6ee7b7">ACTIVE</span>
+                                                    @else
+                                                        <span
+                                                            style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(239,68,68,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#fca5a5">INACTIVE</span>
+                                                    @endif
+                                                </td>
+                                                <td class="px-3 py-2 text-right">
+                                                    <form method="POST"
+                                                        action="{{ route('backoffice.chat-agents.knowledge-base.attach', [$agent, $libEntry]) }}">
+                                                        @csrf
+                                                        <button type="submit" class="bo-btn-primary"
+                                                            style="font-size:0.7rem;padding:0.3rem 0.75rem">+ Add</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endcan
         </div>
     @endif
 
@@ -721,12 +784,12 @@
                                                         {{ __('backoffice.common.edit') }}
                                                     </a>
                                                     <form method="POST"
-                                                        action="{{ route('backoffice.agent-rules.destroy', [$agent, $rule]) }}"
-                                                        onsubmit="return confirm('{{ __('backoffice.pages.chat_agents.delete_confirm_rule', ['title' => $rule->title]) }}')">
+                                                        action="{{ route('backoffice.chat-agents.rules.detach', [$agent, $rule]) }}"
+                                                        onsubmit="return confirm('Lepas rule \'{{ addslashes($rule->title) }}\' dari agent ini?')">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit"
-                                                            class="bo-btn-danger">{{ __('backoffice.common.delete') }}</button>
+                                                        <button type="submit" class="bo-btn-danger"
+                                                            style="font-size:0.7rem;padding:0.3rem 0.75rem">Remove</button>
                                                     </form>
                                                 @endcan
                                             </div>
@@ -739,6 +802,76 @@
                 </div>
             @endif
         </div>
+
+        {{-- Add from Library --}}
+        @can('manage agent-rules')
+            @if (($rulesLibrary ?? collect())->isNotEmpty())
+                <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 space-y-4">
+                    <div>
+                        <h2 class="text-sm font-semibold text-white">Add from Library</h2>
+                        <p class="text-xs text-slate-400">Rules yang belum di-assign ke agent ini. Klik "+ Add" untuk assign.
+                        </p>
+                    </div>
+                    <div class="overflow-hidden rounded-xl border border-white/10">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-xs" style="width:100%">
+                                <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
+                                    <tr>
+                                        <th class="px-3 py-2 font-medium">Title</th>
+                                        <th class="px-3 py-2 font-medium">Type</th>
+                                        <th class="px-3 py-2 font-medium">Level</th>
+                                        <th class="px-3 py-2 font-medium">Category</th>
+                                        <th class="px-3 py-2 font-medium text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-white/5">
+                                    @foreach ($rulesLibrary as $libRule)
+                                        <tr
+                                            class="transition hover:bg-white/5 {{ $libRule->is_active ? '' : 'opacity-40' }}">
+                                            <td class="px-3 py-2">
+                                                <span class="font-medium text-white">{{ $libRule->title }}</span>
+                                                <span
+                                                    class="block text-[11px] text-slate-400 line-clamp-1">{{ $libRule->instruction }}</span>
+                                            </td>
+                                            <td class="px-3 py-2">
+                                                @if ($libRule->type === 'forbidden')
+                                                    <span
+                                                        style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(239,68,68,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#fca5a5">FORBIDDEN</span>
+                                                @else
+                                                    <span
+                                                        style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(59,130,246,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#93c5fd">GUIDELINE</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-3 py-2">
+                                                @if ($libRule->level === 'danger')
+                                                    <span
+                                                        style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(239,68,68,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#fca5a5">DANGER</span>
+                                                @elseif ($libRule->level === 'warning')
+                                                    <span
+                                                        style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(245,158,11,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#fcd34d">WARNING</span>
+                                                @else
+                                                    <span
+                                                        style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(59,130,246,0.2);padding:2px 10px;font-size:11px;font-weight:600;color:#93c5fd">INFO</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-3 py-2 text-slate-300">{{ $libRule->category }}</td>
+                                            <td class="px-3 py-2 text-right">
+                                                <form method="POST"
+                                                    action="{{ route('backoffice.chat-agents.rules.attach', [$agent, $libRule]) }}">
+                                                    @csrf
+                                                    <button type="submit" class="bo-btn-primary"
+                                                        style="font-size:0.7rem;padding:0.3rem 0.75rem">+ Add</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        @endcan
     @endif
 
     @if ($isToolsTab)

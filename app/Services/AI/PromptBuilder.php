@@ -144,10 +144,9 @@ PROMPT;
 
         return Cache::remember("promptbuilder:kb_prompt:{$chatAgent->id}", 300, function () use ($chatAgent): string {
             try {
-                $entries = KnowledgeBase::query()
-                    ->where('chat_agent_id', $chatAgent->id)
+                $entries = $chatAgent->knowledgeBases()
                     ->where('is_active', true)
-                    ->orderBy('id')
+                    ->orderBy('knowledge_base.id')
                     ->get();
 
                 if ($entries->isEmpty()) {
@@ -275,15 +274,9 @@ PROMPT;
 
         return Cache::remember("promptbuilder:agent_rules:{$agentId}", 300, function () use ($chatAgent): string {
             try {
-                $query = AgentRule::query()->where('is_active', true);
-
-                if ($chatAgent) {
-                    $query->where('chat_agent_id', $chatAgent->id);
-                } else {
-                    $query->whereNull('chat_agent_id');
-                }
-
-                $allRules = $query->orderBy('priority')->get();
+                $allRules = $chatAgent
+                    ? $chatAgent->agentRules()->where('is_active', true)->orderBy('priority')->get()
+                    : collect();
 
                 if ($allRules->isEmpty()) {
                     return '';

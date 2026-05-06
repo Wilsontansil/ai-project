@@ -35,7 +35,7 @@ Saat menjawab:
         // ----------------------------------------------------------------
         // 1. Agent Triage — General / fallback, is_default = true
         // ----------------------------------------------------------------
-        ChatAgent::updateOrCreate(
+        $agentTriage = ChatAgent::updateOrCreate(
             ['slug' => 'agent-triage'],
             [
                 'name'                  => 'Agent Triage',
@@ -63,6 +63,8 @@ Tugasmu menangani pertanyaan umum yang tidak termasuk kategori akun, pembayaran,
                 'silent_handoff'        => false,
             ]
         );
+
+        $agentTriage->tools()->sync(Tool::query()->where('is_enabled', true)->pluck('id'));
 
         // ----------------------------------------------------------------
         // 2. Agent Akun — Account specialist

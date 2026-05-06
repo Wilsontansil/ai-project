@@ -225,7 +225,7 @@ CATATAN: Jangan campur dengan topik bonus/deposit jika user tidak minta.'],
 
 Pragmatic Play
 DDT (Dindong)
-Ae Sexy
+Ae Sexy (Sabung)
 AWC
 KA Gaming
 Spade Gaming

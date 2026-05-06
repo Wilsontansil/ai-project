@@ -128,12 +128,11 @@ ALUR MULTI-TURN:
 PRINSIP:
 - Jangan memilih tool hanya karena keyword; nilai kebutuhan user: penjelasan atau data.
 - Jika ragu antara "jawaban data" vs "permintaan baru", anggap permintaan baru hanya bila user jelas meminta aksi/topik baru.
-
+PROMPT;
 // ATURAN KHUSUS BONUS VS PROMO:
 // - Jika user menanyakan bonus secara umum (contoh: "bonus apa saja", "bonus apa aja", "info bonus", "cara klaim bonus", "bonus cashback", "bonus referral", "bonus deposit"), WAJIB jawab dari Knowledge Base bagian "Bonus" dan JANGAN panggil tool promo.
 // - Tool promo HANYA untuk pertanyaan promo aktif/event/banner/promosi yang sedang berjalan (contoh: "promo aktif", "daftar promo", "event terbaru", "promo hari ini").
 // - Jika user menanyakan bonus dan promo sekaligus, jawab bonus dari Knowledge Base "Bonus" terlebih dahulu, lalu lanjutkan info promo aktif menggunakan tool promo.
-PROMPT;
     }
 
     private function getKnowledgeBasePrompt(?ChatAgent $chatAgent): string

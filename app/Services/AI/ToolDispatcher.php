@@ -962,7 +962,7 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
         $messages = [
             [
                 'role' => 'system',
-                'content' => "Extract arguments for the tool from the conversation and the user's latest message (which may include an image/screenshot). Be flexible: accept natural language, mixed order, shorthand, or abbreviations. Use the latest message first, then recent history for any missing TEXT-BASED values ONLY. For bank account name (namarek), accept any string as-is. CRITICAL RULE FOR VISUAL FIELDS: fields that must come from an image (e.g. nama_ktp, depoamount, time) must ONLY be filled from the current image in this message — never from history, never from assistant recap messages, never from other parameter values (e.g. do NOT copy namarek into nama_ktp). If the current message contains no image, or the image is not the expected document type (e.g. not a KTP), or the value is not clearly readable, set the visual field to empty string \"\". Do NOT guess, infer, or use any text source as a substitute for a visual field.{$toolSpecificHint}",
+                'content' => "Extract arguments for the tool from the conversation and the user's latest message (which may include an image/screenshot). Be flexible: accept natural language, mixed order, shorthand, or abbreviations. Use the latest message first, then recent history for any missing TEXT-BASED values ONLY. CRITICAL RULE FOR VISUAL FIELDS: fields that must come from an image must ONLY be filled from the current image in this message — never from history, never from assistant recap messages, never from other parameter values. If the current message contains no image, or the image is not the expected document type, or the value is not clearly readable, set the visual field to empty string \"\". Do NOT guess, infer, or use any text source as a substitute for a visual field.{$toolSpecificHint}",
             ],
         ];
 
@@ -1039,20 +1039,17 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
         }
 
         $visualFields = [];
-        $ktpNameFields = [];
 
         foreach ($properties as $field => $prop) {
             $fieldName = (string) $field;
             $description = (string) ($prop['description'] ?? '');
             $descLower = mb_strtolower($description);
-            $fieldLower = mb_strtolower($fieldName);
 
             $isVisualField =
                 str_contains($descLower, 'foto') ||
                 str_contains($descLower, 'gambar') ||
                 str_contains($descLower, 'screenshot') ||
                 str_contains($descLower, 'image') ||
-                str_contains($descLower, 'ktp') ||
                 str_contains($descLower, 'scan') ||
                 str_contains($descLower, 'ocr') ||
                 str_contains($descLower, 'lampiran');
@@ -1062,13 +1059,6 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
             }
 
             $visualFields[] = $fieldName;
-
-            $isKtpNameField = str_contains($descLower, 'ktp')
-                && (str_contains($descLower, 'nama') || str_contains($fieldLower, 'nama'));
-
-            if ($isKtpNameField) {
-                $ktpNameFields[] = $fieldName;
-            }
         }
 
         if ($visualFields === []) {
@@ -1077,13 +1067,7 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
 
         $hint = ' Tool-specific rule: treat these fields as visual-only — ['
             . implode(', ', $visualFields)
-            . ']. Rules: (1) only fill from the current image, never from conversation history, assistant messages, or other parameter values; (2) if the image is absent, unreadable, or is not the expected document type, set to empty string ""; (3) do not copy values from sibling parameters (e.g. do not use namarek as nama_ktp).';
-
-        if ($ktpNameFields !== []) {
-            $hint .= ' For KTP-related name fields ['
-                . implode(', ', $ktpNameFields)
-                . '], extract the value from the KTP label "Nama"; do not take it from typed chat text.';
-        }
+            . ']. Rules: (1) only fill from the current image, never from conversation history, assistant messages, or other parameter values; (2) if the image is absent, unreadable, or is not the expected document type, set to empty string ""; (3) do not copy values from sibling parameters.';
 
         return $hint;
     }

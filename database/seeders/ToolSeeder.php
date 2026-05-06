@@ -353,7 +353,7 @@ class ToolSeeder extends Seeder
                 'parameters' => null,
                 'endpoints' => null,
                 'keywords' => null,
-                'tool_rules' => "- - List rekening Active yang ada pada Website / Platform\n- Listkan semua Rekening\n- Berikan detail bank, nama, norek\n- Bank yang di list adalah untuk Manual Deposit",
+                'tool_rules' => "- List rekening Active yang ada pada Website / Platform\n- Listkan semua Rekening\n- Berikan detail bank, nama, norek\n- Bank yang di list adalah untuk Manual Deposit",
                 'information_text' => null,
                 'meta' => [
                     'query' => [
@@ -1013,7 +1013,7 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['cek bonus apk', 'check bonus apk', 'status bonus apk', 'bonus apk saya', 'bonus apk pending', 'klaim bonus apk'],
-                'tool_rules' => "- Periksa status klaim Bonus APK berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus APK terbaru milik pemain\n- Sertakan minimal data status, remark, dan keterangan\n- Urutkan dari klaim terbaru ke yang paling lama\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus APK untuk pemain tersebut",
+                'tool_rules' => "- Periksa status klaim Bonus APK berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus APK terbaru milik pemain\n- Sertakan minimal data status, remark\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus APK untuk pemain tersebut",
                 'information_text' => null,
                 'meta' => [
                     'query' => [
@@ -1044,7 +1044,7 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['cek bonus beruntun', 'check bonus beruntun', 'status bonus beruntun', 'bonus deposit beruntun', 'daily streak bonus'],
-                'tool_rules' => "- Periksa status klaim Bonus Deposit Beruntun berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus Beruntun terbaru milik pemain\n- Sertakan minimal data status, remark, dan keterangan\n- Urutkan dari klaim terbaru ke yang paling lama\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus Deposit Beruntun untuk pemain tersebut",
+                'tool_rules' => "- Periksa status klaim Bonus Deposit Beruntun berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus Beruntun terbaru milik pemain\n- Sertakan minimal data status, remark\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus Deposit Beruntun untuk pemain tersebut",
                 'information_text' => null,
                 'meta' => [
                     'query' => [
@@ -1061,7 +1061,7 @@ class ToolSeeder extends Seeder
                 'tool_name' => 'checkBonusDeposit',
                 'category' => 'bonus',
                 'display_name' => 'Check Bonus Deposit',
-                'description' => 'Memeriksa status klaim Bonus Deposit pemain berdasarkan username. Menampilkan daftar klaim bonus deposit terbaru beserta status dan keterangannya.',
+                'description' => 'Memeriksa status klaim Bonus Deposit pemain berdasarkan username. Menampilkan daftar klaim bonus deposit terbaru beserta status dan remark.',
                 'slug' => 'check-bonus-deposit',
                 'type' => 'get',
                 'is_enabled' => true,
@@ -1075,7 +1075,7 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['cek bonus deposit', 'check bonus deposit', 'status bonus deposit', 'bonus deposit saya', 'klaim bonus deposit'],
-                'tool_rules' => "- Periksa status klaim Bonus Deposit berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus Deposit terbaru milik pemain\n- Sertakan minimal data status, remark, dan keterangan\n- Urutkan dari klaim terbaru ke yang paling lama\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus Deposit untuk pemain tersebut",
+                'tool_rules' => "- Periksa status klaim Bonus Deposit berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus Deposit terbaru milik pemain\n- Sertakan minimal data status, remark\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus Deposit untuk pemain tersebut",
                 'information_text' => null,
                 'meta' => [
                     'query' => [
@@ -1092,7 +1092,7 @@ class ToolSeeder extends Seeder
                 'tool_name' => 'checkBonusAjakTeman',
                 'category' => 'bonus',
                 'display_name' => 'Check Bonus Ajak Teman',
-                'description' => 'Memeriksa status klaim Bonus Ajak Teman (Referral Bonus) berdasarkan username. Menampilkan daftar klaim terbaru beserta status dan keterangannya.',
+                'description' => 'Memeriksa status klaim Bonus Ajak Teman (Referral Bonus) berdasarkan username. Menampilkan daftar klaim terbaru beserta status dan remark.',
                 'slug' => 'check-bonus-ajak-teman',
                 'type' => 'get',
                 'is_enabled' => true,
@@ -1106,7 +1106,7 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['cek bonus ajak teman', 'check bonus ajak teman', 'status bonus referral', 'bonus referral saya', 'klaim bonus referral'],
-                'tool_rules' => "- Periksa status klaim Bonus Ajak Teman berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus Ajak Teman terbaru milik pemain\n- Sertakan minimal data status, remark, dan keterangan\n- Urutkan dari klaim terbaru ke yang paling lama\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus Ajak Teman untuk pemain tersebut",
+                'tool_rules' => "- Periksa status klaim Bonus Ajak Teman berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus Ajak Teman terbaru milik pemain\n- Sertakan minimal data status, remark\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus Ajak Teman untuk pemain tersebut",
                 'information_text' => null,
                 'meta' => [
                     'query' => [
@@ -1123,7 +1123,7 @@ class ToolSeeder extends Seeder
                 'tool_name' => 'checkBonusVoucher',
                 'category' => 'bonus',
                 'display_name' => 'Check Bonus Voucher',
-                'description' => 'Memeriksa status klaim Bonus Voucher berdasarkan username. Menampilkan daftar voucher bonus terbaru beserta status dan keterangannya.',
+                'description' => 'Memeriksa status klaim Bonus Voucher berdasarkan username. Menampilkan daftar voucher bonus terbaru beserta status dan remark.',
                 'slug' => 'check-bonus-voucher',
                 'type' => 'get',
                 'is_enabled' => true,
@@ -1137,7 +1137,7 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['cek bonus voucher', 'check bonus voucher', 'status bonus voucher', 'voucher bonus saya', 'klaim bonus voucher'],
-                'tool_rules' => "- Periksa status klaim Bonus Voucher berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus Voucher terbaru milik pemain\n- Sertakan minimal data status, remark, dan keterangan\n- Urutkan dari klaim terbaru ke yang paling lama\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus Voucher untuk pemain tersebut",
+                'tool_rules' => "- Periksa status klaim Bonus Voucher berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus Voucher terbaru milik pemain\n- Sertakan minimal data status, remark\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus Voucher untuk pemain tersebut",
                 'information_text' => null,
                 'meta' => [
                     'query' => [
@@ -1154,7 +1154,7 @@ class ToolSeeder extends Seeder
                 'tool_name' => 'checkBonusFreespin',
                 'category' => 'bonus',
                 'display_name' => 'Check Bonus Freespin',
-                'description' => 'Memeriksa status klaim Bonus Freespin berdasarkan username. Menampilkan daftar klaim freespin terbaru beserta status dan keterangannya.',
+                'description' => 'Memeriksa status klaim Bonus Freespin berdasarkan username. Menampilkan daftar klaim freespin terbaru beserta status dan remark.',
                 'slug' => 'check-bonus-freespin',
                 'type' => 'get',
                 'is_enabled' => true,
@@ -1168,7 +1168,7 @@ class ToolSeeder extends Seeder
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['cek bonus freespin', 'check bonus freespin', 'status bonus freespin', 'freespin saya', 'klaim freespin'],
-                'tool_rules' => "- Periksa status klaim Bonus Freespin berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus Freespin terbaru milik pemain\n- Sertakan minimal data status, remark, dan keterangan\n- Urutkan dari klaim terbaru ke yang paling lama\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus Freespin untuk pemain tersebut",
+                'tool_rules' => "- Periksa status klaim Bonus Freespin berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Tampilkan daftar klaim Bonus Freespin terbaru milik pemain\n- Sertakan minimal data status, remark\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat klaim Bonus Freespin untuk pemain tersebut",
                 'information_text' => null,
                 'meta' => [
                     'query' => [

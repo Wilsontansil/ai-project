@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('knowledge_base', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('chat_agent_id')->constrained('chat_agents')->cascadeOnDelete();
+            $table->unsignedBigInteger('chat_agent_id')->nullable();
             $table->string('title');
             $table->longText('content')->nullable();
             $table->string('source')->default('manual'); // 'manual', 'file', 'datamodel', or 'website'
@@ -25,8 +25,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->unique(['chat_agent_id', 'title']);
-            $table->index(['chat_agent_id', 'is_active']);
+            $table->foreign('chat_agent_id')->references('id')->on('chat_agents')->nullOnDelete();
         });
     }
 

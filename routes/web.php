@@ -10,6 +10,7 @@ use App\Http\Controllers\Backoffice\LocaleController;
 use App\Http\Controllers\Backoffice\MetricsController;
 use App\Http\Controllers\Backoffice\SettingController;
 use App\Http\Controllers\Backoffice\TechnicalController;
+use App\Http\Controllers\Backoffice\KnowledgeBaseController;
 use App\Http\Controllers\Backoffice\ToolController;
 use App\Http\Controllers\Backoffice\RoleController;
 use App\Http\Controllers\Backoffice\UserController;
@@ -66,6 +67,16 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
         Route::delete('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}', [AgentRuleController::class, 'destroy'])->name('backoffice.agent-rules.destroy');
         Route::post('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}/attach', [ChatAgentController::class, 'attachRule'])->name('backoffice.chat-agents.rules.attach');
         Route::delete('/backoffice/chat-agents/{chatAgent}/rules/{agentRule}/detach', [ChatAgentController::class, 'detachRule'])->name('backoffice.chat-agents.rules.detach');
+    });
+
+    // Knowledge Base (standalone management)
+    Route::middleware('permission:manage agents')->group(function () {
+        Route::get('/backoffice/knowledge-base', [KnowledgeBaseController::class, 'index'])->name('backoffice.knowledge-base.index');
+        Route::get('/backoffice/knowledge-base/create', [KnowledgeBaseController::class, 'create'])->name('backoffice.knowledge-base.create');
+        Route::post('/backoffice/knowledge-base', [KnowledgeBaseController::class, 'store'])->name('backoffice.knowledge-base.store');
+        Route::get('/backoffice/knowledge-base/{knowledgeBase}/edit', [KnowledgeBaseController::class, 'edit'])->name('backoffice.knowledge-base.edit');
+        Route::put('/backoffice/knowledge-base/{knowledgeBase}', [KnowledgeBaseController::class, 'update'])->name('backoffice.knowledge-base.update');
+        Route::delete('/backoffice/knowledge-base/{knowledgeBase}', [KnowledgeBaseController::class, 'destroy'])->name('backoffice.knowledge-base.destroy');
     });
 
     // Tools (admin only)

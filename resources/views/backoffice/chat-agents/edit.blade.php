@@ -1028,15 +1028,6 @@
             @endif
         @endcan
 
-        {{-- Create new tool --}}
-        @can('manage tools')
-            <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-4"
-                style="display:flex;align-items:center;justify-content:space-between;gap:1rem">
-                <p class="text-xs text-slate-400">Buat tool baru dan langsung assign ke agent ini.</p>
-                <a href="{{ route('backoffice.tools.create', ['from_agent' => $agent->id]) }}" class="bo-btn-primary"
-                    style="font-size:0.75rem;padding:0.5rem 1rem;white-space:nowrap">+ New Tool</a>
-            </div>
-        @endcan
     @endif
 
     @if ($isSystemConfigTab)

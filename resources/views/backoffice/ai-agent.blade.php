@@ -13,7 +13,6 @@
             <p class="text-xs text-slate-400">Informasi dan konfigurasi AI agent.</p>
         </div>
     </div>
-
     {{-- AI Agent Info --}}
     <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-4 sm:p-5">
         <h2 class="mb-4 text-sm font-semibold">AI Agent Info</h2>

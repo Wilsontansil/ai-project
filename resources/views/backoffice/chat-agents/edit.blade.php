@@ -704,20 +704,24 @@
     @if ($isSystemConfigTab)
         @can('manage settings')
             <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 space-y-5">
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap">
                     <div>
                         <h2 class="text-sm font-semibold text-white">System Config</h2>
-                        <p class="text-xs text-slate-400">Global key / value configuration entries. Accessible via <code
-                                style="color:#22d3ee">SystemConfig::getValue('key')</code>.</p>
+                        <p class="text-xs text-slate-400">Global key / value config entries. Untuk edit konten, gunakan menu
+                            System Config di sidebar.</p>
                     </div>
-                    <form method="POST" action="{{ route('backoffice.system-config.sync-all') }}" style="flex-shrink:0">
-                        @csrf
-                        <input type="hidden" name="from_agent" value="{{ $agent->id }}">
-                        <button type="submit" class="bo-btn-sm"
-                            title="Re-resolve all DataModel lookup entries and store the snapshot value">
-                            ↻ Sync All
-                        </button>
-                    </form>
+                    <div style="display:flex;gap:0.5rem;flex-shrink:0">
+                        <form method="POST" action="{{ route('backoffice.system-config.sync-all') }}">
+                            @csrf
+                            <input type="hidden" name="from_agent" value="{{ $agent->id }}">
+                            <button type="submit" class="bo-btn-sm" title="Re-resolve all DataModel lookup entries">
+                                ↻ Sync All
+                            </button>
+                        </form>
+                        @can('manage settings')
+                            <a href="{{ route('backoffice.system-config.index') }}" class="bo-btn-sm">Manage System Config ↗</a>
+                        @endcan
+                    </div>
                 </div>
 
                 @if (session('success'))
@@ -782,24 +786,10 @@
                                         @endif
                                     </td>
                                     <td class="px-3 py-2 text-right">
-                                        <div style="display:inline-flex;align-items:center;gap:0.375rem">
-                                            <button type="button"
-                                                onclick="scOpenEdit({{ $sc->id }}, {{ json_encode($sc->key) }}, {{ json_encode($sc->value) }}, {{ json_encode($sc->description) }}, {{ json_encode($sc->source_type ?? 'manual') }}, {{ json_encode($sc->data_model_id) }}, {{ json_encode($sc->lookup_field) }}, {{ json_encode($sc->lookup_value) }}, {{ json_encode($sc->result_field) }})"
-                                                class="bo-btn-sm" style="white-space:nowrap">
-                                                Edit
-                                            </button>
-                                            <form method="POST"
-                                                action="{{ route('backoffice.system-config.destroy', $sc) }}"
-                                                onsubmit="return confirm('Delete config \'{{ addslashes($sc->key) }}\'?')"
-                                                style="margin:0">
-                                                @csrf
-                                                @method('DELETE')
-                                                <input type="hidden" name="from_agent" value="{{ $agent->id }}">
-                                                <button type="submit" class="bo-btn-danger" style="white-space:nowrap">
-                                                    Delete
-                                                </button>
-                                            </form>
-                                        </div>
+                                        @can('manage settings')
+                                            <a href="{{ route('backoffice.system-config.edit', $sc) }}" class="bo-btn-sm"
+                                                style="white-space:nowrap">Edit ↗</a>
+                                        @endcan
                                     </td>
                                 </tr>
                             @empty
@@ -817,248 +807,7 @@
                         {{ $systemConfigs->onEachSide(1)->links() }}
                     </div>
                 @endif
-
-                {{-- Edit inline form (hidden until Edit clicked) --}}
-                <div id="sc-edit-panel" style="display:none"
-                    class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-4 space-y-3">
-                    <h3 class="text-sm font-semibold text-white">Edit Entry</h3>
-                    <form id="sc-edit-form" method="POST" action="" class="space-y-3">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" name="from_agent" value="{{ $agent->id }}">
-                        <div>
-                            <label class="bo-label" for="sc-edit-source-type">Source Type</label>
-                            <select id="sc-edit-source-type" name="source_type" onchange="scSyncEditSourceType()">
-                                <option value="manual">Manual</option>
-                                <option value="datamodel_lookup">DataModel Lookup</option>
-                            </select>
-                        </div>
-                        <div style="display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;align-items:start">
-                            <div>
-                                <label class="bo-label" for="sc-edit-key">Key</label>
-                                <input type="text" name="key" id="sc-edit-key" required maxlength="191" />
-                            </div>
-                            <div id="sc-edit-manual-wrap">
-                                <label class="bo-label" for="sc-edit-value">Value</label>
-                                <textarea name="value" id="sc-edit-value" rows="3"></textarea>
-                            </div>
-                        </div>
-                        <div id="sc-edit-dm-wrap" class="rounded-lg border border-white/10 bg-slate-900/50 p-3"
-                            style="display:none">
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;align-items:start">
-                                <div>
-                                    <label class="bo-label" for="sc-edit-data-model-id">DataModel</label>
-                                    <select id="sc-edit-data-model-id" name="data_model_id"
-                                        onchange="scPopulateEditFields()">
-                                        <option value="">-- Select DataModel --</option>
-                                        @foreach ($systemConfigDataModels as $dm)
-                                            <option value="{{ $dm->id }}">{{ $dm->model_name }}
-                                                ({{ $dm->table_name }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="bo-label" for="sc-edit-lookup-value">Lookup Value</label>
-                                    <input id="sc-edit-lookup-value" type="text" name="lookup_value"
-                                        placeholder="e.g. mindeposit" />
-                                </div>
-                                <div>
-                                    <label class="bo-label" for="sc-edit-lookup-field">Lookup Field</label>
-                                    <select id="sc-edit-lookup-field" name="lookup_field">
-                                        <option value="">-- Select Field --</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="bo-label" for="sc-edit-result-field">Result Field</label>
-                                    <select id="sc-edit-result-field" name="result_field">
-                                        <option value="">-- Select Field --</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="bo-label" for="sc-edit-description">Description</label>
-                            <textarea name="description" id="sc-edit-description" rows="2" maxlength="1000"
-                                placeholder="Short explanation of what this key is used for..."></textarea>
-                        </div>
-                        <div style="display:flex;gap:0.5rem">
-                            <button type="submit" class="bo-btn-primary">Save</button>
-                            <button type="button" onclick="document.getElementById('sc-edit-panel').style.display='none'"
-                                class="bo-btn-secondary">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-
-                {{-- Add new --}}
-                <div class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-4 space-y-3">
-                    <h3 class="text-sm font-semibold text-white">Add New Entry</h3>
-                    <form method="POST" action="{{ route('backoffice.system-config.store') }}" class="space-y-3">
-                        @csrf
-                        <input type="hidden" name="from_agent" value="{{ $agent->id }}">
-                        <div>
-                            <label class="bo-label" for="sc-create-source-type">Source Type</label>
-                            <select id="sc-create-source-type" name="source_type" onchange="scSyncCreateSourceType()">
-                                <option value="manual" {{ old('source_type', 'manual') === 'manual' ? 'selected' : '' }}>
-                                    Manual</option>
-                                <option value="datamodel_lookup"
-                                    {{ old('source_type') === 'datamodel_lookup' ? 'selected' : '' }}>DataModel Lookup
-                                </option>
-                            </select>
-                        </div>
-                        <div style="display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;align-items:start">
-                            <div>
-                                <label class="bo-label" for="sc-create-key">Key</label>
-                                <input id="sc-create-key" type="text" name="key" required maxlength="191"
-                                    placeholder="e.g. welcome_message" />
-                                @error('key')
-                                    <p style="margin-top:0.25rem;font-size:0.7rem;color:#f87171">{{ $message }}</p>
-                                @enderror
-                            </div>
-                            <div id="sc-create-manual-wrap">
-                                <label class="bo-label" for="sc-create-value">Value</label>
-                                <textarea id="sc-create-value" name="value" rows="3" placeholder="Config value...">{{ old('value') }}</textarea>
-                            </div>
-                        </div>
-                        <div id="sc-create-dm-wrap" class="rounded-lg border border-white/10 bg-slate-900/50 p-3"
-                            style="display:none">
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;align-items:start">
-                                <div>
-                                    <label class="bo-label" for="sc-create-data-model-id">DataModel</label>
-                                    <select id="sc-create-data-model-id" name="data_model_id"
-                                        onchange="scPopulateCreateFields()">
-                                        <option value="">-- Select DataModel --</option>
-                                        @foreach ($systemConfigDataModels as $dm)
-                                            <option value="{{ $dm->id }}"
-                                                {{ (string) old('data_model_id') === (string) $dm->id ? 'selected' : '' }}>
-                                                {{ $dm->model_name }} ({{ $dm->table_name }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('data_model_id')
-                                        <p style="margin-top:0.25rem;font-size:0.7rem;color:#f87171">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                                <div>
-                                    <label class="bo-label" for="sc-create-lookup-value">Lookup Value</label>
-                                    <input id="sc-create-lookup-value" type="text" name="lookup_value"
-                                        value="{{ old('lookup_value') }}" placeholder="e.g. mindeposit" />
-                                    @error('lookup_value')
-                                        <p style="margin-top:0.25rem;font-size:0.7rem;color:#f87171">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                                <div>
-                                    <label class="bo-label" for="sc-create-lookup-field">Lookup Field</label>
-                                    <select id="sc-create-lookup-field" name="lookup_field">
-                                        <option value="">-- Select Field --</option>
-                                    </select>
-                                    @error('lookup_field')
-                                        <p style="margin-top:0.25rem;font-size:0.7rem;color:#f87171">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                                <div>
-                                    <label class="bo-label" for="sc-create-result-field">Result Field</label>
-                                    <select id="sc-create-result-field" name="result_field">
-                                        <option value="">-- Select Field --</option>
-                                    </select>
-                                    @error('result_field')
-                                        <p style="margin-top:0.25rem;font-size:0.7rem;color:#f87171">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="bo-label" for="sc-create-description">Description</label>
-                            <textarea id="sc-create-description" name="description" rows="2" maxlength="1000"
-                                placeholder="Short explanation of what this key is used for...">{{ old('description') }}</textarea>
-                            @error('description')
-                                <p style="margin-top:0.25rem;font-size:0.7rem;color:#f87171">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <button type="submit" class="bo-btn-primary">+ Add</button>
-                    </form>
-                </div>
             </div>
         @endcan
     @endif
 @endsection
-
-@if ($isSystemConfigTab)
-    <script>
-        const scDataModels = @json(
-            $systemConfigDataModels->mapWithKeys(function ($dm) {
-                return [
-                    (string) $dm->id => [
-                        'fields' => array_keys((array) ($dm->fields ?? [])),
-                    ],
-                ];
-            }));
-
-        function scSetFieldOptions(selectEl, fields, selectedValue = '') {
-            if (!selectEl) return;
-            const opts = ['<option value="">-- Select Field --</option>'];
-            fields.forEach((f) => {
-                const sel = String(f) === String(selectedValue) ? ' selected' : '';
-                opts.push(`<option value="${f}"${sel}>${f}</option>`);
-            });
-            selectEl.innerHTML = opts.join('');
-        }
-
-        function scPopulateCreateFields() {
-            const dmId = document.getElementById('sc-create-data-model-id')?.value ?? '';
-            const fields = scDataModels[String(dmId)]?.fields ?? [];
-            scSetFieldOptions(document.getElementById('sc-create-lookup-field'), fields,
-                @json(old('lookup_field')));
-            scSetFieldOptions(document.getElementById('sc-create-result-field'), fields,
-                @json(old('result_field')));
-        }
-
-        function scPopulateEditFields(selectedLookup = '', selectedResult = '') {
-            const dmId = document.getElementById('sc-edit-data-model-id')?.value ?? '';
-            const fields = scDataModels[String(dmId)]?.fields ?? [];
-            scSetFieldOptions(document.getElementById('sc-edit-lookup-field'), fields, selectedLookup);
-            scSetFieldOptions(document.getElementById('sc-edit-result-field'), fields, selectedResult);
-        }
-
-        function scSyncCreateSourceType() {
-            const sourceType = document.getElementById('sc-create-source-type')?.value ?? 'manual';
-            document.getElementById('sc-create-manual-wrap').style.display = sourceType === 'manual' ? '' : 'none';
-            document.getElementById('sc-create-dm-wrap').style.display = sourceType === 'datamodel_lookup' ? '' : 'none';
-            if (sourceType === 'datamodel_lookup') scPopulateCreateFields();
-        }
-
-        function scSyncEditSourceType() {
-            const sourceType = document.getElementById('sc-edit-source-type')?.value ?? 'manual';
-            document.getElementById('sc-edit-manual-wrap').style.display = sourceType === 'manual' ? '' : 'none';
-            document.getElementById('sc-edit-dm-wrap').style.display = sourceType === 'datamodel_lookup' ? '' : 'none';
-            if (sourceType === 'datamodel_lookup') scPopulateEditFields(
-                document.getElementById('sc-edit-lookup-field')?.value ?? '',
-                document.getElementById('sc-edit-result-field')?.value ?? ''
-            );
-        }
-
-        function scOpenEdit(id, key, value, description, sourceType, dataModelId, lookupField, lookupValue, resultField) {
-            const panel = document.getElementById('sc-edit-panel');
-            const form = document.getElementById('sc-edit-form');
-            const actionTemplate = @json(route('backoffice.system-config.update', ['systemConfig' => '__ID__']));
-            form.action = actionTemplate.replace('__ID__', String(id));
-            document.getElementById('sc-edit-key').value = key;
-            document.getElementById('sc-edit-value').value = value ?? '';
-            document.getElementById('sc-edit-description').value = description ?? '';
-            document.getElementById('sc-edit-source-type').value = sourceType ?? 'manual';
-            document.getElementById('sc-edit-data-model-id').value = dataModelId ?? '';
-            document.getElementById('sc-edit-lookup-value').value = lookupValue ?? '';
-            scPopulateEditFields(lookupField ?? '', resultField ?? '');
-            scSyncEditSourceType();
-            panel.style.display = '';
-            panel.scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest'
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            scSyncCreateSourceType();
-        });
-    </script>
-@endif

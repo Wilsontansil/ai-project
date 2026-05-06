@@ -108,6 +108,9 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
         Route::post('/backoffice/settings', [SettingController::class, 'update'])->name('backoffice.settings.update');
 
         // System Config
+        Route::get('/backoffice/system-config', [SystemConfigController::class, 'index'])->name('backoffice.system-config.index');
+        Route::get('/backoffice/system-config/create', [SystemConfigController::class, 'create'])->name('backoffice.system-config.create');
+        Route::get('/backoffice/system-config/{systemConfig}/edit', [SystemConfigController::class, 'edit'])->name('backoffice.system-config.edit');
         Route::post('/backoffice/system-config/sync-all', [SystemConfigController::class, 'syncAll'])->name('backoffice.system-config.sync-all');
         Route::post('/backoffice/system-config', [SystemConfigController::class, 'store'])->name('backoffice.system-config.store');
         Route::put('/backoffice/system-config/{systemConfig}', [SystemConfigController::class, 'update'])->name('backoffice.system-config.update');

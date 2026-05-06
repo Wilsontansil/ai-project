@@ -9,9 +9,50 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 
 class SystemConfigController extends Controller
 {
+    public function index(Request $request): View
+    {
+        $search = (string) $request->query('search', '');
+
+        $query = SystemConfig::query();
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('key', 'like', '%' . $search . '%')
+                  ->orWhere('value', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+
+        $configs = $query->orderBy('key')->paginate(25)->withQueryString();
+
+        return view('backoffice.system-config.index', [
+            'configs'  => $configs,
+            'search'   => $search,
+            'boActive' => 'system-config',
+        ]);
+    }
+
+    public function create(): View
+    {
+        return view('backoffice.system-config.create', [
+            'dataModels' => DataModel::query()->orderBy('model_name')->get(['id', 'model_name', 'table_name', 'fields']),
+            'boActive'   => 'system-config',
+        ]);
+    }
+
+    public function edit(SystemConfig $systemConfig): View
+    {
+        return view('backoffice.system-config.edit', [
+            'config'     => $systemConfig,
+            'dataModels' => DataModel::query()->orderBy('model_name')->get(['id', 'model_name', 'table_name', 'fields']),
+            'boActive'   => 'system-config',
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
@@ -118,7 +159,7 @@ class SystemConfigController extends Controller
             ])->with('success', 'System config saved.');
         }
 
-        return redirect()->back()->with('success', 'System config saved.');
+        return redirect()->route('backoffice.system-config.index')->with('success', 'System config saved.');
     }
 
     /**

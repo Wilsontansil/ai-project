@@ -358,6 +358,22 @@
                     </a>
                 @endcan
 
+                {{-- System Config --}}
+                @can('manage settings')
+                    <a href="{{ route('backoffice.system-config.index') }}" class="bo-nav-item group"
+                        style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'system-config' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
+                        onmouseout="this.style.background='{{ ($boActive ?? ($active ?? '')) === 'system-config' ? 'rgba(255,255,255,0.12)' : 'transparent' }}';this.style.color='{{ ($boActive ?? ($active ?? '')) === 'system-config' ? '#fff' : 'rgba(255,255,255,0.7)' }}'">
+                        <svg style="width:18px;height:18px;flex-shrink:0;{{ ($boActive ?? ($active ?? '')) === 'system-config' ? 'color:#fff;' : 'color:rgba(255,255,255,0.45);' }}"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 1115 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077l1.41-.513m14.095-5.13l1.41-.513M5.106 17.785l1.15-.964m11.49-9.642l1.149-.964M7.501 19.795l.75-1.3m7.5-12.99l.75-1.3m-6.063 16.658l.26-1.477m2.605-14.772l.26-1.477m0 17.726l-.26-1.477M10.698 4.614l-.26-1.477M16.5 19.794l-.75-1.299m-7.5-12.99l-.75-1.3m6.063 16.658l-.26-1.477M7.702 4.614l.26-1.477" />
+                        </svg>
+                        <span class="bo-label">System Config</span>
+                        <span class="bo-tooltip">System Config</span>
+                    </a>
+                @endcan
+
                 {{-- DB Connections --}}
                 @can('manage database-connections')
                     <a href="{{ route('backoffice.database-connections.index') }}" class="bo-nav-item group"

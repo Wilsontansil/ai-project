@@ -12,7 +12,6 @@
     <?php $isKnowledgeTab = ($activeTab ?? 'general') === 'knowledge-base'; ?>
     <?php $isRulesTab = ($activeTab ?? 'general') === 'rules'; ?>
     <?php $isToolsTab = ($activeTab ?? 'general') === 'tools'; ?>
-    <?php $isSystemConfigTab = ($activeTab ?? 'general') === 'system-config'; ?>
 
     {{-- Header --}}
     <div style="display:flex;align-items:center;justify-content:space-between"
@@ -45,12 +44,6 @@
                 class="rounded-lg px-4 py-2 text-xs font-semibold transition {{ $isToolsTab ? 'bg-cyan-400 text-slate-950' : 'bg-white/5 text-slate-200 hover:bg-white/10' }}">
                 Tools
             </a>
-            @can('manage settings')
-                <a href="{{ route('backoffice.chat-agents.edit', ['chatAgent' => $agent, 'tab' => 'system-config']) }}"
-                    class="rounded-lg px-4 py-2 text-xs font-semibold transition {{ $isSystemConfigTab ? 'bg-cyan-400 text-slate-950' : 'bg-white/5 text-slate-200 hover:bg-white/10' }}">
-                    System Config
-                </a>
-            @endcan
         </div>
     </div>
 
@@ -701,113 +694,4 @@
 
     @endif
 
-    @if ($isSystemConfigTab)
-        @can('manage settings')
-            <div class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-5 space-y-5">
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap">
-                    <div>
-                        <h2 class="text-sm font-semibold text-white">System Config</h2>
-                        <p class="text-xs text-slate-400">Global key / value config entries. Untuk edit konten, gunakan menu
-                            System Config di sidebar.</p>
-                    </div>
-                    <div style="display:flex;gap:0.5rem;flex-shrink:0">
-                        <form method="POST" action="{{ route('backoffice.system-config.sync-all') }}">
-                            @csrf
-                            <input type="hidden" name="from_agent" value="{{ $agent->id }}">
-                            <button type="submit" class="bo-btn-sm" title="Re-resolve all DataModel lookup entries">
-                                ↻ Sync All
-                            </button>
-                        </form>
-                        @can('manage settings')
-                            <a href="{{ route('backoffice.system-config.index') }}" class="bo-btn-sm">Manage System Config ↗</a>
-                        @endcan
-                    </div>
-                </div>
-
-                @if (session('success'))
-                    <div
-                        style="background:rgba(16,185,129,0.15);border:1px solid rgba(52,211,153,0.3);border-radius:0.75rem;padding:0.75rem 1rem;font-size:0.75rem;color:#6ee7b7">
-                        {{ session('success') }}
-                    </div>
-                @endif
-
-                <form method="GET" action="{{ route('backoffice.chat-agents.edit', $agent) }}"
-                    class="rounded-xl border border-slate-700/50 bg-slate-950/40 p-3"
-                    style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
-                    <input type="hidden" name="tab" value="system-config">
-                    <label for="sc_search" class="bo-label" style="margin:0;min-width:92px">Search</label>
-                    <input id="sc_search" type="text" name="sc_search" value="{{ $systemConfigSearch ?? '' }}"
-                        placeholder="Search key, value, description, or lookup fields..." style="flex:1;min-width:220px" />
-                    <button type="submit" class="bo-btn-sm">Filter</button>
-                    @if (!empty($systemConfigSearch))
-                        <a class="bo-btn-secondary"
-                            href="{{ route('backoffice.chat-agents.edit', ['chatAgent' => $agent, 'tab' => 'system-config']) }}"
-                            style="font-size:0.75rem;padding:0.45rem 0.75rem">Reset</a>
-                    @endif
-                </form>
-
-                {{-- Existing rows --}}
-                <div class="overflow-hidden rounded-xl border border-white/10">
-                    <table class="min-w-full text-xs" style="width:100%">
-                        <thead class="bg-white/5 text-left text-[11px] uppercase tracking-wider text-slate-400">
-                            <tr>
-                                <th class="px-3 py-2 font-medium" style="width:22%">Key</th>
-                                <th class="px-3 py-2 font-medium">Value</th>
-                                <th class="px-3 py-2 font-medium">Description</th>
-                                <th class="px-3 py-2 font-medium">Source</th>
-                                <th class="px-3 py-2 font-medium text-right" style="width:120px">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-white/5" id="sc-table-body">
-                            @forelse ($systemConfigs as $sc)
-                                <tr class="transition hover:bg-white/5" id="sc-row-{{ $sc->id }}">
-                                    <td class="px-3 py-2 font-mono text-slate-200">{{ $sc->key }}</td>
-                                    <td class="px-3 py-2 text-slate-300" style="word-break:break-all">
-                                        @if (($sc->source_type ?? 'manual') === 'datamodel_lookup')
-                                            @if ($sc->value !== null && $sc->value !== '')
-                                                <span class="text-emerald-300">{{ $sc->value }}</span>
-                                                <br>
-                                            @endif
-                                            <span class="text-slate-500"
-                                                style="font-size:10px">{{ $sc->lookup_field }}={{ $sc->lookup_value }} →
-                                                {{ $sc->result_field }}</span>
-                                        @else
-                                            {{ $sc->value }}
-                                        @endif
-                                    </td>
-                                    <td class="px-3 py-2 text-slate-400" style="word-break:break-word">
-                                        {{ $sc->description ?: '-' }}
-                                    </td>
-                                    <td class="px-3 py-2 text-slate-400">
-                                        @if (($sc->source_type ?? 'manual') === 'datamodel_lookup')
-                                            DM #{{ $sc->data_model_id }}
-                                        @else
-                                            Manual
-                                        @endif
-                                    </td>
-                                    <td class="px-3 py-2 text-right">
-                                        @can('manage settings')
-                                            <a href="{{ route('backoffice.system-config.edit', $sc) }}" class="bo-btn-sm"
-                                                style="white-space:nowrap">Edit ↗</a>
-                                        @endcan
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="px-4 py-6 text-center text-slate-400">No system config entries
-                                        yet.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                @if (method_exists($systemConfigs, 'links'))
-                    <div class="pt-1">
-                        {{ $systemConfigs->onEachSide(1)->links() }}
-                    </div>
-                @endif
-            </div>
-        @endcan
-    @endif
 @endsection

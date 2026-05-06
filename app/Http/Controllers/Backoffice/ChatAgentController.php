@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\ChatAgent;
 use App\Models\DataModel;
 use App\Models\KnowledgeBase;
-use App\Models\SystemConfig;
 use App\Models\Tool;
 use App\Services\AI\KnowledgeBaseQueryGuard;
 use App\Services\KnowledgeBaseWebsiteScraper;
@@ -70,11 +69,9 @@ class ChatAgentController extends Controller
     public function edit(Request $request, ChatAgent $chatAgent): View
     {
         $activeTab = $request->query('tab');
-        if (!in_array($activeTab, ['general', 'knowledge-base', 'rules', 'tools', 'system-config'], true)) {
+        if (!in_array($activeTab, ['general', 'knowledge-base', 'rules', 'tools'], true)) {
             $activeTab = 'general';
         }
-
-        $systemConfigSearch = trim((string) $request->query('sc_search', ''));
 
         $knowledgeMode = $request->query('mode');
         if (!in_array($knowledgeMode, ['view', 'edit'], true)) {
@@ -110,26 +107,6 @@ class ChatAgentController extends Controller
             $selectedKnowledge = $knowledgeEntries->firstWhere('id', $selectedKnowledgeId);
         }
 
-        $systemConfigs = SystemConfig::query()
-            ->when($systemConfigSearch !== '', function ($query) use ($systemConfigSearch) {
-                $query->where(function ($inner) use ($systemConfigSearch) {
-                    $inner->where('key', 'like', '%' . $systemConfigSearch . '%')
-                        ->orWhere('value', 'like', '%' . $systemConfigSearch . '%')
-                        ->orWhere('description', 'like', '%' . $systemConfigSearch . '%')
-                        ->orWhere('lookup_field', 'like', '%' . $systemConfigSearch . '%')
-                        ->orWhere('lookup_value', 'like', '%' . $systemConfigSearch . '%')
-                        ->orWhere('result_field', 'like', '%' . $systemConfigSearch . '%');
-                });
-            })
-            ->orderBy('key')
-            ->paginate(15)
-            ->appends([
-                'tab' => $activeTab,
-                'mode' => $knowledgeMode,
-                'kb' => $selectedKnowledgeId > 0 ? $selectedKnowledgeId : null,
-                'sc_search' => $systemConfigSearch !== '' ? $systemConfigSearch : null,
-            ]);
-
         return view('backoffice.chat-agents.edit', [
             'agent' => $chatAgent,
             'agentRules' => $agentRules,
@@ -151,11 +128,6 @@ class ChatAgentController extends Controller
                 ->orderBy('category')
                 ->orderBy('display_name')
                 ->get(),
-            'systemConfigs' => $systemConfigs,
-            'systemConfigSearch' => $systemConfigSearch,
-            'systemConfigDataModels' => DataModel::query()
-                ->orderBy('model_name')
-                ->get(['id', 'model_name', 'table_name', 'connection_name', 'fields']),
         ]);
     }
 

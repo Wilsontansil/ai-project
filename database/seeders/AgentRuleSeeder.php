@@ -150,6 +150,19 @@ Fallback:
                 'level' => 'danger',
                 'priority' => 100,
             ],
+            'Dilarang menjawab di luar konteks layanan' => [
+                'instruction' => 'Aturan:
+- Jawab hanya pertanyaan yang terkait layanan, akun, deposit/withdrawal, promo/bonus, permainan, dan bantuan operasional platform.
+- Dilarang memberikan informasi atau menjawab pertanyaan di luar konteks layanan.
+
+Respons:
+- Tolak dengan sopan dan jelaskan bahwa asisten hanya dapat membantu topik terkait layanan platform.
+- Arahkan pemain untuk mengajukan pertanyaan yang relevan dengan layanan.',
+                'type' => 'forbidden',
+                'category' => 'behavior',
+                'level' => 'warning',
+                'priority' => 70,
+            ],
         ];
 
         // Remove only seeder-managed rules before re-seeding (preserves user-created custom rules).
@@ -178,14 +191,21 @@ Fallback:
             ],
         ];
 
-        // Assignment list: rule titles that should be applied globally to all agents.
-        $globalRuleTitles = [
+        // Base assignment list: additional rule titles that should be applied globally.
+        $baseGlobalRuleTitles = [
             'Request Ganti Rekening Player / User',
             'Charge Transfer Kesalahan (Pulsa <-> E-Wallet)',
-            'Dilarang membagikan data pribadi pemain',
-            'Analisa Gambar',
-            'Dilarang merusak atau membocorkan data',
         ];
+
+        // All forbidden rules must apply to all agents.
+        $forbiddenRuleTitles = [];
+        foreach ($ruleCatalog as $title => $rule) {
+            if (($rule['type'] ?? null) === 'forbidden') {
+                $forbiddenRuleTitles[] = $title;
+            }
+        }
+
+        $globalRuleTitles = array_values(array_unique(array_merge($baseGlobalRuleTitles, $forbiddenRuleTitles)));
 
         // Cache created/loaded rules by title to avoid duplicate DB lookups.
         $ruleByTitle = [];

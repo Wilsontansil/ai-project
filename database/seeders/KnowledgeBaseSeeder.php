@@ -166,7 +166,7 @@ TONE:
 - Multiplier Deposit Non Bank = {dep_mul_nonbank}
 
 [BANK]
-Biaya yang dikenakan Platform untuk deposit bank adalah (100-{dep_rate_nonbank}%) x nominal deposit.
+Biaya yang dikenakan Platform untuk deposit bank adalah (100-{dep_rate_bank}%) x nominal deposit.
 BCA, BII/Maybank, BNI, BRI, BSI, BTN, CIMB Niaga, Niaga Syariah, Dana, Danamon, Mandiri, OCBC NISP, Bank Neo, Sea Bank, Jago, Permata, BTPN/Jenius, Bank MAS, Mandiri Syariah, BCA Syariah, QRIS
 (E-Wallet) = Ovo, Shopee, Gopay, LINK AJA, Dana
 

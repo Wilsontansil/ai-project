@@ -1312,8 +1312,8 @@ class ToolSeeder extends Seeder
                     'requires_image'    => true,
                     'expected_document' => 'Foto KTP asli yang jelas',
                     'validity_hints'    => 'KTP harus terlihat jelas dan memuat label NIK, Nama, Agama, dan Berlaku Hingga',
-                    'rejection_message' => 'Maaf, foto KTP belum valid. Pastikan terlihat jelas bagian NIK, Nama, Agama, dan Berlaku Hingga, lalu kirim ulang foto KTP.',
-                    'reprompt_message'  => 'Untuk verifikasi ganti rekening, silakan kirim foto KTP yang jelas (terlihat NIK, Nama, Agama, dan Berlaku Hingga).',
+                    'rejection_message' => 'Maaf, foto KTP belum valid. Pastikan terlihat jelas lalu kirim ulang foto KTP.',
+                    'reprompt_message'  => 'Untuk verifikasi ganti rekening, silakan kirim foto KTP yang jelas.',
                     'visual_fields' => [
                         ['field' => 'nama_ktp', 'label' => 'Nama pada KTP', 'hint' => 'Ambil persis nilai pada label Nama di KTP. Jangan gunakan data dari chat atau field lain.'],
                     ],

@@ -367,7 +367,25 @@ CATATAN PENTING:
         ]);
 
         $this->seed($gameId, [
-            ['title' => 'Pools', 'source' => 'manual', 'content' => '1 - HKP - Hongkong Lotto: Close 22:30 | Result 23:00 | Open 23:05 (Sun-Sat)
+            ['title' => 'Pools', 'source' => 'manual', 'content' => '=== JADWAL POOLS / PASAR TOGEL ===
+
+INSTRUKSI AI:
+- Fokus jawaban untuk jadwal: jam close, jam result, jam open, dan hari operasional.
+- Jangan memberi prediksi angka, angka jitu, atau saran taruhan.
+- Jangan menjanjikan kemenangan.
+- Jika user meminta prediksi, jawab sopan: "Saya hanya bisa bantu info jadwal dan result, bukan prediksi angka."
+
+TIMEZONE:
+- Semua jam pada daftar ini mengikuti WIB (UTC+7).
+- Jika user berada di luar WIB, sarankan konversi ke zona waktu lokal user sebelum memasang taruhan.
+
+FORMAT JAWABAN:
+- Jika user tanya 1 pool, tampilkan hanya pool tersebut.
+- Jika user tanya umum, tampilkan ringkas 3-5 pool populer lalu tawarkan detail pool lain.
+- Jika user tanya jam result terbaru, berikan jam result sesuai pool yang disebut.
+
+DAFTAR POOLS:
+1 - HKP - Hongkong Lotto: Close 22:30 | Result 23:00 | Open 23:05 (Sun-Sat)
 2 - SGP - Singapore Pools: Close 17:15 | Result 17:45 | Open 17:50 (Sun,Mon,Wed,Thu,Sat)
 3 - SDY - Sydney Lotto: Close 13:25 | Result 13:55 | Open 14:00 (Sun-Sat)
 4 - SMR - Samosir Pools: Close 19:30 | Result 20:00 | Open 20:05 (Sun-Sat)
@@ -388,23 +406,64 @@ CATATAN PENTING:
 16 - CAI - Cairo: Close 12:00 | Result 12:30 | Open 12:35 (Sun-Sat)
 17 - TW - Taiwan: Close 23:20 | Result 23:50 | Open 23:55 (Sun-Sat)
 18 - QTR - Qatar: Close 20:30 | Result 21:00 | Open 21:05 (Sun-Sat)
-19 - MLY - Malaysia: Close 18:30 | Result 19:00 | Open 19:05 (Sun-Sat)'],
-            ['title' => 'Sports', 'source' => 'manual', 'content' => 'Mix Parlay: menggabungkan beberapa pertandingan, semua tebakan harus benar.
+19 - MLY - Malaysia: Close 18:30 | Result 19:00 | Open 19:05 (Sun-Sat)
 
-HASIL DALAM TIKET PARLAY:
-- Kalah (Lose): 1 pertandingan kalah = seluruh tiket gugur.
-- Seri (Draw): Odds diubah ke 1, tiket tetap berjalan.
-- Void/Ditunda (>24 jam): Odds menjadi 1, tiket tetap berjalan.
-- Menang Setengah: odds = (Odds awal - 1) / 2 + 1.
+CATATAN:
+- Jika jadwal terasa berbeda di situs saat ini, arahkan user untuk cek menu result/pools terbaru atau hubungi Human Support.
+- Untuk cek angka result terbaru, arahkan ke tool hasil togel (jika tersedia).'],
+            ['title' => 'Sports', 'source' => 'manual', 'content' => '=== PANDUAN SPORTS BETTING ===
 
-HITUNG TOTAL ODDS: Kalikan semua odds. Contoh: 1.80 x 2.00 x 1.50 = 5.40
-PAYOUT: Total Odds x Modal. Contoh: 5.40 x Rp100.000 = Rp540.000
+INSTRUKSI AI:
+- Fokus menjelaskan aturan taruhan sports secara edukatif.
+- Jangan memberi prediksi skor, tips kemenangan, atau jaminan menang.
+- Jika user meminta prediksi, jawab sopan: "Saya bisa bantu jelaskan aturan taruhan, bukan prediksi hasil pertandingan."
 
-JENIS TARUHAN:
-1. HANDICAP (HDP): Tim kuat beri voor ke tim lemah.
-2. OVER/UNDER (O/U): Total gol di atas/bawah angka tertentu.
-3. 1X2: 1=Home menang, X=Draw, 2=Away menang.
-4. ODD/EVEN (O/E): Total gol akhir ganjil atau genap.'],
+═══════════════════════════════════════════════════
+
+USER INTENTS & RESPONSES:
+
+1. [INTENT: Tanya Single Bet vs Mix Parlay]
+   User: "Single sama parlay beda apa?", "Bagusan mana single atau parlay?"
+   → Jawab:
+   - Single Bet: 1 pertandingan dalam 1 tiket.
+   - Mix Parlay: gabungan beberapa pertandingan dalam 1 tiket.
+   - Di Mix Parlay, semua pilihan harus tepat agar tiket menang penuh.
+
+2. [INTENT: Tanya Hasil Tiket Parlay]
+   User: "Kalau 1 match kalah gimana?", "Kalau draw di parlay gimana?"
+   → Gunakan aturan berikut:
+   - Kalah (Lose): 1 pertandingan kalah = seluruh tiket gugur.
+   - Seri (Draw): odds pertandingan tersebut jadi 1, tiket tetap berjalan.
+   - Void/Ditunda (>24 jam): odds jadi 1, tiket tetap berjalan.
+   - Menang Setengah (Won Half): odds dihitung ulang dengan rumus khusus.
+
+3. [INTENT: Tanya Cara Hitung Odds/Payout]
+   User: "Cara hitung parlay gimana?", "Payout saya berapa?"
+   → Jawab:
+   - Total Odds = perkalian semua odds.
+   - Payout = Total Odds x Modal.
+   - Contoh: 1.80 x 2.00 x 1.50 = 5.40 → payout untuk modal Rp100.000 adalah Rp540.000.
+
+4. [INTENT: Tanya Menang Setengah]
+   User: "Won half itu apa?"
+   → Jawab:
+   - Menang Setengah terjadi sesuai aturan handicap.
+   - Rumus odds menang setengah: (Odds awal - 1) / 2 + 1.
+
+═══════════════════════════════════════════════════
+
+JENIS TARUHAN UTAMA:
+1. HANDICAP (HDP): Tim kuat memberi voor ke tim lawan.
+2. OVER/UNDER (O/U): Prediksi total gol di atas atau di bawah angka tertentu.
+3. 1X2: 1 = Home menang, X = Draw, 2 = Away menang.
+4. ODD/EVEN (O/E): Prediksi total gol akhir ganjil atau genap.
+
+═══════════════════════════════════════════════════
+
+BATASAN:
+- Jangan memberikan rekomendasi taruhan personal.
+- Jangan membuat ranking pertandingan paling aman.
+- Jika user meminta analisa di luar aturan dasar, arahkan ke Human Support.'],
             ['title' => 'Togel Info', 'source' => 'manual', 'content' => 'DAFTAR ISTILAH DAN PARAMETER TOGEL
 
 4D: Win 3000x | Kei 0% | Min 500 | Discount 66%

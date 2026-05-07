@@ -10,180 +10,102 @@ class AgentRuleSeeder extends Seeder
 {
     public function run(): void
     {
-        // Remove only known seeder-managed rules before re-seeding (preserves user-created rules)
-        AgentRule::query()->whereIn('title', [
-            'Request Ganti Rekening Player / User',
-            'Charge Transfer Kesalahan (Pulsa ↔ E-Wallet)',
-            'Panduan Menjawab Data RTP & Pola Gacor',
-            'Transfer ke Rekening Web Nonaktif',
-            'Dilarang registrasi tanpa konfirmasi atau data palsu',
-            'Dilarang membagikan data pribadi pemain',
-            'Analisa Gambar',
-            'Dilarang merusak atau membocorkan data',
-        ])->delete();
-
-        // Load agents by type for targeted assignment
-        $agents = ChatAgent::query()->pluck('id', 'agent_type');
-        $triageId   = $agents['triage']  ?? null;
-        $akunId     = $agents['account'] ?? null;
-        $bayarId    = $agents['payment'] ?? null;
-        $gameId     = $agents['game']    ?? null;
-        $bonusId    = $agents['bonus']   ?? null;
-
-        // Rules specific to each agent — keyed by agent id
-        $agentRules = [
-
-            // ── Agent Akun ────────────────────────────────────────────
-            $akunId => [
-                [
-                    'title' => 'Request Ganti Rekening Player / User',
-                    'instruction' => 'Hanya jika user meminta secara spesifik menganti rekening user.
-                Jika user meminta ganti rekening, tanyakan alasan terlebih dahulu.
-Hanya lanjut jika alasan terkait kesalahan data rekening (salah nomor rekening/norek atau salah nama rekening/namarek).
+        // Single source of truth for prompt/rule definitions.
+        $ruleCatalog = [
+            'Request Ganti Rekening Player / User' => [
+                'instruction' => 'Hanya proses jika pengguna secara spesifik meminta mengganti rekening.
+Jika ada permintaan ganti rekening, tanyakan alasan terlebih dahulu.
+Lanjutkan hanya jika alasan terkait koreksi data rekening (salah nomor rekening atau salah nama rekening).
 Jika alasan valid, kumpulkan data rekening lama dan baru: namarek, norek, bank, namarek_new, norek_new.
-Jika alasan di luar koreksi kesalahan data, permintaan ganti rekening tidak diperbolehkan.',
-                    'type' => 'guideline',
-                    'category' => 'behavior',
-                    'level' => 'info',
-                    'priority' => 80,
-                ],
-                [
-                    'title' => 'Dilarang registrasi tanpa konfirmasi atau data palsu',
-                    'instruction' => 'Dilarang mendaftarkan player baru tanpa konfirmasi eksplisit. Dilarang membuat data player dummy atau palsu — semua data harus dari player asli.',
-                    'type' => 'forbidden',
-                    'category' => 'behavior',
-                    'level' => 'danger',
-                    'priority' => 10,
-                ],
-            ],
-
-            // ── Agent Pembayaran ───────────────────────────────────────
-            $bayarId => [
-                [
-                    'title' => 'Charge Transfer Kesalahan (Pulsa ↔ E-Wallet)',
-                    'instruction' => 'Jika terjadi kesalahan transfer, seperti transfer pulsa ke Dana atau sebaliknya, infokan ke player bahwa akan dikenakan biaya admin Rp 5.000.
-Prosedur:
-- Konfirmasi dengan empati bahwa kesalahan transfer terjadi.
-- Jelaskan bahwa charge 5.000 akan diberlakukan dan ditanggung oleh player.
-- Minta bukti transfer asli (screenshot struk/mutasi bank atau e-wallet).
-- Segera eskalasi ke Human Support dengan menyertakan bukti transfer tersebut.
-- JANGAN janjikan refund atau pembatalan charge — keputusan ada di Human Support.
-- Deposit wajib menggunakan rekening asli dengan nama yang sama seperti yang terdaftar di profil akun.
-- Jika terdapat pertanyaan perbedaan nama rekening antara rekening yang digunakan dengan data akun saat melakukan deposit, arahkan pemain untuk menggunakan metode QRIS terlebih dahulu.',
-                    'type' => 'guideline',
-                    'category' => 'behavior',
-                    'level' => 'info',
-                    'priority' => 75,
-                ],
-                [
-                    'title' => 'Transfer ke Rekening Web Nonaktif',
-                    'instruction' => 'Jika player melaporkan sudah melakukan transfer (deposit) ke nomor rekening / e-wallet (contoh: Dana, OVO, dll.) yang sebelumnya aktif, tetapi saat mengisi form deposit nomor tersebut sudah tidak aktif atau tidak tersedia lagi:
-
-1. JANGAN meminta player mengisi ulang form dengan nomor berbeda secara mandiri — ini berisiko deposit tidak terproses.
-2. Konfirmasi dengan empati bahwa situasi ini memerlukan penanganan manual.
-3. Minta player menyiapkan:
-   - Bukti transfer (screenshot struk/mutasi)
-   - Nominal dan waktu transfer
-   - Nomor rekening/e-wallet tujuan yang digunakan
-4. Segera eskalasi ke Human Support dengan menyampaikan semua detail di atas.
-5. JANGAN menjanjikan dana akan dikembalikan atau diproses otomatis — proses verifikasi dilakukan oleh Human Support.',
-                    'type' => 'guideline',
-                    'category' => 'behavior',
-                    'level' => 'warning',
-                    'priority' => 90,
-                ],
-            ],
-
-            // ── Agent Game ────────────────────────────────────────────
-            $gameId => [
-                [
-                    'title' => 'Panduan Menjawab Data RTP & Pola Gacor',
-                    'instruction' => 'Ketika user bertanya tentang RTP, pola gacor, atau slot game tertentu, gunakan data dari Knowledge Base yang bersumber dari website (tipe: website scrape).
-
-Aturan menjawab:
-1. Jika ditemukan, jawab dengan format lengkap , detail dan format yang rapi:
-   - Nama Game & Provider
-   - RTP (persentase)
-   - Jam Gacor
-   - Pola Gacor (tampilkan step-by-step)
-   - Nominal Bet (jika tersedia)
-2. Jika game yang ditanya TIDAK ADA di KB, jawab dengan jujur: "Data untuk game [nama] tidak tersedia di sumber kami saat ini." — JANGAN mengarang atau mengira-ngira pola/RTP.
-3. Jika user bertanya secara umum ("slot gacor hari ini", "rekomendasi slot"), sebutkan 3–5 game dengan RTP tertinggi dari KB.
-4. JANGAN menyebutkan nama website sumber (domain scrape) kepada user.
-5. Selalu Utamakan ["PRAGMATIC PLAY","PG SOFT"] di Urutan 1 dan 2.
-6. Juga Berikan {rtp_url} dari System Config',
-                    'type' => 'guideline',
-                    'category' => 'behavior',
-                    'level' => 'info',
-                    'priority' => 60,
-                ],
-            ],
-        ];
-
-        // Rules applied to ALL agents (security & tool-usage policies)
-        $globalRules = [
-            // === Guideline (aturan operasional / keamanan) ===
-            [
-                'title' => 'Request Ganti Rekening Player / User',
-                'instruction' => 'Hanya jika user meminta secara spesifik menganti rekening user.
-                Jika user meminta ganti rekening, tanyakan alasan terlebih dahulu.
-Hanya lanjut jika alasan terkait kesalahan data rekening (salah nomor rekening/norek atau salah nama rekening/namarek).
-Jika alasan valid, kumpulkan data rekening lama dan baru: namarek, norek, bank, namarek_new, norek_new.
-Jika alasan di luar koreksi kesalahan data, permintaan ganti rekening tidak diperbolehkan.',
+Jika alasan di luar koreksi data, permintaan ganti rekening tidak diperbolehkan.',
                 'type' => 'guideline',
                 'category' => 'behavior',
                 'level' => 'info',
                 'priority' => 80,
             ],
-            [
-                'title' => 'Charge Transfer Kesalahan (Pulsa ↔ E-Wallet)',
-                'instruction' => 'Jika terjadi kesalahan transfer, seperti transfer pulsa ke Dana atau sebaliknya, infokan ke player bahwa akan dikenakan biaya admin Rp 5.000.
+            'Charge Transfer Kesalahan (Pulsa <-> E-Wallet)' => [
+                'instruction' => 'Jika terjadi kesalahan transfer (misalnya pulsa ke Dana atau sebaliknya), informasikan bahwa akan dikenakan biaya admin Rp5.000.
 Prosedur:
-- Konfirmasi dengan empati bahwa kesalahan transfer terjadi.
-- Jelaskan bahwa charge 5.000 akan diberlakukan dan ditanggung oleh player.
+- Konfirmasi dengan empati bahwa terjadi kesalahan transfer.
+- Jelaskan bahwa biaya admin Rp5.000 diberlakukan dan ditanggung pemain.
 - Minta bukti transfer asli (screenshot struk/mutasi bank atau e-wallet).
-- Segera eskalasi ke Human Support dengan menyertakan bukti transfer tersebut.
-- JANGAN janjikan refund atau pembatalan charge — keputusan ada di Human Support.
-- Deposit wajib menggunakan rekening asli dengan nama yang sama seperti yang terdaftar di profil akun.
-- Jika terdapat pertanyaan perbedaan nama rekening antara rekening yang digunakan dengan data akun saat melakukan deposit, arahkan pemain untuk menggunakan metode QRIS terlebih dahulu.',
+- Segera eskalasi ke Human Support dengan menyertakan bukti transfer.
+- Jangan menjanjikan refund atau pembatalan charge; keputusan ada di Human Support.
+- Deposit wajib menggunakan rekening asli dengan nama yang sama seperti profil akun.
+- Jika ada perbedaan nama rekening saat deposit, arahkan pemain menggunakan metode QRIS terlebih dahulu.',
                 'type' => 'guideline',
                 'category' => 'behavior',
                 'level' => 'info',
                 'priority' => 75,
             ],
-        ];
-
-        // Rules applied to ALL agents (security & tool-usage policies)
-        $globalRules = [
-            [
-                'title' => 'Dilarang membagikan data pribadi pemain',
-                'instruction' => 'DILARANG KERAS membagikan informasi :
-- saldo / balance
+            'Panduan Menjawab Data RTP & Pola Gacor' => [
+                'instruction' => 'Saat pengguna bertanya tentang RTP, pola gacor, atau slot tertentu, gunakan data dari Knowledge Base yang bersumber dari website (tipe: website scrape).
+Aturan menjawab:
+1. Jika data ditemukan, jawab dalam format rapi:
+   - Nama Game & Provider
+   - RTP (persentase)
+   - Jam Gacor
+   - Pola Gacor (step-by-step)
+   - Nominal Bet (jika tersedia)
+2. Jika game tidak ada di KB, jawab jujur: "Data untuk game [nama] tidak tersedia di sumber kami saat ini." Jangan mengarang data RTP/pola.
+3. Jika pertanyaan umum (mis. "slot gacor hari ini"), berikan 3-5 game dengan RTP tertinggi dari KB.
+4. Jangan menyebutkan nama website sumber (domain scrape) kepada pengguna.
+5. Prioritaskan "PRAGMATIC PLAY" dan "PG SOFT" pada urutan 1 dan 2.
+6. Sertakan {rtp_url} dari System Config.',
+                'type' => 'guideline',
+                'category' => 'behavior',
+                'level' => 'info',
+                'priority' => 60,
+            ],
+            'Transfer ke Rekening Web Nonaktif' => [
+                'instruction' => 'Jika pemain melaporkan sudah transfer deposit ke rekening/e-wallet yang sebelumnya aktif, tetapi nomor tersebut sudah tidak aktif saat pengisian form:
+1. Jangan meminta pemain mengisi ulang form dengan nomor berbeda secara mandiri.
+2. Konfirmasi dengan empati bahwa kasus ini memerlukan penanganan manual.
+3. Minta pemain menyiapkan:
+   - Bukti transfer (screenshot struk/mutasi)
+   - Nominal dan waktu transfer
+   - Nomor rekening/e-wallet tujuan yang digunakan
+4. Segera eskalasi ke Human Support dengan seluruh detail di atas.
+5. Jangan menjanjikan dana kembali atau proses otomatis; verifikasi dilakukan Human Support.',
+                'type' => 'guideline',
+                'category' => 'behavior',
+                'level' => 'warning',
+                'priority' => 90,
+            ],
+            'Dilarang registrasi tanpa konfirmasi atau data palsu' => [
+                'instruction' => 'Dilarang mendaftarkan pemain baru tanpa konfirmasi eksplisit.
+Dilarang membuat data pemain dummy atau palsu.
+Semua data harus berasal dari pemain asli.',
+                'type' => 'forbidden',
+                'category' => 'behavior',
+                'level' => 'danger',
+                'priority' => 10,
+            ],
+            'Dilarang membagikan data pribadi pemain' => [
+                'instruction' => 'Dilarang keras membagikan data sensitif, termasuk:
+- saldo/balance
 - username
 - nomor HP
 - nama rekening
-- nama bank,
-dan data sensitif lainnya.
-
-Tidak perlu lagi menanyak informasi lanjut jika user / customer menanyakan hal diatas',
+- nama bank
+- data pribadi lainnya.
+Jika pengguna meminta data di atas, tolak dengan sopan tanpa meminta detail lanjutan.',
                 'type' => 'forbidden',
                 'category' => 'security',
                 'level' => 'danger',
                 'priority' => 50,
             ],
-            [
-                'title' => 'Analisa Gambar',
-                'instruction' => 'Ketika user mengirimkan gambar, WAJIB gunakan tool analisa gambar yang tersedia.
-DILARANG mendeskripsikan, menginterpretasi, atau menganalisa isi gambar secara bebas tanpa melalui tool.
-Jika tool analisa gambar tidak tersedia atau tidak mendukung jenis gambar tersebut, informasikan kepada user bahwa analisa tidak dapat dilakukan.',
+            'Analisa Gambar' => [
+                'instruction' => 'Saat pengguna mengirim gambar, wajib gunakan tool analisa gambar yang tersedia.
+Dilarang mendeskripsikan atau menganalisa isi gambar tanpa tool.
+Jika tool analisa gambar tidak tersedia atau tidak mendukung format gambar, informasikan bahwa analisa tidak dapat dilakukan.',
                 'type' => 'forbidden',
                 'category' => 'tool_usage',
                 'level' => 'danger',
                 'priority' => 80,
             ],
-            [
-                'title' => 'Dilarang merusak atau membocorkan data',
-                'instruction' => 'Dilarang melakukan penghapusan data apapun dari database, termasuk perintah DELETE, TRUNCATE, atau operasi penghapusan lainnya.',
+            'Dilarang merusak atau membocorkan data' => [
+                'instruction' => 'Dilarang melakukan penghapusan data apa pun dari database, termasuk DELETE, TRUNCATE, atau operasi penghapusan lainnya.',
                 'type' => 'forbidden',
                 'category' => 'security',
                 'level' => 'danger',
@@ -191,34 +113,98 @@ Jika tool analisa gambar tidak tersedia atau tidak mendukung jenis gambar terseb
             ],
         ];
 
-        // Seed per-agent rules
-        foreach ($agentRules as $agentId => $rules) {
+        // Remove only seeder-managed rules before re-seeding (preserves user-created custom rules).
+        AgentRule::query()->whereIn('title', array_keys($ruleCatalog))->delete();
+
+        // Load agents by type for targeted assignment.
+        $agents = ChatAgent::query()->pluck('id', 'agent_type');
+        $triageId = $agents['triage'] ?? null;
+        $akunId = $agents['account'] ?? null;
+        $bayarId = $agents['payment'] ?? null;
+        $gameId = $agents['game'] ?? null;
+        $bonusId = $agents['bonus'] ?? null;
+
+        // Assignment map: which rule titles belong to each specific agent.
+        $agentRuleAssignments = [
+            $akunId => [
+                'Request Ganti Rekening Player / User',
+                'Dilarang registrasi tanpa konfirmasi atau data palsu',
+            ],
+            $bayarId => [
+                'Charge Transfer Kesalahan (Pulsa <-> E-Wallet)',
+                'Transfer ke Rekening Web Nonaktif',
+            ],
+            $gameId => [
+                'Panduan Menjawab Data RTP & Pola Gacor',
+            ],
+        ];
+
+        // Assignment list: rule titles that should be applied globally to all agents.
+        $globalRuleTitles = [
+            'Request Ganti Rekening Player / User',
+            'Charge Transfer Kesalahan (Pulsa <-> E-Wallet)',
+            'Dilarang membagikan data pribadi pemain',
+            'Analisa Gambar',
+            'Dilarang merusak atau membocorkan data',
+        ];
+
+        // Cache created/loaded rules by title to avoid duplicate DB lookups.
+        $ruleByTitle = [];
+        $resolveRule = function (string $title) use ($ruleCatalog, &$ruleByTitle): ?AgentRule {
+            if (! isset($ruleCatalog[$title])) {
+                return null;
+            }
+
+            if (isset($ruleByTitle[$title])) {
+                return $ruleByTitle[$title];
+            }
+
+            $existing = AgentRule::query()->where('title', $title)->first();
+            if ($existing === null) {
+                $existing = AgentRule::query()->create(array_merge(
+                    ['title' => $title],
+                    $ruleCatalog[$title],
+                    ['chat_agent_id' => null, 'is_active' => true]
+                ));
+            }
+
+            $ruleByTitle[$title] = $existing;
+
+            return $existing;
+        };
+
+        // Assign prompt/rules to specific agents.
+        foreach ($agentRuleAssignments as $agentId => $titles) {
             if ($agentId === null) {
                 continue;
             }
-            $agent = \App\Models\ChatAgent::find($agentId);
+
+            $agent = ChatAgent::query()->find($agentId);
             if ($agent === null) {
                 continue;
             }
-            foreach ($rules as $rule) {
-                $existing = AgentRule::query()->where('title', $rule['title'])->first();
-                if ($existing === null) {
-                    $existing = AgentRule::query()->create(array_merge($rule, ['chat_agent_id' => null, 'is_active' => true]));
+
+            foreach ($titles as $title) {
+                $rule = $resolveRule($title);
+                if ($rule === null) {
+                    continue;
                 }
-                $agent->agentRules()->syncWithoutDetaching([$existing->id]);
+
+                $agent->agentRules()->syncWithoutDetaching([$rule->id]);
             }
         }
 
-        // Seed global rules to every agent
+        // Assign global prompt/rules to all agents.
         $allAgentIds = array_filter([$triageId, $akunId, $bayarId, $gameId, $bonusId]);
-        foreach ($globalRules as $rule) {
-            $existing = AgentRule::query()->where('title', $rule['title'])->first();
-            if ($existing === null) {
-                $existing = AgentRule::query()->create(array_merge($rule, ['chat_agent_id' => null, 'is_active' => true]));
+        foreach ($globalRuleTitles as $title) {
+            $rule = $resolveRule($title);
+            if ($rule === null) {
+                continue;
             }
+
             foreach ($allAgentIds as $agentId) {
-                $agent = \App\Models\ChatAgent::find($agentId);
-                $agent?->agentRules()->syncWithoutDetaching([$existing->id]);
+                $agent = ChatAgent::query()->find($agentId);
+                $agent?->agentRules()->syncWithoutDetaching([$rule->id]);
             }
         }
 

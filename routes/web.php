@@ -30,14 +30,28 @@ Route::middleware(['set.locale', 'guest'])->group(function () {
 
 Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
     Route::get('/backoffice', [DashboardController::class, 'index'])->name('backoffice.dashboard');
-    Route::get('/backoffice/customer/{customer}/chat', [DashboardController::class, 'chat'])->name('backoffice.customer.chat');
+
+    // Customer chat access control (granular permissions per action)
+    Route::middleware('permission:view customers')->group(function () {
+        Route::get('/backoffice/customer/{customer}/chat', [DashboardController::class, 'chat'])->name('backoffice.customer.chat');
+        Route::get('/backoffice/customer/{customer}/messages', [DashboardController::class, 'messages'])->name('backoffice.customer.messages');
+    });
+
+    Route::middleware('permission:manage customer-handoff')->group(function () {
+        Route::post('/backoffice/customer/{customer}/takeover', [DashboardController::class, 'takeover'])->name('backoffice.customer.takeover');
+        Route::post('/backoffice/customer/{customer}/release', [DashboardController::class, 'releaseToBot'])->name('backoffice.customer.release');
+    });
+
+    Route::middleware('permission:send customer-messages')->group(function () {
+        Route::post('/backoffice/customer/{customer}/send-message', [DashboardController::class, 'sendMessage'])->name('backoffice.customer.send-message');
+    });
+
+    Route::middleware('permission:view customer-attachments')->group(function () {
+        Route::get('/backoffice/chat-attachment', [DashboardController::class, 'chatAttachment'])->name('backoffice.chat-attachment');
+    });
+
     Route::get('/backoffice/escalation-queue', [DashboardController::class, 'escalationQueue'])->name('backoffice.escalation-queue');
     Route::get('/backoffice/escalation-queue/count', [DashboardController::class, 'escalationCount'])->name('backoffice.escalation-queue.count');
-    Route::post('/backoffice/customer/{customer}/takeover', [DashboardController::class, 'takeover'])->name('backoffice.customer.takeover');
-    Route::post('/backoffice/customer/{customer}/release', [DashboardController::class, 'releaseToBot'])->name('backoffice.customer.release');
-    Route::post('/backoffice/customer/{customer}/send-message', [DashboardController::class, 'sendMessage'])->name('backoffice.customer.send-message');
-    Route::get('/backoffice/customer/{customer}/messages', [DashboardController::class, 'messages'])->name('backoffice.customer.messages');
-    Route::get('/backoffice/chat-attachment', [DashboardController::class, 'chatAttachment'])->name('backoffice.chat-attachment');
 
     // Chat agents (admin only)
     Route::middleware('permission:manage agents')->group(function () {

@@ -24,6 +24,9 @@ class RolePermissionSeeder extends Seeder
             'manage settings',
             'view metrics',
             'view customers',
+            'manage customer-handoff',
+            'send customer-messages',
+            'view customer-attachments',
         ];
 
         foreach ($permissions as $permission) {

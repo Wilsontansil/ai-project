@@ -32,8 +32,11 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
     Route::get('/backoffice', [DashboardController::class, 'index'])->name('backoffice.dashboard');
 
     // Customer chat access control (granular permissions per action)
-    Route::middleware('permission:view customers')->group(function () {
+    Route::middleware('permission:view customer-chats')->group(function () {
         Route::get('/backoffice/customer/{customer}/chat', [DashboardController::class, 'chat'])->name('backoffice.customer.chat');
+    });
+
+    Route::middleware('permission:view customer-messages')->group(function () {
         Route::get('/backoffice/customer/{customer}/messages', [DashboardController::class, 'messages'])->name('backoffice.customer.messages');
     });
 

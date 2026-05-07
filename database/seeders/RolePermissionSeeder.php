@@ -24,6 +24,8 @@ class RolePermissionSeeder extends Seeder
             'manage settings',
             'view metrics',
             'view customers',
+            'view customer-chats',
+            'view customer-messages',
             'manage customer-handoff',
             'send customer-messages',
             'view customer-attachments',
@@ -48,11 +50,16 @@ class RolePermissionSeeder extends Seeder
         $admin = Role::findOrCreate('admin', 'web');
         $admin->syncPermissions($adminPermissions);
 
-        // Operator: read-only customers + view metrics
+        // Operator: backoffice customer operations (explicitly scoped)
         $operator = Role::findOrCreate('operator', 'web');
         $operator->syncPermissions([
             'view customers',
             'view metrics',
+            'view customer-chats',
+            'view customer-messages',
+            'manage customer-handoff',
+            'send customer-messages',
+            'view customer-attachments',
         ]);
     }
 }

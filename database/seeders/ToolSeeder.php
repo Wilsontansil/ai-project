@@ -298,7 +298,7 @@ class ToolSeeder extends Seeder
                 'tool_name' => 'checkGame',
                 'category' => 'games',
                 'display_name' => 'Cek Game',
-                'description' => 'Cek ketersediaan dan info game berdasarkan keyword.',
+                'description' => 'Cek ketersediaan dan info game berdasarkan kata kunci, termasuk variasi ejaan dan istilah terjemahan umum.',
                 'slug' => 'check-game',
                 'type' => 'get',
                 'is_enabled' => true,
@@ -306,12 +306,12 @@ class ToolSeeder extends Seeder
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
-                        'keyword' => ['type' => 'string', 'description' => 'Kata kunci untuk mencari game berdasarkan nama, provider, kategori, atau keyword terkait. Boleh sebagian, contoh: "maja" untuk mencari "Mahjong Ways", atau "live" untuk mencari semua game dengan kategori live casino.'],
+                        'keyword' => ['type' => 'string', 'description' => 'Kata kunci untuk mencari game berdasarkan nama, provider, kategori, atau keyword terkait. Boleh sebagian, contoh: "maja" untuk mencari "Mahjong Ways", "live" untuk kategori live casino, atau variasi seperti "scater hitam" / "black scatter".'],
                     ],
                 ],
                 'endpoints' => null,
                 // 'keywords' => ['game', 'slot', 'casino', 'provider', 'cek game', 'ada game', 'game aktif', 'cari game', 'game apa', 'live casino', 'sportbook', 'togel', 'arcade', 'fishing'],
-                'tool_rules' => "- Cari game berdasarkan field name, provider, category, atau keyword\n- Tampilkan: name, provider, category\n- Jika ditemukan banyak hasil, tampilkan maksimal 10 dan infokan masih ada lainnya\n- Jika tidak ditemukan, sampaikan game tidak tersedia\n- Tampilkan gambar hanya jika diminta: gunakan URL https://devasset.pilartestengine.com/assets + nilai field image, kirim dalam bentuk file image",
+                'tool_rules' => "- Cari game berdasarkan field name, provider, category, atau keyword\n- Gunakan kata kunci user apa adanya sebagai pencarian pertama\n- Jika tidak ketemu, coba pahami variasi ejaan/typo umum dan terjemahan istilah (contoh: scater -> scatter, hitam <-> black)\n- Tampilkan: name, provider, category\n- Jika ditemukan banyak hasil, tampilkan maksimal 10 dan infokan masih ada lainnya\n- Jika tetap tidak ditemukan, sampaikan untuk ke game page dan pilih menu Cari / Search yang ada di Tab bawah untuk pencarian lebih lengkap",
                 'information_text' => null,
                 'meta' => [
                     'query' => [
@@ -327,6 +327,30 @@ class ToolSeeder extends Seeder
                             ],
                             [
                                 'field'          => 'keyword',
+                                'operator'       => 'LIKE%%',
+                                'source'         => 'arg',
+                                'arg'            => 'keyword',
+                                'group'          => 1,
+                                'skip_if_empty'  => true,
+                            ],
+                            [
+                                'field'          => 'name',
+                                'operator'       => 'LIKE%%',
+                                'source'         => 'arg',
+                                'arg'            => 'keyword',
+                                'group'          => 1,
+                                'skip_if_empty'  => true,
+                            ],
+                            [
+                                'field'          => 'provider',
+                                'operator'       => 'LIKE%%',
+                                'source'         => 'arg',
+                                'arg'            => 'keyword',
+                                'group'          => 1,
+                                'skip_if_empty'  => true,
+                            ],
+                            [
+                                'field'          => 'category',
                                 'operator'       => 'LIKE%%',
                                 'source'         => 'arg',
                                 'arg'            => 'keyword',

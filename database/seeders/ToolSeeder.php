@@ -834,49 +834,49 @@ class ToolSeeder extends Seeder
             // ],
 
             // ─── GET MULTIPLE type tools ───
-            [
-                'tool_name' => 'BonusCashback',
-                'category' => 'bonus',
-                'display_name' => 'Bonus Cashback',
-                'description' => 'Menyediakan informasi tentang bonus cashback. Bonus Cashback dibagikan setiap hari Senin.',
-                'slug' => 'bonus-cashback',
-                'type' => 'get_multiple',
-                'is_enabled' => true,
-                'data_model_id' => null,
-                'parameters' => [
-                    'type' => 'object',
-                    'properties' => [
-                        'username' => ['type' => 'string', 'description' => 'Username pemain'],
-                    ],
-                    'required' => ['username'],
-                ],
-                'endpoints' => null,
-                'tool_rules' => "- Bandingkan total amount Deposit vs Withdraw minggu lalu (Senin-Minggu) dengan status 'accept'\n- Jika Withdraw > Deposit = tidak dapat cashback (sudah profit)\n- Jika Deposit > Withdraw = berhak cashback dari selisihnya\n- Tampilkan: total deposit, total withdraw, selisih, dan status kelayakan\n- Format angka dengan separator ribuan",
-                'information_text' => null,
-                'meta' => [
-                    'data_model_ids' => array_filter([
-                        $depositModel?->id,
-                        $withdrawModel?->id,
-                    ]),
-                    'query' => [
-                        'filters' => [
-                            ['field' => 'status', 'operator' => '=', 'value' => 'accept'],
-                        ],
-                        'date_range' => [
-                            'field' => 'date',
-                            'range' => 'last_week',
-                        ],
-                        'aggregate' => [
-                            'function' => 'sum',
-                            'field' => 'amount',
-                        ],
-                        'order_by' => [
-                            'field' => 'id',
-                            'direction' => 'desc',
-                        ],
-                    ],
-                ],
-            ],
+            // [
+            //     'tool_name' => 'BonusCashback',
+            //     'category' => 'bonus',
+            //     'display_name' => 'Bonus Cashback',
+            //     'description' => 'Menyediakan informasi tentang bonus cashback. Bonus Cashback dibagikan setiap hari Senin.',
+            //     'slug' => 'bonus-cashback',
+            //     'type' => 'get_multiple',
+            //     'is_enabled' => true,
+            //     'data_model_id' => null,
+            //     'parameters' => [
+            //         'type' => 'object',
+            //         'properties' => [
+            //             'username' => ['type' => 'string', 'description' => 'Username pemain'],
+            //         ],
+            //         'required' => ['username'],
+            //     ],
+            //     'endpoints' => null,
+            //     'tool_rules' => "- Bandingkan total amount Deposit vs Withdraw minggu lalu (Senin-Minggu) dengan status 'accept'\n- Jika Withdraw > Deposit = tidak dapat cashback (sudah profit)\n- Jika Deposit > Withdraw = berhak cashback dari selisihnya\n- Tampilkan: total deposit, total withdraw, selisih, dan status kelayakan\n- Format angka dengan separator ribuan",
+            //     'information_text' => null,
+            //     'meta' => [
+            //         'data_model_ids' => array_filter([
+            //             $depositModel?->id,
+            //             $withdrawModel?->id,
+            //         ]),
+            //         'query' => [
+            //             'filters' => [
+            //                 ['field' => 'status', 'operator' => '=', 'value' => 'accept'],
+            //             ],
+            //             'date_range' => [
+            //                 'field' => 'date',
+            //                 'range' => 'last_week',
+            //             ],
+            //             'aggregate' => [
+            //                 'function' => 'sum',
+            //                 'field' => 'amount',
+            //             ],
+            //             'order_by' => [
+            //                 'field' => 'id',
+            //                 'direction' => 'desc',
+            //             ],
+            //         ],
+            //     ],
+            // ],
             // [
             //     'tool_name' => 'referral_bonus',
             //     'category' => 'bonus',

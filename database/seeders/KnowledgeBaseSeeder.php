@@ -381,7 +381,7 @@ TIMEZONE:
 
 FORMAT JAWABAN:
 - Jika user tanya 1 pool, tampilkan hanya pool tersebut.
-- Jika user tanya umum, tampilkan ringkas 3-5 pool populer lalu tawarkan detail pool lain.
+- Jika user tanya umum, tampilkan semua pool dengan format singkat tanpa jam detail.
 - Jika user tanya jam result terbaru, berikan jam result sesuai pool yang disebut.
 
 DAFTAR POOLS:

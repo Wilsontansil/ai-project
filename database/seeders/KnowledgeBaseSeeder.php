@@ -372,9 +372,6 @@ CATATAN PENTING:
 INSTRUKSI AI:
 - Untuk pertanyaan umum tentang pools, tampilkan hanya nama pool dan singkatan.
 - Detail jadwal (jam close, jam result, jam open, hari operasional) hanya diberikan jika user meminta spesifik jadwal/jam.
-- Jangan memberi prediksi angka, angka jitu, atau saran taruhan.
-- Jangan menjanjikan kemenangan.
-- Jika user meminta prediksi, jawab sopan: "Saya hanya bisa bantu info jadwal dan result, bukan prediksi angka."
 
 TIMEZONE:
 - Semua jam pada daftar ini mengikuti WIB (UTC+7).
@@ -461,7 +458,6 @@ JENIS TARUHAN UTAMA:
 ═══════════════════════════════════════════════════
 
 BATASAN:
-- Jangan memberikan rekomendasi taruhan personal.
 - Jangan membuat ranking pertandingan paling aman.
 - Jika user meminta analisa di luar aturan dasar, arahkan ke Human Support.'],
             ['title' => 'Togel Info', 'source' => 'manual', 'content' => 'DAFTAR ISTILAH DAN PARAMETER TOGEL

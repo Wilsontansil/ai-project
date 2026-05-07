@@ -21,6 +21,7 @@ class ToolSeeder extends Seeder
         $bonusAjakTemanModel = DataModel::query()->where('slug', 'bonus-ajak-teman')->first();
         $bonusVoucherModel = DataModel::query()->where('slug', 'bonus-voucher')->first();
         $bonusFreespinModel = DataModel::query()->where('slug', 'bonus-freespin')->first();
+        $bonusCashbackModel = DataModel::query()->where('slug', 'bonus-cashback')->first();
         $promoModel = DataModel::query()->where('slug', 'promo')->first();
         $gameModel = DataModel::query()->where('slug', 'game')->first();
         $rekeningModel = DataModel::query()->where('slug', 'rekenings')->first();
@@ -989,6 +990,52 @@ class ToolSeeder extends Seeder
                         'select' => ['created_at', 'status', 'remark'],
                         'order_by' => [
                             'field' => 'created_at',
+                            'direction' => 'desc',
+                        ],
+                        'limit' => 1,
+                    ],
+                ],
+            ],
+            [
+                'tool_name' => 'CheckBonusCashback',
+                'category' => 'bonus',
+                'display_name' => 'Check Bonus Cashback',
+                'description' => 'Memeriksa status Bonus Cashback mingguan berdasarkan username. Menampilkan periode bonus, nilai bonus, dan rincian winloss/rate/bonus per kategori permainan.',
+                'slug' => 'check-bonus-cashback',
+                'type' => 'get',
+                'is_enabled' => true,
+                'data_model_id' => $bonusCashbackModel?->id,
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'player' => ['type' => 'string', 'description' => 'Username pemain'],
+                    ],
+                    'required' => ['player'],
+                ],
+                'endpoints' => null,
+                'tool_rules' => "- Periksa status Bonus Cashback berdasarkan username pemain\n- Jika username belum tersedia, minta username secara natural\n- Jika tidak ada data, sampaikan bahwa belum ada riwayat Bonus Cashback\n- Tampilkan periode bonus mingguan menggunakan startdate dan enddate, serta paydate jika tersedia\n- Tampilkan bonusamount sebagai nilai bonus cashback\n- Tampilkan ringkasan total_wl dan total_rate\n- Tampilkan rincian per kategori menggunakan pola field *_wl, *_rate, *_bonus (pilar, slot, livecasino, dd, togel, sabungayam, arcade, tangkas, tablegame, sports, esports, other)\n- Jika ada field kategori bernilai null atau 0, tetap tampilkan seperlunya secara ringkas agar tidak membingungkan",
+                'information_text' => null,
+                'meta' => [
+                    'query' => [
+                        'select' => [
+                            'week', 'startdate', 'enddate', 'paydate', 'given', 'bonusamount',
+                            'total_wl', 'total_rate',
+                            'pilar_wl', 'pilar_rate', 'pilar_bonus',
+                            'slot_wl', 'slot_rate', 'slot_bonus',
+                            'livecasino_wl', 'livecasino_rate', 'livecasino_bonus',
+                            'dd_wl', 'dd_rate', 'dd_bonus',
+                            'togel_wl', 'togel_rate', 'togel_bonus',
+                            'sabungayam_wl', 'sabungayam_rate', 'sabungayam_bonus',
+                            'arcade_wl', 'arcade_rate', 'arcade_bonus',
+                            'tangkas_wl', 'tangkas_rate', 'tangkas_bonus',
+                            'tablegame_wl', 'tablegame_rate', 'tablegame_bonus',
+                            'sports_wl', 'sports_rate', 'sports_bonus',
+                            'esports_wl', 'esports_rate', 'esports_bonus',
+                            'other_wl', 'other_rate', 'other_bonus',
+                            'created_at',
+                        ],
+                        'order_by' => [
+                            'field' => 'enddate',
                             'direction' => 'desc',
                         ],
                         'limit' => 1,

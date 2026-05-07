@@ -198,7 +198,7 @@ Lingkup tugasmu:
 
         $agentBonus->tools()->sync(
             Tool::whereIn('tool_name', [
-                'BonusCashback', 'checkBonusAPK', 'checkBonusBeruntun',
+                'CheckBonusCashback', 'BonusCashback', 'checkBonusAPK', 'checkBonusBeruntun',
                 'checkBonusDeposit', 'checkBonusAjakTeman', 'checkBonusVoucher', 'checkBonusFreespin',
             ])->pluck('id')
         );

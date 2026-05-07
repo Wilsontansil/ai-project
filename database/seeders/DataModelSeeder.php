@@ -760,7 +760,7 @@ class DataModelSeeder extends Seeder
                     'other_wl' => ['type' => 'decimal(14,3)', 'required' => false],
                     'other_rate' => ['type' => 'decimal(14,3)', 'required' => false],
                     'other_bonus' => ['type' => 'decimal(14,3)', 'required' => false],
-                    'agent' => ['type' => 'varchar(125)', 'required' => false],
+                    'agent' => ['type' => 'varchar(125)', 'required' => true, 'value' => config('services.agent.kode')],
                     'created_at' => ['type' => 'timestamp', 'required' => false],
                     'updated_at' => ['type' => 'timestamp', 'required' => false],
                 ],

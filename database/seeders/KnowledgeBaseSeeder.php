@@ -164,6 +164,8 @@ TONE:
 - Deposit Menggunakan Pulsa Wajib Beserta SN Atau Nomor HP pengirim di Berita Deposit
 - Multiplier Deposit Bank = {dep_mul_bank}
 - Multiplier Deposit Non Bank = {dep_mul_nonbank}
+- Rate Deposit Bank = {dep_rate_bank}%
+- Rate Deposit Non Bank = {dep_rate_nonbank}%
 
 [BANK]
 BCA, BII/Maybank, BNI, BRI, BSI, BTN, CIMB Niaga, Niaga Syariah, Dana, Danamon, Mandiri, OCBC NISP, Bank Neo, Sea Bank, Jago, Permata, BTPN/Jenius, Bank MAS, Mandiri Syariah, BCA Syariah, QRIS

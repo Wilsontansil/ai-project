@@ -229,6 +229,24 @@
                         <div><span class="text-slate-500">{{ __('backoffice.pages.chat_agents.updated') }}:</span> <span
                                 class="text-slate-300">{{ $agent->updated_at->format('d M Y H:i') }}</span></div>
                     </div>
+
+                    <div class="mt-4 border-t border-slate-700/50 pt-3">
+                        <h4 class="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Routing Keywords
+                        </h4>
+                        @if (!empty($agent->routing_keywords))
+                            <div class="flex flex-wrap gap-2">
+                                @foreach ((array) $agent->routing_keywords as $keyword)
+                                    <span
+                                        style="display:inline-flex;align-items:center;border-radius:9999px;background:rgba(34,211,238,0.15);padding:4px 10px;font-size:11px;font-weight:600;color:#67e8f9">
+                                        {{ $keyword }}
+                                    </span>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-xs text-slate-400">No routing keywords configured for this agent
+                                (fallback/default behavior).</p>
+                        @endif
+                    </div>
                 </div>
 
                 <div

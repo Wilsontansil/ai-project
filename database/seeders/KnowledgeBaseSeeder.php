@@ -370,7 +370,8 @@ CATATAN PENTING:
             ['title' => 'Pools', 'source' => 'manual', 'content' => '=== JADWAL POOLS / PASAR TOGEL ===
 
 INSTRUKSI AI:
-- Fokus jawaban untuk jadwal: jam close, jam result, jam open, dan hari operasional.
+- Untuk pertanyaan umum tentang pools, tampilkan hanya nama pool dan singkatan.
+- Detail jadwal (jam close, jam result, jam open, hari operasional) hanya diberikan jika user meminta spesifik jadwal/jam.
 - Jangan memberi prediksi angka, angka jitu, atau saran taruhan.
 - Jangan menjanjikan kemenangan.
 - Jika user meminta prediksi, jawab sopan: "Saya hanya bisa bantu info jadwal dan result, bukan prediksi angka."
@@ -381,7 +382,8 @@ TIMEZONE:
 
 FORMAT JAWABAN:
 - Jika user tanya 1 pool, tampilkan hanya pool tersebut.
-- Jika user tanya umum, tampilkan semua pool dengan format singkat tanpa jam detail.
+- Jika user tanya umum, tampilkan daftar pool dalam format: Singkatan - Nama Pool (tanpa jam detail).
+- Jika user meminta spesifik jadwal/jam (misalnya jam close, jam result, jam open, atau hari operasional), berikan detail hanya untuk pool yang diminta.
 - Jika user tanya jam result terbaru, berikan jam result sesuai pool yang disebut.
 
 DAFTAR POOLS:

@@ -900,6 +900,10 @@ Tool context:\n" . json_encode($cleanContext, JSON_PRETTY_PRINT | JSON_UNESCAPED
         string|array $userContent,
         ?string $reply
     ): void {
+        if ($tool->type !== 'update') {
+            return;
+        }
+
         try {
             $hasAttachment = false;
             $attachmentUrl = null;

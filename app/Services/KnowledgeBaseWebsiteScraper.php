@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\UrlSsrfGuard;
 use Illuminate\Support\Facades\Http;
 
 class KnowledgeBaseWebsiteScraper
@@ -19,6 +20,8 @@ class KnowledgeBaseWebsiteScraper
         if ($baseUrl === '') {
             throw new \RuntimeException('Source URL is empty.');
         }
+
+        UrlSsrfGuard::assertPublic($baseUrl);
 
         $homeResponse = Http::timeout(20)
             ->withHeaders([
@@ -38,6 +41,8 @@ class KnowledgeBaseWebsiteScraper
         if ($slotIds === []) {
             throw new \RuntimeException('No game slot id found on website.');
         }
+
+        UrlSsrfGuard::assertPublic($ajaxUrl);
 
         $items = [];
         foreach (array_slice($slotIds, 0, $limit) as $slotId) {

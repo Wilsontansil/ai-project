@@ -718,8 +718,6 @@ class ToolController extends Controller
             Log::info('Webhook test response', [
                 'channel' => 'tool.test_endpoint',
                 'method' => 'POST',
-                'base_url' => $baseUrl,
-                'route' => $route,
                 'url' => $url,
                 'status' => $response->status(),
                 'successful' => $response->successful(),
@@ -740,8 +738,6 @@ class ToolController extends Controller
             Log::error('Webhook test exception', [
                 'channel' => 'tool.test_endpoint',
                 'method' => 'POST',
-                'base_url' => $baseUrl,
-                'route' => $route,
                 'url' => $url,
                 'body' => LogSanitizer::redactArguments($body),
                 'error' => $e->getMessage(),

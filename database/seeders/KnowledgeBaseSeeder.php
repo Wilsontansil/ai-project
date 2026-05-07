@@ -160,7 +160,7 @@ TONE:
         $this->seed($bayarId, [
             ['title' => 'Deposit', 'source' => 'manual', 'content' => '[Informasi]
 - Minimal Deposit Rp {dep_min}
-- Maximal Deposit Rp Tak terbatas
+- Maksimal Deposit Rp Tak terbatas
 - Deposit Menggunakan Pulsa Wajib Beserta SN Atau Nomor HP pengirim di Berita Deposit
 - Multiplier Deposit Bank = {dep_mul_bank}
 - Multiplier Deposit Non Bank = {dep_mul_nonbank}
@@ -171,8 +171,25 @@ BCA, BII/Maybank, BNI, BRI, BSI, BTN, CIMB Niaga, Niaga Syariah, Dana, Danamon, 
 
 [NON BANK] (Pulsa) = XL, Telkomsel
 
-Deposit Bank:
-Deposit berbeda bank dikenakan biaya 6.500 atau 2.500 (BI-Fast). Nominal di form deposit harus SAMA PERSIS dengan nominal permintaan deposit.
+Deposit Antar Negara:
+Jika player ingin deposit antar negara, arahkan melalui pulsa provider berikut:
+- Digi
+- Hotlink/Maxis
+- Celcom
+
+Tujuan deposit antar negara: Telkomsel situs (sesuai alur deposit pulsa platform).
+
+Instruksi AI untuk kasus antar negara:
+- Konfirmasi bahwa deposit antar negara bisa diproses via pulsa Digi, Hotlink/Maxis, atau Celcom ke Telkomsel situs.
+- Jangan menyarankan e-wallet internasional atau bank internasional untuk skenario ini.
+- Jika data transfer belum lengkap, minta: SN atau nomor HP pengirim, nominal, waktu transfer, dan bukti transfer.
+- Jika ada kendala verifikasi atau deposit belum masuk, eskalasi ke Human Support.
+
+Deposit Antar Bank:
+Biaya transfer antar bank bisa 6.500, 2.500 (BI-Fast), atau gratis, tergantung kebijakan bank pengirim.
+Nominal di form deposit harus SAMA PERSIS dengan nominal deposit yang diinginkan.
+Nominal transfer juga mengikuti nominal deposit yang sama.
+Biaya admin bank tidak perlu ditambahkan ke nominal form atau nominal transfer karena dipotong otomatis oleh sistem bank.
 Wajib menggunakan rekening pribadi dengan nama yang sama persis seperti yang terdaftar di profil akun.
 
 Deposit QRIS: Tidak wajib rekening asli. Bisa jadi alternatif jika ada masalah perbedaan nama rekening.

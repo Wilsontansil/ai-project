@@ -164,14 +164,15 @@ TONE:
 - Deposit Menggunakan Pulsa Wajib Beserta SN Atau Nomor HP pengirim di Berita Deposit
 - Multiplier Deposit Bank = {dep_mul_bank}
 - Multiplier Deposit Non Bank = {dep_mul_nonbank}
-- Rate Deposit Bank = {dep_rate_bank}%
-- Rate Deposit Non Bank = {dep_rate_nonbank}%
 
 [BANK]
+Biaya yang dikenakan Platform untuk deposit bank adalah (100-{dep_rate_nonbank}%) x nominal deposit.
 BCA, BII/Maybank, BNI, BRI, BSI, BTN, CIMB Niaga, Niaga Syariah, Dana, Danamon, Mandiri, OCBC NISP, Bank Neo, Sea Bank, Jago, Permata, BTPN/Jenius, Bank MAS, Mandiri Syariah, BCA Syariah, QRIS
 (E-Wallet) = Ovo, Shopee, Gopay, LINK AJA, Dana
 
-[NON BANK] (Pulsa) = XL, Telkomsel
+[NON BANK] (Pulsa)
+Biaya yang dikenakan Platform untuk deposit pulsa adalah (100-{dep_rate_nonbank}%) x nominal deposit.
+XL, Telkomsel
 
 Deposit Antar Negara:
 Jika player ingin deposit antar negara, arahkan melalui pulsa provider berikut:

@@ -705,7 +705,7 @@ class SystemConfigSeeder extends Seeder
             [
                 'key' => 'dep_rate_bank',
                 'value' => '100',
-                'source_type' => 'datamodel_lookup',
+                'source_type' => 'manual',
                 'label' => 'dep_rate_bank',
                 'type' => 'manual',
                 'data_model_id' => null,
@@ -716,7 +716,7 @@ class SystemConfigSeeder extends Seeder
             [
                 'key' => 'dep_rate_nonbank',
                 'value' => '100',
-                'source_type' => 'datamodel_lookup',
+                'source_type' => 'manual',
                 'label' => 'dep_rate_nonbank',
                 'type' => 'manual',
                 'data_model_id' => null,

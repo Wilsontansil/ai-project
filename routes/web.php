@@ -29,7 +29,11 @@ Route::middleware(['set.locale', 'guest'])->group(function () {
 });
 
 Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
-    Route::get('/backoffice', [DashboardController::class, 'index'])->name('backoffice.dashboard');
+    Route::middleware('permission:view customers')->group(function () {
+        Route::get('/backoffice', [DashboardController::class, 'index'])->name('backoffice.dashboard');
+        Route::get('/backoffice/escalation-queue', [DashboardController::class, 'escalationQueue'])->name('backoffice.escalation-queue');
+        Route::get('/backoffice/escalation-queue/count', [DashboardController::class, 'escalationCount'])->name('backoffice.escalation-queue.count');
+    });
 
     // Customer chat access control (granular permissions per action)
     Route::middleware('permission:view customer-chats')->group(function () {
@@ -52,9 +56,6 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
     Route::middleware('permission:view customer-attachments')->group(function () {
         Route::get('/backoffice/chat-attachment', [DashboardController::class, 'chatAttachment'])->name('backoffice.chat-attachment');
     });
-
-    Route::get('/backoffice/escalation-queue', [DashboardController::class, 'escalationQueue'])->name('backoffice.escalation-queue');
-    Route::get('/backoffice/escalation-queue/count', [DashboardController::class, 'escalationCount'])->name('backoffice.escalation-queue.count');
 
     // Chat agents (admin only)
     Route::middleware('permission:manage agents')->group(function () {

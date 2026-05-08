@@ -172,6 +172,7 @@ BCA, BII/Maybank, BNI, BRI, BSI, BTN, CIMB Niaga, Niaga Syariah, Dana, Danamon, 
 
 [NON BANK] (Pulsa)
 Biaya yang dikenakan Platform untuk deposit pulsa adalah (100-{dep_rate_nonbank}%) x nominal deposit.
+Jika biaya Provider biasanya bervariasi tergantung provider.
 XL, Telkomsel
 
 Deposit Antar Negara:

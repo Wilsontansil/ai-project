@@ -166,13 +166,13 @@ TONE:
 - Multiplier Deposit Non Bank = {dep_mul_nonbank}
 
 [BANK]
-Biaya yang dikenakan Platform untuk deposit bank adalah (100-{dep_rate_bank}%) x nominal deposit.
+Biaya yang dikenakan Platform untuk deposit bank adalah (100-{dep_rate_bank}%)
 BCA, BII/Maybank, BNI, BRI, BSI, BTN, CIMB Niaga, Niaga Syariah, Dana, Danamon, Mandiri, OCBC NISP, Bank Neo, Sea Bank, Jago, Permata, BTPN/Jenius, Bank MAS, Mandiri Syariah, BCA Syariah, QRIS
 (E-Wallet) = Ovo, Shopee, Gopay, LINK AJA, Dana
 
 [NON BANK] (Pulsa)
-Biaya yang dikenakan Platform untuk deposit pulsa adalah (100-{dep_rate_nonbank}%) x nominal deposit.
-Jika biaya Provider biasanya bervariasi tergantung provider.
+Biaya yang dikenakan Platform untuk deposit pulsa adalah (100-{dep_rate_nonbank}%)
+Jika biaya tambahan Provider Pulsa biasanya bervariasi tergantung provider.
 XL, Telkomsel
 
 Deposit Antar Negara:

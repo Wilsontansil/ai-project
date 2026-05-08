@@ -16,6 +16,7 @@ class SystemConfigController extends Controller
     public function index(Request $request): View
     {
         $search = (string) $request->query('search', '');
+        $type   = (string) $request->query('type', '');
 
         $query = SystemConfig::query();
 
@@ -27,11 +28,16 @@ class SystemConfigController extends Controller
             });
         }
 
+        if (in_array($type, ['manual', 'datamodel_lookup'], true)) {
+            $query->where('source_type', $type);
+        }
+
         $configs = $query->orderBy('key')->paginate(25)->withQueryString();
 
         return view('backoffice.system-config.index', [
             'configs'  => $configs,
             'search'   => $search,
+            'type'     => $type,
             'boActive' => 'system-config',
         ]);
     }

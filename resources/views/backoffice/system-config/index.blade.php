@@ -35,14 +35,20 @@
         </div>
     @endif
 
-    {{-- Search --}}
+    {{-- Search / Filter --}}
     <form method="GET" action="{{ route('backoffice.system-config.index') }}"
         class="rounded-2xl border border-slate-700/70 bg-slate-900/85 p-3"
         style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
         <input type="text" name="search" value="{{ $search }}" placeholder="Search key, value, description..."
             style="flex:1;min-width:220px" />
+        <select name="type"
+            style="background:#1e293b;border:1px solid rgba(148,163,184,0.3);border-radius:0.5rem;color:#cbd5e1;font-size:0.75rem;padding:0.45rem 0.65rem;min-width:150px">
+            <option value="" {{ $type === '' ? 'selected' : '' }}>All Types</option>
+            <option value="manual" {{ $type === 'manual' ? 'selected' : '' }}>Manual</option>
+            <option value="datamodel_lookup" {{ $type === 'datamodel_lookup' ? 'selected' : '' }}>DM Lookup</option>
+        </select>
         <button type="submit" class="bo-btn-sm">Filter</button>
-        @if ($search !== '')
+        @if ($search !== '' || $type !== '')
             <a class="bo-btn-secondary" href="{{ route('backoffice.system-config.index') }}"
                 style="font-size:0.75rem;padding:0.45rem 0.75rem">Reset</a>
         @endif

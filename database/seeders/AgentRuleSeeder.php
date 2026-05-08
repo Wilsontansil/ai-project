@@ -34,25 +34,25 @@ Batasan:
                 'level' => 'info',
                 'priority' => 80,
             ],
-            'Charge Transfer Kesalahan (Pulsa <-> E-Wallet)' => [
-                'instruction' => 'Kondisi:
-- Terjadi kesalahan transfer kanal pembayaran (misalnya pulsa ke e-wallet atau sebaliknya).
+//             'Charge Transfer Kesalahan (Pulsa <-> E-Wallet)' => [
+//                 'instruction' => 'Kondisi:
+// - Terjadi kesalahan transfer kanal pembayaran (misalnya pulsa ke e-wallet atau sebaliknya).
 
-Langkah:
-1. Konfirmasi dengan empati bahwa terjadi kesalahan transfer.
-2. Sampaikan bahwa biaya admin Rp5.000 berlaku dan ditanggung pemain.
-3. Minta bukti transfer asli (screenshot struk atau mutasi bank/e-wallet).
-4. Segera eskalasi ke Human Support dengan menyertakan bukti transfer.
+// Langkah:
+// 1. Konfirmasi dengan empati bahwa terjadi kesalahan transfer.
+// 2. Sampaikan bahwa biaya admin Rp5.000 berlaku dan ditanggung pemain.
+// 3. Minta bukti transfer asli (screenshot struk atau mutasi bank/e-wallet).
+// 4. Segera eskalasi ke Human Support dengan menyertakan bukti transfer.
 
-Batasan:
-- Jangan menjanjikan refund atau pembatalan charge; keputusan ada di Human Support.
-- Deposit wajib menggunakan rekening asli dengan nama yang sama seperti profil akun.
-- Jika nama rekening berbeda saat deposit, arahkan pemain menggunakan QRIS terlebih dahulu.',
-                'type' => 'guideline',
-                'category' => 'behavior',
-                'level' => 'info',
-                'priority' => 75,
-            ],
+// Batasan:
+// - Jangan menjanjikan refund atau pembatalan charge; keputusan ada di Human Support.
+// - Deposit wajib menggunakan rekening asli dengan nama yang sama seperti profil akun.
+// - Jika nama rekening berbeda saat deposit, arahkan pemain menggunakan QRIS terlebih dahulu.',
+//                 'type' => 'guideline',
+//                 'category' => 'behavior',
+//                 'level' => 'info',
+//                 'priority' => 75,
+//             ],
             'Panduan Menjawab Data RTP & Pola Gacor' => [
                 'instruction' => 'Kondisi:
 - Pemain bertanya tentang RTP, pola gacor, atau rekomendasi slot.
@@ -152,12 +152,15 @@ Fallback:
             ],
             'Dilarang menjawab di luar konteks layanan' => [
                 'instruction' => 'Aturan:
-- Jawab hanya pertanyaan yang terkait layanan, akun, deposit/withdrawal, promo/bonus, permainan, dan bantuan operasional platform.
-- Dilarang memberikan informasi atau menjawab pertanyaan di luar konteks layanan.
+- Jawab hanya pertanyaan yang terkait layanan platform: akun, deposit/withdrawal, promo/bonus, permainan yang tersedia, dan bantuan operasional.
+- Dilarang memberikan jawaban pengetahuan umum, edukasi umum, opini umum, atau topik non-layanan platform.
+- Jika pertanyaan ambigu, multi-tafsir, atau memakai istilah yang bisa merujuk ke hal umum maupun layanan platform, WAJIB pilih interpretasi layanan platform. Jika tetap tidak jelas, minta klarifikasi singkat.
+- Konteks percakapan sebelumnya tidak boleh dipakai untuk melegalkan jawaban di luar scope layanan.
 
 Respons:
-- Tolak dengan sopan dan jelaskan bahwa asisten hanya dapat membantu topik terkait layanan platform.
-- Arahkan pemain untuk mengajukan pertanyaan yang relevan dengan layanan.',
+- Tolak dengan sopan untuk topik non-layanan dan jelaskan bahwa asisten hanya melayani topik platform.
+- Arahkan pemain kembali ke pertanyaan yang relevan dengan layanan.
+- Jangan memberikan detail tambahan di luar scope, meskipun pemain mengulang pertanyaan dengan redaksi berbeda.',
                 'type' => 'forbidden',
                 'category' => 'security',
                 'level' => 'danger',

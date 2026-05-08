@@ -57,26 +57,37 @@ class TelegramController extends Controller
             Log::warning('Failed to resolve Telegram customer before dispatch', ['chat_id' => $chatId, 'error' => $e->getMessage()]);
         }
 
-        $this->sendInitialTyping($chatId);
+        $typingPreSent = $this->sendInitialTyping($chatId);
 
-        ProcessAiReply::dispatch('telegram', $chatId, '', $customerId, $attachmentMeta, true)
+        ProcessAiReply::dispatch('telegram', $chatId, '', $customerId, $attachmentMeta, $typingPreSent)
             ->delay(now()->addSeconds(app(AIService::class)->getMessageAwaitSeconds()));
 
         return response()->json(['status' => 'ok']);
     }
 
-    private function sendInitialTyping(string $chatId): void
+    private function sendInitialTyping(string $chatId): bool
     {
         $token = (string) ProjectSetting::getValue('telegram_bot_token', config('services.telegram.bot_token', ''));
 
         if ($token === '' || $chatId === '') {
-            return;
+            return false;
         }
 
-        ResilientHttp::post('telegram', "https://api.telegram.org/bot{$token}/sendChatAction", [
+        $response = ResilientHttp::post('telegram', "https://api.telegram.org/bot{$token}/sendChatAction", [
             'chat_id' => $chatId,
             'action' => 'typing',
         ], timeoutSeconds: 10);
+
+        if ($response === null || $response->failed()) {
+            Log::warning('Initial Telegram typing failed in webhook', [
+                'chat_id' => $chatId,
+                'status' => $response?->status(),
+            ]);
+
+            return false;
+        }
+
+        return true;
     }
 
     private function isDuplicateMessage(Request $request, array $message, string $chatId): bool

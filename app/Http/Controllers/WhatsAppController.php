@@ -126,23 +126,23 @@ class WhatsAppController extends Controller
             Log::warning('Failed to resolve WhatsApp customer before dispatch', ['chat_id' => $chatId, 'error' => $e->getMessage()]);
         }
 
-        $this->sendInitialTyping($chatId);
+        $typingPreSent = $this->sendInitialTyping($chatId);
 
-        ProcessAiReply::dispatch('whatsapp', $chatId, '', $customerId, $attachmentMeta, true)
+        ProcessAiReply::dispatch('whatsapp', $chatId, '', $customerId, $attachmentMeta, $typingPreSent)
             ->delay(now()->addSeconds(app(AIService::class)->getMessageAwaitSeconds()));
 
         return response()->json(['status' => 'ok']);
     }
 
-    private function sendInitialTyping(string $chatId): void
+    private function sendInitialTyping(string $chatId): bool
     {
         if ($chatId === '') {
-            return;
+            return false;
         }
 
         $baseUrl = rtrim((string) ProjectSetting::getValue('whatsapp_base_url', config('services.whatsapp.base_url', '')), '/');
         if ($baseUrl === '') {
-            return;
+            return false;
         }
 
         $headers = ['Accept' => 'application/json'];
@@ -151,10 +151,21 @@ class WhatsAppController extends Controller
             $headers['X-Api-Key'] = $apiKey;
         }
 
-        ResilientHttp::post('waha', $baseUrl . '/api/startTyping', [
+        $response = ResilientHttp::post('waha', $baseUrl . '/api/startTyping', [
             'session' => (string) ProjectSetting::getValue('whatsapp_session', config('services.whatsapp.session', 'default')),
             'chatId' => $chatId,
         ], $headers, timeoutSeconds: 10);
+
+        if ($response === null || $response->failed()) {
+            Log::warning('Initial WAHA typing failed in webhook', [
+                'chat_id' => $chatId,
+                'status' => $response?->status(),
+            ]);
+
+            return false;
+        }
+
+        return true;
     }
 
     /**

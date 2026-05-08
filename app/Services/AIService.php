@@ -9,6 +9,7 @@ use App\Services\AI\ConversationHistory;
 use App\Services\AI\PromptBuilder;
 use App\Services\AI\ReplyFormatter;
 use App\Services\AI\ToolDispatcher;
+use App\Support\AsyncPipelineException;
 use App\Support\MetricsCollector;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -44,11 +45,21 @@ class AIService
      * @param array<string, mixed> $attachmentMeta  Optional attachment from ChatAttachmentStorageService.
      *                                               When type=image the image URL is sent as a vision block.
      */
-    public function reply(mixed $message, mixed $chatId = null, string $channel = 'telegram', array $agentContext = [], array $attachmentMeta = []): string
+    public function reply(
+        mixed $message,
+        mixed $chatId = null,
+        string $channel = 'telegram',
+        array $agentContext = [],
+        array $attachmentMeta = [],
+        bool $throwOnFailure = false,
+    ): string
     {
         $apiKey = (string) ProjectSetting::getValue('openai_api_key', config('services.openai.api_key', ''));
 
         if ($apiKey === '') {
+            if ($throwOnFailure) {
+                throw AsyncPipelineException::missingOpenAiKey();
+            }
             return $this->replyFormatter->format('OpenAI API key is not configured. Please set OPENAI_API_KEY on server .env.');
         }
 
@@ -56,6 +67,9 @@ class AIService
         $chatAgent = $this->agentRouter->resolve((string) $message, $chatId, $channel);
 
         if ($chatAgent === null) {
+            if ($throwOnFailure) {
+                throw AsyncPipelineException::missingAiAgent();
+            }
             return $this->replyFormatter->format('AI agent belum dikonfigurasi. Silakan tambahkan agent di backoffice.');
         }
 
@@ -191,6 +205,10 @@ class AIService
         } catch (\OpenAI\Exceptions\RateLimitException $e) {
             MetricsCollector::recordOpenAiCall($channel, $model, 'chat', 0, null, false);
 
+            if ($throwOnFailure) {
+                throw $e;
+            }
+
             return $this->replyFormatter->format('⚠️ Sistem sedang sibuk, silakan coba beberapa saat lagi.');
         } catch (\Exception $e) {
             MetricsCollector::recordOpenAiCall($channel, $model, 'chat', 0, null, false);
@@ -201,6 +219,10 @@ class AIService
                 'history_count' => count($trimmedHistory ?? $history),
                 'tools_count' => count($payload['tools'] ?? []),
             ]);
+
+            if ($throwOnFailure) {
+                throw $e;
+            }
 
             return $this->replyFormatter->format('⚠️ Terjadi error. Silakan coba beberapa saat lagi.');
         }

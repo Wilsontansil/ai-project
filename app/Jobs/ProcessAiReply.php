@@ -10,8 +10,10 @@ use App\Services\Agent\ConversationMemoryService;
 use App\Services\AI\EscalationIntentDetector;
 use App\Services\AI\EscalationSummaryService;
 use App\Services\AIService;
+use App\Support\AsyncPipelineException;
 use App\Support\MetricsCollector;
 use App\Support\ResilientHttp;
+use Illuminate\Http\Client\Response;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -141,7 +143,14 @@ class ProcessAiReply implements ShouldQueue
             }
 
             try {
-                $reply = $aiService->reply($text, $this->chatId, $this->channel, $agentContext, $this->attachmentMeta);
+                $reply = $aiService->reply(
+                    $text,
+                    $this->chatId,
+                    $this->channel,
+                    $agentContext,
+                    $this->attachmentMeta,
+                    throwOnFailure: true
+                );
             } finally {
                 if ($typingStarted) {
                     $this->stopTypingIndicator();
@@ -173,8 +182,8 @@ class ProcessAiReply implements ShouldQueue
                 }
             }
 
-            if ($reply !== '') {
-                $this->sendReply($reply);
+            if ($reply !== '' && !$this->sendReply($reply)) {
+                return;
             }
 
             MetricsCollector::recordRequest($this->channel, MetricsCollector::elapsed($requestStart));
@@ -199,12 +208,12 @@ class ProcessAiReply implements ShouldQueue
 
     // ── Channel-specific send logic ──────────────────────────
 
-    private function sendReply(string $text): void
+    private function sendReply(string $text): bool
     {
-        match ($this->channel) {
+        return match ($this->channel) {
             'telegram' => $this->sendTelegram($text),
             'whatsapp' => $this->sendWhatsApp($text),
-            default => Log::error("ProcessAiReply: unsupported channel '{$this->channel}'"),
+            default => $this->failUnsupportedChannel(),
         };
     }
 
@@ -226,19 +235,22 @@ class ProcessAiReply implements ShouldQueue
 
     // ── Telegram ─────────────────────────────────────────────
 
-    private function sendTelegram(string $text): void
+    private function sendTelegram(string $text): bool
     {
         $token = (string) ProjectSetting::getValue('telegram_bot_token', config('services.telegram.bot_token', ''));
 
         if ($token === '') {
             Log::error('TELEGRAM_BOT_TOKEN is not configured.');
-            return;
+            $this->fail(AsyncPipelineException::missingTelegramToken());
+            return false;
         }
 
-        ResilientHttp::post('telegram', "https://api.telegram.org/bot{$token}/sendMessage", [
+        $response = ResilientHttp::post('telegram', "https://api.telegram.org/bot{$token}/sendMessage", [
             'chat_id' => $this->chatId,
             'text' => $text,
         ], timeoutSeconds: 10);
+
+        return $this->handleCriticalTransportResult($response, 'telegram', '/sendMessage');
     }
 
     private function sendTelegramTyping(): void
@@ -257,7 +269,7 @@ class ProcessAiReply implements ShouldQueue
 
     // ── WhatsApp (WAHA) ──────────────────────────────────────
 
-    private function sendWhatsApp(string $text): void
+    private function sendWhatsApp(string $text): bool
     {
         $response = $this->postToWaha('/api/sendText', [
             'session' => $this->wahaSession(),
@@ -265,13 +277,7 @@ class ProcessAiReply implements ShouldQueue
             'text' => $text,
         ]);
 
-        if ($response !== null && $response->failed()) {
-            Log::error('Failed to send WAHA message (job)', [
-                'chat_id' => $this->chatId,
-                'status' => $response->status(),
-                'response_size_bytes' => mb_strlen($response->body()),
-            ]);
-        }
+        return $this->handleCriticalTransportResult($response, 'waha', '/api/sendText');
     }
 
     private function sendWhatsAppTyping(): void
@@ -332,6 +338,100 @@ class ProcessAiReply implements ShouldQueue
     private function wahaSession(): string
     {
         return (string) ProjectSetting::getValue('whatsapp_session', config('services.whatsapp.session', 'default'));
+    }
+
+    private function failUnsupportedChannel(): bool
+    {
+        $error = AsyncPipelineException::unsupportedChannel($this->channel);
+        Log::error($error->getMessage());
+        $this->fail($error);
+
+        return false;
+    }
+
+    private function handleCriticalTransportResult(?Response $response, string $provider, string $endpoint): bool
+    {
+        if ($response === null) {
+            Log::warning('Transport call returned null response', [
+                'provider' => $provider,
+                'endpoint' => $endpoint,
+                'channel' => $this->channel,
+                'chat_id' => $this->chatId,
+            ]);
+
+            throw AsyncPipelineException::nullTransportResponse($provider, $endpoint);
+        }
+
+        if ($response->successful()) {
+            return true;
+        }
+
+        $status = $response->status();
+        $body = (string) $response->body();
+        $decision = $this->classifyTransportDecision($status, $body);
+
+        Log::warning('Transport send failed', [
+            'provider' => $provider,
+            'endpoint' => $endpoint,
+            'status' => $status,
+            'decision' => $decision,
+            'reason_summary' => mb_substr(trim($body), 0, 200),
+            'attempt' => method_exists($this, 'attempts') ? $this->attempts() : null,
+            'channel' => $this->channel,
+            'chat_id' => $this->chatId,
+        ]);
+
+        $error = AsyncPipelineException::transportFailure($provider, $endpoint, $status);
+
+        if ($decision === 'retry') {
+            throw $error;
+        }
+
+        $this->fail($error);
+        return false;
+    }
+
+    private function classifyTransportDecision(int $status, string $body): string
+    {
+        if (in_array($status, [408, 425, 429, 500, 502, 503, 504], true)) {
+            return 'retry';
+        }
+
+        if (in_array($status, [400, 401, 403, 404], true)) {
+            return 'fail-fast';
+        }
+
+        if ($status === 422) {
+            $lower = mb_strtolower($body);
+            $permanentPatterns = [
+                'invalid chat id',
+                'invalid payload',
+                'malformed request',
+                'unauthorized api key',
+                'forbidden',
+            ];
+            foreach ($permanentPatterns as $pattern) {
+                if (str_contains($lower, $pattern)) {
+                    return 'fail-fast';
+                }
+            }
+
+            $transientPatterns = [
+                'session not ready',
+                'session reconnecting',
+                'temporary unavailable',
+            ];
+            foreach ($transientPatterns as $pattern) {
+                if (str_contains($lower, $pattern)) {
+                    return 'retry';
+                }
+            }
+
+            // Default 422 policy: retry only once, then fail-fast.
+            return $this->attempts() <= 1 ? 'retry' : 'fail-fast';
+        }
+
+        return $status >= 500 ? 'retry' : 'fail-fast';
     }
 
     private function shouldBlockAiReply(Customer $customer): bool

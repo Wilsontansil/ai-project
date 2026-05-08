@@ -159,8 +159,8 @@ Respons:
 - Tolak dengan sopan dan jelaskan bahwa asisten hanya dapat membantu topik terkait layanan platform.
 - Arahkan pemain untuk mengajukan pertanyaan yang relevan dengan layanan.',
                 'type' => 'forbidden',
-                'category' => 'behavior',
-                'level' => 'warning',
+                'category' => 'security',
+                'level' => 'danger',
                 'priority' => 70,
             ],
         ];

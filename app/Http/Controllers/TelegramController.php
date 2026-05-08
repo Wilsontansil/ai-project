@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\ProcessAiReply;
+use App\Models\ProjectSetting;
 use App\Services\Agent\ChatAttachmentStorageService;
 use App\Services\Agent\CustomerIdentityService;
+use App\Support\ResilientHttp;
 use App\Support\LogSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -55,10 +57,26 @@ class TelegramController extends Controller
             Log::warning('Failed to resolve Telegram customer before dispatch', ['chat_id' => $chatId, 'error' => $e->getMessage()]);
         }
 
-        ProcessAiReply::dispatch('telegram', $chatId, '', $customerId, $attachmentMeta)
+        $this->sendInitialTyping($chatId);
+
+        ProcessAiReply::dispatch('telegram', $chatId, '', $customerId, $attachmentMeta, true)
             ->delay(now()->addSeconds(app(AIService::class)->getMessageAwaitSeconds()));
 
         return response()->json(['status' => 'ok']);
+    }
+
+    private function sendInitialTyping(string $chatId): void
+    {
+        $token = (string) ProjectSetting::getValue('telegram_bot_token', config('services.telegram.bot_token', ''));
+
+        if ($token === '' || $chatId === '') {
+            return;
+        }
+
+        ResilientHttp::post('telegram', "https://api.telegram.org/bot{$token}/sendChatAction", [
+            'chat_id' => $chatId,
+            'action' => 'typing',
+        ], timeoutSeconds: 10);
     }
 
     private function isDuplicateMessage(Request $request, array $message, string $chatId): bool

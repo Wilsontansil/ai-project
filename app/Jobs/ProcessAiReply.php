@@ -52,6 +52,7 @@ class ProcessAiReply implements ShouldQueue
         public readonly string $combinedText,
         public readonly ?int $customerId,
         public readonly array $attachmentMeta = [],
+        public readonly bool $typingPreSent = false,
     ) {}
 
     public function handle(): void
@@ -133,11 +134,19 @@ class ProcessAiReply implements ShouldQueue
                 return;
             }
 
-            $this->sendTypingIndicator();
+            $typingStarted = $this->typingPreSent;
+            if (!$typingStarted) {
+                $this->sendTypingIndicator();
+                $typingStarted = true;
+            }
 
-            $reply = $aiService->reply($text, $this->chatId, $this->channel, $agentContext, $this->attachmentMeta);
-
-            $this->stopTypingIndicator();
+            try {
+                $reply = $aiService->reply($text, $this->chatId, $this->channel, $agentContext, $this->attachmentMeta);
+            } finally {
+                if ($typingStarted) {
+                    $this->stopTypingIndicator();
+                }
+            }
 
             // Detect escalation marker — strip it always; only act if agent has escalation_condition set.
             $shouldEscalate = str_contains($reply, '[ESCALATE]');

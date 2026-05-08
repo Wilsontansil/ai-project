@@ -7,6 +7,7 @@ use App\Models\ProjectSetting;
 use App\Services\Agent\ChatAttachmentStorageService;
 use App\Services\Agent\CustomerIdentityService;
 use App\Support\LogSanitizer;
+use App\Support\ResilientHttp;
 use App\Support\UrlSsrfGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -125,10 +126,35 @@ class WhatsAppController extends Controller
             Log::warning('Failed to resolve WhatsApp customer before dispatch', ['chat_id' => $chatId, 'error' => $e->getMessage()]);
         }
 
-        ProcessAiReply::dispatch('whatsapp', $chatId, '', $customerId, $attachmentMeta)
+        $this->sendInitialTyping($chatId);
+
+        ProcessAiReply::dispatch('whatsapp', $chatId, '', $customerId, $attachmentMeta, true)
             ->delay(now()->addSeconds(app(AIService::class)->getMessageAwaitSeconds()));
 
         return response()->json(['status' => 'ok']);
+    }
+
+    private function sendInitialTyping(string $chatId): void
+    {
+        if ($chatId === '') {
+            return;
+        }
+
+        $baseUrl = rtrim((string) ProjectSetting::getValue('whatsapp_base_url', config('services.whatsapp.base_url', '')), '/');
+        if ($baseUrl === '') {
+            return;
+        }
+
+        $headers = ['Accept' => 'application/json'];
+        $apiKey = (string) ProjectSetting::getValue('whatsapp_api_key', config('services.whatsapp.api_key', ''));
+        if ($apiKey !== '') {
+            $headers['X-Api-Key'] = $apiKey;
+        }
+
+        ResilientHttp::post('waha', $baseUrl . '/api/startTyping', [
+            'session' => (string) ProjectSetting::getValue('whatsapp_session', config('services.whatsapp.session', 'default')),
+            'chatId' => $chatId,
+        ], $headers, timeoutSeconds: 10);
     }
 
     /**

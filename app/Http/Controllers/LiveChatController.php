@@ -21,6 +21,8 @@ use App\Services\AIService;
 
 class LiveChatController extends Controller
 {
+    private const AI_ENABLED_KEY = 'livechat_ai_enabled';
+
     public function handleWebhook(Request $request)
     {
         $payload = $request->all();
@@ -107,6 +109,10 @@ class LiveChatController extends Controller
 
     private function buildAiResponse(Request $request, array $payload)
     {
+        if (!$this->isAiEnabled()) {
+            return response()->json(['status' => 'ignored', 'reason' => 'channel_disabled']);
+        }
+
         $text = $this->extractMessageText($request);
         $chatId = $this->extractChatId($payload, $request);
 
@@ -158,6 +164,15 @@ class LiveChatController extends Controller
         }
 
         return $response;
+    }
+
+    private function isAiEnabled(): bool
+    {
+        return filter_var(
+            ProjectSetting::getValue(self::AI_ENABLED_KEY, '1'),
+            FILTER_VALIDATE_BOOLEAN,
+            FILTER_NULL_ON_FAILURE
+        ) ?? true;
     }
 
     private function generateAiReply(array $payload, string $chatId, string $combinedText, array $attachmentMeta = []): string

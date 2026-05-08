@@ -16,8 +16,14 @@ use App\Services\AIService;
 
 class TelegramController extends Controller
 {
+    private const AI_ENABLED_KEY = 'telegram_ai_enabled';
+
     public function handleWebhook(Request $request)
     {
+        if (!$this->isAiEnabled()) {
+            return response()->json(['status' => 'ignored', 'reason' => 'channel_disabled']);
+        }
+
         $message = $request->input('message', []);
         $chatId  = (string) ($message['chat']['id'] ?? '');
 
@@ -63,6 +69,15 @@ class TelegramController extends Controller
             ->delay(now()->addSeconds(app(AIService::class)->getMessageAwaitSeconds()));
 
         return response()->json(['status' => 'ok']);
+    }
+
+    private function isAiEnabled(): bool
+    {
+        return filter_var(
+            ProjectSetting::getValue(self::AI_ENABLED_KEY, '1'),
+            FILTER_VALIDATE_BOOLEAN,
+            FILTER_NULL_ON_FAILURE
+        ) ?? true;
     }
 
     private function sendInitialTyping(string $chatId): bool

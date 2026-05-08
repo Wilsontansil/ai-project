@@ -11,6 +11,12 @@ use Illuminate\View\View;
 
 class SettingController extends Controller
 {
+    private const BOOLEAN_SETTING_KEYS = [
+        'telegram_ai_enabled',
+        'livechat_ai_enabled',
+        'whatsapp_ai_enabled',
+    ];
+
     public function index(): View
     {
         $settings = Schema::hasTable('project_settings')
@@ -46,6 +52,8 @@ class SettingController extends Controller
 
             if (in_array($setting->key, ['conversation_retention_days', 'customer_memory_retention_days'], true)) {
                 $rules[$inputKey] = ['nullable', 'integer', 'min:1', 'max:3650'];
+            } elseif (in_array($setting->key, self::BOOLEAN_SETTING_KEYS, true)) {
+                $rules[$inputKey] = ['nullable', 'in:0,1'];
             }
         }
 
@@ -60,6 +68,10 @@ class SettingController extends Controller
             // For secret fields, skip if left empty (keeps old value)
             if ($setting->type === 'secret' && ($newValue === null || $newValue === '')) {
                 continue;
+            }
+
+            if (in_array($setting->key, self::BOOLEAN_SETTING_KEYS, true)) {
+                $newValue = $request->boolean($inputKey) ? '1' : '0';
             }
 
             $setting->update(['value' => $newValue]);

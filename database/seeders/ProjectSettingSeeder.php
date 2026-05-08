@@ -9,6 +9,8 @@ class ProjectSettingSeeder extends Seeder
 {
     public function run(): void
     {
+        $aiEnabledLabel = 'AI Enabled';
+
         $settings = [
             // OpenAI
             [
@@ -21,6 +23,13 @@ class ProjectSettingSeeder extends Seeder
 
             // Telegram
             [
+                'key' => 'telegram_ai_enabled',
+                'value' => env('TELEGRAM_AI_ENABLED', '1'),
+                'label' => $aiEnabledLabel,
+                'group' => 'telegram',
+                'type' => 'text',
+            ],
+            [
                 'key' => 'telegram_bot_token',
                 'value' => env('TELEGRAM_BOT_TOKEN'),
                 'label' => 'Bot Token',
@@ -29,6 +38,13 @@ class ProjectSettingSeeder extends Seeder
             ],
 
             // LiveChat
+            [
+                'key' => 'livechat_ai_enabled',
+                'value' => env('LIVECHAT_AI_ENABLED', '1'),
+                'label' => $aiEnabledLabel,
+                'group' => 'livechat',
+                'type' => 'text',
+            ],
             [
                 'key' => 'livechat_verify_token',
                 'value' => env('LIVECHAT_VERIFY_TOKEN'),
@@ -52,6 +68,13 @@ class ProjectSettingSeeder extends Seeder
             ],
 
             // WhatsApp (WAHA)
+            [
+                'key' => 'whatsapp_ai_enabled',
+                'value' => env('WHATSAPP_AI_ENABLED', '1'),
+                'label' => $aiEnabledLabel,
+                'group' => 'whatsapp',
+                'type' => 'text',
+            ],
             [
                 'key' => 'whatsapp_base_url',
                 'value' => env('WAHA_BASE_URL'),

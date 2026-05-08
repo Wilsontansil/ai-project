@@ -85,6 +85,7 @@
                 'icon' =>
                     '<path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>',
             ];
+            $booleanKeys = ['telegram_ai_enabled', 'livechat_ai_enabled', 'whatsapp_ai_enabled'];
         @endphp
 
         @forelse ($grouped as $group => $settings)
@@ -172,6 +173,29 @@
                                     value="{{ $setting->value }}"
                                     class="block w-full rounded-lg border border-white/10 bg-slate-950/60 text-xs text-white outline-none transition placeholder:text-slate-600 focus:border-white/30 focus:ring-1 focus:ring-white/10"
                                     style="padding:0.5rem 0.75rem" />
+                            @elseif (in_array($setting->key, $booleanKeys, true))
+                                @php
+                                    $enabled = in_array((string) $setting->value, ['1', 'true', 'on', 'yes'], true);
+                                @endphp
+                                <input type="hidden" name="setting_{{ $setting->id }}" value="0" />
+                                <label for="setting_{{ $setting->id }}"
+                                    class="flex items-center justify-between rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2.5 cursor-pointer">
+                                    <div>
+                                        <p class="text-xs font-medium text-white">{{ $enabled ? 'Enabled' : 'Disabled' }}
+                                        </p>
+                                        <p class="text-[11px] text-slate-500">Aktifkan atau nonaktifkan AI untuk platform
+                                            ini.</p>
+                                    </div>
+                                    <span
+                                        class="relative inline-flex h-6 w-11 items-center rounded-full {{ $enabled ? 'bg-emerald-500/80' : 'bg-slate-700' }} transition">
+                                        <span
+                                            class="inline-block h-5 w-5 transform rounded-full bg-white transition {{ $enabled ? 'translate-x-5' : 'translate-x-1' }}"></span>
+                                        <input id="setting_{{ $setting->id }}" type="checkbox"
+                                            name="setting_{{ $setting->id }}" value="1"
+                                            {{ $enabled ? 'checked' : '' }}
+                                            class="absolute inset-0 h-full w-full opacity-0 cursor-pointer" />
+                                    </span>
+                                </label>
                             @else
                                 @php
                                     $placeholders = [

@@ -20,8 +20,14 @@ class WhatsAppController extends Controller
     /** WAHA payload types that indicate a media message. */
     private const MEDIA_TYPES = ['image', 'document', 'video', 'audio', 'voice', 'ptt', 'sticker'];
 
+    private const AI_ENABLED_KEY = 'whatsapp_ai_enabled';
+
     public function handleWebhook(Request $request)
     {
+        if (!$this->isAiEnabled()) {
+            return response()->json(['status' => 'ignored', 'reason' => 'channel_disabled']);
+        }
+
         $requestPayload = $request->all();
 
         $event   = (string) ($request->input('event') ?? '');
@@ -132,6 +138,15 @@ class WhatsAppController extends Controller
             ->delay(now()->addSeconds(app(AIService::class)->getMessageAwaitSeconds()));
 
         return response()->json(['status' => 'ok']);
+    }
+
+    private function isAiEnabled(): bool
+    {
+        return filter_var(
+            ProjectSetting::getValue(self::AI_ENABLED_KEY, '1'),
+            FILTER_VALIDATE_BOOLEAN,
+            FILTER_NULL_ON_FAILURE
+        ) ?? true;
     }
 
     private function sendInitialTyping(string $chatId): bool

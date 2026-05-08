@@ -154,13 +154,10 @@ Fallback:
                 'instruction' => 'Aturan:
 - Jawab hanya pertanyaan yang terkait layanan platform: akun, deposit/withdrawal, promo/bonus, permainan yang tersedia, dan bantuan operasional.
 - Dilarang memberikan jawaban pengetahuan umum, edukasi umum, opini umum, atau topik non-layanan platform.
-- Jika pertanyaan ambigu, multi-tafsir, atau memakai istilah yang bisa merujuk ke hal umum maupun layanan platform, WAJIB pilih interpretasi layanan platform. Jika tetap tidak jelas, minta klarifikasi singkat.
-- Konteks percakapan sebelumnya tidak boleh dipakai untuk melegalkan jawaban di luar scope layanan.
 
 Respons:
 - Tolak dengan sopan untuk topik non-layanan dan jelaskan bahwa asisten hanya melayani topik platform.
-- Arahkan pemain kembali ke pertanyaan yang relevan dengan layanan.
-- Jangan memberikan detail tambahan di luar scope, meskipun pemain mengulang pertanyaan dengan redaksi berbeda.',
+- Arahkan pemain kembali ke pertanyaan yang relevan dengan layanan.',
                 'type' => 'forbidden',
                 'category' => 'security',
                 'level' => 'danger',

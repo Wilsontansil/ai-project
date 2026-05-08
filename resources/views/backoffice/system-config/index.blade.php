@@ -13,7 +13,7 @@
                     style="color:#22d3ee">SystemConfig::getValue('key')</code>.</p>
         </div>
         <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
-            @can('manage settings')
+            @can('manage system-config')
                 <form method="POST" action="{{ route('backoffice.system-config.sync-all') }}">
                     @csrf
                     <button type="submit" class="bo-btn-sm" title="Re-resolve all DataModel lookup entries">
@@ -102,7 +102,7 @@
                                         {{ $sc->description ?: '-' }}
                                     </td>
                                     <td class="px-4 py-3 text-right">
-                                        @can('manage settings')
+                                        @can('manage system-config')
                                             <div style="display:inline-flex;align-items:center;gap:0.375rem">
                                                 <a href="{{ route('backoffice.system-config.edit', $sc) }}" class="bo-btn-sm"
                                                     style="white-space:nowrap">Edit</a>

@@ -22,6 +22,7 @@ class RolePermissionSeeder extends Seeder
             'manage database-connections',
             'manage agent-rules',
             'manage settings',
+            'manage system-config',
             'view metrics',
             'view customers',
             'view customer-chats',

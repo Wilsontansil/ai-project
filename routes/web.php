@@ -124,8 +124,10 @@ Route::middleware(['set.locale', 'auth', 'single.session'])->group(function () {
     Route::middleware('permission:manage settings')->group(function () {
         Route::get('/backoffice/settings', [SettingController::class, 'index'])->name('backoffice.settings.index');
         Route::post('/backoffice/settings', [SettingController::class, 'update'])->name('backoffice.settings.update');
+    });
 
-        // System Config
+    // System Config (dedicated permission)
+    Route::middleware('permission:manage system-config')->group(function () {
         Route::get('/backoffice/system-config', [SystemConfigController::class, 'index'])->name('backoffice.system-config.index');
         Route::get('/backoffice/system-config/create', [SystemConfigController::class, 'create'])->name('backoffice.system-config.create');
         Route::get('/backoffice/system-config/{systemConfig}/edit', [SystemConfigController::class, 'edit'])->name('backoffice.system-config.edit');

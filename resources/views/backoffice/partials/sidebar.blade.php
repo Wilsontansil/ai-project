@@ -361,7 +361,7 @@
                 @endcan
 
                 {{-- System Config --}}
-                @can('manage settings')
+                @can('manage system-config')
                     <a href="{{ route('backoffice.system-config.index') }}" class="bo-nav-item group"
                         style="display:flex;align-items:center;gap:0.625rem;border-radius:0.5rem;padding:0.5rem 0.75rem;font-size:0.8125rem;text-decoration:none;transition:background 0.15s;{{ ($boActive ?? ($active ?? '')) === 'system-config' ? 'background:rgba(255,255,255,0.12);font-weight:600;color:#fff;' : 'color:rgba(255,255,255,0.7);' }}"
                         onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff'"
